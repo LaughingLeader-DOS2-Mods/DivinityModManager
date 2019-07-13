@@ -1,9 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFrameworks>netcoreapp2.1</TargetFrameworks>
+	<AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <ApplicationIcon />
     <StartupObject />
+    <Platforms>AnyCPU;x86</Platforms>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net462|x86'">
+    <PlatformTarget>x86</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp2.1|AnyCPU'">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netcoreapp2.1|x86'">
+    <PlatformTarget>x86</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="**\*.xaml.cs">
@@ -15,13 +29,14 @@
     <AvaloniaResource Include="Assets\*" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="AlphaFS" Version="2.2.6" Condition="'$(TargetFramework)'=='net462'" />
     <PackageReference Include="Avalonia" Version="0.8.1" />
+    <PackageReference Include="Avalonia.Controls.DataGrid" Version="0.8.1" />
     <PackageReference Include="Avalonia.Desktop" Version="0.8.1" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="0.8.1" />
-    <PackageReference Include="Genbox.AlphaFS" Version="2.2.2.1" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="LSLib">
+    <Reference Include="LSLib" Condition="'$(TargetFramework)'=='net462'">
       <HintPath>D:\Projects\_Visual_Studio\lslib\LSLib\bin\Debug\LSLib.dll</HintPath>
     </Reference>
   </ItemGroup>

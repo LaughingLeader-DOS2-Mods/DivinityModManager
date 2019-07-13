@@ -1,6 +1,7 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManager"
+        xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManager"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -12,6 +13,62 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-    <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+    <Grid>
+		<TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+		<ListBox Items="{Binding Mods}">
+			<ListBox.DataTemplates>
+				<DataTemplate DataType="data:DivinityModData">
+					<Grid>
+						<Grid.Styles>
+							<Style Selector="TextBox">
+								<Setter Property="IsReadOnly" Value="True" />
+							</Style>
+						</Grid.Styles>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="10" />
+							<ColumnDefinition Width="3*" />
+							<ColumnDefinition Width="50" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Button Grid.Column="0" Width="10" />
+						<TextBox Text="{Binding Name}" Grid.Column="1">
+							<TextBox.Styles>
+								<Style Selector="ToolTip">
+									<Setter Property="IsVisible" Value="{Binding HasToolTip}" />
+								</Style>
+							</TextBox.Styles>
+
+							<ToolTip.Tip>
+								<StackPanel Orientation="Vertical" MaxWidth="700" >
+									<TextBlock Text="{Binding Description}" TextWrapping="Wrap" IsVisible="{Binding HasDescription}" />
+									<StackPanel Orientation="Vertical" Margin="2" IsVisible="{Binding HasDependencies}">
+										<TextBlock Text="Dependencies:" FontWeight="Bold" />
+										<ListBox Items="{Binding Dependencies}" Margin="0" Padding="0" BorderThickness="0">
+											<ListBox.DataTemplates>
+												<DataTemplate DataType="data:DivinityModDependency">
+													<Grid>
+														<Grid.ColumnDefinitions>
+															<ColumnDefinition Width="*" />
+															<ColumnDefinition />
+														</Grid.ColumnDefinitions>
+														<TextBox Text="{Binding Name}" />
+														<TextBox Text="{Binding Version.Version}" Grid.Column="1" BorderThickness="0,1,1,1" />
+													</Grid>
+												</DataTemplate>
+											</ListBox.DataTemplates>
+										</ListBox>
+									</StackPanel>
+								</StackPanel>
+							</ToolTip.Tip>
+						</TextBox>
+						<TextBox Text="{Binding Version.Version}" Grid.Column="2" BorderThickness="0,1,1,1"/>
+						<TextBox Text="{Binding Author}" Grid.Column="3" BorderThickness="0,1,1,1"/>
+					</Grid>
+				</DataTemplate>
+			</ListBox.DataTemplates>
+		</ListBox>
+    </Grid>
+
+
 
 </Window>

@@ -1,6 +1,8 @@
-﻿using ReactiveUI;
+﻿using DivinityModManager.Util;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace DivinityModManager.Models
@@ -9,7 +11,7 @@ namespace DivinityModManager.Models
 	{
 		public string UUID { get; set; }
 		public string Name { get; set; }
-		public string Version { get; set; }
+		public DivinityModVersion Version { get; set; }
 
 		public override string ToString()
 		{
@@ -23,9 +25,68 @@ namespace DivinityModManager.Models
 		public string Name { get; set; }
 		public string Description { get; set; }
 		public string Author { get; set; }
-		public string Version { get; set; }
+		public DivinityModVersion Version { get; set; }
 		public string Folder { get; set; }
 
 		public List<DivinityModDependency> Dependencies { get; set; } = new List<DivinityModDependency>();
+
+		private string dependenciesText;
+
+		public string DependenciesText
+		{
+			get => dependenciesText;
+			private set { this.RaiseAndSetIfChanged(ref dependenciesText, value); }
+		}
+
+		private bool hasDescription = false;
+
+		public bool HasDescription
+		{
+			get => hasDescription;
+			set { this.RaiseAndSetIfChanged(ref hasDescription, value); }
+		}
+
+
+		private bool hasToolTip = false;
+
+		public bool HasToolTip
+		{
+			get => hasToolTip;
+			set { this.RaiseAndSetIfChanged(ref hasToolTip, value); }
+		}
+
+		private bool hasDependencies = false;
+
+		public bool HasDependencies
+		{
+			get => hasDependencies;
+			set { this.RaiseAndSetIfChanged(ref hasDependencies, value); }
+		}
+
+		public void UpdateDependencyText()
+		{
+			HasDescription = !String.IsNullOrWhiteSpace(Description);
+			string t = "";
+			var listDependencies = Dependencies.Where(d => !DivinityModDataLoader.IgnoreMod(d.UUID)).ToList();
+			if (listDependencies.Count > 0)
+			{
+				HasDependencies = true;
+				//t += "Dependencies" + Environment.NewLine;
+				for (var i = 0; i < listDependencies.Count; i++)
+				{
+					var mod = listDependencies[i];
+					t += $"{mod.Name} {mod.Version.Version}";
+					if (i < listDependencies.Count - 1) t += Environment.NewLine;
+				}
+			}
+			else
+			{
+				HasDependencies = false;
+			}
+
+			DependenciesText = t;
+
+			HasToolTip = HasDescription | HasDependencies;
+		}
 	}
 }

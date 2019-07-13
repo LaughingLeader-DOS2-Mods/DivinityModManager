@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using DivinityModManager.Util;
+using DivinityModManager.Models;
 using System;
 
 namespace DivinityModManager.Views

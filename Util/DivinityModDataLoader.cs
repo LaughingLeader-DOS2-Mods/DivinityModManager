@@ -1,7 +1,11 @@
 ﻿using DivinityModManager.Models;
 using System;
 using System.Collections.Generic;
+#if NETFRAMEWORK
 using Alphaleonis.Win32.Filesystem;
+#else
+using System.IO;
+#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -20,6 +24,12 @@ namespace DivinityModManager.Util
 			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder = "GameMaster"},
 			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack"}
 		};
+
+		public static bool IgnoreMod(string modUUID)
+		{
+			return IgnoredMods.Any(m => m.UUID == modUUID);
+		}
+
 		/// <summary>
 		/// Gets an attribute node with the supplied id, return the value.
 		/// </summary>
@@ -36,6 +46,64 @@ namespace DivinityModManager.Util
 			}
 			return fallbackValue;
 		}
+
+		private static int SafeConvertString(string str)
+		{
+			if(!String.IsNullOrWhiteSpace(str) && int.TryParse(str, out int val))
+			{
+				return val;
+			}
+			return -1;
+		}
+
+		private static DivinityModData ParseMetaFile(string metaContents)
+		{
+			try
+			{
+				XElement xDoc = XElement.Parse(metaContents);
+				var moduleInfoNode = xDoc.Descendants("node").FirstOrDefault(n => n.Attribute("id")?.Value == "ModuleInfo");
+				if (moduleInfoNode != null)
+				{
+					DivinityModData modData = new DivinityModData()
+					{
+						UUID = GetAttribute(moduleInfoNode, "UUID", ""),
+						Name = GetAttribute(moduleInfoNode, "Name", ""),
+						Author = GetAttribute(moduleInfoNode, "Author", ""),
+						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
+						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
+						Description = GetAttribute(moduleInfoNode, "Description", "")
+					};
+					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
+					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
+
+					if (dependenciesNodes != null)
+					{
+						foreach (var node in dependenciesNodes)
+						{
+							DivinityModDependency dependencyMod = new DivinityModDependency()
+							{
+								UUID = GetAttribute(node, "UUID", ""),
+								Name = GetAttribute(node, "Name", ""),
+								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(node, "Version", "")))
+							};
+							Console.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
+							if (dependencyMod.UUID != "")
+							{
+								modData.Dependencies.Add(dependencyMod);
+							}
+						}
+					}
+					modData.UpdateDependencyText();
+					return modData;
+				}
+			}
+			catch(Exception ex)
+			{
+				Console.WriteLine($"Error parsing meta.lsx: {ex.ToString()}");
+			}
+			return null;
+		}
+
 		public static List<DivinityModData> LoadEditorProjects(string modsFolderPath)
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
@@ -52,49 +120,54 @@ namespace DivinityModManager.Util
 					if(File.Exists(metaFile))
 					{
 						var str = File.ReadAllText(metaFile);
-						//XmlDocument xDoc = new XmlDocument();
-						//xDoc.LoadXml(str);
-						XElement xDoc = XElement.Parse(str);
-						var moduleInfoNode = xDoc.Descendants("node").FirstOrDefault(n => n.Attribute("id")?.Value == "ModuleInfo");
-						//var moduleInfoNode = xDoc.SelectSingleNode("//node[@id='ModuleInfo']");
-						if(moduleInfoNode != null)
-						{
-							DivinityModData modData = new DivinityModData()
-							{
-								UUID = GetAttribute(moduleInfoNode, "UUID", ""),
-								Name = GetAttribute(moduleInfoNode, "Name", ""),
-								Author = GetAttribute(moduleInfoNode, "Author", ""),
-								Version = GetAttribute(moduleInfoNode, "Version", ""),
-								Folder = GetAttribute(moduleInfoNode, "Folder", "")
-							};
-							Console.WriteLine($"Added mod {modData.Name} from {metaFile}");
-							//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
-							var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
-
-							if (dependenciesNodes != null)
-							{
-								foreach(var node in dependenciesNodes)
-								{
-									DivinityModDependency dependencyMod = new DivinityModDependency()
-									{
-										UUID = GetAttribute(node, "UUID", ""),
-										Name = GetAttribute(node, "Name", ""),
-										Version = GetAttribute(node, "Version", "")
-									};
-									Console.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
-									if(dependencyMod.UUID != "")
-									{
-										modData.Dependencies.Add(dependencyMod);
-									}
-								}
-							}
-
-							projects.Add(modData);
-						}
+						var modData = ParseMetaFile(str);
+						if (modData != null) projects.Add(modData);
 					}
 				}
 			}
 			return projects;
+		}
+
+		public static List<DivinityModData> LoadModPackageData(string modsFolderPath)
+		{
+			List<DivinityModData> mods = new List<DivinityModData>();
+
+#if NETFRAMEWORK
+			if (Directory.Exists(modsFolderPath))
+			{
+				var modPaks = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters() {
+					InclusionFilter = (f) =>
+					{
+						return Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
+					}
+				}, PathFormat.FullPath);
+				Console.WriteLine("Mod Packages: " + modPaks.Count());
+				foreach (var pakPath in modPaks)
+				{
+					using (var pr = new LSLib.LS.PackageReader(pakPath))
+					{
+						var pak = pr.Read();
+						var metaFile = pak.Files.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+						if (metaFile != null)
+						{
+							using (var stream = metaFile.MakeStream())
+							{
+								using (var sr = new System.IO.StreamReader(stream))
+								{
+									string text = sr.ReadToEnd();
+									var modData = ParseMetaFile(text);
+									if (modData != null)
+									{
+										mods.Add(modData);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+#endif
+			return mods;
 		}
 	}
 }

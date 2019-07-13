@@ -6,14 +6,20 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
+using ReactiveUI;
+using DynamicData;
 
 namespace DivinityModManager.ViewModels
 {
     public class MainWindowViewModel : ViewModelBase
     {
-        public string Greeting => "Hello World!";
+		public string Title => "Divinity Mod Manager 1.0.0.0";
+
+		public string Greeting => "Hello World!";
 
 		public AvaloniaList<DivinityModData> Mods { get; set; } = new AvaloniaList<DivinityModData>();
+
+		public AvaloniaList<DivinityProfileData> Profiles { get; set; } = new AvaloniaList<DivinityProfileData>();
 
 		private void traceNewMods(List<DivinityModData> mods)
 		{
@@ -38,6 +44,8 @@ namespace DivinityModManager.ViewModels
 			//Editor mods have priority over paks
 			Mods.AddRange(modPakData.Where(m => !pakEditorConflicts.Contains(m)));
 			traceNewMods(modPakData);
+
+
 		}
     }
 }

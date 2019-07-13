@@ -1,11 +1,7 @@
 ﻿using DivinityModManager.Models;
 using System;
 using System.Collections.Generic;
-#if NETFRAMEWORK
 using Alphaleonis.Win32.Filesystem;
-#else
-using System.IO;
-#endif
 using System.Text;
 using System.Xml;
 using System.Xml.Linq;
@@ -132,7 +128,6 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
-#if NETFRAMEWORK
 			if (Directory.Exists(modsFolderPath))
 			{
 				var modPaks = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters() {
@@ -166,7 +161,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-#endif
+
 			return mods;
 		}
 	}

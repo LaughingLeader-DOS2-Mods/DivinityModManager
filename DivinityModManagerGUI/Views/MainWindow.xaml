@@ -10,7 +10,7 @@
         Icon="/Assets/avalonia-logo.ico"
         Title="{Binding Title}"
 		Name="mainWindow"
-		>
+>
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -51,7 +51,7 @@
 				</ComboBox>
 			</Grid>
 		</StackPanel>
-		<ListBox Items="{Binding ModOrder}" Grid.Row="1">
+		<ListBox Items="{Binding ModOrder}" Grid.Row="1" >
 			<ListBox.DataTemplates>
 				<DataTemplate DataType="data:DivinityModSeparator">
 					<Grid>

@@ -6,6 +6,8 @@ using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Linq;
+using LSLib.LS;
+using System.Diagnostics;
 
 namespace DivinityModManager.Util
 {
@@ -104,22 +106,30 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
 
-			if(Directory.Exists(modsFolderPath))
+			try
 			{
-				var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
-				var filteredFolders = projectDirectories.Where(f => !IgnoredMods.Any(m => Path.GetFileName(f).Equals(m.Folder, StringComparison.OrdinalIgnoreCase)));
-				Console.WriteLine("Project Folders: " + filteredFolders.Count());
-				foreach (var folder in filteredFolders)
+				if (Directory.Exists(modsFolderPath))
 				{
-					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
-					var metaFile = Path.Combine(folder, "meta.lsx");
-					if(File.Exists(metaFile))
+					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
+					var filteredFolders = projectDirectories.Where(f => !IgnoredMods.Any(m => Path.GetFileName(f).Equals(m.Folder, StringComparison.OrdinalIgnoreCase)));
+					Console.WriteLine("Project Folders: " + filteredFolders.Count());
+					foreach (var folder in filteredFolders)
 					{
-						var str = File.ReadAllText(metaFile);
-						var modData = ParseMetaFile(str);
-						if (modData != null) projects.Add(modData);
+						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
+						var metaFile = Path.Combine(folder, "meta.lsx");
+						if (File.Exists(metaFile))
+						{
+							var str = File.ReadAllText(metaFile);
+							var modData = ParseMetaFile(str);
+							modData.IsEditorMod = true;
+							if (modData != null) projects.Add(modData);
+						}
 					}
 				}
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error loading mod projects: {ex.ToString()}");
 			}
 			return projects;
 		}
@@ -128,32 +138,36 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
-			if (Directory.Exists(modsFolderPath))
+			try
 			{
-				var modPaks = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters() {
-					InclusionFilter = (f) =>
-					{
-						return Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
-					}
-				}, PathFormat.FullPath);
-				Console.WriteLine("Mod Packages: " + modPaks.Count());
-				foreach (var pakPath in modPaks)
+				if (Directory.Exists(modsFolderPath))
 				{
-					using (var pr = new LSLib.LS.PackageReader(pakPath))
+					var modPaks = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
 					{
-						var pak = pr.Read();
-						var metaFile = pak.Files.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
-						if (metaFile != null)
+						InclusionFilter = (f) =>
 						{
-							using (var stream = metaFile.MakeStream())
+							return Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
+						}
+					}, PathFormat.FullPath);
+					Console.WriteLine("Mod Packages: " + modPaks.Count());
+					foreach (var pakPath in modPaks)
+					{
+						using (var pr = new LSLib.LS.PackageReader(pakPath))
+						{
+							var pak = pr.Read();
+							var metaFile = pak.Files.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+							if (metaFile != null)
 							{
-								using (var sr = new System.IO.StreamReader(stream))
+								using (var stream = metaFile.MakeStream())
 								{
-									string text = sr.ReadToEnd();
-									var modData = ParseMetaFile(text);
-									if (modData != null)
+									using (var sr = new System.IO.StreamReader(stream))
 									{
-										mods.Add(modData);
+										string text = sr.ReadToEnd();
+										var modData = ParseMetaFile(text);
+										if (modData != null)
+										{
+											mods.Add(modData);
+										}
 									}
 								}
 							}
@@ -161,8 +175,139 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error loading mod paks: {ex.ToString()}");
+			}
 
 			return mods;
+		}
+
+		private static Node FindResourceNode(Node node, string attribute, string matchVal)
+		{
+			if (node.Attributes.TryGetValue(attribute, out var att))
+			{
+				var attVal = (string)att.Value;
+				if (attVal.Equals(matchVal, StringComparison.OrdinalIgnoreCase))
+				{
+					return node;
+				}
+			}
+			foreach(var nList in node.Children.Values)
+			{
+				foreach(var n in nList)
+				{
+					var match = FindResourceNode(n, attribute, matchVal);
+					if (match != null) return match;
+				}
+			}
+			return null;
+		}
+
+		private static bool NodeIdMatch(Node n, string id)
+		{
+			if(n.Attributes.TryGetValue("id", out var att))
+			{
+				string idAttVal = (string)att.Value;
+				return id.Equals(idAttVal, StringComparison.OrdinalIgnoreCase);
+			}
+			return false;
+		}
+
+		public static List<DivinityProfileData> LoadProfileData(string profilePath)
+		{
+			List<DivinityProfileData> profiles = new List<DivinityProfileData>();
+			if (Directory.Exists(profilePath))
+			{
+				var profileDirectories = Directory.EnumerateDirectories(profilePath);
+				foreach (var folder in profileDirectories)
+				{
+					string displayName = Path.GetFileName(folder);
+					string profileUUID = "";
+
+					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
+					var profileFile = Path.Combine(folder, "profile.lsb");
+					if (File.Exists(profileFile))
+					{
+						var profileRes = ResourceUtils.LoadResource(profileFile, LSLib.LS.Enums.ResourceFormat.LSB);
+						if(profileRes != null && profileRes.Regions.TryGetValue("PlayerProfile", out var region))
+						{
+							if(region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
+							{
+								displayName = (string)profileDisplayNameAtt.Value;
+							}
+							if (region.Attributes.TryGetValue("PlayerProfileID", out var profileIdAtt))
+							{
+								profileUUID = (string)profileIdAtt.Value;
+							}
+						}
+					}
+
+					var profileData = new DivinityProfileData()
+					{
+						Name = displayName,
+						UUID = profileUUID,
+						Folder = Path.GetFullPath(folder)
+					};
+
+					var modSettingsFile = Path.Combine(folder, "modsettings.lsx");
+					if(File.Exists(modSettingsFile))
+					{
+						var modSettingsRes = ResourceUtils.LoadResource(modSettingsFile, LSLib.LS.Enums.ResourceFormat.LSX);
+						if (modSettingsRes != null && modSettingsRes.Regions.TryGetValue("ModuleSettings", out var region))
+						{
+							if(region.Children.TryGetValue("ModOrder", out var modOrderRootNode))
+							{
+								var modOrderChildrenRoot = modOrderRootNode.FirstOrDefault();
+								if(modOrderChildrenRoot != null)
+								{
+									var modOrder = modOrderChildrenRoot.Children.Values.FirstOrDefault();
+									if(modOrder != null)
+									{
+										foreach (var c in modOrder)
+										{
+											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
+											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											{
+												var uuid = (string)attribute.Value;
+												if(!string.IsNullOrEmpty(uuid))
+												{
+													profileData.ModOrder.Add(uuid);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					profiles.Add(profileData);
+				}
+			}
+			return profiles;
+		}
+
+		public static string GetSelectedProfileUUID(string profilePath)
+		{
+			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
+			string activeProfileUUID = "";
+			if (File.Exists(playerprofilesFile))
+			{
+				Trace.WriteLine($"Loading playerprofiles.lsb at '{playerprofilesFile}'");
+				var res = ResourceUtils.LoadResource(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+				if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
+				{
+					Trace.WriteLine($"ActiveProfile | Getting root node '{String.Join(";", region.Attributes.Keys)}'");
+
+					if (region.Attributes.TryGetValue("ActiveProfile", out var att))
+					{
+						Trace.WriteLine($"ActiveProfile | '{att.Type} {att.Value}'");
+						activeProfileUUID = (string)att.Value;
+					}
+				}
+			}
+			return activeProfileUUID;
 		}
 	}
 }

@@ -24,9 +24,12 @@ namespace DivinityModManager
         // container, etc.
         private static void AppMain(Application app, string[] args)
         {
-            var window = new MainWindow
+			var data = new MainWindowViewModel();
+			data.Refresh();
+
+			var window = new MainWindow
             {
-                DataContext = new MainWindowViewModel(),
+                DataContext = data,
             };
 
             app.Run(window);

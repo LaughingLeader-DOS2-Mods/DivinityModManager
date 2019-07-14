@@ -2,7 +2,7 @@
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFrameworks>net462;netcoreapp2.2</TargetFrameworks>
-	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
     <ApplicationIcon />
     <StartupObject />
     <Platforms>AnyCPU;x86</Platforms>

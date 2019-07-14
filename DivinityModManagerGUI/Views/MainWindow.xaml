@@ -1,13 +1,16 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerGUI"
+        xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
+        xmlns:local="clr-namespace:DivinityModManager.Views;assembly=DivinityModManagerGUI"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="DivinityModManager.Views.MainWindow"
         Icon="/Assets/avalonia-logo.ico"
-        Title="{Binding Title}">
+        Title="{Binding Title}"
+		Name="mainWindow"
+		>
 
     <Design.DataContext>
         <vm:MainWindowViewModel/>
@@ -18,28 +21,68 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<StackPanel Orientation="Horizontal">
-			<TextBlock Text="Profile" />
-			<DropDown Items="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}" >
-			</DropDown>
+		<StackPanel Orientation="Horizontal" Margin="4">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<TextBlock Text="Profile" VerticalAlignment="Center" Margin="0,0,4,0" />
+				<ComboBox Items="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" >
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="data:DivinityProfileData">
+							<TextBlock Text="{Binding Name}" />
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+			</Grid>
+			<Grid Margin="4,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
+				<ComboBox Items="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}" Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" >
+					<ComboBox.DataTemplates>
+						<DataTemplate DataType="data:DivinityLoadOrder">
+							<TextBlock Text="{Binding Name}" />
+						</DataTemplate>
+					</ComboBox.DataTemplates>
+				</ComboBox>
+			</Grid>
 		</StackPanel>
-		<ListBox Items="{Binding Mods}" Grid.Row="1">
+		<ListBox Items="{Binding ModOrder}" Grid.Row="1">
 			<ListBox.DataTemplates>
+				<DataTemplate DataType="data:DivinityModSeparator">
+					<Grid>
+						<Grid.RowDefinitions>
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Rectangle Fill="Orange" Opacity="0.2" IsHitTestVisible="False" />
+						<TextBlock Text="Unordered Mods:" Background="Transparent" Margin="4" />
+						<Separator BorderThickness="1" BorderBrush="Orange" Grid.Row="1" />
+					</Grid>
+				</DataTemplate>
 				<DataTemplate DataType="data:DivinityModData">
 					<Grid>
 						<Grid.Styles>
 							<Style Selector="TextBox">
 								<Setter Property="IsReadOnly" Value="True" />
+								<Setter Property="Background" Value="Transparent" />
 							</Style>
 						</Grid.Styles>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="10" />
+							<ColumnDefinition Width="46" />
 							<ColumnDefinition Width="3*" />
 							<ColumnDefinition Width="50" />
 							<ColumnDefinition Width="*" />
 						</Grid.ColumnDefinitions>
+						<Rectangle Grid.ColumnSpan="4" IsVisible="{Binding IsEditorMod}" Fill="LimeGreen" IsHitTestVisible="False" Opacity="0.2" />
 						<Button Grid.Column="0" Width="10" />
-						<TextBox Text="{Binding Name}" Grid.Column="1">
+						<NumericUpDown Value="{Binding Index}" Grid.Column="1" Minimum="0" Maximum="{x:Static vm:MainWindowViewModel.StaticMaxOrderIndex}" ClipValueToMinMax="True" />
+						<TextBox Text="{Binding Name}" Grid.Column="2">
 							<TextBox.Styles>
 								<Style Selector="ToolTip">
 									<Setter Property="IsVisible" Value="{Binding HasToolTip}" />
@@ -69,8 +112,8 @@
 								</StackPanel>
 							</ToolTip.Tip>
 						</TextBox>
-						<TextBox Text="{Binding Version.Version}" Grid.Column="2" BorderThickness="0,1,1,1"/>
-						<TextBox Text="{Binding Author}" Grid.Column="3" BorderThickness="0,1,1,1"/>
+						<TextBox Text="{Binding Version.Version}" Grid.Column="3" BorderThickness="0,1,1,1"/>
+						<TextBox Text="{Binding Author}" Grid.Column="4" BorderThickness="0,1,1,1"/>
 					</Grid>
 				</DataTemplate>
 			</ListBox.DataTemplates>

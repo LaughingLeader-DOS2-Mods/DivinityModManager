@@ -18,8 +18,27 @@ namespace DivinityModManager.Models
 		}
 	}
 
-	public class DivinityModData : ReactiveObject
+	public interface IDivinityModListEntry
 	{
+
+
+	}
+
+	public struct DivinityModSeparator : IDivinityModListEntry
+	{
+
+	}
+
+	public class DivinityModData : ReactiveObject, IDivinityModListEntry
+	{
+		private int index = -1;
+
+		public int Index
+		{
+			get => index;
+			set { this.RaiseAndSetIfChanged(ref index, value); }
+		}
+
 		public string UUID { get; set; }
 		public string Name { get; set; }
 		public string Description { get; set; }
@@ -61,6 +80,15 @@ namespace DivinityModManager.Models
 			get => hasDependencies;
 			set { this.RaiseAndSetIfChanged(ref hasDependencies, value); }
 		}
+
+		private bool isEditorMod = false;
+
+		public bool IsEditorMod
+		{
+			get => isEditorMod;
+			set { this.RaiseAndSetIfChanged(ref isEditorMod, value); }
+		}
+
 
 		public void UpdateDependencyText()
 		{

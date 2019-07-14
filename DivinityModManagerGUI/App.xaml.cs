@@ -10,8 +10,6 @@ namespace DivinityModManager
         public override void Initialize()
         {
             AvaloniaXamlLoader.Load(this);
-
-			
 		}
    }
 }

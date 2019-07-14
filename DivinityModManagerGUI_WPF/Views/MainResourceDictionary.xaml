@@ -1,0 +1,103 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:DivinityModManager.Views"
+					xmlns:conv="clr-namespace:DivinityModManager.Converters"
+					xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
+					xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
+					xmlns:dd="urn:gong-wpf-dragdrop"
+					x:Name="MainResources"
+					>
+	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	<DataTemplate DataType="{x:Type data:DivinityProfileData}">
+		<TextBlock Text="{Binding Name}" />
+	</DataTemplate>
+	<DataTemplate DataType="{x:Type data:DivinityLoadOrder}" >
+		<TextBlock Text="{Binding Name}" />
+	</DataTemplate>
+	<DataTemplate DataType="{x:Type data:DivinityModSeparator}">
+		<Grid>
+			<Grid.RowDefinitions>
+				<RowDefinition Height="*" />
+				<RowDefinition Height="Auto" />
+			</Grid.RowDefinitions>
+			<Rectangle Fill="Orange" Opacity="0.2" IsHitTestVisible="False" />
+			<TextBlock Text="Unordered Mods:" Background="Transparent" Margin="4" />
+			<Separator BorderThickness="1" BorderBrush="Orange" Grid.Row="1" />
+		</Grid>
+	</DataTemplate>
+	<DataTemplate DataType="{x:Type data:DivinityModDependency}">
+		<Grid>
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="*" />
+				<ColumnDefinition />
+			</Grid.ColumnDefinitions>
+			<TextBlock Text="{Binding Name}" />
+			<TextBlock Text="{Binding Version.Version}" Grid.Column="1" />
+		</Grid>
+	</DataTemplate>
+	<Style TargetType="ListViewItem" x:Name="ModEntry">
+		<Style.Triggers>
+			<DataTrigger Binding="{Binding IsEditorMod}" Value="True">
+				<Setter Property="Background">
+					<Setter.Value>
+						<SolidColorBrush Color="Lime" Opacity="0.2" />
+					</Setter.Value>
+				</Setter>
+			</DataTrigger>
+		</Style.Triggers>
+	</Style>
+	<Style TargetType="ListView" x:Key="ModOrderListView">
+		<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
+		<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
+	</Style>
+	<GridView x:Key="ModGridView" x:Shared="False" AllowsColumnReorder="True">
+		<GridView.ColumnHeaderContainerStyle>
+			<Style TargetType="{x:Type GridViewColumnHeader}">
+				<Setter Property="HorizontalContentAlignment" Value="Left" />
+				<Setter Property="Margin" Value="4,0,0,0" />
+			</Style>
+		</GridView.ColumnHeaderContainerStyle>
+		<GridView.Columns>
+			<GridViewColumn Width="40">
+				<GridViewColumn.Header>
+					<TextBlock Text="#" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBox Text="{Binding Index}" BorderBrush="{x:Null}" Background="Transparent" Margin="2,0,2,0" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="400">
+				<GridViewColumn.Header>
+					<TextBlock Text="Name" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="80">
+				<GridViewColumn.Header>
+					<TextBlock Text="Version" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="300">
+				<GridViewColumn.Header>
+					<TextBlock Text="Author" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView.Columns>
+	</GridView>
+</ResourceDictionary>

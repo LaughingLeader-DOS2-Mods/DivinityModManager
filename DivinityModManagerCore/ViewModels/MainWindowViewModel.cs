@@ -17,10 +17,10 @@ namespace DivinityModManager.ViewModels
 
 		public string Greeting => "Hello World!";
 
-		public static MainWindowViewModel self { get; set; }
-
 		public List<DivinityModData> Mods { get; set; } = new List<DivinityModData>();
-		public ObservableCollection<IDivinityModListEntry> ModOrder { get; set; } = new ObservableCollection<IDivinityModListEntry>();
+		public ObservableCollection<DivinityModData> ActiveModOrder { get; set; } = new ObservableCollection<DivinityModData>();
+
+		public ObservableCollection<DivinityModData> InactiveMods { get; set; } = new ObservableCollection<DivinityModData>();
 
 		public ObservableCollection<DivinityProfileData> Profiles { get; set; } = new ObservableCollection<DivinityProfileData>();
 
@@ -71,6 +71,15 @@ namespace DivinityModManager.ViewModels
 		}
 
 		public static int StaticMaxOrderIndex { get; set; } = 30;
+
+		private int layoutMode = 0;
+
+		public int LayoutMode
+		{
+			get => layoutMode;
+			set { this.RaiseAndSetIfChanged(ref layoutMode, value); }
+		}
+
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -176,11 +185,13 @@ namespace DivinityModManager.ViewModels
 
 			unOrderedMods.ForEach(m => m.Index = -1);
 
-			ModOrder = new ObservableCollection<IDivinityModListEntry>(sorted);
-			ModOrder.Add(new DivinityModSeparator());
-			ModOrder.AddRange(unOrderedMods.OrderBy(m => m.Name));
+			ActiveModOrder.Clear();
+			ActiveModOrder.AddRange(sorted);
 
-			MaxOrderIndex = ModOrder.Count - 2;
+			InactiveMods.Clear();
+			InactiveMods.AddRange(unOrderedMods.OrderBy(m => m.Name));
+
+			MaxOrderIndex = ActiveModOrder.Count - 1;
 			StaticMaxOrderIndex = MaxOrderIndex;
 
 			Trace.WriteLine($"MaxOrderIndex is {MaxOrderIndex}");
@@ -195,6 +206,28 @@ namespace DivinityModManager.ViewModels
 			BuildModOrderList();
 		}
 
+		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			if(e.NewItems != null)
+			{
+				foreach (DivinityModData item in ActiveModOrder)
+				{
+					item.Index = ActiveModOrder.IndexOf(item);
+				}
+			}
+		}
+
+		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			if (e.NewItems != null)
+			{
+				foreach (DivinityModData item in InactiveMods)
+				{
+					item.Index = InactiveMods.IndexOf(item);
+				}
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrder);
@@ -205,7 +238,8 @@ namespace DivinityModManager.ViewModels
 				}
 			});
 
-			self = this;
+			ActiveModOrder.CollectionChanged += ActiveMods_SetItemIndex;
+			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 		}
     }
 }

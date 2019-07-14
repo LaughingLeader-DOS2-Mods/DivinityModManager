@@ -21,7 +21,7 @@ namespace DivinityModManager.Views
 	{
 		public MainWindowDebugData () : base()
 		{
-			for(var i = 0; i < 15; i++)
+			for(var i = 0; i < 45; i++)
 			{
 				var d = new DivinityModData()
 				{
@@ -31,8 +31,42 @@ namespace DivinityModManager.Views
 					Description = "Test"
 				};
 				d.IsEditorMod = i%2 == 0;
-				ModOrder.Add(d);
+				ActiveModOrder.Add(d);
 			}
+
+			for (var i = 0; i < 30; i++)
+			{
+				var d = new DivinityModData()
+				{
+					Name = "Inactive Mod Test" + i,
+					Author = "LaughingLeader",
+					Version = new DivinityModVersion(370871668),
+					Description = "Test"
+				};
+				d.IsEditorMod = i % 2 == 0;
+				InactiveMods.Add(d);
+			}
+
+			for (var i = 0; i < 4; i++)
+			{
+				var p = new DivinityProfileData()
+				{
+					Name = "Profile" + i
+				};
+				p.ModOrder.AddRange(ActiveModOrder.Select(m => m.UUID));
+				Profiles.Add(p);
+			}
+			SelectedProfileIndex = 0;
+
+			for (var i = 0; i < 4; i++)
+			{
+				var lo = new DivinityLoadOrder()
+				{
+					Name = "SavedOrder" + i
+				};
+				ModOrderList.Add(lo);
+			}
+			//SelectedModOrderIndex = 2;
 		}
 	}
 	/// <summary>

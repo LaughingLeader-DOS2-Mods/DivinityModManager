@@ -1,20 +1,20 @@
-﻿<Window x:Class="DivinityModManager.Views.MainWindow"
+﻿<reactiveui:ReactiveWindow 
+		x:Class="DivinityModManager.Views.MainWindow"
+		x:TypeArguments="vm:MainWindowViewModel"
+		xmlns:reactiveui="http://reactiveui.net"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DivinityModManager.Views"
         xmlns:conv="clr-namespace:DivinityModManager.Converters"
-        xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
+        xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 		xmlns:dd="urn:gong-wpf-dragdrop"
         mc:Ignorable="d"
-        Title="{Binding Title, FallbackValue='Divinity Mod Manager'}" Height="768" Width="1024" DataContextChanged="Window_DataContextChanged"
+        Height="768" Width="1280"
 		d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"
 >
-	<Window.DataContext>
-		<vm:MainWindowViewModel/>
-	</Window.DataContext>
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -46,7 +46,7 @@
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Profile" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}" DisplayMemberPath="Name" IsEditable="True"
+				<ComboBox x:Name="ProfilesComboBox" DisplayMemberPath="Name" IsEditable="True" ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}"
 						  Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" 
 				/>
 			</Grid>
@@ -57,10 +57,10 @@
 					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}" Grid.Column="1" IsEditable="True"
+				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" IsEditable="True" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
 						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" />
 				<StackPanel Orientation="Horizontal" Grid.Column="2">
-					<Button x:Name="SaveOrderButton" Command="{Binding SaveOrderCommand}">
+					<Button x:Name="SaveOrderButton">
 						<Button.Resources>
 							<Style TargetType="{x:Type Image}">
 								<Style.Triggers>
@@ -78,7 +78,7 @@
 				</StackPanel>
 			</Grid>
 		</StackPanel>
-		<ContentControl Grid.Row="1" Content="{Binding}">
+		<ContentControl x:Name="LayoutContent" Grid.Row="1" Content="{Binding}">
 			<ContentControl.Style>
 				<Style TargetType="{x:Type ContentControl}">
 					<Style.Triggers>
@@ -93,4 +93,4 @@
 			</ContentControl.Style>
 		</ContentControl>
 	</Grid>
-</Window>
+</reactiveui:ReactiveWindow>

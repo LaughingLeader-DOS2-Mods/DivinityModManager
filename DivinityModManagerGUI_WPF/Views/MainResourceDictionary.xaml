@@ -1,13 +1,14 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:DivinityModManager.Views"
-					xmlns:conv="clr-namespace:DivinityModManager.Converters"
+					xmlns:sysc="clr-namespace:System.Windows.Converters;assembly=WindowsBase"
+					xmlns:sys="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
 					xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
 					xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 					xmlns:dd="urn:gong-wpf-dragdrop"
 					x:Name="MainResources"
 					>
-	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	<sys:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/Save_16x.png" />
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/SaveGrey_16x.png" />
@@ -72,6 +73,46 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
+			<GridViewColumn Width="400">
+				<GridViewColumn.Header>
+					<TextBlock Text="Name" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Name}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="80">
+				<GridViewColumn.Header>
+					<TextBlock Text="Version" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="300">
+				<GridViewColumn.Header>
+					<TextBlock Text="Author" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView.Columns>
+	</GridView>
+	<GridView x:Key="InactiveModGridView" x:Shared="False" AllowsColumnReorder="True">
+		<GridView.ColumnHeaderContainerStyle>
+			<Style TargetType="{x:Type GridViewColumnHeader}">
+				<Setter Property="HorizontalContentAlignment" Value="Left" />
+				<Setter Property="Margin" Value="4,0,0,0" />
+			</Style>
+		</GridView.ColumnHeaderContainerStyle>
+		<GridView.Columns>
 			<GridViewColumn Width="400">
 				<GridViewColumn.Header>
 					<TextBlock Text="Name" />

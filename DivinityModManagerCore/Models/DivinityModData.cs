@@ -77,6 +77,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref isEditorMod, value); }
 		}
 
+		private bool isActive = false;
+
+		public bool IsActive
+		{
+			get => isActive;
+			set { this.RaiseAndSetIfChanged(ref isActive, value); }
+		}
+
+
 		public void UpdateDependencyText()
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);

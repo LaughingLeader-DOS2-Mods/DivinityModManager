@@ -6,9 +6,15 @@ using System.Text;
 
 namespace DivinityModManager.Models
 {
+	public struct DivinityLoadOrderEntry
+	{
+		public string UUID;
+		public string Name;
+	}
+
 	public class DivinityLoadOrder : ReactiveObject
 	{
-		public SourceCache<DivinityModData, string> Order { get; set; } = new SourceCache<DivinityModData, string>(t => t.UUID);
+		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
 		private string name;
 

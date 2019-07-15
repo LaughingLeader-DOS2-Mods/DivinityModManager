@@ -229,6 +229,7 @@ namespace DivinityModManager.Util
 				foreach (var folder in profileDirectories)
 				{
 					string displayName = Path.GetFileName(folder);
+					string storedDisplayedName = displayName;
 					string profileUUID = "";
 
 					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
@@ -240,7 +241,7 @@ namespace DivinityModManager.Util
 						{
 							if(region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
 							{
-								displayName = (string)profileDisplayNameAtt.Value;
+								storedDisplayedName = (string)profileDisplayNameAtt.Value;
 							}
 							if (region.Attributes.TryGetValue("PlayerProfileID", out var profileIdAtt))
 							{
@@ -252,6 +253,7 @@ namespace DivinityModManager.Util
 					var profileData = new DivinityProfileData()
 					{
 						Name = displayName,
+						ProfileName = storedDisplayedName,
 						UUID = profileUUID,
 						Folder = Path.GetFullPath(folder)
 					};
@@ -321,7 +323,7 @@ namespace DivinityModManager.Util
 			if(Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
-				string contents = GenerateModSettingsFile(order.Order.Items, allMods);
+				string contents = GenerateModSettingsFile(order.Order, allMods);
 				try
 				{
 					var buffer = Encoding.UTF8.GetBytes(contents);
@@ -341,7 +343,7 @@ namespace DivinityModManager.Util
 			return false;
 		}
 
-		public static string GenerateModSettingsFile(IEnumerable<DivinityModData> order, IEnumerable<DivinityModData> allMods)
+		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods)
 		{
 			string modulesText = "";
 			foreach(var uuid in order.Select(m => m.UUID))
@@ -357,6 +359,11 @@ namespace DivinityModManager.Util
 			string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
 			Trace.Write(output);
 			return output;
+		}
+
+		public static string CreateHandle()
+		{
+			return Guid.NewGuid().ToString().Replace('-', 'g').Insert(0, "h");
 		}
 	}
 }

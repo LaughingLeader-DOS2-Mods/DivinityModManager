@@ -8,6 +8,11 @@ namespace DivinityModManager.Models
 	public class DivinityProfileData : ReactiveObject
 	{
 		public string Name { get; set; }
+
+		/// <summary>
+		/// The stored name in the profile.lsb file.
+		/// </summary>
+		public string ProfileName { get; set; }
 		public string UUID { get; set; }
 		public string Folder { get; set; }
 

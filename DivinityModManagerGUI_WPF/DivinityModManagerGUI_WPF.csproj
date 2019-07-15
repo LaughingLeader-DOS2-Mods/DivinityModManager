@@ -90,6 +90,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
       <DependentUpon>HorizontalModLayout.xaml</DependentUpon>
     </Compile>

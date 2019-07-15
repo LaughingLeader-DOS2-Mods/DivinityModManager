@@ -8,6 +8,7 @@ using System.Text;
 using ReactiveUI;
 using DynamicData;
 using System.Collections.ObjectModel;
+using System.Windows.Input;
 
 namespace DivinityModManager.ViewModels
 {
@@ -80,7 +81,8 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref layoutMode, value); }
 		}
 
-
+		public ICommand SaveOrderCommand { get; set; }
+		public ICommand RefreshCommand { get; set; }
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
 			foreach (var mod in mods)
@@ -240,6 +242,29 @@ namespace DivinityModManager.ViewModels
 
 			ActiveModOrder.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
+
+			SaveOrderCommand = ReactiveCommand.Create(() =>
+			{
+				var loadOrder = SelectedModOrder;
+				var profile = SelectedProfile;
+				if (loadOrder != null && profile != null)
+				{
+					loadOrder.Order.Clear();
+					foreach(var mod in ActiveModOrder)
+					{
+						loadOrder.Order.AddOrUpdate(mod);
+					}
+
+					if(DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods))
+					{
+						Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
+					}
+					else
+					{
+						Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
+					}
+				}
+			});
 		}
     }
 }

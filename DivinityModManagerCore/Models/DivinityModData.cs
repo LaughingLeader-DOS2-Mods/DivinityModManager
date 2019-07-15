@@ -6,30 +6,16 @@ using System.Linq;
 
 namespace DivinityModManager.Models
 {
-	public struct DivinityModDependency
+	public interface IDivinityModData
 	{
-		public string UUID { get; set; }
-		public string Name { get; set; }
-		public DivinityModVersion Version { get; set; }
-
-		public override string ToString()
-		{
-			return $"Dependency|Name({Name}) UUID({UUID}) Version({Version})";
-		}
+		string UUID { get; set; }
+		string Name { get; set; }
+		string Folder { get; set; }
+		string MD5 { get; set; }
+		DivinityModVersion Version { get; set; }
 	}
 
-	public interface IDivinityModListEntry
-	{
-
-
-	}
-
-	public struct DivinityModSeparator : IDivinityModListEntry
-	{
-
-	}
-
-	public class DivinityModData : ReactiveObject, IDivinityModListEntry
+	public class DivinityModData : ReactiveObject, IDivinityModData
 	{
 		private int index = -1;
 
@@ -46,7 +32,9 @@ namespace DivinityModManager.Models
 		public DivinityModVersion Version { get; set; }
 		public string Folder { get; set; }
 
-		public List<DivinityModDependency> Dependencies { get; set; } = new List<DivinityModDependency>();
+		public string MD5 { get; set; }
+
+		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 
 		private string dependenciesText;
 

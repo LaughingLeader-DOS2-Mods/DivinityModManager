@@ -18,7 +18,7 @@
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManagerGUI;component/Views/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Views/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<DataTemplate x:Key="VerticalModLayout">
 				<local:VerticalModLayout />
@@ -40,18 +40,36 @@
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Profile" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}" Grid.Column="1" 
-						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" 
+				<ComboBox ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}" DisplayMemberPath="Name" IsEditable="True"
+						  Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" 
 				/>
 			</Grid>
 			<Grid Margin="4,0">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
+					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}" Grid.Column="1" 
-						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" />
+				<ComboBox ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}" Grid.Column="1" IsEditable="True"
+						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" />
+				<StackPanel Orientation="Horizontal" Grid.Column="2">
+					<Button x:Name="SaveOrderButton" IsEnabled="{Binding CanSaveOrder}" Command="{Binding SaveOrderCommand}">
+						<Button.Resources>
+							<Style TargetType="{x:Type Image}">
+								<Style.Triggers>
+									<Trigger Property="IsEnabled" Value="True">
+										<Setter Property="Source" Value="{StaticResource SaveImage}" />
+									</Trigger>
+									<Trigger Property="IsEnabled" Value="False">
+										<Setter Property="Source" Value="{StaticResource SaveDisabledImage}" />
+									</Trigger>
+								</Style.Triggers>
+							</Style>
+						</Button.Resources>
+						<Image Width="16" Height="16" Stretch="UniformToFill" />
+					</Button>
+				</StackPanel>
 			</Grid>
 		</StackPanel>
 		<ContentControl Grid.Row="1" Content="{Binding}">

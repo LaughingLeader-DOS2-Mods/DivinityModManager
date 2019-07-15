@@ -8,6 +8,8 @@ using System.Xml.Linq;
 using System.Linq;
 using LSLib.LS;
 using System.Diagnostics;
+using System.Reflection;
+using System.Resources;
 
 namespace DivinityModManager.Util
 {
@@ -69,7 +71,8 @@ namespace DivinityModManager.Util
 						Author = GetAttribute(moduleInfoNode, "Author", ""),
 						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
 						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
-						Description = GetAttribute(moduleInfoNode, "Description", "")
+						Description = GetAttribute(moduleInfoNode, "Description", ""),
+						MD5 = GetAttribute(moduleInfoNode, "MD5", "")
 					};
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
@@ -78,11 +81,13 @@ namespace DivinityModManager.Util
 					{
 						foreach (var node in dependenciesNodes)
 						{
-							DivinityModDependency dependencyMod = new DivinityModDependency()
+							DivinityModDependencyData dependencyMod = new DivinityModDependencyData()
 							{
 								UUID = GetAttribute(node, "UUID", ""),
 								Name = GetAttribute(node, "Name", ""),
-								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(node, "Version", "")))
+								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(node, "Version", ""))),
+								Folder = GetAttribute(node, "Folder", ""),
+								MD5 = GetAttribute(node, "MD5", "")
 							};
 							Console.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
 							if (dependencyMod.UUID != "")
@@ -308,6 +313,34 @@ namespace DivinityModManager.Util
 				}
 			}
 			return activeProfileUUID;
+		}
+
+		public static bool SaveModSettings(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
+		{
+			if(Directory.Exists(folder))
+			{
+				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
+				string contents = GenerateModSettingsFile(order.Order.Items, allMods);
+			}
+			return false;
+		}
+
+		public static string GenerateModSettingsFile(IEnumerable<DivinityModData> order, IEnumerable<DivinityModData> allMods)
+		{
+			string modulesText = "";
+			foreach(var uuid in order.Select(m => m.UUID))
+			{
+				modulesText += String.Format(Properties.Resources.ModSettingsModOrderModuleNode, uuid) + Environment.NewLine;
+			}
+
+			string modShortDescText = "";
+			foreach (var mod in allMods)
+			{
+				modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, mod.Name, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+			}
+			string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
+			Trace.Write(output);
+			return output;
 		}
 	}
 }

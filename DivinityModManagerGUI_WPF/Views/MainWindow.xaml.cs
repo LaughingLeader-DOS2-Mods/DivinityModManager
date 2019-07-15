@@ -1,4 +1,5 @@
 ﻿using DivinityModManager.Models;
+using DivinityModManager.Util;
 using DivinityModManager.ViewModels;
 using System;
 using System.Collections.Generic;
@@ -74,6 +75,7 @@ namespace DivinityModManager.Views
 	/// </summary>
 	public partial class MainWindow : Window
 	{
+		private MainWindowViewModel Data { get; set; }
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -83,8 +85,14 @@ namespace DivinityModManager.Views
 		{
 			if(e.NewValue is MainWindowViewModel viewModel)
 			{
+				Data = viewModel;
 				viewModel.Refresh();
 			}
+		}
+
+		private void ExportTestButton_Click(object sender, RoutedEventArgs e)
+		{
+			DivinityModDataLoader.ExportModOrder(Data.ActiveModOrder, Data.Mods);
 		}
 	}
 }

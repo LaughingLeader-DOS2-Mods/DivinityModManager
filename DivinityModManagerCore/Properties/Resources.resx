@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,57 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ModSettingsModuleShortDescNode" xml:space="preserve">
+    <value>						&lt;node id="ModuleShortDesc"&gt;
+							&lt;attribute id="Folder" value="{0}" type="30" /&gt;
+							&lt;attribute id="MD5" value="{1}" type="23" /&gt;
+							&lt;attribute id="Name" value="{2}" type="22" /&gt;
+							&lt;attribute id="UUID" value="{3}" type="22" /&gt;
+							&lt;attribute id="Version" value="{4}" type="4" /&gt;
+						&lt;/node&gt;</value>
+    <comment>0 = Folder, 1 = MD5, 2 = Name, 3 = UUID, 4 = Version</comment>
+  </data>
+  <data name="ModSettingsTemplate" xml:space="preserve">
+    <value>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
+&lt;save&gt;
+    &lt;header version="2" /&gt;
+    &lt;version major="3" minor="6" revision="4" build="0" /&gt;
+    &lt;region id="ModuleSettings"&gt;
+        &lt;node id="root"&gt;
+            &lt;children&gt;
+                &lt;node id="ModOrder"&gt;
+                    &lt;children&gt;
+{0}					&lt;/children&gt;
+                &lt;/node&gt;
+                &lt;node id="Mods"&gt;
+                    &lt;children&gt;
+{1}					&lt;/children&gt;
+                &lt;/node&gt;
+            &lt;/children&gt;
+        &lt;/node&gt;
+    &lt;/region&gt;
+&lt;/save&gt;</value>
+    <comment>0 = ModOrder, 1 = Mods</comment>
+  </data>
+  <data name="ModSettingsModOrderModuleNode" xml:space="preserve">
+    <value>                        &lt;node id="Module"&gt;
+                            &lt;attribute id="UUID" value="{0}" type="22" /&gt;
+                        &lt;/node&gt;</value>
+    <comment>0 = UUID</comment>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="AddItem" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\AddItem_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="Save" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\Save_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="SaveDisabled" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\SaveGrey_16x.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

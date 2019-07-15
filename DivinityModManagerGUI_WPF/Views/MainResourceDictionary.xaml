@@ -8,13 +8,17 @@
 					x:Name="MainResources"
 					>
 	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+
+	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/Save_16x.png" />
+	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/SaveGrey_16x.png" />
+
 	<DataTemplate DataType="{x:Type data:DivinityProfileData}">
 		<TextBlock Text="{Binding Name}" />
 	</DataTemplate>
 	<DataTemplate DataType="{x:Type data:DivinityLoadOrder}" >
 		<TextBlock Text="{Binding Name}" />
 	</DataTemplate>
-	<DataTemplate DataType="{x:Type data:DivinityModSeparator}">
+	<!--<DataTemplate DataType="{x:Type data:DivinityModSeparator}">
 		<Grid>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="*" />
@@ -24,8 +28,8 @@
 			<TextBlock Text="Unordered Mods:" Background="Transparent" Margin="4" />
 			<Separator BorderThickness="1" BorderBrush="Orange" Grid.Row="1" />
 		</Grid>
-	</DataTemplate>
-	<DataTemplate DataType="{x:Type data:DivinityModDependency}">
+	</DataTemplate>-->
+	<DataTemplate DataType="{x:Type data:DivinityModDependencyData}">
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />

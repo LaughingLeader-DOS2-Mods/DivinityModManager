@@ -77,7 +77,6 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref isEditorMod, value); }
 		}
 
-
 		public void UpdateDependencyText()
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);
@@ -102,6 +101,10 @@ namespace DivinityModManager.Models
 			DependenciesText = t;
 
 			HasToolTip = HasDescription | HasDependencies;
+		}
+		public override string ToString()
+		{
+			return $"Mod|Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
 		}
 	}
 }

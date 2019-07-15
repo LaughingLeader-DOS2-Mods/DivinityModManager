@@ -10,6 +10,7 @@ using LSLib.LS;
 using System.Diagnostics;
 using System.Reflection;
 using System.Resources;
+using System.Threading.Tasks;
 
 namespace DivinityModManager.Util
 {
@@ -315,12 +316,27 @@ namespace DivinityModManager.Util
 			return activeProfileUUID;
 		}
 
-		public static bool SaveModSettings(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
+		public static async Task<bool> SaveModSettings(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
 		{
 			if(Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
 				string contents = GenerateModSettingsFile(order.Order.Items, allMods);
+				try
+				{
+					var buffer = Encoding.UTF8.GetBytes(contents);
+					using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.OpenOrCreate, 
+						System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, true))
+					{
+						await fs.WriteAsync(buffer, 0, buffer.Length);
+					}
+
+					return true;
+				}
+				catch(AccessViolationException ex)
+				{
+					Trace.WriteLine($"Failed to write file '{outputFilePath}': {ex.ToString()}");
+				}
 			}
 			return false;
 		}

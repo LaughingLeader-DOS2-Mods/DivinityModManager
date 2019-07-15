@@ -92,7 +92,7 @@ namespace DivinityModManager.Views
 
 		private void ExportTestButton_Click(object sender, RoutedEventArgs e)
 		{
-			DivinityModDataLoader.ExportModOrder(Data.ActiveModOrder, Data.Mods);
+			//DivinityModDataLoader.ExportModOrder(Data.ActiveModOrder, Data.Mods);
 		}
 	}
 }

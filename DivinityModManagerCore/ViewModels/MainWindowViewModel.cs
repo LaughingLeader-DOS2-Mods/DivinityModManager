@@ -9,21 +9,30 @@ using ReactiveUI;
 using DynamicData;
 using System.Collections.ObjectModel;
 using System.Windows.Input;
+using System.Threading.Tasks;
+using DynamicData.Binding;
+using System.Reactive.Linq;
 
 namespace DivinityModManager.ViewModels
 {
-    public class MainWindowViewModel : ViewModelBase
+    public class MainWindowViewModel : BaseHistoryViewModel
     {
 		public string Title => "Divinity Mod Manager 1.0.0.0";
 
 		public string Greeting => "Hello World!";
 
 		public List<DivinityModData> Mods { get; set; } = new List<DivinityModData>();
-		public ObservableCollection<DivinityModData> ActiveModOrder { get; set; } = new ObservableCollection<DivinityModData>();
 
-		public ObservableCollection<DivinityModData> InactiveMods { get; set; } = new ObservableCollection<DivinityModData>();
+		private SourceList<DivinityModData> activeModOrder = new SourceList<DivinityModData>();
+		private SourceList<DivinityModData> inactiveMods = new SourceList<DivinityModData>();
+		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
 
-		public ObservableCollection<DivinityProfileData> Profiles { get; set; } = new ObservableCollection<DivinityProfileData>();
+
+		public ObservableCollectionExtended<DivinityModData> ActiveModOrder { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+
+		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+
+		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
 		private int selectedProfileIndex = 0;
 
@@ -39,7 +48,7 @@ namespace DivinityModManager.ViewModels
 
 		public DivinityProfileData SelectedProfile { get => Profiles[SelectedModOrderIndex]; }
 
-		public ObservableCollection<DivinityLoadOrder> ModOrderList { get; set; } = new ObservableCollection<DivinityLoadOrder>();
+		public ObservableCollectionExtended<DivinityLoadOrder> ModOrderList { get; set; } = new ObservableCollectionExtended<DivinityLoadOrder>();
 
 		private int selectedModOrderIndex = 0;
 
@@ -81,8 +90,17 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref layoutMode, value); }
 		}
 
+		private bool canSaveOrder = false;
+
+		public bool CanSaveOrder
+		{
+			get => canSaveOrder;
+			set { this.RaiseAndSetIfChanged(ref canSaveOrder, value); }
+		}
+
 		public ICommand SaveOrderCommand { get; set; }
 		public ICommand RefreshCommand { get; set; }
+		public ICommand DebugCommand { get; set; }
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
 			foreach (var mod in mods)
@@ -210,6 +228,11 @@ namespace DivinityModManager.ViewModels
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
 		{
+			if(e.OldItems != null && e.NewItems != null)
+			{
+				
+			}
+
 			if(e.NewItems != null)
 			{
 				foreach (DivinityModData item in ActiveModOrder)
@@ -230,6 +253,39 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private async Task<bool> SaveLoadOrderToFile()
+		{
+			var loadOrder = SelectedModOrder;
+			var profile = SelectedProfile;
+			if (loadOrder != null && profile != null)
+			{
+				loadOrder.Order.Clear();
+				foreach (var mod in ActiveModOrder)
+				{
+					loadOrder.Order.AddOrUpdate(mod);
+				}
+
+				var result = await DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods);
+				if (result)
+				{
+					Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
+					return true;
+				}
+				else
+				{
+					Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
+				}
+			}
+
+			return false;
+		}
+
+		private bool ActiveModsChanging(DivinityModData m)
+		{
+			Trace.WriteLine($"[ActiveModsChanging] Mod {m.Name}");
+			return true;
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrder);
@@ -240,31 +296,59 @@ namespace DivinityModManager.ViewModels
 				}
 			});
 
-			ActiveModOrder.CollectionChanged += ActiveMods_SetItemIndex;
-			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
-
-			SaveOrderCommand = ReactiveCommand.Create(() =>
+			activeModOrder.Preview().OnItemAdded((item) =>
 			{
-				var loadOrder = SelectedModOrder;
-				var profile = SelectedProfile;
-				if (loadOrder != null && profile != null)
+				Trace.WriteLine("Taking snapshot of mod order");
+				var mods = activeModOrder.Items;
+				History.Snapshot(() =>
 				{
-					loadOrder.Order.Clear();
-					foreach(var mod in ActiveModOrder)
-					{
-						loadOrder.Order.AddOrUpdate(mod);
-					}
-
-					if(DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods))
-					{
-						Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
-					}
-					else
-					{
-						Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
-					}
-				}
+					activeModOrder.Clear();
+					activeModOrder.AddRange(mods);
+					InactiveMods.Add(item);
+				}, () =>
+				{
+					activeModOrder.Add(item);
+				});
+			}).Bind(ActiveModOrder).Subscribe(o => {
+				Trace.WriteLine($"[Preview().OnItemAdded] Changeset: {String.Join(",", o)}");
 			});
+
+			DebugCommand = ReactiveCommand.Create(() => activeModOrder.Add(new DivinityModData() { Name = "Test" }));
+
+			//var connection = activeModOrder.Connect(ActiveModsChanging);
+			//var b = connection.ObserveOn(RxApp.MainThreadScheduler).Bind(ActiveModOrder);
+
+			//ActiveModOrder.CollectionChanged += ActiveMods_SetItemIndex;
+			//InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
+
+			//ActiveModOrder.ObserveCollectionChanges().Subscribe(e =>
+			//{
+			//	if(e.EventArgs.OldItems != null)
+			//	{
+			//		string str = "";
+			//		for (var i = 0; i < e.EventArgs.OldItems.Count; i++)
+			//		{
+			//			var obj = e.EventArgs.OldItems[i];
+			//			str += obj.ToString();
+			//			if (i < e.EventArgs.OldItems.Count - 1) str += ",";
+			//		}
+			//		Trace.WriteLine($"[OldItems] {str}");
+			//	}
+			//	if (e.EventArgs.NewItems != null)
+			//	{
+			//		string str = "";
+			//		for(var i = 0; i < e.EventArgs.NewItems.Count; i++)
+			//		{
+			//			var obj = e.EventArgs.NewItems[i];
+			//			str += obj.ToString();
+			//			if (i < e.EventArgs.NewItems.Count - 1) str += ",";
+			//		}
+			//		Trace.WriteLine($"[NewItems] {str}");
+			//	}
+			//});
+
+			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
+			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderToFile, canExecuteSaveCommand);
 		}
     }
 }

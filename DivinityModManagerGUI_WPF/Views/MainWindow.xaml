@@ -28,6 +28,12 @@
 			</DataTemplate>
 		</ResourceDictionary>
 	</Window.Resources>
+	<Window.InputBindings>
+		<KeyBinding Key="Z" Modifiers="Ctrl" Command="{Binding UndoCommand}" />
+		<KeyBinding Key="Z" Modifiers="Ctrl+Alt" Command="{Binding RedoCommand}" />
+		<KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
+		<KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding DebugCommand}" />
+	</Window.InputBindings>
 	<Grid x:Name="VerticalGridLayout">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
@@ -54,7 +60,7 @@
 				<ComboBox ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}" Grid.Column="1" IsEditable="True"
 						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" />
 				<StackPanel Orientation="Horizontal" Grid.Column="2">
-					<Button x:Name="SaveOrderButton" IsEnabled="{Binding CanSaveOrder}" Command="{Binding SaveOrderCommand}">
+					<Button x:Name="SaveOrderButton" Command="{Binding SaveOrderCommand}">
 						<Button.Resources>
 							<Style TargetType="{x:Type Image}">
 								<Style.Triggers>

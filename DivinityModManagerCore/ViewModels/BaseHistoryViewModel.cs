@@ -1,0 +1,109 @@
+﻿using System;
+using System.ComponentModel;
+using System.Reactive.Disposables;
+using System.Runtime.CompilerServices;
+using ReactiveUI;
+using ReactiveHistory;
+using Reactive.Bindings.Extensions;
+using System.Reflection;
+using System.Windows.Input;
+using System.Collections.Generic;
+using DivinityModManager.Models;
+
+namespace DivinityModManager.ViewModels
+{
+	public interface IHistoryViewModel
+	{
+		IHistory History { get; }
+
+		void Undo();
+		void Redo();
+	}
+
+	public static class HistoryViewModelExtensions
+	{
+		public static void ChangeListWithHistory<T>(this IHistoryViewModel vm, IList<T> source, IList<T> oldValue, IList<T> newValue)
+		{
+			if (vm.History != null)
+			{
+				void undo() => source = oldValue;
+				void redo() => source = newValue;
+				vm.History.Snapshot(undo, redo);
+				source = newValue;
+			}
+		}
+
+		public static void AddWithHistory<T>(this IHistoryViewModel vm, IList<T> source, T item)
+		{
+			if (vm.History != null)
+			{
+				int index = source.Count;
+				void redo() => source.Insert(index, item);
+				void undo() => source.RemoveAt(index);
+				vm.History.Snapshot(undo, redo);
+				redo();
+			}
+		}
+
+		public static void RemoveWithHistory<T>(this IHistoryViewModel vm, IList<T> source, T item)
+		{
+			if (vm.History != null)
+			{
+				int index = source.IndexOf(item);
+				void redo() => source.RemoveAt(index);
+				void undo() => source.Insert(index, item);
+				vm.History.Snapshot(undo, redo);
+				redo();
+			}
+		}
+
+		public static void CreateSnapshot(this IHistoryViewModel vm, Action undo, Action redo)
+		{
+			vm.History?.Snapshot(undo, redo);
+		}
+	}
+
+	public class BaseHistoryViewModel : BaseHistoryObject, IHistoryViewModel, IDisposable
+	{
+		private CompositeDisposable Disposable { get; set; }
+
+		public ICommand UndoCommand { get; set; }
+		public ICommand RedoCommand { get; set; }
+		public ICommand ClearHistoryCommand { get; set; }
+
+		public void Dispose()
+		{
+			this.Disposable.Dispose();
+		}
+
+		public void Undo()
+		{
+			History.Undo();
+		}
+
+		public void Redo()
+		{
+			History.Redo();
+		}
+
+		public BaseHistoryViewModel()
+		{
+			Disposable = new CompositeDisposable();
+
+			var history = new StackHistory().AddTo(Disposable);
+			History = history;
+
+			var undo = ReactiveCommand.Create(Undo, History.CanUndo);
+			undo.Subscribe().AddTo(this.Disposable);
+			UndoCommand = undo;
+
+			var redo = ReactiveCommand.Create(Redo, History.CanRedo);
+			redo.Subscribe().AddTo(this.Disposable);
+			RedoCommand = redo;
+
+			var clear = ReactiveCommand.Create(History.Clear, History.CanClear);
+			clear.Subscribe().AddTo(this.Disposable);
+			ClearHistoryCommand = clear;
+		}
+	}
+}

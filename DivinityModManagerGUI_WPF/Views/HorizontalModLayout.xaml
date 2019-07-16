@@ -40,7 +40,7 @@
 			</Grid.RowDefinitions>
 			<TextBlock Text="Active Mods" Padding="4" />
 			<ListView ItemsSource="{Binding ActiveMods}" Style="{StaticResource ModOrderListView}" Grid.Row="1"
-				  dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding DropHandler}" dd:DragDrop.DragHandler="{Binding DropHandler}"
+				  dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding DropHandler}"
 					  View="{DynamicResource ModGridView}"/>
 		</Grid>
 		<GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>
@@ -51,7 +51,7 @@
 			</Grid.RowDefinitions>
 			<TextBlock Text="Inactive Mods" Padding="4" />
 			<ListView ItemsSource="{Binding InactiveMods}" Style="{StaticResource ModOrderListView}" Grid.Row="1"
-					dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding DropHandler}" dd:DragDrop.DragHandler="{Binding DropHandler}"
+					dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding DropHandler}"
 					View="{DynamicResource InactiveModGridView}"/>
 		</Grid>
 	</Grid>

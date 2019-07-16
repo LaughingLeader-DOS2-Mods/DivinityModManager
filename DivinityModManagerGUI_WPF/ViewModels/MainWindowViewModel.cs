@@ -51,8 +51,8 @@ namespace DivinityModManager.ViewModels
 
 		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
 
-		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
-		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+		public ObservableCollection<DivinityModData> ActiveMods { get; set; } = new ObservableCollection<DivinityModData>();
+		public ObservableCollection<DivinityModData> InactiveMods { get; set; } = new ObservableCollection<DivinityModData>();
 
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
@@ -82,7 +82,7 @@ namespace DivinityModManager.ViewModels
 			{
 				if(value != selectedModOrderIndex)
 				{
-					SelectedModOrder?.ActiveModBinding?.Dispose();
+					SelectedModOrder?.DisposeBinding();
 				}
 				this.RaiseAndSetIfChanged(ref selectedModOrderIndex, value);
 				this.RaisePropertyChanged("SelectedModOrder");
@@ -108,6 +108,14 @@ namespace DivinityModManager.ViewModels
 		{
 			get => canSaveOrder;
 			set { this.RaiseAndSetIfChanged(ref canSaveOrder, value); }
+		}
+
+		private bool loadingOrder = false;
+
+		public bool LoadingOrder
+		{
+			get => loadingOrder;
+			set { this.RaiseAndSetIfChanged(ref loadingOrder, value); }
 		}
 
 		public ViewModelActivator Activator { get; }
@@ -192,7 +200,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null)
 			{
-				if(SelectedProfile.SavedLoadOrder == null)
+				if (SelectedProfile.SavedLoadOrder == null)
 				{
 					DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current" };
 
@@ -213,7 +221,7 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.AddRange(SavedModOrderList);
 				SelectedModOrderIndex = 0;
 
-				LoadModOrder(SelectedProfile.SavedLoadOrder);
+				//LoadModOrder(SelectedProfile.SavedLoadOrder);
 			}
 		}
 
@@ -226,103 +234,6 @@ namespace DivinityModManager.ViewModels
 				index = loadOrder.Order.IndexOf(entry);
 			}
 			return index > -1 ? index : 99999999;
-		}
-
-		public void LoadModOrder(DivinityLoadOrder order)
-		{
-			if (order == null) return;
-			//var orderedMods = mods.Items.Where(m => order.Order.Any(o => o.UUID == m.UUID)).ToList();
-			//var unOrderedMods = mods.Items.Where(m => !orderedMods.Contains(m)).ToList();
-			//var sorted = orderedMods.OrderBy(m => GetModOrder(m, order)).ToList();
-
-			ActiveMods.Clear();
-			InactiveMods.Clear();
-
-			foreach(var entry in order.Order)
-			{
-				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-				if (mod != null)
-				{
-					mod.IsActive = true;
-					ActiveMods.Add(mod);
-				}
-			}
-
-			foreach(var mod in mods.Items.Where(m => !order.Order.Any(e => e.UUID == m.UUID)))
-			{
-				mod.Index = -1;
-				mod.IsActive = false;
-				InactiveMods.Add(mod);
-			}
-
-			InactiveMods = new ObservableCollectionExtended<DivinityModData>(InactiveMods.OrderBy(m => m.Name));
-
-			//orderedMods.ForEach(m => {
-			//	m.IsActive = true;
-			//	Trace.WriteLine($"Mod {m.Name} is active.");
-			//});
-
-			//unOrderedMods.ForEach(m => {
-			//	m.IsActive = false;
-			//	Trace.WriteLine($"Mod {m.Name} is inactive.");
-			//});
-
-			Trace.WriteLine($"Loaded mod order: {order.Name}");
-		}
-
-		public void Refresh()
-		{
-			mods.Clear();
-			Profiles.Clear();
-			LoadMods();
-			LoadProfiles();
-			BuildModOrderList();
-		}
-
-		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			for(var i = 0; i < ActiveMods.Count; i++)
-			{
-				ActiveMods[i].Index = i;
-			}
-		}
-
-		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			//if (e.NewItems != null)
-			//{
-			//	foreach (DivinityModData item in InactiveMods)
-			//	{
-			//		item.Index = InactiveMods.IndexOf(item);
-			//	}
-			//}
-		}
-
-		private async Task<bool> SaveLoadOrderToFile()
-		{
-			var loadOrder = SelectedModOrder;
-			var profile = SelectedProfile;
-			if (loadOrder != null && profile != null)
-			{
-				loadOrder.Order.Clear();
-				foreach (var mod in ActiveMods)
-				{
-					loadOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
-				}
-
-				var result = await DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods);
-				if (result)
-				{
-					Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
-					return true;
-				}
-				else
-				{
-					Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
-				}
-			}
-
-			return false;
 		}
 
 		private void AddNewOrderConfig()
@@ -352,23 +263,6 @@ namespace DivinityModManager.ViewModels
 					//Order = SelectedModOrder.Order.ToList()
 				};
 
-				//foreach(var entry in SelectedModOrder.Order)
-				//{
-				//	newOrder.Order.Add(entry.Clone());
-				//}
-
-				newOrder.ActiveModBinding = ActiveMods.ToObservableChangeSet().AutoRefresh(m => m.Index).Buffer(TimeSpan.FromMilliseconds(250)).
-					FlattenBufferResult().Transform(m => new DivinityLoadOrderEntry { Name = m.Name, UUID = m.UUID }).Bind(newOrder.Order).
-					Subscribe(c =>
-					{
-						//newOrder.Order = c.ToList();
-
-						Trace.WriteLine($"Load order {newOrder.Name} changed.");
-						Trace.WriteLine("=========================");
-						Trace.WriteLine($"{String.Join(Environment.NewLine + "	", newOrder.Order.Select(e => e.Name))}");
-						Trace.WriteLine("=========================");
-					});
-
 				ModOrderList.Add(newOrder);
 
 				SelectedModOrderIndex = ModOrderList.IndexOf(newOrder);
@@ -377,6 +271,140 @@ namespace DivinityModManager.ViewModels
 			this.CreateSnapshot(undo, redo);
 
 			redo();
+		}
+
+		public void LoadModOrder(DivinityLoadOrder order)
+		{
+			if (order == null) return;
+
+			LoadingOrder = true;
+			//var orderedMods = mods.Items.Where(m => order.Order.Any(o => o.UUID == m.UUID)).ToList();
+			//var unOrderedMods = mods.Items.Where(m => !orderedMods.Contains(m)).ToList();
+			//var sorted = orderedMods.OrderBy(m => GetModOrder(m, order)).ToList();
+
+			ActiveMods.Clear();
+			InactiveMods.Clear();
+			
+
+			IEnumerable<DivinityLoadOrderEntry> loadFrom = order.Order;
+
+			//if(order.SavedOrder != null)
+			//{
+			//	loadFrom = order.SavedOrder;
+			//}
+
+			foreach(var entry in loadFrom)
+			{
+				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
+				if (mod != null)
+				{
+					ActiveMods.Add(mod);
+				}
+			}
+
+			List<DivinityModData> inactive = new List<DivinityModData>();
+
+			foreach (var mod in mods.Items)
+			{
+				if(ActiveMods.Any(m => m.UUID == mod.UUID))
+				{
+					mod.IsActive = true;
+					//Trace.WriteLine("Added mod " + mod.Name + " to active order");
+				}
+				else
+				{
+					mod.IsActive = false;
+					mod.Index = -1;
+					inactive.Add(mod);
+					Trace.WriteLine("Added mod " + mod.Name + " to inactive order");
+				}
+			}
+
+			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
+			//order.CreateActiveOrderBind(ActiveMods.ToObservableChangeSet());
+
+			//orderedMods.ForEach(m => {
+			//	m.IsActive = true;
+			//	Trace.WriteLine($"Mod {m.Name} is active.");
+			//});
+
+			//unOrderedMods.ForEach(m => {
+			//	m.IsActive = false;
+			//	Trace.WriteLine($"Mod {m.Name} is inactive.");
+			//});
+
+			Trace.WriteLine($"Loaded mod order: {order.Name}");
+
+			LoadingOrder = false;
+		}
+
+		public void Refresh()
+		{
+			mods.Clear();
+			Profiles.Clear();
+			LoadMods();
+			LoadProfiles();
+			BuildModOrderList();
+		}
+
+		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			//Trace.WriteLine($"[ActiveMods_SetItemIndex] Active collection changed. {e.NewItems} {e.OldItems} {e.Action}");
+			foreach (var mod in ActiveMods)
+			{
+				mod.Index = ActiveMods.IndexOf(mod);
+			}
+			if(SelectedModOrder != null && !LoadingOrder)
+			{
+				SelectedModOrder.Order = ActiveMods.Select(m => new DivinityLoadOrderEntry { Name = m.Name, UUID = m.UUID }).ToList();
+			}
+			if (e.NewItems != null)
+			{
+				foreach (DivinityModData m in e.NewItems)
+				{
+					m.IsActive = true;
+				}
+			}
+		}
+
+		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
+		{
+			if (e.NewItems != null)
+			{
+				foreach (DivinityModData m in e.NewItems)
+				{
+					m.IsActive = false;
+					m.Index = -1;
+					Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
+				}
+			}
+		}
+
+		private async Task<bool> SaveLoadOrderToFile()
+		{
+			var loadOrder = SelectedModOrder;
+			var profile = SelectedProfile;
+			if (loadOrder != null && profile != null)
+			{
+				loadOrder.Order.Clear();
+				foreach (var mod in ActiveMods)
+				{
+					loadOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
+				}
+
+				var result = await DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods);
+				if (result)
+				{
+					Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
+					return true;
+				}
+				else
+				{
+					Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
+				}
+			}
+
+			return false;
 		}
 
 		private bool ActiveModsChanging(DivinityModData m)
@@ -494,11 +522,23 @@ namespace DivinityModManager.ViewModels
 				}
 			});
 
-			//DebugCommand = ReactiveCommand.Create(() => activeModOrder.Add(new DivinityModData() { Name = "Test" }));
+			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 
 			//var connection = activeModOrder.Connect(ActiveModsChanging);
 			//var b = connection.ObserveOn(RxApp.MainThreadScheduler).Bind(ActiveModOrder);
 
+			void rebuildIndexes()
+			{
+				foreach (var mod in ActiveMods)
+				{
+					mod.Index = ActiveMods.IndexOf(mod);
+				}
+			};
+
+			//ActiveMods.ToObservableChangeSet().WhenAnyValue(c => c).Buffer(TimeSpan.FromMilliseconds(250)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(c =>
+			//{
+			//	rebuildIndexes();
+			//});
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 

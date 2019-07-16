@@ -91,6 +91,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\AutoGrayableImage.cs" />
+    <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
       <DependentUpon>HorizontalModLayout.xaml</DependentUpon>

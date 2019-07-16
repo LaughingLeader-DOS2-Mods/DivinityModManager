@@ -115,5 +115,14 @@ namespace DivinityModManager.Models
 		{
 			return $"Mod|Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
 		}
+
+		public DivinityLoadOrderEntry ToOrderEntry()
+		{
+			return new DivinityLoadOrderEntry
+			{
+				UUID = this.UUID,
+				Name = this.Name
+			};
+		}
 	}
 }

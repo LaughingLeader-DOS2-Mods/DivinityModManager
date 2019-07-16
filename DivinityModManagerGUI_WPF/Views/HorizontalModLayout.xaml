@@ -16,20 +16,10 @@
 	</UserControl.Resources>
 	<Grid>
 		<Grid.Resources>
-			<Style TargetType="{x:Type ListViewItem}">
-				<Style.Triggers>
-					<DataTrigger Binding="{Binding IsEditorMod}" Value="True">
-						<Setter Property="Background">
-							<Setter.Value>
-								<SolidColorBrush Color="Lime" Opacity="0.2" />
-							</Setter.Value>
-						</Setter>
-					</DataTrigger>
-				</Style.Triggers>
-			</Style>
+
 		</Grid.Resources>
 		<Grid.ColumnDefinitions>
-			<ColumnDefinition Width="1.25*" />
+			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="4" />
 			<ColumnDefinition Width="*" />
 		</Grid.ColumnDefinitions>

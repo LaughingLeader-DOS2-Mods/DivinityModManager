@@ -59,7 +59,7 @@ namespace DivinityModManager.Views
 				{
 					Name = "SavedOrder" + i
 				};
-				var orderList = this.mods.Items.Where(m => m.IsActive).Select(m => new DivinityLoadOrderEntry() { UUID = m.UUID, Name = m.Name }).OrderBy(e => rnd.Next(10));
+				var orderList = this.mods.Items.Where(m => m.IsActive).Select(m => m.ToOrderEntry()).OrderBy(e => rnd.Next(10));
 				lo.SetOrder(orderList);
 				ModOrderList.Add(lo);
 			}
@@ -71,9 +71,13 @@ namespace DivinityModManager.Views
 	/// </summary>
 	public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
 	{
+		private static MainWindow self;
+		public static MainWindow Self => self;
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			self = this;
 
 			ViewModel = new MainWindowViewModel();
 

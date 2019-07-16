@@ -13,7 +13,7 @@
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 		xmlns:dd="urn:gong-wpf-dragdrop"
         mc:Ignorable="d"
-        Height="768" Width="1280"
+        Height="800" Width="1400"
 		d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"
 >
 	<Window.Resources>

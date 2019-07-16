@@ -1,14 +1,14 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:DivinityModManager.Views"
-					xmlns:sysc="clr-namespace:System.Windows.Converters;assembly=WindowsBase"
-					xmlns:sys="clr-namespace:System.Windows.Controls;assembly=PresentationFramework"
 					xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
 					xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
+					xmlns:conv="clr-namespace:DivinityModManager.Converters"
 					xmlns:dd="urn:gong-wpf-dragdrop"
 					x:Name="MainResources"
 					>
-	<sys:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/SaveAs_16x.png" />
@@ -37,13 +37,27 @@
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
-				<ColumnDefinition />
+				<ColumnDefinition Width="Auto" />
 			</Grid.ColumnDefinitions>
+			<Grid.Resources>
+				<Style TargetType="{x:Type TextBlock}">
+					<Style.Triggers>
+						<DataTrigger Binding="{Binding Converter={StaticResource ModIsAvailableConverter}}" Value="True">
+							<Setter Property="Foreground" Value="Green" />
+						</DataTrigger>
+						<DataTrigger Binding="{Binding Converter={StaticResource ModIsAvailableConverter}}" Value="False">
+							<Setter Property="Foreground" Value="Red" />
+							<Setter Property="FontWeight" Value="Bold" />
+						</DataTrigger>
+					</Style.Triggers>
+				</Style>
+			</Grid.Resources>
 			<TextBlock Text="{Binding Name}" />
-			<TextBlock Text="{Binding Version.Version}" Grid.Column="1" />
+			<TextBlock Text="{Binding Version.Version}" Grid.Column="1" Margin="4,0,0,0" />
 		</Grid>
 	</DataTemplate>
-	<Style TargetType="ListViewItem" x:Name="ModEntry">
+	<Style TargetType="{x:Type ListViewItem}">
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 		<Style.Triggers>
 			<DataTrigger Binding="{Binding IsEditorMod}" Value="True">
 				<Setter Property="Background">
@@ -82,7 +96,18 @@
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Name}" />
+						<TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch">
+							<TextBlock.ToolTip>
+								<StackPanel Orientation="Vertical" MaxWidth="700" >
+									<TextBlock Text="{Binding Name}" FontWeight="Bold" />
+									<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+									<StackPanel Orientation="Vertical" Margin="2" Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+										<TextBlock Text="Dependencies:" FontWeight="Bold" />
+										<ListBox ItemsSource="{Binding Dependencies}" Margin="0" Padding="0" BorderThickness="0" />
+									</StackPanel>
+								</StackPanel>
+							</TextBlock.ToolTip>
+						</TextBlock>
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
@@ -92,17 +117,17 @@
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Version.Version}" />
+						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="300">
+			<GridViewColumn Width="100">
 				<GridViewColumn.Header>
 					<TextBlock Text="Author" />
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Author}" />
+						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
@@ -136,7 +161,7 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="300">
+			<GridViewColumn Width="100">
 				<GridViewColumn.Header>
 					<TextBlock Text="Author" />
 				</GridViewColumn.Header>

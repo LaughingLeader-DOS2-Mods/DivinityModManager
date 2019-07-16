@@ -175,6 +175,20 @@ namespace DivinityModManager.ViewModels
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
+
+			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
+			//{
+			//	for(var i = 0; i < mod.Dependencies.Count;i++)
+			//	{
+			//		DivinityModDependencyData dependencyData = mod.Dependencies[i];
+			//		dependencyData.IsAvailable = mods.Keys.Any(k => k == dependencyData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == dependencyData.UUID);
+			//	}
+			//}
+		}
+
+		public bool ModIsAvailable(IDivinityModData divinityModData)
+		{
+			return mods.Keys.Any(k => k == divinityModData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
 		}
 
 		public void LoadProfiles()
@@ -209,7 +223,7 @@ namespace DivinityModManager.ViewModels
 						var mod = mods.Items.FirstOrDefault(m => m.UUID == uuid);
 						if (mod != null)
 						{
-							currentOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
+							currentOrder.Order.Add(mod.ToOrderEntry());
 						}
 					}
 
@@ -259,8 +273,8 @@ namespace DivinityModManager.ViewModels
 
 				DivinityLoadOrder newOrder = new DivinityLoadOrder()
 				{
-					Name = "New" + nextOrders.Count
-					//Order = SelectedModOrder.Order.ToList()
+					Name = "New" + nextOrders.Count,
+					Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
 				};
 
 				ModOrderList.Add(newOrder);
@@ -316,7 +330,6 @@ namespace DivinityModManager.ViewModels
 					mod.IsActive = false;
 					mod.Index = -1;
 					inactive.Add(mod);
-					Trace.WriteLine("Added mod " + mod.Name + " to inactive order");
 				}
 			}
 
@@ -349,20 +362,35 @@ namespace DivinityModManager.ViewModels
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
 		{
-			//Trace.WriteLine($"[ActiveMods_SetItemIndex] Active collection changed. {e.NewItems} {e.OldItems} {e.Action}");
+			//Trace.WriteLine($"[ActiveMods_SetItemIndex] Active collection changed. New({e.NewItems}) Old({e.OldItems}) Action({e.Action})");
 			foreach (var mod in ActiveMods)
 			{
 				mod.Index = ActiveMods.IndexOf(mod);
 			}
+
 			if(SelectedModOrder != null && !LoadingOrder)
 			{
-				SelectedModOrder.Order = ActiveMods.Select(m => new DivinityLoadOrderEntry { Name = m.Name, UUID = m.UUID }).ToList();
-			}
-			if (e.NewItems != null)
-			{
-				foreach (DivinityModData m in e.NewItems)
+				if(e.OldItems != null)
 				{
-					m.IsActive = true;
+					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Removing {e.OldItems.Count} old items from order.");
+					foreach (DivinityModData m in e.OldItems)
+					{
+						SelectedModOrder.Order.Remove(SelectedModOrder.Order.FirstOrDefault(x => x.UUID == m.UUID));
+						m.IsActive = false;
+					}
+				}
+				if (e.NewItems != null)
+				{
+					foreach (DivinityModData m in e.NewItems)
+					{
+						m.IsActive = true;
+						SelectedModOrder.Order.Add(m.ToOrderEntry());
+						
+						//Trace.WriteLine($"[ActiveMods_SetItemIndex] Mod {m.Name} became inactive.");
+					}
+
+					SelectedModOrder.Order = SelectedModOrder.Order.OrderBy(mEntry => ActiveMods.IndexOf(ActiveMods.First(mod => mod.UUID == mEntry.UUID))).ToList();
+					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Reordered saved order {String.Join(",", SelectedModOrder.Order.Select(x => x.Name))}.");
 				}
 			}
 		}
@@ -375,7 +403,7 @@ namespace DivinityModManager.ViewModels
 				{
 					m.IsActive = false;
 					m.Index = -1;
-					Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
+					//Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
 				}
 			}
 		}
@@ -389,7 +417,7 @@ namespace DivinityModManager.ViewModels
 				loadOrder.Order.Clear();
 				foreach (var mod in ActiveMods)
 				{
-					loadOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
+					loadOrder.Order.Add(mod.ToOrderEntry());
 				}
 
 				var result = await DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods);

@@ -19,6 +19,7 @@ using System.Windows.Controls;
 using System.Reactive;
 using ReactiveUI.Legacy;
 using System.ComponentModel;
+using System.IO;
 
 namespace DivinityModManager.ViewModels
 {
@@ -41,8 +42,6 @@ namespace DivinityModManager.ViewModels
     public class MainWindowViewModel : BaseHistoryViewModel, ISupportsActivation
 	{
 		public string Title => "Divinity Mod Manager 1.0.0.0";
-
-		public string Greeting => "Hello World!";
 
 		protected SourceCache<DivinityModData, string> mods = new SourceCache<DivinityModData, string>(m => m.UUID);
 
@@ -102,7 +101,7 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref layoutMode, value); }
 		}
 
-		private bool canSaveOrder = false;
+		private bool canSaveOrder = true;
 
 		public bool CanSaveOrder
 		{
@@ -121,6 +120,8 @@ namespace DivinityModManager.ViewModels
 		public ViewModelActivator Activator { get; }
 
 		public ICommand SaveOrderCommand { get; set; }
+		public ICommand SaveOrderAsCommand { get; set; }
+		public ICommand ExportOrderCommand { get; set; }
 		public ICommand AddOrderConfigCommand { get; set; }
 		public ICommand RefreshCommand { get; set; }
 		public ICommand DebugCommand { get; set; }
@@ -408,30 +409,51 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private async Task<bool> SaveLoadOrderToFile()
+		private async Task<bool> SaveLoadOrder()
 		{
-			var loadOrder = SelectedModOrder;
-			var profile = SelectedProfile;
-			if (loadOrder != null && profile != null)
+			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				loadOrder.Order.Clear();
-				foreach (var mod in ActiveMods)
+				string outputName = Path.Combine(Directory.GetCurrentDirectory(), SelectedModOrder.Name + ".json");
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					loadOrder.Order.Add(mod.ToOrderEntry());
+					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 				}
 
-				var result = await DivinityModDataLoader.SaveModSettings(profile.Folder, loadOrder, Mods);
-				if (result)
+				return await DivinityModDataLoader.ExportLoadOrderToFile(outputName, SelectedModOrder);
+			}
+
+			return false;
+		}
+
+		private async Task<bool> SaveLoadOrderAs()
+		{
+			if (SelectedProfile != null && SelectedModOrder != null)
+			{
+				string outputName = Path.Combine(Directory.GetCurrentDirectory(), SelectedModOrder.Name + ".json");
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					Trace.WriteLine($"Saved modsettings.lsx to '{profile.Folder}'.");
-					return true;
+					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+				}
+
+				return await DivinityModDataLoader.ExportLoadOrderToFile(outputName, SelectedModOrder);
+			}
+
+			return false;
+		}
+		private async Task<bool> ExportLoadOrder()
+		{
+			if (SelectedProfile != null && SelectedModOrder != null)
+			{
+				var result = await DivinityModDataLoader.ExportModSettingsToFile(SelectedProfile.Folder, SelectedModOrder, mods.Items);
+				if(result)
+				{
+					Trace.WriteLine($"Saved mod settings to profile folder {SelectedProfile.Folder}");
 				}
 				else
 				{
-					Trace.WriteLine($"Failed to save modsettings.lsx to '{profile.Folder}'.");
+					Trace.WriteLine($"Problem saving mod settings to profile folder {SelectedProfile.Folder}");
 				}
 			}
-
 			return false;
 		}
 
@@ -444,7 +466,10 @@ namespace DivinityModManager.ViewModels
 		private void HandleActivation()
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderToFile, canExecuteSaveCommand);
+			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrder, canExecuteSaveCommand);
+			SaveOrderAsCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderAs, canExecuteSaveCommand);
+
+			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
 
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 		}

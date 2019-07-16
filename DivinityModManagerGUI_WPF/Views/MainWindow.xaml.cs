@@ -92,7 +92,10 @@ namespace DivinityModManager.Views
 
 				//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
 
-				this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveOrderButton.Command).DisposeWith(disposableRegistration);
+				this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveButton.Command).DisposeWith(disposableRegistration);
+				this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.SaveAsButton.Command).DisposeWith(disposableRegistration);
+				this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.ExportToModSettingsButton.Command).DisposeWith(disposableRegistration);
+
 				this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(disposableRegistration);
 
 				this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(disposableRegistration);

@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace DivinityModManager.Util
 {
@@ -20,7 +21,7 @@ namespace DivinityModManager.Util
 		{
 			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder = "Shared" },
 			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder = "Shared_DOS" },
-			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4"},
+			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version = new DivinityModVersion(371465211)},
 			new DivinityModData{ Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder = "DOS2_Arena"},
 			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder = "GameMaster"},
 			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack"}
@@ -318,7 +319,38 @@ namespace DivinityModManager.Util
 			return activeProfileUUID;
 		}
 
-		public static async Task<bool> SaveModSettings(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
+		public static async Task<bool> ExportLoadOrderToFile(string outputFilePath, DivinityLoadOrder order)
+		{
+			var parentDir = Path.GetDirectoryName(outputFilePath);
+			if (!Directory.Exists(parentDir)) Directory.CreateDirectory(parentDir);
+
+			string contents = JsonConvert.SerializeObject(order, Newtonsoft.Json.Formatting.Indented);
+
+			var buffer = Encoding.UTF8.GetBytes(contents);
+			using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.Create,
+				System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, true))
+			{
+				await fs.WriteAsync(buffer, 0, buffer.Length);
+			}
+
+			return true;
+		}
+
+		public static async Task<DivinityLoadOrder> LoadOrderFromFile(string loadOrderFile)
+		{
+			if(File.Exists(loadOrderFile))
+			{
+				using (var reader = File.OpenText(loadOrderFile))
+				{
+					var fileText = await reader.ReadToEndAsync();
+					DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+					return order;
+				}
+			}
+			return null;
+		}
+
+		public static async Task<bool> ExportModSettingsToFile(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
 		{
 			if(Directory.Exists(folder))
 			{
@@ -327,7 +359,7 @@ namespace DivinityModManager.Util
 				try
 				{
 					var buffer = Encoding.UTF8.GetBytes(contents);
-					using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.OpenOrCreate, 
+					using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.Create, 
 						System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, true))
 					{
 						await fs.WriteAsync(buffer, 0, buffer.Length);
@@ -345,19 +377,23 @@ namespace DivinityModManager.Util
 
 		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods)
 		{
+			/* The ModOrder node contains the load order. DOS2 by default stores all UUIDs, even if the mod no longer exists. */
 			string modulesText = "";
 			foreach(var uuid in order.Select(m => m.UUID))
 			{
 				modulesText += String.Format(Properties.Resources.ModSettingsModOrderModuleNode, uuid) + Environment.NewLine;
 			}
 
+			/* Active mods are contained within the Mods node. Origins is always included at the top, despite it not being in ModOrder. */
 			string modShortDescText = "";
-			foreach (var mod in allMods)
+			var dos2Origins = IgnoredMods.First(x => x.Name == "Divinity: Original Sin 2");
+			modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, dos2Origins.Folder, dos2Origins.MD5, dos2Origins.Name, dos2Origins.UUID, dos2Origins.Version.VersionInt) + Environment.NewLine;
+			foreach (var mod in allMods.Where(m => order.Any(o => o.UUID == m.UUID)))
 			{
 				modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, mod.Name, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 			}
 			string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
-			Trace.Write(output);
+			//Trace.WriteLine(output);
 			return output;
 		}
 

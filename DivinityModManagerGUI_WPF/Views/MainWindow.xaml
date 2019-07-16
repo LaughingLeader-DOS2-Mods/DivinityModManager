@@ -34,6 +34,7 @@
 		<KeyBinding Key="Z" Modifiers="Ctrl+Alt" Command="{Binding RedoCommand}" />
 		<KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
 		<KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding DebugCommand}" />
+		<KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveOrderCommand}" />
 	</Window.InputBindings>
 	<Grid x:Name="VerticalGridLayout">
 		<Grid.RowDefinitions>
@@ -76,7 +77,7 @@
 					<Button x:Name="AddNewOrderButton" ToolTip="Add New Load Order">
 						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource AddItemImage}"/>
 					</Button>
-					<Button x:Name="SaveOrderButton" ToolTip="Save Load Order to File" Margin="8,0,0,0">
+					<Button x:Name="SaveButton" ToolTip="Save Load Order to File" Margin="8,0,0,0">
 						<Button.Resources>
 							<Style TargetType="{x:Type Image}">
 								<Style.Triggers>
@@ -97,7 +98,7 @@
 				</StackPanel>
 				<StackPanel Grid.Column="2" Orientation="Horizontal" Margin="21,0,0,0">
 					<TextBlock Text="Export to Game" VerticalAlignment="Center" Margin="4,0"/>
-					<Button x:Name="ExportToModSettings" ToolTip="Export Load Order to Game for the Current Profile">
+					<Button x:Name="ExportToModSettingsButton" ToolTip="Export Load Order to Game for the Current Profile">
 						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource ExportDataImage}"/>
 					</Button>
 				</StackPanel>

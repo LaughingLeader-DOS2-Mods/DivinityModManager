@@ -1,20 +1,19 @@
 ﻿using DynamicData;
 using DynamicData.Binding;
-
 using ReactiveUI;
-
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using Newtonsoft.Json;
 
 namespace DivinityModManager.Models
 {
 	public struct DivinityLoadOrderEntry
 	{
-		public string UUID;
-		public string Name;
+		public string UUID { get; set; }
+		public string Name { get; set; }
 
 		public DivinityLoadOrderEntry Clone()
 		{
@@ -22,20 +21,20 @@ namespace DivinityModManager.Models
 		}
 	}
 
+	[JsonObject(MemberSerialization.OptIn)]
 	public class DivinityLoadOrder : ReactiveObject, IActivatable
 	{
-		//private List<DivinityLoadOrderEntry> savedList;
-		//public List<DivinityLoadOrderEntry> SavedOrder => savedList;
-
-		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
-
 		private string name;
 
+		[JsonProperty]
 		public string Name
 		{
 			get => name;
 			set { this.RaiseAndSetIfChanged(ref name, value); }
 		}
+
+		[JsonProperty]
+		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
 		public void SetOrder(IEnumerable<DivinityLoadOrderEntry> nextOrder)
 		{

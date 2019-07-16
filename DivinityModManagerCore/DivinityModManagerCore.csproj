@@ -14,6 +14,7 @@
   </ItemGroup>
 	<ItemGroup>
 		<PackageReference Include="AlphaFS" Version="2.2.6" />
+		<PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
 		<PackageReference Include="ReactiveHistory" Version="0.8.0" />
 		<PackageReference Include="ReactiveProperty" Version="5.6.0" />
 		<PackageReference Include="ReactiveUI" Version="9.19.5" />

@@ -7,6 +7,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DivinityModManager.Views"
+        xmlns:controls="clr-namespace:DivinityModManager.Controls"
         xmlns:conv="clr-namespace:DivinityModManager.Converters"
         xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
@@ -39,7 +40,12 @@
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 		</Grid.RowDefinitions>
-		<StackPanel Orientation="Horizontal" Margin="4">
+		<Grid Margin="4">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="Auto" />
+				<ColumnDefinition Width="*" />
+			</Grid.ColumnDefinitions>
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
@@ -50,17 +56,27 @@
 						  Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" 
 				/>
 			</Grid>
-			<Grid Margin="4,0">
+			<Grid Margin="4,0" Grid.Column="1">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
-					<ColumnDefinition Width="Auto" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
 				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" IsEditable="True" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
-						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" />
-				<StackPanel Orientation="Horizontal" Grid.Column="2">
-					<Button x:Name="SaveOrderButton">
+						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" 
+				/>
+			</Grid>
+			<Grid Grid.Column="2" Margin="1,0,0,0">
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="10" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<StackPanel Orientation="Horizontal">
+					<Button x:Name="AddNewOrderButton" ToolTip="Add New Load Order">
+						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource AddItemImage}"/>
+					</Button>
+					<Button x:Name="SaveOrderButton" ToolTip="Save Load Order to File" Margin="8,0,0,0">
 						<Button.Resources>
 							<Style TargetType="{x:Type Image}">
 								<Style.Triggers>
@@ -75,9 +91,18 @@
 						</Button.Resources>
 						<Image Width="16" Height="16" Stretch="UniformToFill" />
 					</Button>
+					<Button x:Name="SaveAsButton" ToolTip="Save Order As...">
+						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource SaveAsImage}"/>
+					</Button>
+				</StackPanel>
+				<StackPanel Grid.Column="2" Orientation="Horizontal" Margin="21,0,0,0">
+					<TextBlock Text="Export to Game" VerticalAlignment="Center" Margin="4,0"/>
+					<Button x:Name="ExportToModSettings" ToolTip="Export Load Order to Game for the Current Profile">
+						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource ExportDataImage}"/>
+					</Button>
 				</StackPanel>
 			</Grid>
-		</StackPanel>
+		</Grid>
 		<ContentControl x:Name="LayoutContent" Grid.Row="1" Content="{Binding}">
 			<ContentControl.Style>
 				<Style TargetType="{x:Type ContentControl}">

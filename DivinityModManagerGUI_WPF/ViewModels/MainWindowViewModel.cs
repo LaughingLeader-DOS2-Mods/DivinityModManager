@@ -80,6 +80,10 @@ namespace DivinityModManager.ViewModels
 			get => selectedModOrderIndex;
 			set
 			{
+				if(value != selectedModOrderIndex)
+				{
+					SelectedModOrder?.ActiveModBinding?.Dispose();
+				}
 				this.RaiseAndSetIfChanged(ref selectedModOrderIndex, value);
 				this.RaisePropertyChanged("SelectedModOrder");
 			}
@@ -109,6 +113,7 @@ namespace DivinityModManager.ViewModels
 		public ViewModelActivator Activator { get; }
 
 		public ICommand SaveOrderCommand { get; set; }
+		public ICommand AddOrderConfigCommand { get; set; }
 		public ICommand RefreshCommand { get; set; }
 		public ICommand DebugCommand { get; set; }
 
@@ -187,32 +192,43 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null)
 			{
-				DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current" };
-
-				foreach (var uuid in SelectedProfile.ModOrder)
+				if(SelectedProfile.SavedLoadOrder == null)
 				{
-					var mod = mods.Items.FirstOrDefault(m => m.UUID == uuid);
-					if (mod != null)
+					DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current" };
+
+					foreach (var uuid in SelectedProfile.ModOrder)
 					{
-						currentOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
+						var mod = mods.Items.FirstOrDefault(m => m.UUID == uuid);
+						if (mod != null)
+						{
+							currentOrder.Order.Add(new DivinityLoadOrderEntry() { UUID = mod.UUID, Name = mod.Name });
+						}
 					}
+
+					SelectedProfile.SavedLoadOrder = currentOrder;
 				}
 
-				ModOrderList.Add(currentOrder);
+				ModOrderList.Clear();
+				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
 				ModOrderList.AddRange(SavedModOrderList);
 				SelectedModOrderIndex = 0;
 
-				OrderModsByModOrder(currentOrder);
+				LoadModOrder(SelectedProfile.SavedLoadOrder);
 			}
 		}
 
 		private int GetModOrder(DivinityModData mod, DivinityLoadOrder loadOrder)
 		{
-			var index = loadOrder.Order.FindIndex(o => o.UUID == mod.UUID);
+			var entry = loadOrder.Order.FirstOrDefault(o => o.UUID == mod.UUID);
+			int index = -1;
+			if(mod != null)
+			{
+				index = loadOrder.Order.IndexOf(entry);
+			}
 			return index > -1 ? index : 99999999;
 		}
 
-		public void OrderModsByModOrder(DivinityLoadOrder order)
+		public void LoadModOrder(DivinityLoadOrder order)
 		{
 			if (order == null) return;
 			//var orderedMods = mods.Items.Where(m => order.Order.Any(o => o.UUID == m.UUID)).ToList();
@@ -265,15 +281,9 @@ namespace DivinityModManager.ViewModels
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
 		{
-			if(e.NewItems != null)
+			for(var i = 0; i < ActiveMods.Count; i++)
 			{
-				App.Current.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() =>
-				{
-					foreach (DivinityModData mod in e.NewItems)
-					{
-						mod.Index = ActiveMods.IndexOf(mod);
-					}
-				}));
+				ActiveMods[i].Index = i;
 			}
 		}
 
@@ -315,6 +325,60 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
+		private void AddNewOrderConfig()
+		{
+			var lastIndex = SelectedModOrderIndex;
+			var lastOrders = ModOrderList.ToList();
+
+			var nextOrders = new List<DivinityLoadOrder>();
+			nextOrders.Add(SelectedProfile.SavedLoadOrder);
+			nextOrders.AddRange(SavedModOrderList);
+
+			void undo()
+			{
+				ModOrderList.Clear();
+				ModOrderList.AddRange(lastOrders);
+				SelectedModOrderIndex = lastIndex;
+			};
+
+			void redo()
+			{
+				ModOrderList.Clear();
+				ModOrderList.AddRange(nextOrders);
+
+				DivinityLoadOrder newOrder = new DivinityLoadOrder()
+				{
+					Name = "New" + nextOrders.Count
+					//Order = SelectedModOrder.Order.ToList()
+				};
+
+				//foreach(var entry in SelectedModOrder.Order)
+				//{
+				//	newOrder.Order.Add(entry.Clone());
+				//}
+
+				newOrder.ActiveModBinding = ActiveMods.ToObservableChangeSet().AutoRefresh(m => m.Index).Buffer(TimeSpan.FromMilliseconds(250)).
+					FlattenBufferResult().Transform(m => new DivinityLoadOrderEntry { Name = m.Name, UUID = m.UUID }).Bind(newOrder.Order).
+					Subscribe(c =>
+					{
+						//newOrder.Order = c.ToList();
+
+						Trace.WriteLine($"Load order {newOrder.Name} changed.");
+						Trace.WriteLine("=========================");
+						Trace.WriteLine($"{String.Join(Environment.NewLine + "	", newOrder.Order.Select(e => e.Name))}");
+						Trace.WriteLine("=========================");
+					});
+
+				ModOrderList.Add(newOrder);
+
+				SelectedModOrderIndex = ModOrderList.IndexOf(newOrder);
+			};
+
+			this.CreateSnapshot(undo, redo);
+
+			redo();
+		}
+
 		private bool ActiveModsChanging(DivinityModData m)
 		{
 			Trace.WriteLine($"[ActiveModsChanging] Mod {m.Name}");
@@ -323,7 +387,10 @@ namespace DivinityModManager.ViewModels
 
 		private void HandleActivation()
 		{
+			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
+			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderToFile, canExecuteSaveCommand);
 
+			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 		}
 
 		private void HandleDeactivation()
@@ -423,7 +490,7 @@ namespace DivinityModManager.ViewModels
 			indexChanged.Subscribe((selectedOrder) => {
 				if(SelectedModOrderIndex > -1)
 				{
-					OrderModsByModOrder(SelectedModOrder);
+					LoadModOrder(SelectedModOrder);
 				}
 			});
 
@@ -460,9 +527,6 @@ namespace DivinityModManager.ViewModels
 			//		Trace.WriteLine($"[NewItems] {str}");
 			//	}
 			//});
-
-			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderToFile, canExecuteSaveCommand);
 		}
     }
 }

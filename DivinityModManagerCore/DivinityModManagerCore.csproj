@@ -7,6 +7,8 @@
 
   <ItemGroup>
     <None Remove="Resources\AddItem_16x.png" />
+    <None Remove="Resources\ExportData_16x.png" />
+    <None Remove="Resources\SaveAs_16x.png" />
     <None Remove="Resources\SaveGrey_16x.png" />
     <None Remove="Resources\Save_16x.png" />
   </ItemGroup>
@@ -24,6 +26,8 @@
 	</ItemGroup>
 	<ItemGroup>
 	  <Resource Include="Resources\AddItem_16x.png" />
+	  <Resource Include="Resources\ExportData_16x.png" />
+	  <Resource Include="Resources\SaveAs_16x.png" />
 	  <Resource Include="Resources\SaveGrey_16x.png" />
 	  <Resource Include="Resources\Save_16x.png" />
 	</ItemGroup>

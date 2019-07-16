@@ -11,7 +11,10 @@
 	<sys:BooleanToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/Save_16x.png" />
+	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/SaveAs_16x.png" />
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/SaveGrey_16x.png" />
+	<BitmapImage x:Key="AddItemImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/AddItem_16x.png" />
+	<BitmapImage x:Key="ExportDataImage" UriSource="pack://application:,,,/DivinityModManagerCore;component/Resources/ExportData_16x.png" />
 
 	<DataTemplate DataType="{x:Type data:DivinityProfileData}">
 		<TextBlock Text="{Binding Name}" />

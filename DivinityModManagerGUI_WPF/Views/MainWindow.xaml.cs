@@ -18,6 +18,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Reactive.Disposables;
 using DynamicData;
+using DynamicData.Binding;
 
 namespace DivinityModManager.Views
 {
@@ -56,9 +57,10 @@ namespace DivinityModManager.Views
 			{
 				var lo = new DivinityLoadOrder()
 				{
-					Name = "SavedOrder" + i,
-					Order = this.mods.Items.Where(m => m.IsActive).Select(m => new DivinityLoadOrderEntry() { UUID = m.UUID, Name = m.Name }).ToList()
+					Name = "SavedOrder" + i
 				};
+				var orderList = this.mods.Items.Where(m => m.IsActive).Select(m => new DivinityLoadOrderEntry() { UUID = m.UUID, Name = m.Name }).OrderBy(e => rnd.Next(10));
+				lo.SetOrder(orderList);
 				ModOrderList.Add(lo);
 			}
 			SelectedModOrderIndex = 2;
@@ -87,6 +89,7 @@ namespace DivinityModManager.Views
 				//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
 
 				this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveOrderButton.Command).DisposeWith(disposableRegistration);
+				this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(disposableRegistration);
 
 				this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(disposableRegistration);
 				this.Bind(ViewModel, vm => vm.SelectedProfileIndex, view => view.ProfilesComboBox.SelectedIndex).DisposeWith(disposableRegistration);

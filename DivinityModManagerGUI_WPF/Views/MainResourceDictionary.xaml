@@ -86,7 +86,7 @@
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBox Text="{Binding Index}" BorderBrush="{x:Null}" Background="Transparent" Margin="2,0,2,0" />
+						<TextBlock Text="{Binding Index}" Background="Transparent" Margin="2,0,2,0" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>

@@ -19,6 +19,7 @@ using System.Windows.Shapes;
 using System.Reactive.Disposables;
 using DynamicData;
 using DynamicData.Binding;
+using System.Diagnostics;
 
 namespace DivinityModManager.Views
 {
@@ -111,6 +112,16 @@ namespace DivinityModManager.Views
 		private void ExportTestButton_Click(object sender, RoutedEventArgs e)
 		{
 			//DivinityModDataLoader.ExportModOrder(Data.ActiveModOrder, Data.Mods);
+		}
+
+		private void ComboBox_KeyDown_LoseFocus(object sender, KeyEventArgs e)
+		{
+			if((e.Key == Key.Enter || e.Key == Key.Return))
+			{
+				UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
+				elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+				e.Handled = true;
+			}
 		}
 	}
 }

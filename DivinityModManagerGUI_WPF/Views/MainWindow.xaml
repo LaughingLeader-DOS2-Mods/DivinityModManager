@@ -53,8 +53,9 @@
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Profile" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox x:Name="ProfilesComboBox" DisplayMemberPath="Name" IsEditable="True" ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}"
+				<ComboBox x:Name="ProfilesComboBox" DisplayMemberPath="Name" ItemsSource="{Binding Profiles}" SelectedIndex="{Binding SelectedProfileIndex}"
 						  Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" 
+						  IsTextSearchEnabled="True"
 				/>
 			</Grid>
 			<Grid Margin="4,0" Grid.Column="1">
@@ -63,8 +64,10 @@
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
-				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" IsEditable="True" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
-						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name" 
+				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
+						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name"
+						  Text="{Binding SelectedModOrder.Name, Mode=TwoWay}" IsEditable="True" IsTextSearchEnabled="True" KeyDown="ComboBox_KeyDown_LoseFocus"
+						  
 				/>
 			</Grid>
 			<Grid Grid.Column="2" Margin="1,0,0,0">

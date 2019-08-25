@@ -57,15 +57,38 @@
 		</Grid>
 	</DataTemplate>
 	<Style TargetType="{x:Type ListViewItem}">
+		<Style.Resources>
+			<LinearGradientBrush x:Key="ListItemHoverFill_Selected" EndPoint="0,1" StartPoint="0,0">
+				<GradientStop Color="#FFD1FFD1" Offset="0"/>
+				<GradientStop Color="#FFA3FFAB" Offset="1"/>
+			</LinearGradientBrush>
+		</Style.Resources>
+	
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}"/>
 		<Style.Triggers>
-			<DataTrigger Binding="{Binding IsEditorMod}" Value="True">
-				<Setter Property="Background">
-					<Setter.Value>
-						<SolidColorBrush Color="Lime" Opacity="0.2" />
-					</Setter.Value>
-				</Setter>
-			</DataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsEditorMod}" Value="True" />
+					<Condition Binding="{Binding IsSelected}" Value="False" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background">
+						<Setter.Value>
+							<SolidColorBrush Color="Lime" Opacity="0.15" />
+						</Setter.Value>
+					</Setter>
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsEditorMod}" Value="True" />
+					<Condition Binding="{Binding IsSelected}" Value="True" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background" Value="{StaticResource ListItemHoverFill_Selected}" />
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
 		</Style.Triggers>
 	</Style>
 	<Style TargetType="ListView" x:Key="ModOrderListView">

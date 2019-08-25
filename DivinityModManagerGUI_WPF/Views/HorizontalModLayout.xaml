@@ -28,11 +28,27 @@
 				<RowDefinition Height="Auto"/>
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
-			<TextBlock Text="Active Mods" Padding="4" />
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="4"/>
+					<ColumnDefinition Width="Auto"/>
+					<ColumnDefinition Width="*"/>
+				</Grid.ColumnDefinitions>
+				<TextBlock Text="Active Mods" Padding="4" />
+				<Border Grid.Column="2" BorderBrush="Black" BorderThickness="1" Width="16" Height="16">
+					<Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Fill="#FF91FF91">
+						<Rectangle.ToolTip>
+							<ToolTip>
+								<TextBlock Text="Green mods are editor projects, rather than paks located in your mod directory." TextWrapping="Wrap" />
+							</ToolTip>
+						</Rectangle.ToolTip>
+					</Rectangle>
+				</Border>
+			</Grid>
 			<ListView ItemsSource="{Binding ActiveMods}" Style="{StaticResource ModOrderListView}" Grid.Row="1"
 					dd:DragDrop.IsDragSource="True" dd:DragDrop.IsDropTarget="True"
 					View="{DynamicResource ModGridView}" GridViewColumnHeader.Click="ListView_Click"
-					 
 			/>
 		</Grid>
 		<GridSplitter Grid.Column="1" Width="4" VerticalAlignment="Stretch" HorizontalAlignment="Stretch"/>

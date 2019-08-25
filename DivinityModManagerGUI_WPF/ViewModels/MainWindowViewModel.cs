@@ -503,15 +503,15 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				if (!Directory.Exists(loadOrderDirectory))
+				if (!Directory.Exists(Settings.LoadOrderPath))
 				{
-					Directory.CreateDirectory(loadOrderDirectory);
+					Directory.CreateDirectory(Settings.LoadOrderPath);
 				}
 
-				string outputName = Path.Combine(loadOrderDirectory, SelectedModOrder.Name + ".json");
+				string outputName = Path.Combine(Settings.LoadOrderPath, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					outputName = Path.Combine(loadOrderDirectory, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					outputName = Path.Combine(Settings.LoadOrderPath, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 					tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
@@ -533,12 +533,12 @@ namespace DivinityModManager.ViewModels
 				dialog.AddExtension = true;
 				dialog.DefaultExt = ".json";
 				dialog.Filter = "JSON file (*.json)|*.json";
-				dialog.InitialDirectory = loadOrderDirectory;
+				dialog.InitialDirectory = Directory.Exists(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory();
 
-				string outputName = Path.Combine(loadOrderDirectory, SelectedModOrder.Name + ".json");
+				string outputName = Path.Combine(Settings.LoadOrderPath, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					outputName = Path.Combine(loadOrderDirectory, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					outputName = Path.Combine(Settings.LoadOrderPath, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 				}
 
 				dialog.FileName = outputName;
@@ -547,14 +547,24 @@ namespace DivinityModManager.ViewModels
 				dialog.OverwritePrompt = true;
 				dialog.Title = "Save Load Order As...";
 
-				if(!Directory.Exists(loadOrderDirectory))
+				if(!Directory.Exists(Settings.LoadOrderPath))
 				{
-					Directory.CreateDirectory(loadOrderDirectory);
+					Directory.CreateDirectory(Settings.LoadOrderPath);
 				}
 
 				if(dialog.ShowDialog(view) == true)
 				{
-					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
+					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+					{
+						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
+						tempOrder.Name = $"Current ({SelectedProfile.Name})";
+
+						return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, tempOrder);
+					}
+					else
+					{
+						return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
+					}
 				}
 			}
 
@@ -600,11 +610,6 @@ namespace DivinityModManager.ViewModels
 		}
 
 		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
-
-		private int lastCount = 0;
-
-		//TO DO: Make available as a setting.
-		private string loadOrderDirectory = @"Data\ModOrder";
 
 		public void OnViewActivated(Window parentView)
 		{
@@ -661,9 +666,13 @@ namespace DivinityModManager.ViewModels
 
 				RxApp.MainThreadScheduler.Schedule(async () =>
 				{
-					loadOrderDirectory = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-					Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
-					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
+					if(String.IsNullOrWhiteSpace(Settings.LoadOrderPath))
+					{
+						//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+						Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+					}
+					Trace.WriteLine($"Attempting to load saved load orders from '{Settings.LoadOrderPath}'.");
+					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(Settings.LoadOrderPath);
 					if (SavedModOrderList.Count > 0)
 					{
 						BuildModOrderList();

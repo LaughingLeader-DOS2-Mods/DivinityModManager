@@ -22,7 +22,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref gameDataPath, value); }
 		}
 
-		private string loadOrderPath = @"\Data\ModOrder";
+		private string loadOrderPath = @"";
 
 		[JsonProperty]
 		public string LoadOrderPath

@@ -21,6 +21,7 @@ using ReactiveUI.Legacy;
 using System.ComponentModel;
 using System.IO;
 using System.Reactive.Concurrency;
+using Ookii.Dialogs.Wpf;
 
 namespace DivinityModManager.ViewModels
 {
@@ -122,6 +123,8 @@ namespace DivinityModManager.ViewModels
 		}
 
 		public ViewModelActivator Activator { get; }
+
+		private Window view;
 
 		public ICommand SaveOrderCommand { get; set; }
 		public ICommand SaveOrderAsCommand { get; set; }
@@ -419,10 +422,15 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
+				if (!Directory.Exists(loadOrderDirectory))
+				{
+					Directory.CreateDirectory(loadOrderDirectory);
+				}
+
 				string outputName = Path.Combine(loadOrderDirectory, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					outputName = Path.Combine(loadOrderDirectory, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 					tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
@@ -440,13 +448,33 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				string outputName = Path.Combine(Directory.GetCurrentDirectory(), SelectedModOrder.Name + ".json");
+				var dialog = new VistaSaveFileDialog();
+				dialog.AddExtension = true;
+				dialog.DefaultExt = ".json";
+				dialog.Filter = "JSON file (*.json)|*.json";
+				dialog.InitialDirectory = loadOrderDirectory;
+
+				string outputName = Path.Combine(loadOrderDirectory, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					outputName = Path.Combine(loadOrderDirectory, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 				}
 
-				return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+				dialog.FileName = outputName;
+				dialog.RestoreDirectory = true;
+
+				dialog.OverwritePrompt = true;
+				dialog.Title = "Save Load Order As...";
+
+				if(!Directory.Exists(loadOrderDirectory))
+				{
+					Directory.CreateDirectory(loadOrderDirectory);
+				}
+
+				if(dialog.ShowDialog(view) == true)
+				{
+					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
+				}
 			}
 
 			return false;
@@ -496,6 +524,11 @@ namespace DivinityModManager.ViewModels
 
 		//TO DO: Make available as a setting.
 		private string loadOrderDirectory = @"Data\ModOrder";
+
+		public void OnViewActivated(Window parentView)
+		{
+			view = parentView;
+		}
 
 		public MainWindowViewModel() : base()
 		{

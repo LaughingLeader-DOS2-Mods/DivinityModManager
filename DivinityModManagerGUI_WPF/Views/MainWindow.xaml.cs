@@ -85,6 +85,8 @@ namespace DivinityModManager.Views
 			this.WhenActivated(disposableRegistration =>
 			{
 				DataContext = ViewModel;
+				ViewModel.OnViewActivated(this);
+
 				//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
 
 				this.OneWayBind(ViewModel,

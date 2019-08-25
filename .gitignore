@@ -128,7 +128,7 @@ _ReSharper*/
 
 # JustCode is a .NET coding add-in
 # Tests
-DivinityModManagerGUI_Avalonia\*
+DivinityModManagerGUI_Avalonia/*
 
 .JustCode
 

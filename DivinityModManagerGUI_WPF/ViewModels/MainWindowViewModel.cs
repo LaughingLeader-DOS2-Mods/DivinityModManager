@@ -413,13 +413,14 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				string outputName = Path.Combine(Directory.GetCurrentDirectory(), SelectedModOrder.Name + ".json");
+				string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), @"\LoadOrder");
+				string outputName = Path.Combine(outputDirectory, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
 					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 				}
 
-				return await DivinityModDataLoader.ExportLoadOrderToFile(outputName, SelectedModOrder);
+				return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
 			}
 
 			return false;
@@ -435,7 +436,7 @@ namespace DivinityModManager.ViewModels
 					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
 				}
 
-				return await DivinityModDataLoader.ExportLoadOrderToFile(outputName, SelectedModOrder);
+				return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
 			}
 
 			return false;
@@ -444,7 +445,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				var result = await DivinityModDataLoader.ExportModSettingsToFile(SelectedProfile.Folder, SelectedModOrder, mods.Items);
+				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
 				if(result)
 				{
 					Trace.WriteLine($"Saved mod settings to profile folder {SelectedProfile.Folder}");

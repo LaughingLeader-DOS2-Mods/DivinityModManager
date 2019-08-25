@@ -319,7 +319,7 @@ namespace DivinityModManager.Util
 			return activeProfileUUID;
 		}
 
-		public static async Task<bool> ExportLoadOrderToFile(string outputFilePath, DivinityLoadOrder order)
+		public static async Task<bool> ExportLoadOrderToFileAsync(string outputFilePath, DivinityLoadOrder order)
 		{
 			var parentDir = Path.GetDirectoryName(outputFilePath);
 			if (!Directory.Exists(parentDir)) Directory.CreateDirectory(parentDir);
@@ -336,7 +336,44 @@ namespace DivinityModManager.Util
 			return true;
 		}
 
-		public static async Task<DivinityLoadOrder> LoadOrderFromFile(string loadOrderFile)
+		public static async Task<List<DivinityLoadOrder>> FindLoadOrderFilesInDirectoryAsync(string directory)
+		{
+			List<DivinityLoadOrder> loadOrders = new List<DivinityLoadOrder>();
+
+			if (Directory.Exists(directory))
+			{
+				var files = Directory.EnumerateFiles(directory, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive, new DirectoryEnumerationFilters()
+				{
+					InclusionFilter = (f) =>
+					{
+						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase);
+					}
+				});
+
+				foreach(var loadOrderFile in files)
+				{
+					try
+					{
+						using (var reader = File.OpenText(loadOrderFile))
+						{
+							var fileText = await reader.ReadToEndAsync();
+							DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+							if (order != null)
+							{
+								loadOrders.Add(order);
+							}
+						}
+					}
+					catch(Exception ex)
+					{
+						Trace.WriteLine($"Failed to read '{loadOrderFile}': {ex.ToString()}");
+					}
+				}
+			}
+
+			return loadOrders;
+		}
+		public static async Task<DivinityLoadOrder> LoadOrderFromFileAsync(string loadOrderFile)
 		{
 			if(File.Exists(loadOrderFile))
 			{
@@ -350,7 +387,7 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static async Task<bool> ExportModSettingsToFile(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
+		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
 		{
 			if(Directory.Exists(folder))
 			{

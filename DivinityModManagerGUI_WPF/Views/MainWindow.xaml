@@ -66,7 +66,7 @@
 				<TextBlock Text="Mod Order" VerticalAlignment="Center" Margin="0,0,4,0" />
 				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
 						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name"
-						  Text="{Binding SelectedModOrder.Name, Mode=TwoWay}" IsEditable="True" IsTextSearchEnabled="True" KeyDown="ComboBox_KeyDown_LoseFocus"
+						  Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True" IsTextSearchEnabled="True" KeyDown="ComboBox_KeyDown_LoseFocus"
 						  
 				/>
 			</Grid>

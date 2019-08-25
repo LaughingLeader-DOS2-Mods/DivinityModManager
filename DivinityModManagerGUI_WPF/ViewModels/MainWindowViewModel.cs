@@ -20,6 +20,7 @@ using System.Reactive;
 using ReactiveUI.Legacy;
 using System.ComponentModel;
 using System.IO;
+using System.Reactive.Concurrency;
 
 namespace DivinityModManager.ViewModels
 {
@@ -90,6 +91,9 @@ namespace DivinityModManager.ViewModels
 
 		private readonly ObservableAsPropertyHelper<DivinityLoadOrder> selectedModOrder;
 		public DivinityLoadOrder SelectedModOrder => selectedModOrder.Value;
+
+		private readonly ObservableAsPropertyHelper<string> selectedModOrderDisplayName;
+		public string SelectedModOrderDisplayName => selectedModOrderDisplayName.Value;
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
 
@@ -235,6 +239,8 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
 				ModOrderList.AddRange(SavedModOrderList);
 				SelectedModOrderIndex = 0;
+
+				Trace.WriteLine($"{SelectedProfile.SavedLoadOrder.Name}");
 
 				//LoadModOrder(SelectedProfile.SavedLoadOrder);
 			}
@@ -413,16 +419,20 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				string outputDirectory = Path.Combine(Directory.GetCurrentDirectory(), @"\LoadOrder");
-				string outputName = Path.Combine(outputDirectory, SelectedModOrder.Name + ".json");
+				string outputName = Path.Combine(loadOrderDirectory, SelectedModOrder.Name + ".json");
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
 					outputName = Path.Combine(Directory.GetCurrentDirectory(), $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
+					tempOrder.Name = $"Current ({SelectedProfile.Name})";
+
+					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, tempOrder);
 				}
-
-				return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+				else
+				{
+					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+				}
 			}
-
 			return false;
 		}
 
@@ -484,6 +494,9 @@ namespace DivinityModManager.ViewModels
 
 		private int lastCount = 0;
 
+		//TO DO: Make available as a setting.
+		private string loadOrderDirectory = @"Data\ModOrder";
+
 		public MainWindowViewModel() : base()
 		{
 			Activator = new ViewModelActivator();
@@ -512,6 +525,14 @@ namespace DivinityModManager.ViewModels
 				//	Trace.WriteLine($"[Preview().OnItemAdded] Changeset: {String.Join(",", o)}");
 				//}).DisposeWith(disposables);
 
+				var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
+				indexChanged.Subscribe((selectedOrder) => {
+					if (SelectedModOrderIndex > -1)
+					{
+						LoadModOrder(SelectedModOrder);
+					}
+				}).DisposeWith(disposables);
+
 				this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
 				{
 					if (b)
@@ -519,9 +540,20 @@ namespace DivinityModManager.ViewModels
 						BuildModOrderList();
 					}
 				}).DisposeWith(disposables);
-			});
 
-			mods.Connect().Bind(out allMods).DisposeMany().Subscribe();
+				mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(disposables);
+
+				RxApp.MainThreadScheduler.Schedule(async () =>
+				{
+					loadOrderDirectory = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+					Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
+					if (SavedModOrderList.Count > 0)
+					{
+						BuildModOrderList();
+					}
+				});
+			});
 
 			/*
 			var sortActiveMods = SortExpressionComparer<DivinityModData>.Ascending(m => m.Index);
@@ -565,34 +597,16 @@ namespace DivinityModManager.ViewModels
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile);
-			this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
-				Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder);
 
-			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
-			indexChanged.Subscribe((selectedOrder) => {
-				if(SelectedModOrderIndex > -1)
-				{
-					LoadModOrder(SelectedModOrder);
-				}
-			});
+			var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
+				(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);
+
+			selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder);
+			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
+			
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 
-			//var connection = activeModOrder.Connect(ActiveModsChanging);
-			//var b = connection.ObserveOn(RxApp.MainThreadScheduler).Bind(ActiveModOrder);
-
-			void rebuildIndexes()
-			{
-				foreach (var mod in ActiveMods)
-				{
-					mod.Index = ActiveMods.IndexOf(mod);
-				}
-			};
-
-			//ActiveMods.ToObservableChangeSet().WhenAnyValue(c => c).Buffer(TimeSpan.FromMilliseconds(250)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(c =>
-			//{
-			//	rebuildIndexes();
-			//});
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 

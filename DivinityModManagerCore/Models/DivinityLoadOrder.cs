@@ -33,6 +33,35 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref name, value); }
 		}
 
+		/*
+		private string displayName;
+		public string DisplayName
+		{
+			get => String.IsNullOrEmpty(displayName) ? name : displayName;
+			set { this.RaiseAndSetIfChanged(ref displayName, value); }
+		}
+		*/
+
+		private DateTime lastModifiedDate;
+
+		public DateTime LastModifiedDate
+		{
+			get => lastModifiedDate;
+			set {
+				this.RaiseAndSetIfChanged(ref lastModifiedDate, value);
+				LastModified = lastModifiedDate.ToString("g");
+			}
+		}
+
+		private string lastModified;
+
+		public string LastModified
+		{
+			get => lastModified;
+			set { this.RaiseAndSetIfChanged(ref lastModified, value); }
+		}
+
+
 		[JsonProperty]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
@@ -40,6 +69,16 @@ namespace DivinityModManager.Models
 		{
 			Order.Clear();
 			Order.AddRange(nextOrder);
+		}
+
+		public DivinityLoadOrder Clone()
+		{
+			return new DivinityLoadOrder()
+			{
+				Name = this.name,
+				Order = this.Order.ToList(),
+				LastModifiedDate = this.LastModifiedDate
+			};
 		}
 
 		public IDisposable ActiveModBinding { get; set; }

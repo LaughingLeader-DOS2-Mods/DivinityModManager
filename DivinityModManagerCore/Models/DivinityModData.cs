@@ -52,7 +52,6 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref hasDescription, value); }
 		}
 
-
 		private bool hasToolTip = false;
 
 		public bool HasToolTip
@@ -83,6 +82,14 @@ namespace DivinityModManager.Models
 		{
 			get => isActive;
 			set { this.RaiseAndSetIfChanged(ref isActive, value); }
+		}
+
+		private bool isSelected = false;
+
+		public bool IsSelected
+		{
+			get => isSelected;
+			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
 		}
 
 

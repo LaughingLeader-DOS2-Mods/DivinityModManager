@@ -360,6 +360,17 @@ namespace DivinityModManager.Util
 							DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
 							if (order != null)
 							{
+								order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
+
+								/*
+								if (loadOrderFile.IndexOf("_Current.json", StringComparison.OrdinalIgnoreCase) > -1)
+								{
+									var fileName = Path.GetFileNameWithoutExtension(loadOrderFile);
+									var profile = fileName.Split('_').First();
+									order.Name = $"Current ({profile})";
+								}
+								*/
+
 								loadOrders.Add(order);
 							}
 						}

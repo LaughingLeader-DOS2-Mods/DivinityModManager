@@ -23,6 +23,7 @@ using System.Diagnostics;
 
 namespace DivinityModManager.Views
 {
+#if debug
 	public class MainWindowDebugData : MainWindowViewModel
 	{
 		public MainWindowDebugData () : base()
@@ -67,6 +68,7 @@ namespace DivinityModManager.Views
 			SelectedModOrderIndex = 2;
 		}
 	}
+#endif
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
@@ -85,7 +87,6 @@ namespace DivinityModManager.Views
 			this.WhenActivated(disposableRegistration =>
 			{
 				DataContext = ViewModel;
-				ViewModel.OnViewActivated(this);
 
 				//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
 
@@ -107,7 +108,7 @@ namespace DivinityModManager.Views
 				this.OneWayBind(ViewModel, vm => vm.ModOrderList, view => view.OrdersComboBox.ItemsSource).DisposeWith(disposableRegistration);
 				this.Bind(ViewModel, vm => vm.SelectedModOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(disposableRegistration);
 
-				ViewModel.Refresh();
+				ViewModel.OnViewActivated(this);
 			});
 		}
 

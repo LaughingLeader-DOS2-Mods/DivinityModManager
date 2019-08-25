@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Reactive.Concurrency;
 using Ookii.Dialogs.Wpf;
+using Newtonsoft.Json;
 
 namespace DivinityModManager.ViewModels
 {
@@ -41,7 +42,7 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
-    public class MainWindowViewModel : BaseHistoryViewModel, ISupportsActivation
+	public class MainWindowViewModel : BaseHistoryViewModel, ISupportsActivation
 	{
 		public string Title => "Divinity Mod Manager 1.0.0.0";
 
@@ -81,7 +82,7 @@ namespace DivinityModManager.ViewModels
 			get => selectedModOrderIndex;
 			set
 			{
-				if(value != selectedModOrderIndex)
+				if (value != selectedModOrderIndex)
 				{
 					SelectedModOrder?.DisposeBinding();
 				}
@@ -125,6 +126,8 @@ namespace DivinityModManager.ViewModels
 		public ViewModelActivator Activator { get; }
 
 		private Window view;
+
+		public DivinityModManagerSettings Settings { get; set; }
 
 		public ICommand SaveOrderCommand { get; set; }
 		public ICommand SaveOrderAsCommand { get; set; }
@@ -176,11 +179,89 @@ namespace DivinityModManager.ViewModels
 		}
 #endif
 
+		private bool LoadSettings()
+		{
+			string settingsFile = @"Data\settings.json";
+			try
+			{
+				if (File.Exists(settingsFile))
+				{
+					using (var reader = File.OpenText(settingsFile))
+					{
+						var fileText = reader.ReadToEnd();
+						Settings = JsonConvert.DeserializeObject<DivinityModManagerSettings>(fileText);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error loading settings at '{settingsFile}': {ex.ToString()}");
+			}
+			if (Settings == null)
+			{
+				Settings = new DivinityModManagerSettings();
+				SaveSettings();
+			}
+			else
+			{
+				return true;
+			}
+			return false;
+		}
+
+		public bool SaveSettings()
+		{
+			string settingsFile = @"Data\settings.json";
+
+			try
+			{
+				Directory.CreateDirectory("Data");
+
+				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
+				File.WriteAllText(settingsFile, contents);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error saving settings at '{settingsFile}': {ex.ToString()}");
+			}
+			return false;
+		}
+
 		public void LoadMods()
 		{
-			var projects = DivinityModDataLoader.LoadEditorProjects(@"G:\Divinity Original Sin 2\DefEd\Data\Mods");
-			var modPakData = DivinityModDataLoader.LoadModPackageData(@"D:\Users\LaughingLeader\Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods");
+			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			string modPakFolder = (Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods"));
+
+			List<DivinityModData> modPakData = null;
+			List<DivinityModData> projects = null;
+
+			if(Directory.Exists(modPakFolder))
+			{
+				modPakData = DivinityModDataLoader.LoadModPackageData(modPakFolder);
+			}
+
+			if (Directory.Exists(Settings.GameDataPath))
+			{
+				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
+				if(Directory.Exists(modsDirectory))
+				{
+					projects = DivinityModDataLoader.LoadEditorProjects(modsDirectory);
+				}
+			}
+
+			if(modPakData == null)
+			{
+				modPakData = new List<DivinityModData>();
+			}
+
+			if(projects == null)
+			{
+				projects = new List<DivinityModData>();
+			}
+
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
+
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
 
@@ -528,6 +609,8 @@ namespace DivinityModManager.ViewModels
 		public void OnViewActivated(Window parentView)
 		{
 			view = parentView;
+			LoadSettings();
+			Refresh();
 		}
 
 		public MainWindowViewModel() : base()

@@ -14,8 +14,8 @@
 		xmlns:dd="urn:gong-wpf-dragdrop"
         mc:Ignorable="d"
         Height="800" Width="1400"
-		d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"
 >
+	<!--d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"-->
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

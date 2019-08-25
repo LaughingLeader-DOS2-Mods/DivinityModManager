@@ -31,7 +31,6 @@ namespace DivinityModManager.Util
 		{
 			return IgnoredMods.Any(m => m.UUID == modUUID);
 		}
-
 		/// <summary>
 		/// Gets an attribute node with the supplied id, return the value.
 		/// </summary>

@@ -35,26 +35,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="DynamicData, Version=6.12.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamicData.6.12.7\lib\net461\DynamicData.dll</HintPath>
+    <Reference Include="DynamicData, Version=6.13.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.6.13.1\lib\net461\DynamicData.dll</HintPath>
     </Reference>
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
-      <HintPath>..\packages\gong-wpf-dragdrop.2.0.3\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
+      <HintPath>..\packages\gong-wpf-dragdrop.2.0.4\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
-      <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
+    <Reference Include="ReactiveUI, Version=9.20.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.9.20.1\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=9.19.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.9.19.5\lib\net461\ReactiveUI.dll</HintPath>
+    <Reference Include="ReactiveUI.WPF, Version=9.20.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.WPF.9.20.1\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.WPF, Version=9.19.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.9.19.5\lib\net461\ReactiveUI.WPF.dll</HintPath>
-    </Reference>
-    <Reference Include="Splat, Version=8.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.8.0.5\lib\net461\Splat.dll</HintPath>
+    <Reference Include="Splat, Version=8.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.8.2.4\lib\net461\Splat.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -66,7 +63,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Reactive, Version=4.1.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.4.1.5\lib\net46\System.Reactive.dll</HintPath>
+      <HintPath>..\packages\System.Reactive.4.1.6\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.2\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>

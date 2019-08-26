@@ -21,8 +21,8 @@ using ReactiveUI.Legacy;
 using System.ComponentModel;
 using System.IO;
 using System.Reactive.Concurrency;
-using Ookii.Dialogs.Wpf;
 using Newtonsoft.Json;
+using Microsoft.Win32;
 
 namespace DivinityModManager.ViewModels
 {
@@ -544,62 +544,60 @@ namespace DivinityModManager.ViewModels
 			return result;
 		}
 
-		private async Task<bool> SaveLoadOrderAs()
+		private void SaveLoadOrderAs()
 		{
-			if (SelectedProfile != null && SelectedModOrder != null)
+			var startDirectory = Path.GetFullPath(!String.IsNullOrEmpty(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory());
+
+			Trace.WriteLine(startDirectory);
+
+			if (!Directory.Exists(startDirectory))
 			{
-				var dialog = new VistaSaveFileDialog();
-				dialog.AddExtension = true;
-				dialog.DefaultExt = ".json";
-				dialog.Filter = "JSON file (*.json)|*.json";
-				dialog.InitialDirectory = Directory.Exists(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory();
-
-				string outputName = Path.Combine(Settings.LoadOrderPath, SelectedModOrder.Name + ".json");
-				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
-				{
-					outputName = Path.Combine(Settings.LoadOrderPath, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
-				}
-
-				dialog.FileName = outputName;
-				dialog.RestoreDirectory = true;
-
-				dialog.OverwritePrompt = true;
-				dialog.Title = "Save Load Order As...";
-
-				if(!Directory.Exists(Settings.LoadOrderPath))
-				{
-					Directory.CreateDirectory(Settings.LoadOrderPath);
-				}
-
-				if(dialog.ShowDialog(view) == true)
-				{
-					bool result = false;
-					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
-					{
-						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
-						tempOrder.Name = $"Current ({SelectedProfile.Name})";
-
-						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, tempOrder);
-					}
-					else
-					{
-						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
-					}
-
-					if (result)
-					{
-						StatusText = $"Saved mod load order to '{dialog.FileName}'";
-					}
-					else
-					{
-						StatusText = $"Failed to save mod load order to '{dialog.FileName}'";
-					}
-
-					return result;
-				}
+				Directory.CreateDirectory(startDirectory);
 			}
 
-			return false;
+			var dialog = new SaveFileDialog();
+			dialog.AddExtension = true;
+			dialog.DefaultExt = ".json";
+			dialog.Filter = "JSON file (*.json)|*.json";
+			dialog.InitialDirectory = startDirectory;
+
+			string outputName = Path.Combine(SelectedModOrder.Name + ".json");
+			if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+			{
+				outputName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json";
+			}
+
+			//dialog.RestoreDirectory = true;
+			dialog.FileName = outputName;
+			dialog.CheckFileExists = false;
+			dialog.CheckPathExists = false;
+			dialog.OverwritePrompt = true;
+			dialog.Title = "Save Load Order As...";
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				bool result = false;
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+				{
+					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
+					tempOrder.Name = $"Current ({SelectedProfile.Name})";
+
+					result = DivinityModDataLoader.ExportLoadOrderToFile(dialog.FileName, tempOrder);
+				}
+				else
+				{
+					result = DivinityModDataLoader.ExportLoadOrderToFile(dialog.FileName, SelectedModOrder);
+				}
+
+				if (result)
+				{
+					StatusText = $"Saved mod load order to '{dialog.FileName}'";
+				}
+				else
+				{
+					StatusText = $"Failed to save mod load order to '{dialog.FileName}'";
+				}
+			}
 		}
 		private async Task<bool> ExportLoadOrder()
 		{
@@ -632,7 +630,7 @@ namespace DivinityModManager.ViewModels
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrder, canExecuteSaveCommand);
-			SaveOrderAsCommand = ReactiveCommand.CreateFromTask(SaveLoadOrderAs, canExecuteSaveCommand);
+			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
 
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
 

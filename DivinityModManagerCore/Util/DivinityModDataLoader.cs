@@ -318,6 +318,23 @@ namespace DivinityModManager.Util
 			return activeProfileUUID;
 		}
 
+		public static bool ExportLoadOrderToFile(string outputFilePath, DivinityLoadOrder order)
+		{
+			var parentDir = Path.GetDirectoryName(outputFilePath);
+			if (!Directory.Exists(parentDir)) Directory.CreateDirectory(parentDir);
+
+			string contents = JsonConvert.SerializeObject(order, Newtonsoft.Json.Formatting.Indented);
+
+			var buffer = Encoding.UTF8.GetBytes(contents);
+			using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.Create,
+				System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, false))
+			{
+				fs.Write(buffer, 0, buffer.Length);
+			}
+
+			return true;
+		}
+
 		public static async Task<bool> ExportLoadOrderToFileAsync(string outputFilePath, DivinityLoadOrder order)
 		{
 			var parentDir = Path.GetDirectoryName(outputFilePath);

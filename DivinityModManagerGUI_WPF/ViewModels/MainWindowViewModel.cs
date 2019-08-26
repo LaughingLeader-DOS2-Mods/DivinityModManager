@@ -517,10 +517,10 @@ namespace DivinityModManager.ViewModels
 					Directory.CreateDirectory(Settings.LoadOrderPath);
 				}
 
-				string outputName = Path.Combine(Settings.LoadOrderPath, SelectedModOrder.Name + ".json");
+				string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					outputName = Path.Combine(Settings.LoadOrderPath, $"{SelectedProfile.Name}_{SelectedModOrder.Name}.json");
+					outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine($"{SelectedProfile.Name}_{SelectedModOrder.Name}.json"), '_');
 					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 					tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
@@ -568,7 +568,7 @@ namespace DivinityModManager.ViewModels
 			}
 
 			//dialog.RestoreDirectory = true;
-			dialog.FileName = outputName;
+			dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
 			dialog.CheckFileExists = false;
 			dialog.CheckPathExists = false;
 			dialog.OverwritePrompt = true;

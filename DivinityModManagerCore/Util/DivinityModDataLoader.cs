@@ -31,6 +31,16 @@ namespace DivinityModManager.Util
 		{
 			return IgnoredMods.Any(m => m.UUID == modUUID);
 		}
+
+		public static string MakeSafeFilename(string filename, char replaceChar)
+		{
+			foreach (char c in System.IO.Path.GetInvalidFileNameChars())
+			{
+				filename = filename.Replace(c, replaceChar);
+			}
+			return filename;
+		}
+
 		/// <summary>
 		/// Gets an attribute node with the supplied id, return the value.
 		/// </summary>

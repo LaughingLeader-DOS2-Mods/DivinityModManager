@@ -40,6 +40,7 @@
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Grid Margin="4">
 			<Grid.ColumnDefinitions>
@@ -121,5 +122,10 @@
 				</Style>
 			</ContentControl.Style>
 		</ContentControl>
+		<StatusBar Grid.Row="2">
+			<StatusBarItem HorizontalAlignment="Stretch">
+				<TextBox Text="{Binding StatusText}" IsReadOnly="True" BorderThickness="0" Background="Transparent" HorizontalAlignment="Stretch" />
+			</StatusBarItem>
+		</StatusBar>
 	</Grid>
 </reactiveui:ReactiveWindow>

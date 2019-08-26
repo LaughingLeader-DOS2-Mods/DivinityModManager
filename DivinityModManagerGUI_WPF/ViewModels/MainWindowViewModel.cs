@@ -123,6 +123,14 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref loadingOrder, value); }
 		}
 
+		private string statusText;
+
+		public string StatusText
+		{
+			get => statusText;
+			set { this.RaiseAndSetIfChanged(ref statusText, value); }
+		}
+
 		public ViewModelActivator Activator { get; }
 
 		private Window view;
@@ -501,6 +509,7 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<bool> SaveLoadOrder()
 		{
+			bool result = false;
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				if (!Directory.Exists(Settings.LoadOrderPath))
@@ -515,14 +524,24 @@ namespace DivinityModManager.ViewModels
 					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 					tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
-					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, tempOrder);
+					result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, tempOrder);
 				}
 				else
 				{
-					return await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+					result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+				}
+
+				if (result)
+				{
+					StatusText = $"Saved mod load order to '{outputName}'";
+				}
+				else
+				{
+					StatusText = $"Failed to save mod load order to '{outputName}'";
 				}
 			}
-			return false;
+
+			return result;
 		}
 
 		private async Task<bool> SaveLoadOrderAs()
@@ -554,17 +573,29 @@ namespace DivinityModManager.ViewModels
 
 				if(dialog.ShowDialog(view) == true)
 				{
+					bool result = false;
 					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 					{
 						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 						tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
-						return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, tempOrder);
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, tempOrder);
 					}
 					else
 					{
-						return await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(dialog.FileName, SelectedModOrder);
 					}
+
+					if (result)
+					{
+						StatusText = $"Saved mod load order to '{dialog.FileName}'";
+					}
+					else
+					{
+						StatusText = $"Failed to save mod load order to '{dialog.FileName}'";
+					}
+
+					return result;
 				}
 			}
 
@@ -574,14 +605,18 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
+				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
 				if(result)
 				{
-					Trace.WriteLine($"Saved mod settings to profile folder {SelectedProfile.Folder}");
+					//MessageBox.Show(view, $"Saved mod settings to '{outputPath}'", "Mod Order Exported");
+					StatusText = $"Exported load order to '{outputPath}'";
 				}
 				else
 				{
-					Trace.WriteLine($"Problem saving mod settings to profile folder {SelectedProfile.Folder}");
+					string msg = $"Problem exporting load order to '{outputPath}'";
+					StatusText = msg;
+					MessageBox.Show(view, msg, "Mod Order Export Failed");
 				}
 			}
 			return false;

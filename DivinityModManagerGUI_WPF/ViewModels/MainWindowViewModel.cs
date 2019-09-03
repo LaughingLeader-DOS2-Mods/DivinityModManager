@@ -246,6 +246,7 @@ namespace DivinityModManager.ViewModels
 
 			if(Directory.Exists(modPakFolder))
 			{
+				Trace.WriteLine($"Loading mods from '{modPakFolder}'.");
 				modPakData = DivinityModDataLoader.LoadModPackageData(modPakFolder);
 			}
 
@@ -254,6 +255,7 @@ namespace DivinityModManager.ViewModels
 				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
 				if(Directory.Exists(modsDirectory))
 				{
+					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
 					projects = DivinityModDataLoader.LoadEditorProjects(modsDirectory);
 				}
 			}
@@ -273,6 +275,8 @@ namespace DivinityModManager.ViewModels
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
 
+			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
+
 			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
 			//{
 			//	for(var i = 0; i < mod.Dependencies.Count;i++)
@@ -290,21 +294,35 @@ namespace DivinityModManager.ViewModels
 
 		public void LoadProfiles()
 		{
-			var profiles = DivinityModDataLoader.LoadProfileData(@"D:\Users\LaughingLeader\Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\PlayerProfiles");
-			Profiles.AddRange(profiles);
+			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			string profileFolder = (Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\PlayerProfiles"));
 
-			var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(@"D:\Users\LaughingLeader\Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\PlayerProfiles");
-			if (!String.IsNullOrWhiteSpace(selectedUUID))
+			if(Directory.Exists(profileFolder))
 			{
-				var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
-				if (index > -1)
-				{
-					SelectedProfileIndex = index;
-					Debug_TraceProfileModOrder(Profiles[index]);
-				}
-			}
+				Trace.WriteLine($"Loading profiles from '{profileFolder}'.");
 
-			Trace.WriteLine($"Last selected UUID: {selectedUUID}");
+				var profiles = DivinityModDataLoader.LoadProfileData(profileFolder);
+				Profiles.AddRange(profiles);
+
+				Trace.WriteLine($"Loaded '{Profiles.Count}' profiles.");
+
+				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(profileFolder);
+				if (!String.IsNullOrWhiteSpace(selectedUUID))
+				{
+					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
+					if (index > -1)
+					{
+						SelectedProfileIndex = index;
+						Debug_TraceProfileModOrder(Profiles[index]);
+					}
+				}
+
+				Trace.WriteLine($"Last selected UUID: {selectedUUID}");
+			}
+			else
+			{
+				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{profileFolder}'.");
+			}
 		}
 
 		public void BuildModOrderList()
@@ -452,6 +470,7 @@ namespace DivinityModManager.ViewModels
 
 		public void Refresh()
 		{
+			Trace.WriteLine($"Refreshing view.");
 			mods.Clear();
 			Profiles.Clear();
 			LoadMods();
@@ -704,11 +723,19 @@ namespace DivinityModManager.ViewModels
 						//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
 						Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
 					}
-					Trace.WriteLine($"Attempting to load saved load orders from '{Settings.LoadOrderPath}'.");
-					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(Settings.LoadOrderPath);
+
+					string loadOrderDirectory = Path.GetFullPath(Settings.LoadOrderPath);
+
+					Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
 					if (SavedModOrderList.Count > 0)
 					{
+						Trace.WriteLine($"{SavedModOrderList.Count} load orders found. Building mod order list.");
 						BuildModOrderList();
+					}
+					else
+					{
+						Trace.WriteLine("No saved orders found.");
 					}
 				});
 			});

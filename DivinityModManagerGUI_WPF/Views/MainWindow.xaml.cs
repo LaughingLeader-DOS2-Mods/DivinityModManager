@@ -20,6 +20,7 @@ using System.Reactive.Disposables;
 using DynamicData;
 using DynamicData.Binding;
 using System.Diagnostics;
+using System.Globalization;
 
 namespace DivinityModManager.Views
 {
@@ -76,9 +77,17 @@ namespace DivinityModManager.Views
 	{
 		private static MainWindow self;
 		public static MainWindow Self => self;
+
+		private TextWriterTraceListener debugLogListener;
 		public MainWindow()
 		{
 			InitializeComponent();
+
+			string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+			string logFileName = "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log";
+			debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
+			Trace.Listeners.Add(debugLogListener);
+			Trace.AutoFlush = true;
 
 			self = this;
 

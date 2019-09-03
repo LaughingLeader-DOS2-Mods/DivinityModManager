@@ -61,26 +61,6 @@ namespace DivinityModManager.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap AddItem_16x {
-            get {
-                object obj = ResourceManager.GetObject("AddItem_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap ExportData_16x {
-            get {
-                object obj = ResourceManager.GetObject("ExportData_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to                         &lt;node id=&quot;Module&quot;&gt;
         ///                            &lt;attribute id=&quot;UUID&quot; value=&quot;{0}&quot; type=&quot;22&quot; /&gt;
         ///                        &lt;/node&gt;.
@@ -130,36 +110,6 @@ namespace DivinityModManager.Properties {
         public static string ModSettingsTemplate {
             get {
                 return ResourceManager.GetString("ModSettingsTemplate", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap Save_16x {
-            get {
-                object obj = ResourceManager.GetObject("Save_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap SaveAs_16x {
-            get {
-                object obj = ResourceManager.GetObject("SaveAs_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
-        /// </summary>
-        public static System.Drawing.Bitmap SaveDisabled_16x {
-            get {
-                object obj = ResourceManager.GetObject("SaveDisabled_16x", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }

@@ -204,6 +204,7 @@ namespace DivinityModManager.ViewModels
 			catch (Exception ex)
 			{
 				Trace.WriteLine($"Error loading settings at '{settingsFile}': {ex.ToString()}");
+				Settings = null;
 			}
 			if (Settings == null)
 			{

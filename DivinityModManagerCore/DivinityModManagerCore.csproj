@@ -22,7 +22,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="LSLib">
-			<HintPath>D:\Projects\_Visual_Studio\lslib\LSLib\bin\Debug\LSLib.dll</HintPath>
+			<HintPath>..\LSLib\LSLib.dll</HintPath>
 		</Reference>
 	</ItemGroup>
 	<ItemGroup>

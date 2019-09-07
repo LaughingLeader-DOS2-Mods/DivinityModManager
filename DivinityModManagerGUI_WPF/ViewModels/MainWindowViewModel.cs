@@ -326,7 +326,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public void BuildModOrderList()
+		public void BuildModOrderList(bool selectLast = false)
 		{
 			if (SelectedProfile != null)
 			{
@@ -349,7 +349,12 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
 				ModOrderList.AddRange(SavedModOrderList);
-				SelectedModOrderIndex = 0;
+				if (selectLast)
+				{
+					view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() => {
+						SelectedModOrderIndex = ModOrderList.Count - 1;
+					}));
+				}
 
 				Trace.WriteLine($"{SelectedProfile.SavedLoadOrder.Name}");
 
@@ -379,25 +384,22 @@ namespace DivinityModManager.ViewModels
 
 			void undo()
 			{
-				ModOrderList.Clear();
-				ModOrderList.AddRange(lastOrders);
+				SavedModOrderList.Clear();
+				SavedModOrderList.AddRange(lastOrders);
+				BuildModOrderList();
 				SelectedModOrderIndex = lastIndex;
 			};
 
 			void redo()
 			{
-				ModOrderList.Clear();
-				ModOrderList.AddRange(nextOrders);
-
 				DivinityLoadOrder newOrder = new DivinityLoadOrder()
 				{
 					Name = "New" + nextOrders.Count,
 					Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
 				};
 
-				ModOrderList.Add(newOrder);
-
-				SelectedModOrderIndex = ModOrderList.IndexOf(newOrder);
+				SavedModOrderList.Add(newOrder);
+				BuildModOrderList(true);
 			};
 
 			this.CreateSnapshot(undo, redo);
@@ -699,13 +701,16 @@ namespace DivinityModManager.ViewModels
 				//	Trace.WriteLine($"[Preview().OnItemAdded] Changeset: {String.Join(",", o)}");
 				//}).DisposeWith(disposables);
 
+				
 				var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
 				indexChanged.Subscribe((selectedOrder) => {
-					if (SelectedModOrderIndex > -1)
+					/*if (SelectedModOrderIndex > -1 && !LoadingOrder)
 					{
 						LoadModOrder(SelectedModOrder);
 					}
+					*/
 				}).DisposeWith(disposables);
+				
 
 				this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
 				{

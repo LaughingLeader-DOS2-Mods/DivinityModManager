@@ -63,9 +63,9 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
-	public class BaseHistoryViewModel : BaseHistoryObject, IHistoryViewModel, IDisposable
+	public abstract class BaseHistoryViewModel : BaseHistoryObject, IHistoryViewModel, IDisposable
 	{
-		private CompositeDisposable Disposable { get; set; }
+		public CompositeDisposable Disposables { get; internal set; }
 
 		public ICommand UndoCommand { get; set; }
 		public ICommand RedoCommand { get; set; }
@@ -73,7 +73,7 @@ namespace DivinityModManager.ViewModels
 
 		public void Dispose()
 		{
-			this.Disposable.Dispose();
+			this.Disposables?.Dispose();
 		}
 
 		public void Undo()
@@ -88,21 +88,21 @@ namespace DivinityModManager.ViewModels
 
 		public BaseHistoryViewModel()
 		{
-			Disposable = new CompositeDisposable();
+			Disposables = new CompositeDisposable();
 
-			var history = new StackHistory().AddTo(Disposable);
+			var history = new StackHistory().AddTo(Disposables);
 			History = history;
 
 			var undo = ReactiveCommand.Create(Undo, History.CanUndo);
-			undo.Subscribe().AddTo(this.Disposable);
+			undo.Subscribe().DisposeWith(this.Disposables);
 			UndoCommand = undo;
 
 			var redo = ReactiveCommand.Create(Redo, History.CanRedo);
-			redo.Subscribe().AddTo(this.Disposable);
+			redo.Subscribe().DisposeWith(this.Disposables);
 			RedoCommand = redo;
 
 			var clear = ReactiveCommand.Create(History.Clear, History.CanClear);
-			clear.Subscribe().AddTo(this.Disposable);
+			clear.Subscribe().DisposeWith(this.Disposables);
 			ClearHistoryCommand = clear;
 		}
 	}

@@ -23,6 +23,7 @@ using System.IO;
 using System.Reactive.Concurrency;
 using Newtonsoft.Json;
 using Microsoft.Win32;
+using DivinityModManager.Views;
 
 namespace DivinityModManager.ViewModels
 {
@@ -42,7 +43,7 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
-	public class MainWindowViewModel : BaseHistoryViewModel, ISupportsActivation
+	public class MainWindowViewModel : BaseHistoryViewModel
 	{
 		public string Title => "Divinity Mod Manager 1.0.0.0";
 
@@ -131,9 +132,15 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref statusText, value); }
 		}
 
-		public ViewModelActivator Activator { get; }
+		private bool conflictCheckerWindowOpen = false;
 
-		private Window view;
+		public bool ConflictCheckerWindowOpen
+		{
+			get => conflictCheckerWindowOpen;
+			set { this.RaiseAndSetIfChanged(ref conflictCheckerWindowOpen, value); }
+		}
+
+		private MainWindow view;
 
 		public DivinityModManagerSettings Settings { get; set; }
 
@@ -143,6 +150,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand AddOrderConfigCommand { get; set; }
 		public ICommand RefreshCommand { get; set; }
 		public ICommand DebugCommand { get; set; }
+		public ICommand OpenConflictCheckerCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -648,7 +656,45 @@ namespace DivinityModManager.ViewModels
 			return true;
 		}
 
-		private void HandleActivation()
+		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
+
+		public void OnViewActivated(MainWindow parentView)
+		{
+			view = parentView;
+
+			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
+			{
+				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
+			});
+
+			LoadSettings();
+			Refresh();
+
+			RxApp.MainThreadScheduler.Schedule(async () =>
+			{
+				if (String.IsNullOrWhiteSpace(Settings.LoadOrderPath))
+				{
+					//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+					Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+				}
+
+				string loadOrderDirectory = Path.GetFullPath(Settings.LoadOrderPath);
+
+				Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+				SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
+				if (SavedModOrderList.Count > 0)
+				{
+					Trace.WriteLine($"{SavedModOrderList.Count} load orders found. Building mod order list.");
+					BuildModOrderList();
+				}
+				else
+				{
+					Trace.WriteLine("No saved orders found.");
+				}
+			});
+		}
+
+		public MainWindowViewModel() : base()
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrder, canExecuteSaveCommand);
@@ -657,144 +703,33 @@ namespace DivinityModManager.ViewModels
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
 
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
-		}
-
-		private void HandleDeactivation()
-		{
-
-		}
-
-		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
-
-		public void OnViewActivated(Window parentView)
-		{
-			view = parentView;
-			LoadSettings();
-			Refresh();
-		}
-
-		public MainWindowViewModel() : base()
-		{
-			Activator = new ViewModelActivator();
-
-			this.WhenActivated(disposables =>
-			{
-				this.HandleActivation();
-
-				Disposable.Create(() => this.HandleDeactivation()).DisposeWith(disposables);
-
-				//activeModOrder.Preview().OnItemAdded((item) =>
-				//{
-				//	Trace.WriteLine("Taking snapshot of mod order");
-				//	var mods = activeModOrder.Items;
-				//	History.Snapshot(() =>
-				//	{
-				//		activeModOrder.Clear();
-				//		activeModOrder.AddRange(mods);
-				//		InactiveMods.Add(item);
-				//	}, () =>
-				//	{
-				//		activeModOrder.Add(item);
-				//	});
-				//}).Bind(ActiveModOrder).Subscribe(o =>
-				//{
-				//	Trace.WriteLine($"[Preview().OnItemAdded] Changeset: {String.Join(",", o)}");
-				//}).DisposeWith(disposables);
-
-				
-				var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
-				indexChanged.Subscribe((selectedOrder) => {
-					/*if (SelectedModOrderIndex > -1 && !LoadingOrder)
-					{
-						LoadModOrder(SelectedModOrder);
-					}
-					*/
-				}).DisposeWith(disposables);
-				
-
-				this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
-				{
-					if (b)
-					{
-						BuildModOrderList();
-					}
-				}).DisposeWith(disposables);
-
-				mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(disposables);
-
-				RxApp.MainThreadScheduler.Schedule(async () =>
-				{
-					if(String.IsNullOrWhiteSpace(Settings.LoadOrderPath))
-					{
-						//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-						Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
-					}
-
-					string loadOrderDirectory = Path.GetFullPath(Settings.LoadOrderPath);
-
-					Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
-					SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
-					if (SavedModOrderList.Count > 0)
-					{
-						Trace.WriteLine($"{SavedModOrderList.Count} load orders found. Building mod order list.");
-						BuildModOrderList();
-					}
-					else
-					{
-						Trace.WriteLine("No saved orders found.");
-					}
-				});
-			});
-
-			/*
-			var sortActiveMods = SortExpressionComparer<DivinityModData>.Ascending(m => m.Index);
-			var sortInactiveMods = SortExpressionComparer<DivinityModData>.Ascending(m => m.Name);
-
-			mods.Connect().Bind(out modList).DisposeMany().Subscribe();
-
-			var shouldResort = mods.Connect().WhenPropertyChanged(x => x.Index).Throttle(TimeSpan.FromMilliseconds(250)).Select(_ => Unit.Default);
-
-			mods.Connect().AutoRefresh(m => m.IsActive).Filter(m => m.IsActive).Sort(sortActiveMods, shouldResort).ObserveOn(RxApp.MainThreadScheduler).Bind(activeMods).Subscribe(c =>
-			{
-				//foreach(var obj in c.SortedItems)
-				//{
-
-				//}
-				//foreach (var obj in mods.Items)
-				//{
-				//	obj.Index = ActiveMods.IndexOf(obj);
-				//}
-			});
-			mods.Connect().AutoRefresh(m => m.IsActive).Filter(m => !m.IsActive).Sort(sortInactiveMods, shouldResort).ObserveOn(RxApp.MainThreadScheduler).Bind(inactiveMods).Subscribe(c =>
-			{
-				//foreach (var obj in mods.Items)
-				//{
-				//	obj.Index = InactiveMods.IndexOf(obj);
-				//}
-			});
-
-			ActiveMods.WhenAnyValue(x => x.Count).Throttle(TimeSpan.FromMilliseconds(2000)).Subscribe(x =>
-			{
-				if (x > lastCount)
-				{
-					foreach (var item in ActiveMods)
-					{
-						item.Index = ActiveMods.IndexOf(item);
-					}
-					lastCount = x;
-				}
-			});
-			*/
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
-				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile);
+				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
 
 			var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
 				(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);
 
-			selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder);
+			selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder).DisposeWith(this.Disposables);
 			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
-			
+
+			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
+			indexChanged.Subscribe((selectedOrder) => {
+				if (SelectedModOrderIndex > -1 && !LoadingOrder)
+				{
+					LoadModOrder(SelectedModOrder);
+				}
+			}).DisposeWith(Disposables);
+
+			this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
+			{
+				if (b)
+				{
+					BuildModOrderList();
+				}
+			}).DisposeWith(Disposables);
+
+			mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(Disposables);
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 

@@ -22,7 +22,7 @@ namespace DivinityModManager.Models
 	}
 
 	[JsonObject(MemberSerialization.OptIn)]
-	public class DivinityLoadOrder : ReactiveObject, IActivatable
+	public class DivinityLoadOrder : ReactiveObject
 	{
 		private string name;
 

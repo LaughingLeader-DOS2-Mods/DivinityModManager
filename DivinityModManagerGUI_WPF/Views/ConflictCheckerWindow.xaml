@@ -1,6 +1,6 @@
-﻿<reactiveui:ReactiveWindow 
-		x:Class="DivinityModManager.Views.MainWindow"
-		x:TypeArguments="vm:MainWindowViewModel"
+﻿<reactiveui:ReactiveWindow
+		x:Class="DivinityModManager.Views.ConflictCheckerWindow"
+		x:TypeArguments="vm:ConflictCheckerWindowViewModel"
 		xmlns:reactiveui="http://reactiveui.net"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -12,31 +12,37 @@
         xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 		xmlns:dd="urn:gong-wpf-dragdrop"
-        mc:Ignorable="d"
-        Height="800" Width="1400"
->
-	<!--d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"-->
+		mc:Ignorable="d"
+        Title="ConflictCheckerWindow" Height="450" Width="920">
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Views/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<DataTemplate x:Key="VerticalModLayout">
-				<local:VerticalModLayout />
-			</DataTemplate>
-			<DataTemplate x:Key="HorizontalModLayout">
-				<local:HorizontalModLayout/>
+			<Style x:Key="TabItemConflictHeader" TargetType="TabItem">
+				<Style.Setters>
+					<Setter Property="Header">
+						<Setter.Value>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto"/>
+									<ColumnDefinition/>
+								</Grid.ColumnDefinitions>
+								<TextBlock Text="{Binding Header, FallbackValue='ConflictGroup'}" Background="{x:Null}" />
+								<TextBlock Text="{Binding TotalConflicts, FallbackValue='0', TargetNullValue='0'}" Grid.Column="1" Margin="6,0,0,0" Foreground="Red" />
+							</Grid>
+						</Setter.Value>
+					</Setter>
+				</Style.Setters>
+			</Style>
+			<DataTemplate DataType="{x:Type data:DivinityConflictGroup}">
+				<ListView ItemsSource="{Binding Conflicts}" SelectedIndex="{Binding SelectedConflictIndex}">
+					
+				</ListView>
 			</DataTemplate>
 		</ResourceDictionary>
 	</Window.Resources>
-	<Window.InputBindings>
-		<KeyBinding Key="Z" Modifiers="Ctrl" Command="{Binding UndoCommand}" />
-		<KeyBinding Key="Z" Modifiers="Ctrl+Alt" Command="{Binding RedoCommand}" />
-		<KeyBinding Key="Y" Modifiers="Ctrl" Command="{Binding RedoCommand}" />
-		<KeyBinding Key="D" Modifiers="Ctrl" Command="{Binding DebugCommand}" />
-		<KeyBinding Key="S" Modifiers="Ctrl" Command="{Binding SaveOrderCommand}" />
-	</Window.InputBindings>
-	<Grid>
+    <Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto" />
 			<RowDefinition Height="Auto" />
@@ -44,8 +50,8 @@
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
 		<Menu x:Name="TopMenuBar">
-			<MenuItem Header="Tools">
-				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
+			<MenuItem Header="Commands">
+				<MenuItem x:Name="RunCommandMenuItem" Header="Check for Conflicts" />
 			</MenuItem>
 		</Menu>
 		<Grid Grid.Row="1" Margin="4">
@@ -74,7 +80,6 @@
 				<ComboBox x:Name="OrdersComboBox" Grid.Column="1" ItemsSource="{Binding ModOrderList}" SelectedIndex="{Binding SelectedModOrderIndex}"
 						  VerticalAlignment="Center" HorizontalAlignment="Stretch" MinWidth="100" MinHeight="16" DisplayMemberPath="Name"
 						  Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" IsEditable="True" IsTextSearchEnabled="True" KeyDown="ComboBox_KeyDown_LoseFocus"
-						  
 				/>
 			</Grid>
 			<Grid Grid.Column="2" Margin="1,0,0,0">
@@ -83,51 +88,20 @@
 					<ColumnDefinition Width="10" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
-				<StackPanel Orientation="Horizontal">
-					<Button x:Name="AddNewOrderButton" ToolTip="Add New Load Order">
-						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource AddItemImage}"/>
-					</Button>
-					<Button x:Name="SaveButton" ToolTip="Save Load Order to File" Margin="8,0,0,0">
-						<Button.Resources>
-							<Style TargetType="{x:Type Image}">
-								<Style.Triggers>
-									<Trigger Property="IsEnabled" Value="True">
-										<Setter Property="Source" Value="{StaticResource SaveImage}" />
-									</Trigger>
-									<Trigger Property="IsEnabled" Value="False">
-										<Setter Property="Source" Value="{StaticResource SaveDisabledImage}" />
-									</Trigger>
-								</Style.Triggers>
-							</Style>
-						</Button.Resources>
-						<Image Width="16" Height="16" Stretch="UniformToFill" />
-					</Button>
-					<Button x:Name="SaveAsButton" ToolTip="Save Order As...">
-						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource SaveAsImage}"/>
-					</Button>
-				</StackPanel>
 				<StackPanel Grid.Column="2" Orientation="Horizontal" Margin="21,0,0,0">
-					<TextBlock Text="Export to Game" VerticalAlignment="Center" Margin="4,0"/>
+					<TextBlock Text="Check for Conflicts" VerticalAlignment="Center" Margin="4,0"/>
 					<Button x:Name="ExportToModSettingsButton" ToolTip="Export Load Order to Game for the Current Profile">
 						<controls:AutoGrayableImage Width="16" Height="16" Stretch="UniformToFill" Source="{StaticResource ExportDataImage}"/>
 					</Button>
 				</StackPanel>
 			</Grid>
 		</Grid>
-		<ContentControl x:Name="LayoutContent" Grid.Row="2" Content="{Binding}">
-			<ContentControl.Style>
-				<Style TargetType="{x:Type ContentControl}">
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding LayoutMode}" Value="0">
-							<Setter Property="ContentTemplate" Value="{StaticResource HorizontalModLayout}" />
-						</DataTrigger>
-						<DataTrigger Binding="{Binding LayoutMode}" Value="1">
-							<Setter Property="ContentTemplate" Value="{StaticResource VerticalModLayout}" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</ContentControl.Style>
-		</ContentControl>
+		<TabControl x:Name="ConflictsTabControlPanel" Grid.Row="2">
+			<TabItem Style="{StaticResource TabItemConflictHeader}" />
+			<TabItem Header="Stats">
+				
+			</TabItem>
+		</TabControl>
 		<StatusBar Grid.Row="3">
 			<StatusBarItem HorizontalAlignment="Stretch">
 				<TextBox Text="{Binding StatusText}" IsReadOnly="True" BorderThickness="0" Background="Transparent" HorizontalAlignment="Stretch" />

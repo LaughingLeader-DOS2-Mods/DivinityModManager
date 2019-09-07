@@ -79,6 +79,10 @@ namespace DivinityModManager.Views
 		public static MainWindow Self => self;
 
 		private TextWriterTraceListener debugLogListener;
+
+		private ConflictCheckerWindow conflictCheckerWindow;
+		public ConflictCheckerWindow ConflictCheckerWindow => conflictCheckerWindow;
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -93,32 +97,59 @@ namespace DivinityModManager.Views
 
 			ViewModel = new MainWindowViewModel();
 
-			this.WhenActivated(disposableRegistration =>
+			this.OneWayBind(ViewModel,
+				viewModel => viewModel.Title,
+				view => view.Title).DisposeWith(ViewModel.Disposables);
+
+			//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
+			//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
+
+			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.SaveAsButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.ExportToModSettingsButton.Command).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
+			this.Bind(ViewModel, vm => vm.SelectedProfileIndex, view => view.ProfilesComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.ModOrderList, view => view.OrdersComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
+			this.Bind(ViewModel, vm => vm.SelectedModOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
+
+			//Menu Items
+			this.OneWayBind(ViewModel, vm => vm.OpenConflictCheckerCommand, view => view.ConflictCheckerMenuItem.Command).DisposeWith(ViewModel.Disposables);
+
+			DataContext = ViewModel;
+
+			this.WhenActivated(d =>
 			{
-				DataContext = ViewModel;
-
-				//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
-
-				this.OneWayBind(ViewModel,
-					viewModel => viewModel.Title,
-					view => view.Title).DisposeWith(disposableRegistration);
-
-				//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
-
-				this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveButton.Command).DisposeWith(disposableRegistration);
-				this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.SaveAsButton.Command).DisposeWith(disposableRegistration);
-				this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.ExportToModSettingsButton.Command).DisposeWith(disposableRegistration);
-
-				this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(disposableRegistration);
-
-				this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(disposableRegistration);
-				this.Bind(ViewModel, vm => vm.SelectedProfileIndex, view => view.ProfilesComboBox.SelectedIndex).DisposeWith(disposableRegistration);
-
-				this.OneWayBind(ViewModel, vm => vm.ModOrderList, view => view.OrdersComboBox.ItemsSource).DisposeWith(disposableRegistration);
-				this.Bind(ViewModel, vm => vm.SelectedModOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(disposableRegistration);
-
+				d.Add(ViewModel.Disposables);
 				ViewModel.OnViewActivated(this);
 			});
+		}
+
+		public void ToggleConflictChecker(bool openWindow)
+		{
+			if(openWindow)
+			{
+				if (ConflictCheckerWindow == null)
+				{
+					conflictCheckerWindow = new ConflictCheckerWindow();
+				}
+				
+				if(!conflictCheckerWindow.IsVisible)
+				{
+					conflictCheckerWindow.Show();
+				}
+			}
+			else
+			{
+				if (conflictCheckerWindow != null)
+				{
+					conflictCheckerWindow.Close();
+					conflictCheckerWindow = null;
+				}
+			}
 		}
 
 		private void ExportTestButton_Click(object sender, RoutedEventArgs e)

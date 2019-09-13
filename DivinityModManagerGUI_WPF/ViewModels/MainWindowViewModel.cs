@@ -359,13 +359,20 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.AddRange(SavedModOrderList);
 				if (selectLast)
 				{
-					view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, new Action(() => {
+					view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => {
 						SelectedModOrderIndex = ModOrderList.Count - 1;
+						//Trace.WriteLine($"{SelectedProfile.SavedLoadOrder.Name}");
 					}));
 				}
-
-				Trace.WriteLine($"{SelectedProfile.SavedLoadOrder.Name}");
-
+				else
+				{
+					if(SelectedModOrderIndex < 0 || SelectedModOrderIndex >= ModOrderList.Count)
+					{
+						view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => {
+							SelectedModOrderIndex = 0;
+						}));
+					}
+				}
 				//LoadModOrder(SelectedProfile.SavedLoadOrder);
 			}
 		}
@@ -394,7 +401,7 @@ namespace DivinityModManager.ViewModels
 			{
 				SavedModOrderList.Clear();
 				SavedModOrderList.AddRange(lastOrders);
-				BuildModOrderList();
+				BuildModOrderList(false);
 				SelectedModOrderIndex = lastIndex;
 			};
 
@@ -537,37 +544,59 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private async Task<bool> SaveLoadOrder()
+		private void SaveLoadOrder()
+		{
+			view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(async () =>
+			{
+				await SaveLoadOrderAsync();
+			}));
+		}
+
+		private async Task<bool> SaveLoadOrderAsync()
 		{
 			bool result = false;
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
-				if (!Directory.Exists(Settings.LoadOrderPath))
+				string outputDirectory = Settings.LoadOrderPath;
+
+				if (String.IsNullOrWhiteSpace(outputDirectory))
 				{
-					Directory.CreateDirectory(Settings.LoadOrderPath);
+					outputDirectory = AppDomain.CurrentDomain.BaseDirectory;
+				}
+
+				if (!Directory.Exists(outputDirectory))
+				{
+					Directory.CreateDirectory(outputDirectory);
 				}
 
 				string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
-				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
-				{
-					outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine($"{SelectedProfile.Name}_{SelectedModOrder.Name}.json"), '_');
-					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
-					tempOrder.Name = $"Current ({SelectedProfile.Name})";
+				string outputPath = Path.Combine(outputDirectory, outputName);
 
-					result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, tempOrder);
-				}
-				else
+				try
 				{
-					result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputName, SelectedModOrder);
+					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+					{
+						outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine($"{SelectedProfile.Name}_{SelectedModOrder.Name}.json"), '_');
+						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
+						tempOrder.Name = $"Current ({SelectedProfile.Name})";
+
+						outputPath = Path.Combine(outputDirectory, outputName);
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, tempOrder);
+					}
+					else
+					{
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, SelectedModOrder);
+					}
+				}
+				catch(Exception ex)
+				{
+					StatusText = $"Failed to save mod load order to '{outputPath}': {ex.Message}";
+					result = false;
 				}
 
 				if (result)
 				{
-					StatusText = $"Saved mod load order to '{outputName}'";
-				}
-				else
-				{
-					StatusText = $"Failed to save mod load order to '{outputName}'";
+					StatusText = $"Saved mod load order to '{outputPath}'";
 				}
 			}
 
@@ -672,13 +701,17 @@ namespace DivinityModManager.ViewModels
 
 			RxApp.MainThreadScheduler.Schedule(async () =>
 			{
-				if (String.IsNullOrWhiteSpace(Settings.LoadOrderPath))
+				string loadOrderDirectory = Settings.LoadOrderPath;
+				if (String.IsNullOrWhiteSpace(loadOrderDirectory))
 				{
 					//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-					Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+					//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+					loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
 				}
-
-				string loadOrderDirectory = Path.GetFullPath(Settings.LoadOrderPath);
+				else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
+				{
+					loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
+				}
 
 				Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
 				SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
@@ -697,7 +730,7 @@ namespace DivinityModManager.ViewModels
 		public MainWindowViewModel() : base()
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			SaveOrderCommand = ReactiveCommand.CreateFromTask(SaveLoadOrder, canExecuteSaveCommand);
+			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
 
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);

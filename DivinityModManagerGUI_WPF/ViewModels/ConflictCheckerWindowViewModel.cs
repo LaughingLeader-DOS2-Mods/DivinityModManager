@@ -1,4 +1,5 @@
 ﻿using DivinityModManager.Models;
+using DivinityModManager.Models.Conflicts;
 using DivinityModManager.Util;
 using System;
 using System.Collections.Generic;
@@ -51,9 +52,32 @@ namespace DivinityModManager.ViewModels
 		public DivinityConflictEntryData SelectedConflictEntry => selectedConflictEntry.Value;
 
 		#region Profiles & Load Order
+
 		private ReadOnlyObservableCollection<DivinityProfileData> _profiles;
 		public ReadOnlyObservableCollection<DivinityProfileData> Profiles => _profiles;
-		public ReadOnlyObservableCollection<DivinityLoadOrder> ModOrderList { get; private set; }
+
+		private ReadOnlyObservableCollection<DivinityProfileData> _loadOrders;
+		public ReadOnlyObservableCollection<DivinityProfileData> LoadOrders => _loadOrders;
+
+		private ObservableAsPropertyHelper<DivinityLoadOrder> _selectedLoadOrder;
+		public DivinityLoadOrder SelectedLoadOrder => _selectedLoadOrder.Value;
+
+		private int selectedProfileIndex;
+
+		public int SelectedProfileIndex
+		{
+			get => selectedProfileIndex;
+			set { this.RaiseAndSetIfChanged(ref selectedProfileIndex, value); }
+		}
+
+		private int selectedLoadOrderIndex;
+
+		public int SelectedLoadOrderIndex
+		{
+			get => selectedLoadOrderIndex;
+			set { this.RaiseAndSetIfChanged(ref selectedLoadOrderIndex, value); }
+		}
+
 
 		#endregion
 
@@ -73,7 +97,12 @@ namespace DivinityModManager.ViewModels
 			view = v;
 			mainWindowViewModel = vm;
 
-			mainWindowViewModel.Profiles.ToObservableChangeSet().Bind(out _profiles);
+			if(_selectedLoadOrder == null)
+			{
+				_selectedLoadOrder = mainWindowViewModel.WhenAnyValue(x => x.SelectedModOrder).ToProperty(this, x => x.SelectedLoadOrder);
+				//mainWindowViewModel.Profiles.ToObservableChangeSet().Bind(out _profiles);
+			}
+			
 			
 			//this.WhenAnyValue(x => x.SelectedGroupIndex)
 		}

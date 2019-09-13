@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive.Disposables;
 
-namespace DivinityModManager.Models
+namespace DivinityModManager.Models.Conflicts
 {
 	public class DivinityConflictGroup : ReactiveObject
 	{

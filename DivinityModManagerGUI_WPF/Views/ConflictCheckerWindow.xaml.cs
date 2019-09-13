@@ -3,6 +3,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -30,11 +31,22 @@ namespace DivinityModManager.Views
 			DataContext = ViewModel;
 
 			this.OneWayBind(ViewModel, vm => vm.ConflictGroups, view => view.ConflictsTabControlPanel.ItemsSource).DisposeWith(ViewModel.Disposables);
+
+			this.WhenActivated(d =>
+			{
+				d.Add(ViewModel.Disposables);
+
+				this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
+				this.OneWayBind(ViewModel, vm => vm.SelectedProfileIndex, view => view.ProfilesComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
+
+				this.OneWayBind(ViewModel, vm => vm.LoadOrders, view => view.OrdersComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
+				this.OneWayBind(ViewModel, vm => vm.SelectedLoadOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
+			});
 		}
 
 		public void Init(MainWindowViewModel mainWindowViewModel)
 		{
-
+			ViewModel.OnActivated(this, mainWindowViewModel);
 		}
 
 		private void ComboBox_KeyDown_LoseFocus(object sender, KeyEventArgs e)

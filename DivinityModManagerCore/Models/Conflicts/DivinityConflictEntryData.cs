@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DivinityModManager.Models
+namespace DivinityModManager.Models.Conflicts
 {
 	public class DivinityConflictEntryData : ReactiveObject
 	{

@@ -139,6 +139,7 @@ namespace DivinityModManager.Views
 				
 				if(!conflictCheckerWindow.IsVisible)
 				{
+					conflictCheckerWindow.Init(ViewModel);
 					conflictCheckerWindow.Show();
 				}
 			}

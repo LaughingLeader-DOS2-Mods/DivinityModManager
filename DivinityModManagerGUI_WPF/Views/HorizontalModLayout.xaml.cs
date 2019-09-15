@@ -57,11 +57,13 @@ namespace DivinityModManager.Views
 
 					string header = "";
 
-					
-
 					if (headerClicked.Column.Header is TextBlock textBlock)
 					{
 						header = textBlock.Text;
+					}
+					else if (headerClicked.Column.Header is string gridHeader)
+					{
+						header = gridHeader;
 					}
 
 					Sort(header, direction, sender);

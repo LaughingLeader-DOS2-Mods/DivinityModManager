@@ -36,10 +36,27 @@ namespace DivinityModManager.ViewModels
 		{
 			base.Drop(dropInfo);
 
-			//if(dropInfo.Data is DivinityModData modData)
-			//{
-			//	modData.Index = dropInfo.InsertIndex;
-			//}
+			var newSelected = new List<object>();
+
+			if (dropInfo.Data is IEnumerable<object> list)
+			{
+				newSelected.AddRange(list);
+			}
+			else if (dropInfo.Data is ISelectable d)
+			{
+				newSelected.Add(d);
+			}
+
+			foreach (var obj in dropInfo.TargetCollection)
+			{
+				if (!newSelected.Contains(obj))
+				{
+					if (obj is ISelectable d)
+					{
+						d.IsSelected = false;
+					}
+				}
+			}
 		}
 	}
 
@@ -344,10 +361,13 @@ namespace DivinityModManager.ViewModels
 
 					foreach (var uuid in SelectedProfile.ModOrder)
 					{
-						var mod = mods.Items.FirstOrDefault(m => m.UUID == uuid);
-						if (mod != null)
+						if(SelectedProfile.ActiveMods.Contains(uuid, StringComparer.OrdinalIgnoreCase))
 						{
-							currentOrder.Order.Add(mod.ToOrderEntry());
+							var mod = mods.Items.FirstOrDefault(m => m.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase));
+							if (mod != null)
+							{
+								currentOrder.Order.Add(mod.ToOrderEntry());
+							}
 						}
 					}
 

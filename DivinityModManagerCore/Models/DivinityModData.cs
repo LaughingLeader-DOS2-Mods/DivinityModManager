@@ -6,6 +6,11 @@ using System.Linq;
 
 namespace DivinityModManager.Models
 {
+	public interface ISelectable
+	{
+		bool IsSelected { get; set; }
+	}
+
 	public interface IDivinityModData
 	{
 		string UUID { get; set; }
@@ -15,7 +20,7 @@ namespace DivinityModManager.Models
 		DivinityModVersion Version { get; set; }
 	}
 
-	public class DivinityModData : ReactiveObject, IDivinityModData
+	public class DivinityModData : ReactiveObject, IDivinityModData, ISelectable
 	{
 		private int index = -1;
 

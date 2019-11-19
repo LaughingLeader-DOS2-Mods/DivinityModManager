@@ -12,6 +12,7 @@ using System.Reflection;
 using System.Resources;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace DivinityModManager.Util
 {
@@ -150,28 +151,41 @@ namespace DivinityModManager.Util
 			return projects;
 		}
 
+		private static Regex multiPartPakPattern = new Regex("_[0-9]+.pak", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
+		private static bool CanProcessPak(FileSystemEntryInfo f)
+		{
+			return !multiPartPakPattern.IsMatch(f.FileName) && Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
+		}
+
 		public static List<DivinityModData> LoadModPackageData(string modsFolderPath)
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
-			try
+			if (Directory.Exists(modsFolderPath))
 			{
-				if (Directory.Exists(modsFolderPath))
+				List<string> modPaks = new List<string>();
+				try
 				{
-					var modPaks = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
+					modPaks.AddRange(Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
 					{
-						InclusionFilter = (f) =>
-						{
-							return Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
-						}
-					}, PathFormat.FullPath);
-					Console.WriteLine("Mod Packages: " + modPaks.Count());
-					foreach (var pakPath in modPaks)
+						InclusionFilter = CanProcessPak
+					}, PathFormat.FullPath));
+				}
+				catch(Exception ex)
+				{
+					Trace.WriteLine($"Error enumerating pak folder'{modsFolderPath}': {ex.ToString()}");
+				}
+
+				Trace.WriteLine("Mod Packages: " + modPaks.Count());
+				foreach (var pakPath in modPaks)
+				{
+					try
 					{
 						using (var pr = new LSLib.LS.PackageReader(pakPath))
 						{
 							var pak = pr.Read();
-							var metaFile = pak.Files.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
 							if (metaFile != null)
 							{
 								using (var stream = metaFile.MakeStream())
@@ -189,7 +203,16 @@ namespace DivinityModManager.Util
 							}
 						}
 					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Error loading pak '{pakPath}': {ex.ToString()}");
+					}
 				}
+			}
+
+			try
+			{
+				
 			}
 			catch(Exception ex)
 			{
@@ -271,7 +294,16 @@ namespace DivinityModManager.Util
 					var modSettingsFile = Path.Combine(folder, "modsettings.lsx");
 					if(File.Exists(modSettingsFile))
 					{
-						var modSettingsRes = ResourceUtils.LoadResource(modSettingsFile, LSLib.LS.Enums.ResourceFormat.LSX);
+						Resource modSettingsRes = null;
+						try
+						{
+							modSettingsRes = ResourceUtils.LoadResource(modSettingsFile, LSLib.LS.Enums.ResourceFormat.LSX);
+						}
+						catch(Exception ex)
+						{
+							Trace.WriteLine($"Error reading '{modSettingsFile}': '{ex.ToString()}'");
+						}
+						
 						if (modSettingsRes != null && modSettingsRes.Regions.TryGetValue("ModuleSettings", out var region))
 						{
 							if(region.Children.TryGetValue("ModOrder", out var modOrderRootNode))
@@ -291,6 +323,30 @@ namespace DivinityModManager.Util
 												if(!string.IsNullOrEmpty(uuid))
 												{
 													profileData.ModOrder.Add(uuid);
+												}
+											}
+										}
+									}
+								}
+							}
+
+							if (region.Children.TryGetValue("Mods", out var modListRootNode))
+							{
+								var modListChildrenRoot = modListRootNode.FirstOrDefault();
+								if (modListChildrenRoot != null)
+								{
+									var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
+									if (modList != null)
+									{
+										foreach (var c in modList)
+										{
+											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
+											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											{
+												var uuid = (string)attribute.Value;
+												if (!string.IsNullOrEmpty(uuid))
+												{
+													profileData.ActiveMods.Add(uuid);
 												}
 											}
 										}

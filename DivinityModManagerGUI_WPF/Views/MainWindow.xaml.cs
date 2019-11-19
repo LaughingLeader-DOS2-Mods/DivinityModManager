@@ -87,8 +87,18 @@ namespace DivinityModManager.Views
 		{
 			InitializeComponent();
 
+			string exePath = Alphaleonis.Win32.Filesystem.Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
+
 			string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
-			string logFileName = "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log";
+			string logsDirectory = exePath + "/_Logs/";
+			if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
+			{
+				Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
+			}
+
+			Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
+
+			string logFileName = Alphaleonis.Win32.Filesystem.Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
 			debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
 			Trace.Listeners.Add(debugLogListener);
 			Trace.AutoFlush = true;

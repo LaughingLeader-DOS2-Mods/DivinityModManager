@@ -1,0 +1,44 @@
+﻿<reactiveui:ReactiveWindow x:Class="DivinityModManager.Views.SettingsWindow"
+		x:TypeArguments="data:DivinityModManagerSettings"
+		xmlns:reactiveui="http://reactiveui.net"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:DivinityModManager.Views"
+        xmlns:c="clr-namespace:DivinityModManager.Controls"
+        xmlns:conv="clr-namespace:DivinityModManager.Converters"
+        xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
+        xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
+		xmlns:dd="urn:gong-wpf-dragdrop"
+		xmlns:autogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+        mc:Ignorable="d"
+        Title="Preferences" Height="450" Width="600">
+	<Grid>
+		<Grid.RowDefinitions>
+			<RowDefinition Height="*" />
+			<RowDefinition Height="Auto" />
+		</Grid.RowDefinitions>
+		<TabControl>
+			<TabItem Header="General">
+				<autogrid:AutoGrid
+					ColumnCount="2"
+                    Columns="auto,*"
+                    ChildMargin="2"
+                    Margin="20"
+					RowHeight="*"
+					RowCount="3"
+					Rows="auto,auto"
+					>
+					<Label Content="Game Data Path:" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data"/>
+					<c:UnfocusableTextBox Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Path'}" TextAlignment="Left" VerticalAlignment="Center" />
+					<Label Content="Saved Load Orders Path:" ToolTip="The folder to save and load load orders to." />
+					<c:UnfocusableTextBox Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}" TextAlignment="Left" VerticalAlignment="Center" />
+				</autogrid:AutoGrid>
+			</TabItem>
+		</TabControl>
+		<StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="10">
+			<Button x:Name="SaveSettingsButton" Content="Save" Padding="20,2" Command="{Binding SaveSettingsCommand}" />
+		</StackPanel>
+	</Grid>
+</reactiveui:ReactiveWindow>

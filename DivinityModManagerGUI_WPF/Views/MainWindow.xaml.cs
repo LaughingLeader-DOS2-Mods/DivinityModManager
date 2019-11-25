@@ -83,6 +83,9 @@ namespace DivinityModManager.Views
 		private ConflictCheckerWindow conflictCheckerWindow;
 		public ConflictCheckerWindow ConflictCheckerWindow => conflictCheckerWindow;
 
+		private SettingsWindow settingsWindow;
+		public SettingsWindow SettingsWindow => settingsWindow;
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -104,6 +107,9 @@ namespace DivinityModManager.Views
 			Trace.AutoFlush = true;
 
 			self = this;
+
+			settingsWindow = new SettingsWindow();
+			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
 
@@ -127,7 +133,7 @@ namespace DivinityModManager.Views
 			this.Bind(ViewModel, vm => vm.SelectedModOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
 
 			//Menu Items
-			this.OneWayBind(ViewModel, vm => vm.OpenConflictCheckerCommand, view => view.ConflictCheckerMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			//this.OneWayBind(ViewModel, vm => vm.OpenConflictCheckerCommand, view => view.ConflictCheckerMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			DataContext = ViewModel;
 
@@ -175,6 +181,29 @@ namespace DivinityModManager.Views
 				UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
 				elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 				e.Handled = true;
+			}
+		}
+
+		private void MenuItem_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		private void Settings_Preferences_MenuItem_Click(object sender, RoutedEventArgs e)
+		{
+			if(!SettingsWindow.IsVisible)
+			{
+				if (SettingsWindow == null)
+				{
+					settingsWindow = new SettingsWindow();
+				}
+				SettingsWindow.Init(this.ViewModel.Settings);
+				SettingsWindow.Show();
+				settingsWindow.Owner = this;
+			}
+			else
+			{
+				SettingsWindow.Hide();
 			}
 		}
 	}

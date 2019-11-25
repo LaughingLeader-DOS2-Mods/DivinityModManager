@@ -62,7 +62,7 @@ namespace DivinityModManager.ViewModels
 
 	public class MainWindowViewModel : BaseHistoryViewModel
 	{
-		public string Title => "Divinity Mod Manager 1.0.0.0";
+		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 		protected SourceCache<DivinityModData, string> mods = new SourceCache<DivinityModData, string>(m => m.UUID);
 
@@ -214,6 +214,7 @@ namespace DivinityModManager.ViewModels
 
 		private bool LoadSettings()
 		{
+			bool loaded = false;
 			string settingsFile = @"Data\settings.json";
 			try
 			{
@@ -223,6 +224,7 @@ namespace DivinityModManager.ViewModels
 					{
 						var fileText = reader.ReadToEnd();
 						Settings = JsonConvert.DeserializeObject<DivinityModManagerSettings>(fileText);
+						loaded = Settings != null;
 					}
 				}
 			}
@@ -231,16 +233,23 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Error loading settings at '{settingsFile}': {ex.ToString()}");
 				Settings = null;
 			}
+
+
 			if (Settings == null)
 			{
 				Settings = new DivinityModManagerSettings();
 				SaveSettings();
 			}
-			else
+
+			if (Settings.SaveSettingsCommand == null)
 			{
-				return true;
+				var canSaveSettings = Settings.WhenAnyValue(m => m.CanSaveSettings);
+				Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings);
 			}
-			return false;
+
+			if (loaded) Settings.CanSaveSettings = false;
+
+			return loaded;
 		}
 
 		public bool SaveSettings()
@@ -253,6 +262,8 @@ namespace DivinityModManager.ViewModels
 
 				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(settingsFile, contents);
+				StatusText = $"Saved settings to {settingsFile}";
+				Settings.CanSaveSettings = false;
 				return true;
 			}
 			catch (Exception ex)

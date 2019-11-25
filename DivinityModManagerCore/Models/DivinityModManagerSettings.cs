@@ -7,28 +7,49 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
-	[JsonObject(MemberSerialization.OptIn)]
+	[DataContract]
 	public class DivinityModManagerSettings : ReactiveObject
 	{
 		private string gameDataPath = "";
 
-		[JsonProperty]
+		[DataMember]
 		public string GameDataPath
 		{
 			get => gameDataPath;
-			set { this.RaiseAndSetIfChanged(ref gameDataPath, value); }
+			set 
+			{
+				if (value != gameDataPath) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref gameDataPath, value);
+			}
 		}
 
 		private string loadOrderPath = "";
 
-		[JsonProperty]
+		[DataMember]
 		public string LoadOrderPath
 		{
 			get => loadOrderPath;
-			set { this.RaiseAndSetIfChanged(ref loadOrderPath, value); }
+			set 
+			{
+				if (value != loadOrderPath) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref loadOrderPath, value); 
+			}
 		}
+
+		public ICommand SaveSettingsCommand { get; set; }
+
+		private bool canSaveSettings = false;
+
+		public bool CanSaveSettings
+		{
+			get => canSaveSettings;
+			set { this.RaiseAndSetIfChanged(ref canSaveSettings, value); }
+		}
+
 	}
 }

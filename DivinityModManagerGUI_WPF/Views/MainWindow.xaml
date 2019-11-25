@@ -43,10 +43,13 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Menu x:Name="TopMenuBar">
-			<MenuItem Header="Tools">
-				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
+		<Menu x:Name="TopMenuBar" Padding="2">
+			<MenuItem Header="Settings">
+				<MenuItem x:Name="Settings_Preferences_MenuItem" Header="Preferences" Click="Settings_Preferences_MenuItem_Click" />
 			</MenuItem>
+			<!--<MenuItem Header="Tools">
+				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
+			</MenuItem>-->
 		</Menu>
 		<Grid Grid.Row="1" Margin="4">
 			<Grid.ColumnDefinitions>

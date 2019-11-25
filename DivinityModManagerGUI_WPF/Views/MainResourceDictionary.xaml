@@ -94,6 +94,20 @@
 		<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
 		<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
 	</Style>
+	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">
+		<TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch">
+			<TextBlock.ToolTip>
+				<StackPanel Orientation="Vertical" MaxWidth="700" >
+					<TextBlock Text="{Binding Name}" FontWeight="Bold" />
+					<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<StackPanel Orientation="Vertical" Margin="2" Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+						<TextBlock Text="Dependencies:" FontWeight="Bold" />
+						<ListBox ItemsSource="{Binding Dependencies}" Margin="0" Padding="0" BorderThickness="0" />
+					</StackPanel>
+				</StackPanel>
+			</TextBlock.ToolTip>
+		</TextBlock>
+	</DataTemplate>
 	<GridView x:Key="ModGridView" x:Shared="False" AllowsColumnReorder="True">
 		<GridView.ColumnHeaderContainerStyle>
 			<Style TargetType="{x:Type GridViewColumnHeader}">
@@ -112,26 +126,10 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="400">
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
 				<GridViewColumn.Header>
 					<TextBlock Text="Name" />
 				</GridViewColumn.Header>
-				<GridViewColumn.CellTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding Name}" HorizontalAlignment="Stretch">
-							<TextBlock.ToolTip>
-								<StackPanel Orientation="Vertical" MaxWidth="700" >
-									<TextBlock Text="{Binding Name}" FontWeight="Bold" />
-									<TextBlock Text="{Binding Description}" TextWrapping="Wrap" Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
-									<StackPanel Orientation="Vertical" Margin="2" Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
-										<TextBlock Text="Dependencies:" FontWeight="Bold" />
-										<ListBox ItemsSource="{Binding Dependencies}" Margin="0" Padding="0" BorderThickness="0" />
-									</StackPanel>
-								</StackPanel>
-							</TextBlock.ToolTip>
-						</TextBlock>
-					</DataTemplate>
-				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn Width="80">
 				<GridViewColumn.Header>
@@ -163,15 +161,10 @@
 			</Style>
 		</GridView.ColumnHeaderContainerStyle>
 		<GridView.Columns>
-			<GridViewColumn Width="400">
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
 				<GridViewColumn.Header>
 					<TextBlock Text="Name" />
 				</GridViewColumn.Header>
-				<GridViewColumn.CellTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding Name}" />
-					</DataTemplate>
-				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn Width="80">
 				<GridViewColumn.Header>
@@ -179,7 +172,7 @@
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Version.Version}" />
+						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
@@ -189,7 +182,7 @@
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding Author}" />
+						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>

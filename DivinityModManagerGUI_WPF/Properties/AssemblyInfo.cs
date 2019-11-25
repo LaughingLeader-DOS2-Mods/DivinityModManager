@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("DivinityModManager")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("LaughingLeader")]
 [assembly: AssemblyProduct("DivinityModManager")]
 [assembly: AssemblyCopyright("Copyright ©  2019")]
 [assembly: AssemblyTrademark("")]

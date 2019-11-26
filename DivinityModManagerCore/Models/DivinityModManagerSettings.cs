@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using System.Windows.Input;
+using DivinityModManager.Util;
 
 namespace DivinityModManager.Models
 {
@@ -25,6 +26,19 @@ namespace DivinityModManager.Models
 			{
 				if (value != gameDataPath) CanSaveSettings = true;
 				this.RaiseAndSetIfChanged(ref gameDataPath, value);
+			}
+		}
+
+		private string dos2workshopPath = "";
+
+		[DataMember]
+		public string DOS2WorkshopPath
+		{
+			get => dos2workshopPath;
+			set 
+			{
+				if (value != dos2workshopPath) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref dos2workshopPath, value);
 			}
 		}
 
@@ -51,5 +65,9 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref canSaveSettings, value); }
 		}
 
+		public DivinityModManagerSettings()
+		{
+			
+		}
 	}
 }

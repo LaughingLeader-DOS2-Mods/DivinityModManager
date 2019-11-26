@@ -29,6 +29,7 @@ namespace DivinityModManager.Models
 			get => index;
 			set { this.RaiseAndSetIfChanged(ref index, value); }
 		}
+		public string FilePath { get; set; }
 
 		public string UUID { get; set; }
 		public string Name { get; set; }

@@ -139,6 +139,7 @@ namespace DivinityModManager.Util
 							var str = File.ReadAllText(metaFile);
 							var modData = ParseMetaFile(str);
 							modData.IsEditorMod = true;
+							modData.FilePath = folder;
 							if (modData != null) projects.Add(modData);
 						}
 					}
@@ -167,14 +168,19 @@ namespace DivinityModManager.Util
 				List<string> modPaks = new List<string>();
 				try
 				{
-					modPaks.AddRange(Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
+					var files = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive,
+						new DirectoryEnumerationFilters()
+						{
+							InclusionFilter = CanProcessPak
+						});
+					if (files != null)
 					{
-						InclusionFilter = CanProcessPak
-					}, PathFormat.FullPath));
+						modPaks.AddRange(files);
+					}
 				}
 				catch(Exception ex)
 				{
-					Trace.WriteLine($"Error enumerating pak folder'{modsFolderPath}': {ex.ToString()}");
+					Trace.WriteLine($"Error enumerating pak folder '{modsFolderPath}': {ex.ToString()}");
 				}
 
 				Trace.WriteLine("Mod Packages: " + modPaks.Count());
@@ -196,6 +202,7 @@ namespace DivinityModManager.Util
 										var modData = ParseMetaFile(text);
 										if (modData != null)
 										{
+											modData.FilePath = pakPath;
 											mods.Add(modData);
 										}
 									}

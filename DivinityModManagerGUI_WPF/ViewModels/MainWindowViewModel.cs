@@ -69,11 +69,17 @@ namespace DivinityModManager.ViewModels
 		protected ReadOnlyObservableCollection<DivinityModData> allMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
 
+		protected SourceCache<DivinityModData, string> workshopMods = new SourceCache<DivinityModData, string>(m => m.UUID);
+
+		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
+		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
+
+		public ModUpdatesViewData ModUpdatesViewData = new ModUpdatesViewData();
+
 		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
 
-		public ObservableCollection<DivinityModData> ActiveMods { get; set; } = new ObservableCollection<DivinityModData>();
-		public ObservableCollection<DivinityModData> InactiveMods { get; set; } = new ObservableCollection<DivinityModData>();
-
+		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
 		private int selectedProfileIndex = 0;
@@ -157,8 +163,24 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref conflictCheckerWindowOpen, value); }
 		}
 
-		private MainWindow view;
+		private bool modUpdatesAvailable = false;
 
+		public bool ModUpdatesAvailable
+		{
+			get => modUpdatesAvailable;
+			set { this.RaiseAndSetIfChanged(ref modUpdatesAvailable, value); }
+		}
+
+		private bool modUpdatesViewVisible = false;
+
+		public bool ModUpdatesViewVisible
+		{
+			get => modUpdatesViewVisible;
+			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
+		}
+
+
+		private MainWindow view;
 		public DivinityModManagerSettings Settings { get; set; }
 
 		public ICommand SaveOrderCommand { get; set; }
@@ -168,6 +190,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand RefreshCommand { get; set; }
 		public ICommand DebugCommand { get; set; }
 		public ICommand OpenConflictCheckerCommand { get; set; }
+		public ICommand ToggleUpdatesViewCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -234,10 +257,15 @@ namespace DivinityModManager.ViewModels
 				Settings = null;
 			}
 
-
 			if (Settings == null)
 			{
 				Settings = new DivinityModManagerSettings();
+				SaveSettings();
+			}
+
+			if(String.IsNullOrEmpty(Settings.DOS2WorkshopPath))
+			{
+				Settings.DOS2WorkshopPath = DivinityRegistryHelper.GetDOS2WorkshopPath().Replace("\\", "/");
 				SaveSettings();
 			}
 
@@ -273,6 +301,53 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
+		public void CheckForModUpdates()
+		{
+			ModUpdatesViewData.Clear();
+
+			int count = 0;
+			foreach(var workshopMod in WorkshopMods)
+			{
+				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == mod.UUID && !x.IsEditorMod);
+				if(pakMod != null)
+				{
+					if(mod.Version.VersionInt > pakMod.Version.VersionInt)
+					{
+						ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
+						{
+							LocalMod = pakMod,
+							WorkshopMod = workshopMod
+						});
+						count++;
+					}
+				}
+				else
+				{
+					ModUpdatesViewData.NewMods.Add(workshopMod);
+					count++;
+				}
+			}
+			if(count > 0)
+			{
+				Trace.WriteLine($"'{count}' mod updates pending.");
+			}
+		}
+
+		public void LoadWorkshopMods()
+		{
+			if(Directory.Exists(Settings.DOS2WorkshopPath))
+			{
+				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath);
+
+				var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
+
+				workshopMods.Clear();
+				workshopMods.AddOrUpdate(sortedWorkshopMods);
+
+				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+			}
+		}
+
 		public void LoadMods()
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -285,6 +360,18 @@ namespace DivinityModManager.ViewModels
 			{
 				Trace.WriteLine($"Loading mods from '{modPakFolder}'.");
 				modPakData = DivinityModDataLoader.LoadModPackageData(modPakFolder);
+			}
+
+			if(String.IsNullOrEmpty(Settings.GameDataPath) || !Directory.Exists(Settings.GameDataPath))
+			{
+				string p = DivinityRegistryHelper.GetDOS2Path();
+				if(!String.IsNullOrEmpty(p))
+				{
+					string gameDataPath = Path.Combine(p, "DefEd/Data").Replace("\\", "/");
+					Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
+					Settings.GameDataPath = gameDataPath;
+					SaveSettings();
+				}
 			}
 
 			if (Directory.Exists(Settings.GameDataPath))
@@ -525,6 +612,8 @@ namespace DivinityModManager.ViewModels
 			LoadMods();
 			LoadProfiles();
 			BuildModOrderList();
+			LoadWorkshopMods();
+			CheckForModUpdates();
 		}
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -763,10 +852,9 @@ namespace DivinityModManager.ViewModels
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
-
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
-
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
+			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
@@ -794,6 +882,12 @@ namespace DivinityModManager.ViewModels
 			}).DisposeWith(Disposables);
 
 			mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(Disposables);
+			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe().DisposeWith(Disposables);
+
+			ModUpdates.CollectionChanged += delegate
+			{
+				ModUpdatesAvailable = ModUpdates.Count > 0;
+			};
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 

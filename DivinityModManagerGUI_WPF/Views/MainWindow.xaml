@@ -12,6 +12,7 @@
         xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
         xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 		xmlns:dd="urn:gong-wpf-dragdrop"
+		xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
         mc:Ignorable="d"
         Height="800" Width="1400"
 >
@@ -47,10 +48,32 @@
 			<MenuItem Header="Settings">
 				<MenuItem x:Name="Settings_Preferences_MenuItem" Header="Preferences" Click="Settings_Preferences_MenuItem_Click" />
 			</MenuItem>
+			<MenuItem Header="Updates" Command="{Binding ToggleUpdatesViewCommand}" />
 			<!--<MenuItem Header="Tools">
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
 			</MenuItem>-->
 		</Menu>
+		<Grid Grid.Row="1" Grid.RowSpan="2" Background="AntiqueWhite" Panel.ZIndex="99" 
+			  Visibility="{Binding ModUpdatesViewVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}" >
+			<ag:AutoGrid x:Name="UpdateGrid"
+			RowCount="3" Rows="auto,auto,*" Columns="*" DataContext="{Binding ModUpdatesViewData}"
+			  >
+				<TextBlock Text="Mod Updates" TextAlignment="Center" FontSize="24" Background="White" />
+				<ag:AutoGrid Visibility="{Binding NewAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}"
+				RowCount="2" Rows="auto,*"
+			>
+					<TextBlock Text="New" TextAlignment="Center" FontSize="20" Background="White" />
+					<ListView ItemsSource="{Binding NewMods}" />
+				</ag:AutoGrid>
+				<ag:AutoGrid Visibility="{Binding UpdatesAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}"
+				RowCount="2" Rows="auto,*"
+			>
+					<TextBlock Text="Updated" TextAlignment="Center" FontSize="20" Background="White" />
+					<ListView ItemsSource="{Binding Updates}" />
+				</ag:AutoGrid>
+			</ag:AutoGrid>
+		</Grid>
+		
 		<Grid Grid.Row="1" Margin="4">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="Auto" />
@@ -117,6 +140,7 @@
 				</StackPanel>
 			</Grid>
 		</Grid>
+
 		<ContentControl x:Name="LayoutContent" Grid.Row="2" Content="{Binding}">
 			<ContentControl.Style>
 				<Style TargetType="{x:Type ContentControl}">

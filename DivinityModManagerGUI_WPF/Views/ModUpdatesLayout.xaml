@@ -12,7 +12,10 @@
 			xmlns:dd="urn:gong-wpf-dragdrop"
 			xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 			mc:Ignorable="d" 
-			d:DesignHeight="450" d:DesignWidth="800">
+			d:DesignHeight="450" d:DesignWidth="800"
+			IsEnabled="{Binding Unlocked}"
+			IsManipulationEnabled="{Binding Unlocked}"
+>
 	<d:DesignerProperties.DesignStyle>
 		<Style TargetType="UserControl">
 			<Setter Property="Background" Value="White" />
@@ -45,7 +48,7 @@
 				<TextBlock Text="Mod Updates" TextAlignment="Center" FontSize="24" Background="White" />
 				<Rectangle Height="2" Fill="LightGray" />
 			</StackPanel>
-			<ag:AutoGrid Visibility="{Binding NewAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}"
+			<ag:AutoGrid
 					RowCount="2" Rows="auto,*" Columns="*" Grid.Row="1"
 				>
 				<TextBlock Text="New Mods" TextAlignment="Center" FontSize="20" Background="White"/>
@@ -59,7 +62,7 @@
 				<ListView ItemsSource="{Binding Updates}" View="{DynamicResource ModUpdatesGridView}" GridViewColumnHeader.Click="SortModUpdatesGridView" BorderThickness="0"/>
 			</ag:AutoGrid>
 			<Grid Grid.Row="4" Margin="4">
-				<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
 					<Button Content="Copy Selected to Mods Folder" Command="{Binding CopySelectedModsCommand}" Padding="8,2"/>
 				</StackPanel>
 			</Grid>

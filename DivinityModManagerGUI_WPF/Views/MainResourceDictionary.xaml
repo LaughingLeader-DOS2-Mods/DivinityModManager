@@ -236,7 +236,7 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+			<GridViewColumn Width="80" Header="Current" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.HeaderContainerStyle>
 					<Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource GridViewLeftContainerStyle}">
 						<Setter Property="Control.ToolTip" Value="Current Version" />

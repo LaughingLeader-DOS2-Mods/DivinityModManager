@@ -32,7 +32,7 @@ namespace DivinityModManager.Views
 
 		private void Sort(string sortBy, ListSortDirection direction, object sender, bool modUpdatesGrid = false)
 		{
-			if (sortBy == "Version") sortBy = "Version.Version";
+			if (sortBy == "Version" || sortBy == "Current") sortBy = "Version.Version";
 			if (sortBy == "New") sortBy = "WorkshopMod.Version.Version";
 			if (sortBy == "#") sortBy = "Index";
 			

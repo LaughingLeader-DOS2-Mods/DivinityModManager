@@ -11,11 +11,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
+using Ookii.Dialogs.Wpf;
+using DivinityModManager.Views;
 
 namespace DivinityModManager.ViewModels
 {
+	public struct CopyModUpdatesTask
+	{
+		public List<string> NewFilesToMove;
+		public List<string> UpdatesToMove;
+		public string DocumentsFolder;
+		public string ModPakFolder;
+		public int TotalMoved;
+	}
+
 	public class ModUpdatesViewData : ReactiveObject
 	{
+		private bool unlocked = true;
+
+		public bool Unlocked
+		{
+			get => unlocked;
+			set { this.RaiseAndSetIfChanged(ref unlocked, value); }
+		}
+
 		private bool newAvailable;
 
 		public bool NewAvailable
@@ -63,6 +82,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand SelectAllNewModsCommand { get; set; }
 		public ICommand SelectAllUpdatesCommand { get; set; }
 
+		public Action<bool> CloseView { get; set; }
+
 		public void Clear()
 		{
 			Updates.Clear();
@@ -70,67 +91,151 @@ namespace DivinityModManager.ViewModels
 
 			TotalUpdates = 0;
 			NewAvailable = UpdatesAvailable = false;
+			Unlocked = true;
+		}
+
+		public void SelectAll(bool select = true)
+		{
+			foreach (var x in NewMods)
+			{
+				x.IsSelected = select;
+			}
+			foreach (var x in Updates)
+			{
+				x.IsSelected = select;
+			}
+		}
+
+		private void CopySelectedMods_Run()
+		{
+			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			string modPakFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods");
+
+			if (Directory.Exists(modPakFolder))
+			{
+				Unlocked = false;
+				using (ProgressDialog dialog = new ProgressDialog()
+				{
+					WindowTitle = "Updating Mods",
+					Text = "Copying workshop mods...",
+					CancellationText = "Update Canceled",
+					MinimizeBox = false,
+					ProgressBarStyle = ProgressBarStyle.ProgressBar
+				})
+				{
+					dialog.DoWork += CopyFilesProgress_DoWork;
+					dialog.RunWorkerCompleted += CopyFilesProgress_RunWorkerCompleted;
+
+					var args = new CopyModUpdatesTask()
+					{
+						DocumentsFolder = documentsFolder,
+						ModPakFolder = modPakFolder,
+						NewFilesToMove = new List<string>(NewMods.Where(x => x.IsSelected).Select(x => x.FilePath)),
+						UpdatesToMove = new List<string>(Updates.Where(x => x.IsSelected).Select(x => x.WorkshopMod.FilePath)),
+						TotalMoved = 0
+					};
+
+					dialog.ShowDialog(MainWindow.Self, args);
+				}
+			}
+			else
+			{
+				CloseView?.Invoke(false);
+			}
 		}
 
 		public void CopySelectedMods()
 		{
-			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string modPakFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods");
-			int totalMoved = 0;
-			
-			if (Directory.Exists(modPakFolder))
+			if (Updates.Where(x => x.IsSelected).Count() > 0)
 			{
-				List<string> filesToMove = new List<string>(NewMods.Where(x => x.IsSelected).Select(x => x.FilePath));
-				if (filesToMove.Count > 0)
+				using (TaskDialog dialog = new TaskDialog()
 				{
-					Trace.WriteLine($"Copying '{filesToMove.Count}' new workshop mod(s) to the local mods folder.");
-
-					foreach (string file in filesToMove)
+					Buttons =
 					{
-						File.Copy(file, Path.Combine(modPakFolder, Path.GetFileName(file)), true);
-						totalMoved++;
+						new TaskDialogButton(ButtonType.Yes),
+						new TaskDialogButton(ButtonType.No)
+					},
+					WindowTitle = "Update Mods?",
+					Content = string.Format("Override local mods with the latest workshop versions?{0}{1}{0}{2}",
+						Environment.NewLine,
+						"Existing paks will be moved to the backup folder:",
+						"(Larian Studios/Divinity Original Sin 2 Definitive Edition/Mods_Backup/)"),
+					MainIcon = TaskDialogIcon.Warning
+				})
+				{
+					var result = dialog.ShowDialog(MainWindow.Self);
+					if (result.ButtonType == ButtonType.Yes)
+					{
+						CopySelectedMods_Run();
 					}
-
-					filesToMove.Clear();
-				}
-				
-				filesToMove.AddRange(Updates.Where(x => x.IsSelected).Select(x => x.WorkshopMod.FilePath));
-				if(filesToMove.Count > 0)
-				{
-					string backupFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods_Old_ModManager");
-					Directory.CreateDirectory(backupFolder);
-					Trace.WriteLine($"Copying '{filesToMove.Count}' workshop mod update(s) to the local mods folder.");
-					foreach (string file in filesToMove)
+					else
 					{
-						string baseName = Path.GetFileName(file);
-						string existingMod = Path.Combine(modPakFolder, baseName);
-						if(File.Exists(existingMod))
-						{
-							Trace.WriteLine($"Moved old pak to backup folder: '{existingMod}'.");
-							string nextPath = DivinityFileUtils.GetUniqueFilename(Path.Combine(backupFolder, Path.GetFileName(existingMod)));
-							File.Move(existingMod, nextPath);
-							totalMoved++;
-						}
-						Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
-						File.Move(file, Path.Combine(modPakFolder, Path.GetFileName(file)));
+						//CloseView?.Invoke(false);
 					}
 				}
-
-				Trace.WriteLine("Update complete.");
-				JustUpdated = totalMoved > 0;
+			}
+			else
+			{
+				CopySelectedMods_Run();
 			}
 		}
 
-		public void SelectAll(bool select)
+		private void CopyFilesProgress_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
-			foreach(var x in NewMods)
+			Unlocked = true;
+			Trace.WriteLine("Update complete.");
+			if (e.Result is CopyModUpdatesTask args)
 			{
-				x.IsSelected = select;
+				JustUpdated = args.TotalMoved > 0;
 			}
-			foreach(var x in Updates)
+			CloseView?.Invoke(true);
+		}
+
+		private void CopyFilesProgress_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+		{
+			ProgressDialog dialog = (ProgressDialog)sender;
+			if(e.Argument is CopyModUpdatesTask args)
 			{
-				x.IsSelected = select;
+				var totalWork = args.NewFilesToMove.Count + args.UpdatesToMove.Count;
+				if (args.NewFilesToMove.Count > 0)
+				{
+					Trace.WriteLine($"Copying '{args.NewFilesToMove.Count}' new workshop mod(s) to the local mods folder.");
+
+					foreach (string file in args.NewFilesToMove)
+					{
+						if (e.Cancel) return;
+						var fileName = Path.GetFileName(file);
+						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{fileName}'...", null);
+						File.Copy(file, Path.Combine(args.ModPakFolder, fileName), true);
+						args.TotalMoved++;
+					}
+				}
+
+				if (args.UpdatesToMove.Count > 0)
+				{
+					string backupFolder = Path.Combine(args.DocumentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods_Old_ModManager");
+					Directory.CreateDirectory(backupFolder);
+					Trace.WriteLine($"Copying '{args.UpdatesToMove.Count}' workshop mod update(s) to the local mods folder.");
+					foreach (string file in args.UpdatesToMove)
+					{
+						if (e.Cancel) return;
+						string baseName = Path.GetFileName(file);
+						string existingMod = Path.Combine(args.ModPakFolder, baseName);
+						if (File.Exists(existingMod))
+						{
+							dialog.ReportProgress(args.TotalMoved / totalWork, $"Moving '{baseName}' to backup folder...", null);
+							Trace.WriteLine($"Moved old pak to backup folder: '{existingMod}'.");
+							string nextPath = DivinityFileUtils.GetUniqueFilename(Path.Combine(backupFolder, Path.GetFileName(existingMod)));
+							File.Move(existingMod, nextPath);
+						}
+						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
+						Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
+						File.Move(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)));
+						args.TotalMoved++;
+					}
+				}
 			}
+			
 		}
 
 		public ModUpdatesViewData()

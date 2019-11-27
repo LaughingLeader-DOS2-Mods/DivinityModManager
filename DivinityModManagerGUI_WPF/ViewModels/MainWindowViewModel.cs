@@ -337,6 +337,7 @@ namespace DivinityModManager.ViewModels
 			}
 			if(count > 0)
 			{
+				ModUpdatesViewData.SelectAll(true);
 				Trace.WriteLine($"'{count}' mod updates pending.");
 			}
 		}
@@ -909,20 +910,28 @@ namespace DivinityModManager.ViewModels
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
 
-			this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
+			//this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
+			//{
+			//	Trace.WriteLine("Updates available: " + b.ToString());
+			//});
+
+			ModUpdatesViewData.CloseView = new Action<bool>((bool refresh) =>
 			{
-				Trace.WriteLine("Updates available: " + b.ToString());
+				ModUpdatesViewData.Clear();
+				if (refresh) Refresh();
+				ModUpdatesViewVisible = false;
+				view.Activate();
 			});
 
-			this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
-			{
-				if(b)
-				{
-					ModUpdatesViewVisible = false;
-					ModUpdatesViewData.Clear();
-					Refresh();
-				}
-			});
+			//this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
+			//{
+			//	if(b)
+			//	{
+			//		ModUpdatesViewVisible = false;
+			//		ModUpdatesViewData.Clear();
+			//		Refresh();
+			//	}
+			//});
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 

@@ -1,4 +1,5 @@
 ﻿using DivinityModManager.Models;
+using DynamicData;
 using DynamicData.Binding;
 using ReactiveUI;
 using System;
@@ -6,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Input;
 
 namespace DivinityModManager.ViewModels
 {
@@ -38,6 +40,18 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref totalUpdates, value); }
 		}
 
+		private bool anySelected = false;
+
+		public bool AnySelected
+		{
+			get => anySelected;
+			set { this.RaiseAndSetIfChanged(ref anySelected, value); }
+		}
+
+		public ICommand CopySelectedModsCommand { get; set; }
+		public ICommand SelectAllNewModsCommand { get; set; }
+		public ICommand SelectAllUpdatesCommand { get; set; }
+
 		public void Clear()
 		{
 			Updates.Clear();
@@ -45,6 +59,22 @@ namespace DivinityModManager.ViewModels
 
 			TotalUpdates = 0;
 			NewAvailable = UpdatesAvailable = false;
+		}
+
+		public void CopySelectedMods()
+		{
+
+		}
+		public void SelectAll(bool select)
+		{
+			foreach(var x in NewMods)
+			{
+				x.IsSelected = select;
+			}
+			foreach(var x in Updates)
+			{
+				x.IsSelected = select;
+			}
 		}
 
 		public ModUpdatesViewData()
@@ -59,6 +89,24 @@ namespace DivinityModManager.ViewModels
 				UpdatesAvailable = Updates.Count > 0;
 			};
 
+			var anySelectedObservable = this.WhenAnyValue(x => x.AnySelected);
+
+			CopySelectedModsCommand = ReactiveCommand.Create(CopySelectedMods, anySelectedObservable);
+			SelectAllNewModsCommand = ReactiveCommand.Create<bool>((b) =>
+			{
+				foreach (var x in NewMods)
+				{
+					x.IsSelected = b;
+				}
+			});
+			SelectAllUpdatesCommand = ReactiveCommand.Create<bool>((b) =>
+			{
+				foreach(var x in Updates)
+				{
+					x.IsSelected = b;
+				}
+			});
+
 			//this.WhenAnyValue(x => x.NewMods.Count).Subscribe((count) =>
 			//{
 			//	NewAvailable = count > 0;
@@ -70,6 +118,30 @@ namespace DivinityModManager.ViewModels
 			//});
 
 			this.WhenAnyValue(x => x.NewMods.Count, x => x.Updates.Count, (a, b) => a + b).BindTo(this, x => x.TotalUpdates);
+			NewMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).ToCollection().Subscribe((c) =>
+			{
+				bool nextAnySelected = c.Any(x => x.IsSelected);
+				if(!nextAnySelected)
+				{
+					AnySelected = Updates.Any(x => x.IsSelected);
+				}
+				else
+				{
+					AnySelected = true;
+				}
+			});
+			Updates.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).ToCollection().Subscribe((c) =>
+			{
+				bool nextAnySelected = c.Any(x => x.IsSelected);
+				if (!nextAnySelected)
+				{
+					AnySelected = NewMods.Any(x => x.IsSelected);
+				}
+				else
+				{
+					AnySelected = true;
+				}
+			});
 		}
 	}
 }

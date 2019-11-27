@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,38 @@ namespace DivinityModManager.Views
 		GridViewColumnHeader _lastHeaderClicked = null;
 		ListSortDirection _lastDirection = ListSortDirection.Ascending;
 
-		private void SortGridView_Click(object sender, RoutedEventArgs e)
+		private void Sort(string sortBy, ListSortDirection direction, object sender, bool modUpdatesGrid = false)
+		{
+			if (sortBy == "Version") sortBy = "Version.Version";
+			if (sortBy == "New") sortBy = "WorkshopMod.Version.Version";
+			if (sortBy == "#") sortBy = "Index";
+			
+			if (modUpdatesGrid && sortBy != "IsSelected" && sortBy != "WorkshopMod.Version.Version") 
+			{
+				sortBy = "LocalMod." + sortBy;
+			}
+
+			if (sortBy != "")
+			{
+				try
+				{
+					ListView lv = sender as ListView;
+					ICollectionView dataView =
+						CollectionViewSource.GetDefaultView(lv.ItemsSource);
+
+					dataView.SortDescriptions.Clear();
+					SortDescription sd = new SortDescription(sortBy, direction);
+					dataView.SortDescriptions.Add(sd);
+					dataView.Refresh();
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine("Error sorting grid: " + ex.ToString());
+				}
+			}
+		}
+
+		private void SortGrid(object sender, RoutedEventArgs e, bool modUpdatesGrid = false)
 		{
 			GridViewColumnHeader headerClicked = e.OriginalSource as GridViewColumnHeader;
 			ListSortDirection direction;
@@ -64,8 +96,16 @@ namespace DivinityModManager.Views
 					{
 						header = gridHeader;
 					}
+					else if (headerClicked.Column.Header is CheckBox selectionHeader)
+					{
+						header = "IsSelected";
+					}
+					else if (headerClicked.Column.Header is Control c && c.ToolTip is string toolTip)
+					{
+						header = toolTip;
+					}
 
-					Sort(header, direction, sender);
+					Sort(header, direction, sender, modUpdatesGrid);
 
 					_lastHeaderClicked = headerClicked;
 					_lastDirection = direction;
@@ -73,18 +113,14 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		private void Sort(string sortBy, ListSortDirection direction, object sender)
+		private void SortNewModsGridView(object sender, RoutedEventArgs e)
 		{
-			if (sortBy == "Version") sortBy = "Version.Version";
-			if (sortBy == "#") sortBy = "Index";
-			ListView lv = sender as ListView;
-			ICollectionView dataView =
-			  CollectionViewSource.GetDefaultView(lv.ItemsSource);
+			SortGrid(sender, e);
+		}
 
-			dataView.SortDescriptions.Clear();
-			SortDescription sd = new SortDescription(sortBy, direction);
-			dataView.SortDescriptions.Add(sd);
-			dataView.Refresh();
+		private void SortModUpdatesGridView(object sender, RoutedEventArgs e)
+		{
+			SortGrid(sender, e, true);
 		}
 	}
 }

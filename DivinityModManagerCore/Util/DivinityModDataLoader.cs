@@ -101,7 +101,7 @@ namespace DivinityModManager.Util
 								Folder = GetAttribute(node, "Folder", ""),
 								MD5 = GetAttribute(node, "MD5", "")
 							};
-							Console.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
+							//Trace.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
 							if (dependencyMod.UUID != "")
 							{
 								modData.Dependencies.Add(dependencyMod);

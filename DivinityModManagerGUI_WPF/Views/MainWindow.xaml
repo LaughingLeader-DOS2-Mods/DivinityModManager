@@ -44,7 +44,7 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<ag:AutoGrid ColumnCount="3" Columns="2*,100,1*" RowCount="1" Rows="auto">
+		<ag:AutoGrid ColumnCount="3" Columns="2*,1,1*" RowCount="1" Rows="auto">
 			<Menu x:Name="TopMenuBar" Padding="2">
 				<MenuItem Header="File"></MenuItem>
 				<MenuItem Header="Settings">
@@ -56,33 +56,47 @@
 			</Menu>
 			<Grid />
 			<StackPanel Orientation="Horizontal">
-				<Button Command="{Binding ToggleUpdatesViewCommand}" MinWidth="20" BorderThickness="0">
-					<Button.Content>
-						<Grid>
-							<Grid.Resources>
-								<DataTemplate x:Key="UpdatesHeaderTemplate">
-									<Grid x:Name="ToggleUpdatesButtonGrid">
-										<TextBlock x:Name="UpdateCountTextBlock" Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
-										   ToolTip="Mod Updates"/>
-									</Grid>
-									<DataTemplate.Triggers>
-										<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
-											<Setter Property="Background" TargetName="ToggleUpdatesButtonGrid" Value="Red"/>
-											<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="White"/>
-											<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Bold"/>
-										</DataTrigger>
-										<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
-											<Setter Property="Background" TargetName="ToggleUpdatesButtonGrid" Value="Transparent"/>
-											<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="Black"/>
-											<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Normal"/>
-										</DataTrigger>
-									</DataTemplate.Triggers>
-								</DataTemplate>
-							</Grid.Resources>
-							<ContentControl ContentTemplate="{StaticResource UpdatesHeaderTemplate}" Content="{Binding}" />
-						</Grid>
-					</Button.Content>
-				</Button>
+				<StackPanel.Resources>
+					<DataTemplate x:Key="UpdatesButtonTemplate">
+						<Viewbox Stretch="Uniform" >
+							<StackPanel x:Name="UpdateViewPanel" Background="Transparent">
+								<Button Command="{Binding ToggleUpdatesViewCommand}" MinWidth="20" BorderThickness="0" x:Name="UpdateViewToggleButton" Background="Transparent"
+										 ToolTip="Toggle the Mod Updates View"
+										>
+									<Button.Content>
+										<StackPanel Orientation="Horizontal">
+											<TextBlock Text="Updates" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="4,0" />
+											<Grid>
+												<Rectangle x:Name="RedUpdateBackground" MinWidth="20" MinHeight="20" Fill="Transparent" Opacity="0.85" />
+												<TextBlock x:Name="UpdateCountTextBlock" HorizontalAlignment="Stretch" VerticalAlignment="Center" TextAlignment="Center"
+														   Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"/>
+											</Grid>
+										</StackPanel>
+									</Button.Content>
+								</Button>
+							</StackPanel>
+						</Viewbox>
+						<DataTemplate.Triggers>
+							<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
+								<Setter Property="Fill" TargetName="RedUpdateBackground" Value="Red"/>
+								<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="White"/>
+								<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Bold"/>
+							</DataTrigger>
+							<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
+								<Setter Property="Fill" TargetName="RedUpdateBackground" Value="Transparent"/>
+								<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="Black"/>
+								<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Normal"/>
+							</DataTrigger>
+							<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
+								<Setter Property="Background" TargetName="UpdateViewPanel" Value="LightBlue"/>
+							</DataTrigger>
+							<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="False">
+								<Setter Property="Background" TargetName="UpdateViewPanel" Value="Transparent"/>
+							</DataTrigger>
+						</DataTemplate.Triggers>
+					</DataTemplate>
+				</StackPanel.Resources>
+				<ContentControl ContentTemplate="{StaticResource UpdatesButtonTemplate}" Content="{Binding}" />
 			</StackPanel>
 		</ag:AutoGrid>
 		<Grid Grid.Row="1" Grid.RowSpan="2" Background="AntiqueWhite" Panel.ZIndex="99" 

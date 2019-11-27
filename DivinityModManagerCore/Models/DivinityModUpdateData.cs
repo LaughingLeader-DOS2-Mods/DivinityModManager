@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.Models
 {
-	public class DivinityModUpdateData : ReactiveObject
+	public class DivinityModUpdateData : ReactiveObject, ISelectable
 	{
 		public DivinityModData LocalMod { get; set; }
 		public DivinityModData WorkshopMod { get; set; }
@@ -19,5 +19,7 @@ namespace DivinityModManager.Models
 			get => isSelected;
 			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
 		}
+
+		public bool IsEditorMod { get; set; } = false;
 	}
 }

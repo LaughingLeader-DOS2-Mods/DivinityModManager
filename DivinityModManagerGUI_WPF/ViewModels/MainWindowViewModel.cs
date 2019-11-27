@@ -307,17 +307,26 @@ namespace DivinityModManager.ViewModels
 			int count = 0;
 			foreach(var workshopMod in WorkshopMods)
 			{
-				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsEditorMod);
+				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID);
 				if(pakMod != null)
 				{
-					if(workshopMod.Version.VersionInt > pakMod.Version.VersionInt)
+					if(!pakMod.IsEditorMod)
 					{
-						ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
+						Trace.WriteLine($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
+						if (workshopMod.Version.VersionInt > pakMod.Version.VersionInt)
 						{
-							LocalMod = pakMod,
-							WorkshopMod = workshopMod
-						});
-						count++;
+							ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
+							{
+								LocalMod = pakMod,
+								WorkshopMod = workshopMod
+							});
+							count++;
+						}
+					}
+					else
+					{
+						Trace.WriteLine($"[***WARNING***] An editor mod has a local workshop pak! ({pakMod.Name}):");
+						Trace.WriteLine($"--- Editor Version({pakMod.Version.Version}) | Workshop Version({workshopMod.Version.Version})");
 					}
 				}
 				else

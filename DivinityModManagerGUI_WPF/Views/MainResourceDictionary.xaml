@@ -108,18 +108,21 @@
 			</TextBlock.ToolTip>
 		</TextBlock>
 	</DataTemplate>
-	<GridView x:Key="ModGridView" x:Shared="False" AllowsColumnReorder="True">
-		<GridView.ColumnHeaderContainerStyle>
-			<Style TargetType="{x:Type GridViewColumnHeader}">
-				<Setter Property="HorizontalContentAlignment" Value="Left" />
-				<Setter Property="Margin" Value="4,0,0,0" />
-			</Style>
-		</GridView.ColumnHeaderContainerStyle>
+	<Style x:Key="GridViewLeftContainerStyle" TargetType="{x:Type GridViewColumnHeader}">
+		<Setter Property="HorizontalContentAlignment" Value="Left" />
+		<Setter Property="Margin" Value="4,0,0,0" />
+	</Style>
+	<Style x:Key="GridViewCenteredContainerStyle" TargetType="{x:Type GridViewColumnHeader}">
+		<Setter Property="HorizontalContentAlignment" Value="Center" />
+		<Setter Property="VerticalContentAlignment" Value="Center" />
+		<Setter Property="Margin" Value="2" />
+	</Style>
+	<DataTemplate x:Key="GridViewTextblockHeaderTemplate">
+		<TextBlock Margin="2,0,2,0" Text="{Binding}" />
+	</DataTemplate>
+	<GridView x:Key="ModGridView" x:Shared="False" AllowsColumnReorder="True" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 		<GridView.Columns>
-			<GridViewColumn Width="40">
-				<GridViewColumn.Header>
-					<TextBlock Text="#" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="40" Header="#" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Index}" Background="Transparent" Margin="2,0,2,0" />
@@ -131,20 +134,14 @@
 					<TextBlock Text="Name" />
 				</GridViewColumn.Header>
 			</GridViewColumn>
-			<GridViewColumn Width="80">
-				<GridViewColumn.Header>
-					<TextBlock Text="Version" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="100">
-				<GridViewColumn.Header>
-					<TextBlock Text="Author" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="100" Header="Author" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
@@ -153,33 +150,17 @@
 			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
-	<GridView x:Key="InactiveModGridView" x:Shared="False" AllowsColumnReorder="True">
-		<GridView.ColumnHeaderContainerStyle>
-			<Style TargetType="{x:Type GridViewColumnHeader}">
-				<Setter Property="HorizontalContentAlignment" Value="Left" />
-				<Setter Property="Margin" Value="4,0,0,0" />
-			</Style>
-		</GridView.ColumnHeaderContainerStyle>
+	<GridView x:Key="InactiveModGridView" x:Shared="False" AllowsColumnReorder="True" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 		<GridView.Columns>
-			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
-				<GridViewColumn.Header>
-					<TextBlock Text="Name" />
-				</GridViewColumn.Header>
-			</GridViewColumn>
-			<GridViewColumn Width="80">
-				<GridViewColumn.Header>
-					<TextBlock Text="Version" />
-				</GridViewColumn.Header>
-				<GridViewColumn.CellTemplate>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}" Header="Name" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}" />
+			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+			<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="100">
-				<GridViewColumn.Header>
-					<TextBlock Text="Author" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="100" Header="Author" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
@@ -188,43 +169,28 @@
 			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
-	<GridView x:Key="NewModsGridView" x:Shared="False" AllowsColumnReorder="True">
-		<GridView.ColumnHeaderContainerStyle>
-			<Style TargetType="{x:Type GridViewColumnHeader}">
-				<Setter Property="HorizontalContentAlignment" Value="Left" />
-				<Setter Property="Margin" Value="4,0,0,0" />
-			</Style>
-		</GridView.ColumnHeaderContainerStyle>
+	<GridView x:Key="NewModsGridView" x:Shared="False" AllowsColumnReorder="True" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 		<GridView.Columns>
-			<GridViewColumn Width="40">
+			<GridViewColumn Width="40" HeaderContainerStyle="{StaticResource GridViewCenteredContainerStyle}">
 				<GridViewColumn.Header>
-					<CheckBox x:Name="NewModsCheckAllCheckBox" />
+					<CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding SelectAllNewModsCommand}" 
+							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<CheckBox IsChecked="{Binding IsSelected}" Margin="2,0,2,0" />
+						<CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" VerticalAlignment="Center" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
-				<GridViewColumn.Header>
-					<TextBlock Text="Name" />
-				</GridViewColumn.Header>
-			</GridViewColumn>
-			<GridViewColumn Width="100">
-				<GridViewColumn.Header>
-					<TextBlock Text="Author" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}" Header="Name" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}" />
+			<GridViewColumn Width="100" Header="Author" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="80">
-				<GridViewColumn.Header>
-					<TextBlock Text="Version" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
@@ -249,53 +215,45 @@
 			</TextBlock.ToolTip>
 		</TextBlock>
 	</DataTemplate>
-	<GridView x:Key="ModUpdatesGridView" x:Shared="False" AllowsColumnReorder="True">
-		<GridView.ColumnHeaderContainerStyle>
-			<Style TargetType="{x:Type GridViewColumnHeader}">
-				<Setter Property="HorizontalContentAlignment" Value="Left" />
-				<Setter Property="Margin" Value="4,0,0,0" />
-			</Style>
-		</GridView.ColumnHeaderContainerStyle>
+	<GridView x:Key="ModUpdatesGridView" x:Shared="False" AllowsColumnReorder="True" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 		<GridView.Columns>
-			<GridViewColumn Width="40">
+			<GridViewColumn Width="40" HeaderContainerStyle="{StaticResource GridViewCenteredContainerStyle}">
 				<GridViewColumn.Header>
-					<CheckBox x:Name="ModUpdatesCheckAllCheckBox" />
+					<CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding SelectAllUpdatesCommand}" 
+							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<CheckBox IsChecked="{Binding IsSelected}" Margin="2,0,2,0" />
+						<CheckBox IsChecked="{Binding IsSelected}" HorizontalAlignment="Center" VerticalAlignment="Center" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="400" CellTemplate="{StaticResource ModUpdateNameTemplate}">
-				<GridViewColumn.Header>
-					<TextBlock Text="Name" />
-				</GridViewColumn.Header>
-			</GridViewColumn>
-			<GridViewColumn Width="100">
-				<GridViewColumn.Header>
-					<TextBlock Text="Author" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModUpdateNameTemplate}" Header="Name" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}" />
+			<GridViewColumn Width="100" Header="Author" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding WorkshopMod.Author}" ToolTip="{Binding WorkshopMod.Author}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="80">
-				<GridViewColumn.Header>
-					<TextBlock Text="Version" ToolTip="Current Version" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.HeaderContainerStyle>
+					<Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource GridViewLeftContainerStyle}">
+						<Setter Property="Control.ToolTip" Value="Current Version" />
+					</Style>
+				</GridViewColumn.HeaderContainerStyle>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding LocalMod.Version.Version}" ToolTip="{Binding LocalMod.Version.Version}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn Width="80">
-				<GridViewColumn.Header>
-					<TextBlock Text="New" ToolTip="New Version" />
-				</GridViewColumn.Header>
+			<GridViewColumn Width="80" Header="New" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.HeaderContainerStyle>
+					<Style TargetType="{x:Type GridViewColumnHeader}" BasedOn="{StaticResource GridViewLeftContainerStyle}">
+						<Setter Property="Control.ToolTip" Value="New Version" />
+					</Style>
+				</GridViewColumn.HeaderContainerStyle>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding WorkshopMod.Version.Version}" ToolTip="{Binding WorkshopMod.Version.Version}" />

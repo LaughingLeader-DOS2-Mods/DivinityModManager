@@ -615,11 +615,26 @@ namespace DivinityModManager.ViewModels
 		public void Refresh()
 		{
 			Trace.WriteLine($"Refreshing view.");
+
+			List<DivinityLoadOrderEntry> lastActiveOrder = null;
+			int lastOrderIndex = -1;
+			if (SelectedModOrder != null)
+			{
+				lastActiveOrder = SelectedModOrder.Order.ToList();
+				lastOrderIndex = SelectedModOrderIndex;
+			}
 			mods.Clear();
 			Profiles.Clear();
 			LoadMods();
 			LoadProfiles();
 			BuildModOrderList();
+			if(lastActiveOrder != null)
+			{
+				// Just in case a mod disappears
+				var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
+				SelectedModOrderIndex = lastOrderIndex;
+				SelectedModOrder.SetOrder(lastActiveOrder);
+			}
 			LoadWorkshopMods();
 			CheckForModUpdates();
 		}
@@ -897,6 +912,16 @@ namespace DivinityModManager.ViewModels
 			this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
 			{
 				Trace.WriteLine("Updates available: " + b.ToString());
+			});
+
+			this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
+			{
+				if(b)
+				{
+					ModUpdatesViewVisible = false;
+					ModUpdatesViewData.Clear();
+					Refresh();
+				}
 			});
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));

@@ -44,34 +44,50 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Menu x:Name="TopMenuBar" Padding="2">
-			<MenuItem Header="Settings">
-				<MenuItem x:Name="Settings_Preferences_MenuItem" Header="Preferences" Click="Settings_Preferences_MenuItem_Click" />
-			</MenuItem>
-			<MenuItem Header="Updates" Command="{Binding ToggleUpdatesViewCommand}" />
-			<!--<MenuItem Header="Tools">
+		<ag:AutoGrid ColumnCount="3" Columns="2*,100,1*" RowCount="1" Rows="auto">
+			<Menu x:Name="TopMenuBar" Padding="2">
+				<MenuItem Header="File"></MenuItem>
+				<MenuItem Header="Settings">
+					<MenuItem x:Name="Settings_Preferences_MenuItem" Header="Preferences" Click="Settings_Preferences_MenuItem_Click" />
+				</MenuItem>
+				<!--<MenuItem Header="Tools">
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
 			</MenuItem>-->
-		</Menu>
+			</Menu>
+			<Grid />
+			<StackPanel Orientation="Horizontal">
+				<Button Command="{Binding ToggleUpdatesViewCommand}" MinWidth="20" BorderThickness="0">
+					<Button.Content>
+						<Grid>
+							<Grid.Resources>
+								<DataTemplate x:Key="UpdatesHeaderTemplate">
+									<Grid x:Name="ToggleUpdatesButtonGrid">
+										<TextBlock x:Name="UpdateCountTextBlock" Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
+										   ToolTip="Mod Updates"/>
+									</Grid>
+									<DataTemplate.Triggers>
+										<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
+											<Setter Property="Background" TargetName="ToggleUpdatesButtonGrid" Value="Red"/>
+											<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="White"/>
+											<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Bold"/>
+										</DataTrigger>
+										<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
+											<Setter Property="Background" TargetName="ToggleUpdatesButtonGrid" Value="Transparent"/>
+											<Setter Property="Foreground" TargetName="UpdateCountTextBlock" Value="Black"/>
+											<Setter Property="FontWeight" TargetName="UpdateCountTextBlock" Value="Normal"/>
+										</DataTrigger>
+									</DataTemplate.Triggers>
+								</DataTemplate>
+							</Grid.Resources>
+							<ContentControl ContentTemplate="{StaticResource UpdatesHeaderTemplate}" Content="{Binding}" />
+						</Grid>
+					</Button.Content>
+				</Button>
+			</StackPanel>
+		</ag:AutoGrid>
 		<Grid Grid.Row="1" Grid.RowSpan="2" Background="AntiqueWhite" Panel.ZIndex="99" 
 			  Visibility="{Binding ModUpdatesViewVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}" >
-			<ag:AutoGrid x:Name="UpdateGrid"
-			RowCount="3" Rows="auto,auto,*" Columns="*" DataContext="{Binding ModUpdatesViewData}"
-			  >
-				<TextBlock Text="Mod Updates" TextAlignment="Center" FontSize="24" Background="White" />
-				<ag:AutoGrid Visibility="{Binding NewAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}"
-				RowCount="2" Rows="auto,*"
-			>
-					<TextBlock Text="New" TextAlignment="Center" FontSize="20" Background="White" />
-					<ListView ItemsSource="{Binding NewMods}" />
-				</ag:AutoGrid>
-				<ag:AutoGrid Visibility="{Binding UpdatesAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Visible'}"
-				RowCount="2" Rows="auto,*"
-			>
-					<TextBlock Text="Updated" TextAlignment="Center" FontSize="20" Background="White" />
-					<ListView ItemsSource="{Binding Updates}" />
-				</ag:AutoGrid>
-			</ag:AutoGrid>
+			<local:ModUpdatesLayout DataContext="{Binding ModUpdatesViewData}" />
 		</Grid>
 		
 		<Grid Grid.Row="1" Margin="4">

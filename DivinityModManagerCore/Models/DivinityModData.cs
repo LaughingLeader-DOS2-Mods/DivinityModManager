@@ -98,7 +98,6 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
 		}
 
-
 		public void UpdateDependencyText()
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);

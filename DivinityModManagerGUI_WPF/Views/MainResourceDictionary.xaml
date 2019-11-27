@@ -188,4 +188,120 @@
 			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
+	<GridView x:Key="NewModsGridView" x:Shared="False" AllowsColumnReorder="True">
+		<GridView.ColumnHeaderContainerStyle>
+			<Style TargetType="{x:Type GridViewColumnHeader}">
+				<Setter Property="HorizontalContentAlignment" Value="Left" />
+				<Setter Property="Margin" Value="4,0,0,0" />
+			</Style>
+		</GridView.ColumnHeaderContainerStyle>
+		<GridView.Columns>
+			<GridViewColumn Width="40">
+				<GridViewColumn.Header>
+					<CheckBox x:Name="NewModsCheckAllCheckBox" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<CheckBox IsChecked="{Binding IsSelected}" Margin="2,0,2,0" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
+				<GridViewColumn.Header>
+					<TextBlock Text="Name" />
+				</GridViewColumn.Header>
+			</GridViewColumn>
+			<GridViewColumn Width="100">
+				<GridViewColumn.Header>
+					<TextBlock Text="Author" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="80">
+				<GridViewColumn.Header>
+					<TextBlock Text="Version" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView.Columns>
+	</GridView>
+	<DataTemplate x:Key="ModUpdateNameTemplate" DataType="{x:Type data:DivinityModUpdateData}">
+		<TextBlock Text="{Binding LocalMod.Name}" HorizontalAlignment="Stretch">
+			<TextBlock.ToolTip>
+				<StackPanel Orientation="Vertical" MaxWidth="700" >
+					<TextBlock Text="{Binding LocalMod.Name}" FontWeight="Bold" />
+					<TextBlock Text="{Binding LocalMod.Description}" TextWrapping="Wrap" 
+							   Visibility="{Binding LocalMod.HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+					<StackPanel Orientation="Vertical" Margin="2" 
+								Visibility="{Binding LocalMod.HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+						<TextBlock Text="Dependencies:" FontWeight="Bold" />
+						<ListBox ItemsSource="{Binding LocalMod.Dependencies}" Margin="0" Padding="0" BorderThickness="0" />
+					</StackPanel>
+				</StackPanel>
+			</TextBlock.ToolTip>
+		</TextBlock>
+	</DataTemplate>
+	<GridView x:Key="ModUpdatesGridView" x:Shared="False" AllowsColumnReorder="True">
+		<GridView.ColumnHeaderContainerStyle>
+			<Style TargetType="{x:Type GridViewColumnHeader}">
+				<Setter Property="HorizontalContentAlignment" Value="Left" />
+				<Setter Property="Margin" Value="4,0,0,0" />
+			</Style>
+		</GridView.ColumnHeaderContainerStyle>
+		<GridView.Columns>
+			<GridViewColumn Width="40">
+				<GridViewColumn.Header>
+					<CheckBox x:Name="ModUpdatesCheckAllCheckBox" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<CheckBox IsChecked="{Binding IsSelected}" Margin="2,0,2,0" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModUpdateNameTemplate}">
+				<GridViewColumn.Header>
+					<TextBlock Text="Name" />
+				</GridViewColumn.Header>
+			</GridViewColumn>
+			<GridViewColumn Width="100">
+				<GridViewColumn.Header>
+					<TextBlock Text="Author" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding WorkshopMod.Author}" ToolTip="{Binding WorkshopMod.Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="80">
+				<GridViewColumn.Header>
+					<TextBlock Text="Version" ToolTip="Current Version" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding LocalMod.Version.Version}" ToolTip="{Binding LocalMod.Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="80">
+				<GridViewColumn.Header>
+					<TextBlock Text="New" ToolTip="New Version" />
+				</GridViewColumn.Header>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding WorkshopMod.Version.Version}" ToolTip="{Binding WorkshopMod.Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView.Columns>
+	</GridView>
 </ResourceDictionary>

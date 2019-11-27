@@ -74,7 +74,7 @@ namespace DivinityModManager.ViewModels
 		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
 		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
 
-		public ModUpdatesViewData ModUpdatesViewData = new ModUpdatesViewData();
+		public ModUpdatesViewData ModUpdatesViewData { get; set; } = new ModUpdatesViewData();
 
 		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
 
@@ -178,7 +178,6 @@ namespace DivinityModManager.ViewModels
 			get => modUpdatesViewVisible;
 			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
 		}
-
 
 		private MainWindow view;
 		public DivinityModManagerSettings Settings { get; set; }
@@ -308,10 +307,10 @@ namespace DivinityModManager.ViewModels
 			int count = 0;
 			foreach(var workshopMod in WorkshopMods)
 			{
-				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == mod.UUID && !x.IsEditorMod);
+				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsEditorMod);
 				if(pakMod != null)
 				{
-					if(mod.Version.VersionInt > pakMod.Version.VersionInt)
+					if(workshopMod.Version.VersionInt > pakMod.Version.VersionInt)
 					{
 						ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
 						{
@@ -884,10 +883,12 @@ namespace DivinityModManager.ViewModels
 			mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(Disposables);
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe().DisposeWith(Disposables);
 
-			ModUpdates.CollectionChanged += delegate
+			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
+
+			this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
 			{
-				ModUpdatesAvailable = ModUpdates.Count > 0;
-			};
+				Trace.WriteLine("Updates available: " + b.ToString());
+			});
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 

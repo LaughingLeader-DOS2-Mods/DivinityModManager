@@ -125,11 +125,15 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\ModUpdatesViewData.cs" />
     <Compile Include="Views\ConflictCheckerWindow.xaml.cs">
       <DependentUpon>ConflictCheckerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
       <DependentUpon>HorizontalModLayout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ModUpdatesLayout.xaml.cs">
+      <DependentUpon>ModUpdatesLayout.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SettingsWindow.xaml.cs">
       <DependentUpon>SettingsWindow.xaml</DependentUpon>
@@ -162,6 +166,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Views\ModUpdatesLayout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\SettingsWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

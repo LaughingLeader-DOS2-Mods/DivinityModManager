@@ -804,21 +804,27 @@ namespace DivinityModManager.ViewModels
 		}
 		private async Task<bool> ExportLoadOrder()
 		{
+			StatusText = "";
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
 				if(result)
 				{
-					//MessageBox.Show(view, $"Saved mod settings to '{outputPath}'", "Mod Order Exported");
 					StatusText = $"Exported load order to '{outputPath}'";
+					Trace.WriteLine(StatusText);
 				}
 				else
 				{
 					string msg = $"Problem exporting load order to '{outputPath}'";
 					StatusText = msg;
+					Trace.WriteLine(StatusText);
 					MessageBox.Show(view, msg, "Mod Order Export Failed");
 				}
+			}
+			else
+			{
+				Trace.WriteLine("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
 			return false;
 		}

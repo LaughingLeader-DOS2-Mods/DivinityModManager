@@ -527,7 +527,8 @@ namespace DivinityModManager.Util
 			modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, dos2Origins.Folder, dos2Origins.MD5, dos2Origins.Name, dos2Origins.UUID, dos2Origins.Version.VersionInt) + Environment.NewLine;
 			foreach (var mod in allMods.Where(m => order.Any(o => o.UUID == m.UUID)))
 			{
-				modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, mod.Name, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+				string safeName = System.Security.SecurityElement.Escape(mod.Name);
+				modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 			}
 			string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
 			//Trace.WriteLine(output);

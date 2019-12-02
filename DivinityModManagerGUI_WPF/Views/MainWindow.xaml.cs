@@ -112,6 +112,8 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.OpenModsFolderCommand, view => view.OpenModsFolderButton.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenWorkshopFolderCommand, view => view.OpenWorkshopFolderButton.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenDOS2GameCommand, view => view.OpenDOS2GameButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.OpenDonationPageButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.OpenRepoPageButton.Command).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(ViewModel.Disposables);
 

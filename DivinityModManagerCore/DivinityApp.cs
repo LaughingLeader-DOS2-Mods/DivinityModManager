@@ -8,6 +8,8 @@ namespace DivinityModManager
 {
 	public static class DivinityApp
 	{
-		public const string SettingsFile = "Data\\";
+		public const string DIR_DATA = "Data\\";
+		public const string URL_DONATION = @"https://ko-fi.com/laughingleader";
+		public const string URL_REPO = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager";
 	}
 }

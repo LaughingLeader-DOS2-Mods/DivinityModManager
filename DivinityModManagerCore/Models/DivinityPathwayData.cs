@@ -41,13 +41,13 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref documentsProfilesPath, value); }
 		}
 
-		private string gameDOS2DEPath;
+		//private string gameDOS2DEPath;
 
-		public string GameDOS2DEPath
-		{
-			get => gameDOS2DEPath;
-			set { this.RaiseAndSetIfChanged(ref gameDOS2DEPath, value); }
-		}
+		//public string GameDOS2DEPath
+		//{
+		//	get => gameDOS2DEPath;
+		//	set { this.RaiseAndSetIfChanged(ref gameDOS2DEPath, value); }
+		//}
 
 	}
 }

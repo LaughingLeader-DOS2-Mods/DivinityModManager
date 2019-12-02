@@ -29,6 +29,15 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		private string gameExecutable;
+
+		[DataMember]
+		public string DOS2DEGameExecutable
+		{
+			get => gameExecutable;
+			set { this.RaiseAndSetIfChanged(ref gameExecutable, value); }
+		}
+
 		private string dos2workshopPath = "";
 
 		[DataMember]
@@ -57,6 +66,7 @@ namespace DivinityModManager.Models
 
 		private bool logEnabled = false;
 
+		[DataMember]
 		public bool LogEnabled
 		{
 			get => logEnabled;
@@ -78,7 +88,7 @@ namespace DivinityModManager.Models
 		{
 			OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(DivinityApp.SettingsFile);
+				Process.Start(DivinityApp.DIR_DATA);
 			});
 		}
 	}

@@ -358,6 +358,14 @@
 					<Button x:Name="OpenDOS2GameButton" ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
 						<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
 					</Button>
+					<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
+					<Label Content="Support" />
+					<Button x:Name="OpenDonationPageButton" ToolTip="Donate a Coffee to the Developer (LaughingLeader)">
+						<controls:AutoGrayableImage Source="{StaticResource OpenDonationLinkImage}" />
+					</Button>
+					<Button x:Name="OpenRepoPageButton" ToolTip="Open Project Page (Github)">
+						<controls:AutoGrayableImage Source="{StaticResource OpenRepoLinkImage}" />
+					</Button>
 				</StackPanel>
 			</Grid>
 		</Grid>

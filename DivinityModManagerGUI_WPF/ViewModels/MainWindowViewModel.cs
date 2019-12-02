@@ -194,17 +194,19 @@ namespace DivinityModManager.ViewModels
 		private MainWindow view;
 		public DivinityModManagerSettings Settings { get; set; }
 
-		public ICommand SaveOrderCommand { get; set; }
-		public ICommand SaveOrderAsCommand { get; set; }
-		public ICommand ExportOrderCommand { get; set; }
-		public ICommand AddOrderConfigCommand { get; set; }
-		public ICommand RefreshCommand { get; set; }
-		public ICommand OpenModsFolderCommand { get; set; }
-		public ICommand OpenWorkshopFolderCommand { get; set; }
-		public ICommand OpenDOS2GameCommand { get; set; }
-		public ICommand DebugCommand { get; set; }
-		public ICommand OpenConflictCheckerCommand { get; set; }
-		public ICommand ToggleUpdatesViewCommand { get; set; }
+		public ICommand SaveOrderCommand { get; private set; }
+		public ICommand SaveOrderAsCommand { get; private set; }
+		public ICommand ExportOrderCommand { get; private set; }
+		public ICommand AddOrderConfigCommand { get; private set; }
+		public ICommand RefreshCommand { get; private set; }
+		public ICommand OpenModsFolderCommand { get; private set; }
+		public ICommand OpenWorkshopFolderCommand { get; private set; }
+		public ICommand OpenDOS2GameCommand { get; private set; }
+		public ICommand OpenDonationPageCommand { get; private set; }
+		public ICommand OpenRepoPageCommand { get; private set; }
+		public ICommand DebugCommand { get; private set; }
+		public ICommand OpenConflictCheckerCommand { get; private set; }
+		public ICommand ToggleUpdatesViewCommand { get; private set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -327,6 +329,7 @@ namespace DivinityModManager.ViewModels
 			}
 
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
+			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
@@ -461,12 +464,16 @@ namespace DivinityModManager.ViewModels
 				if (Directory.Exists(installPath))
 				{
 					PathwayData.InstallPath = installPath;
-					string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
-					if (File.Exists(exePath))
+					if(!File.Exists(Settings.DOS2DEGameExecutable))
 					{
-						PathwayData.GameDOS2DEPath = exePath;
-						Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+						string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+						if (File.Exists(exePath))
+						{
+							Settings.DOS2DEGameExecutable = exePath;
+							Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+						}
 					}
+					
 					string gameDataPath = Path.Combine(installPath, "DefEd/Data").Replace("\\", "/");
 					Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
 					Settings.GameDataPath = gameDataPath;
@@ -477,11 +484,14 @@ namespace DivinityModManager.ViewModels
 			{
 				string installPath = Path.GetFullPath(Path.Combine(Settings.GameDataPath, @"..\..\"));
 				PathwayData.InstallPath = installPath;
-				string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
-				if (File.Exists(exePath))
+				if (!File.Exists(Settings.DOS2DEGameExecutable))
 				{
-					PathwayData.GameDOS2DEPath = exePath;
-					Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+					string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+					if (File.Exists(exePath))
+					{
+						Settings.DOS2DEGameExecutable = exePath;
+						Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+					}
 				}
 			}
 		}
@@ -1001,6 +1011,7 @@ namespace DivinityModManager.ViewModels
 		}
 
 		private IObservable<bool> canOpenWorkshopFolder;
+		private IObservable<bool> canOpenDOS2DEGame;
 
 		public MainWindowViewModel() : base()
 		{
@@ -1030,11 +1041,20 @@ namespace DivinityModManager.ViewModels
 				Process.Start(Settings.DOS2WorkshopPath);
 			}, canOpenWorkshopFolder);
 
-			var canOpenDOS2DEGame = this.WhenAnyValue(x => x.PathwayData.GameDOS2DEPath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			OpenDOS2GameCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(PathwayData.GameDOS2DEPath);
+				Process.Start(Settings.DOS2DEGameExecutable);
 			}, canOpenDOS2DEGame);
+
+			OpenDonationPageCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(DivinityApp.URL_DONATION);
+			});
+
+			OpenRepoPageCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(DivinityApp.URL_REPO);
+			});
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);

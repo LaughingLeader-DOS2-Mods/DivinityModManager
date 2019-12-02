@@ -146,11 +146,15 @@
     </ApplicationDefinition>
     <Compile Include="Controls\AutoGrayableImage.cs" />
     <Compile Include="Controls\CircleDecorator.cs" />
+    <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
+    <Compile Include="Views\AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\ConflictCheckerWindow.xaml.cs">
       <DependentUpon>ConflictCheckerWindow.xaml</DependentUpon>
     </Compile>
@@ -166,6 +170,10 @@
     <Compile Include="Views\VerticalModLayout.xaml.cs">
       <DependentUpon>VerticalModLayout.xaml</DependentUpon>
     </Compile>
+    <Page Include="Views\AboutWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\ConflictCheckerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

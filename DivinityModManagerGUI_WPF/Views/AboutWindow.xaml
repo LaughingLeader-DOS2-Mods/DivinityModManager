@@ -1,0 +1,89 @@
+﻿<Window
+	x:Class="DivinityModManager.Views.AboutWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:app="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:ext="clr-namespace:DivinityModManager.Controls.Extensions"
+	xmlns:local="clr-namespace:DivinityModManager.Views"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:wpfautogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+	Title="About Divinity Mod Manager"
+	Width="600"
+	Height="300"
+	mc:Ignorable="d">
+	<wpfautogrid:AutoGrid
+		Margin="16"
+		Columns="*"
+		RowCount="4"
+		Rows="auto,auto,auto,*">
+		<TextBlock
+			HorizontalAlignment="Center"
+			FontSize="18"
+			Text="{Binding Title, FallbackValue='Divinity Mod Manager v1.2.0.0'}"
+			TextAlignment="Center" />
+		<Separator Margin="0,4" />
+		<wpfautogrid:AutoGrid
+			HorizontalAlignment="Center"
+			ColumnCount="2"
+			Columns="1*,3*"
+			RowCount="3"
+			Rows="auto,auto,auto">
+			<TextBlock
+				Margin="0,0,0,4"
+				HorizontalAlignment="Right"
+				Text="Author:"
+				TextAlignment="Left" />
+			<TextBlock Margin="10,0,0,0" HorizontalAlignment="Left">
+				<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_AUTHOR}">
+					<TextBlock Text="LaughingLeader" ToolTip="{x:Static app:DivinityApp.URL_AUTHOR}" />
+				</Hyperlink>
+			</TextBlock>
+			<TextBlock HorizontalAlignment="Right" Text="Home Page:" />
+			<TextBlock Margin="10,0,0,4" HorizontalAlignment="Left">
+				<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_REPO}">
+					<TextBlock Text="{x:Static app:DivinityApp.URL_REPO}" ToolTip="{x:Static app:DivinityApp.URL_REPO}" />
+				</Hyperlink>
+			</TextBlock>
+			<TextBlock HorizontalAlignment="Right" Text="License" />
+			<TextBlock Margin="10,0,0,4" HorizontalAlignment="Left">
+				<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_LICENSE}">
+					<TextBlock Text="MIT 2019" ToolTip="{x:Static app:DivinityApp.URL_LICENSE}" />
+				</Hyperlink>
+			</TextBlock>
+		</wpfautogrid:AutoGrid>
+		<StackPanel Orientation="Vertical">
+			<TextBlock
+				HorizontalAlignment="Center"
+				FontSize="16"
+				Text="Support Links"
+				TextAlignment="Center" />
+			<Separator Margin="0,4" />
+			<wpfautogrid:AutoGrid
+				HorizontalAlignment="Center"
+				ColumnCount="2"
+				Columns="1*,3*"
+				RowCount="3"
+				Rows="auto,auto,auto">
+				<TextBlock HorizontalAlignment="Right" Text="Donate a Coffee:" />
+				<TextBlock Margin="10,0,0,4" HorizontalAlignment="Left">
+					<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_DONATION}">
+						<TextBlock Text="{x:Static app:DivinityApp.URL_DONATION}" ToolTip="{x:Static app:DivinityApp.URL_DONATION}" />
+					</Hyperlink>
+				</TextBlock>
+				<TextBlock HorizontalAlignment="Right" Text="Report an Issue:" />
+				<TextBlock Margin="10,0,0,4" HorizontalAlignment="Left">
+					<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_ISSUES}">
+						<TextBlock Text="{x:Static app:DivinityApp.URL_ISSUES}" ToolTip="{x:Static app:DivinityApp.URL_ISSUES}" />
+					</Hyperlink>
+				</TextBlock>
+				<TextBlock HorizontalAlignment="Right" Text="Changelog:" />
+				<TextBlock Margin="10,0,0,4" HorizontalAlignment="Left">
+					<Hyperlink ext:HyperlinkExtensions.IsExternal="True" NavigateUri="{x:Static app:DivinityApp.URL_CHANGELOG}">
+						<TextBlock Text="CHANGELOG.md" ToolTip="{x:Static app:DivinityApp.URL_CHANGELOG}" />
+					</Hyperlink>
+				</TextBlock>
+			</wpfautogrid:AutoGrid>
+		</StackPanel>
+	</wpfautogrid:AutoGrid>
+</Window>

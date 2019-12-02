@@ -1049,7 +1049,7 @@ namespace DivinityModManager.ViewModels
 				{
 					Process.Start(Settings.DOS2DEGameExecutable);
 				}
-				else;
+				else
 				{
 					Process.Start(Settings.DOS2DEGameExecutable, "-storylog 1");
 				}

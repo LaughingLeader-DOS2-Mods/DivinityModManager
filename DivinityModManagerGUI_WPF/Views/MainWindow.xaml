@@ -173,6 +173,190 @@
 					</MultiDataTrigger>
 				</DataTemplate.Triggers>
 			</DataTemplate>
+			<local:ModUpdatesLayout
+				x:Key="ModUpdaterPanel"
+				Background="LightBlue"
+				DataContext="{Binding ModUpdatesViewData}" />
+			<Grid x:Key="ModOrderPanel">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Grid Margin="4">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="Auto" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+					<Grid>
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock
+							Margin="0,0,4,0"
+							VerticalAlignment="Center"
+							Text="Profile" />
+						<ComboBox
+							x:Name="ProfilesComboBox"
+							Grid.Column="1"
+							MinWidth="100"
+							MinHeight="16"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Center"
+							DisplayMemberPath="Name"
+							IsTextSearchEnabled="False"
+							ItemsSource="{Binding Profiles}"
+							SelectedIndex="{Binding SelectedProfileIndex}" />
+					</Grid>
+					<Grid Grid.Column="1" Margin="4,0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<TextBlock
+							Margin="0,0,4,0"
+							VerticalAlignment="Center"
+							Text="Mod Order" />
+						<ComboBox
+							x:Name="OrdersComboBox"
+							Grid.Column="1"
+							MinWidth="100"
+							MinHeight="16"
+							HorizontalAlignment="Stretch"
+							VerticalAlignment="Center"
+							DisplayMemberPath="Name"
+							IsEditable="True"
+							IsTextSearchEnabled="True"
+							ItemsSource="{Binding ModOrderList}"
+							KeyDown="ComboBox_KeyDown_LoseFocus"
+							SelectedIndex="{Binding SelectedModOrderIndex}"
+							Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+					</Grid>
+					<Grid Grid.Column="2" Margin="1,0,0,0">
+						<Grid.ColumnDefinitions>
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="Auto" />
+							<ColumnDefinition Width="*" />
+						</Grid.ColumnDefinitions>
+						<Grid.Resources>
+							<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
+						</Grid.Resources>
+						<StackPanel Orientation="Horizontal">
+							<Button
+								x:Name="AddNewOrderButton"
+								Command="{Binding AddOrderConfigCommand}"
+								ToolTip="Add New Load Order">
+								<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
+							</Button>
+							<Button
+								x:Name="SaveButton"
+								Command="{Binding SaveOrderCommand}"
+								ToolTip="Save Load Order to File">
+								<Button.Resources>
+									<Style TargetType="{x:Type Image}">
+										<Style.Triggers>
+											<Trigger Property="IsEnabled" Value="True">
+												<Setter Property="Source" Value="{StaticResource SaveImage}" />
+											</Trigger>
+											<Trigger Property="IsEnabled" Value="False">
+												<Setter Property="Source" Value="{StaticResource SaveDisabledImage}" />
+											</Trigger>
+										</Style.Triggers>
+									</Style>
+								</Button.Resources>
+								<Image
+									Width="16"
+									Height="16"
+									Stretch="Uniform" />
+							</Button>
+							<Button
+								x:Name="SaveAsButton"
+								Command="{Binding SaveOrderAsCommand}"
+								ToolTip="Save Order As...">
+								<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
+							</Button>
+						</StackPanel>
+						<Rectangle Grid.Column="1" Style="{StaticResource VerticalSeparator}" />
+						<StackPanel Grid.Column="2" Orientation="Horizontal">
+							<TextBlock
+								Margin="0,0,6,0"
+								VerticalAlignment="Center"
+								Text="Export to Game" />
+							<Button
+								x:Name="ExportToModSettingsButton"
+								Command="{Binding ExportOrderCommand}"
+								ToolTip="Export Load Order to Game for the Current Profile">
+								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+							</Button>
+							<Rectangle Style="{StaticResource VerticalSeparator}" />
+							<Label Content="Refresh" />
+							<Button
+								x:Name="RefreshButton"
+								Command="{Binding RefreshCommand}"
+								ToolTip="Refresh Mods and Workshop Updates">
+								<controls:AutoGrayableImage Source="{StaticResource RefreshImage}" />
+							</Button>
+							<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
+							<Label Content="Shortcuts" />
+							<Button
+								x:Name="OpenModsFolderButton"
+								Command="{Binding OpenModsFolderCommand}"
+								ToolTip="Open Mods Folder">
+								<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
+							</Button>
+							<Button
+								x:Name="OpenWorkshopFolderButton"
+								Command="{Binding OpenWorkshopFolderCommand}"
+								ToolTip="Open DOS2 Workshop Folder">
+								<controls:AutoGrayableImage Source="{StaticResource OpenSteamWorkshopFolderImage}" />
+							</Button>
+							<Button
+								x:Name="OpenDOS2GameButton"
+								Command="{Binding OpenDOS2GameCommand}"
+								ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
+								<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
+							</Button>
+							<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
+							<Label Content="Support" />
+							<Button
+								x:Name="OpenDonationPageButton"
+								Command="{Binding OpenDonationPageCommand}"
+								ToolTip="Donate a Coffee to the Developer (LaughingLeader)">
+								<controls:AutoGrayableImage Source="{StaticResource OpenDonationLinkImage}" />
+							</Button>
+							<Button
+								x:Name="OpenRepoPageButton"
+								Command="{Binding OpenRepoPageCommand}"
+								ToolTip="Open Project Page (Github)">
+								<controls:AutoGrayableImage Source="{StaticResource OpenRepoLinkImage}" />
+							</Button>
+						</StackPanel>
+					</Grid>
+				</Grid>
+				<Separator
+					Grid.Row="1"
+					Height="1"
+					Background="Gray" />
+				<ContentControl
+					x:Name="LayoutContent"
+					Grid.Row="2"
+					Content="{Binding}">
+					<ContentControl.Style>
+						<Style TargetType="{x:Type ContentControl}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding LayoutMode}" Value="0">
+									<Setter Property="ContentTemplate" Value="{StaticResource HorizontalModLayout}" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding LayoutMode}" Value="1">
+									<Setter Property="ContentTemplate" Value="{StaticResource VerticalModLayout}" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</ContentControl.Style>
+				</ContentControl>
+			</Grid>
 		</ResourceDictionary>
 	</Window.Resources>
 	<Window.InputBindings>
@@ -239,153 +423,26 @@
 			</StackPanel>
 
 		</Grid>
-		<Grid
+		<Separator
 			Grid.Row="1"
-			Grid.RowSpan="2"
-			Panel.ZIndex="99"
-			Background="LightBlue"
-			Visibility="{Binding ModUpdatesViewVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Collapsed'}">
-			<local:ModUpdatesLayout DataContext="{Binding ModUpdatesViewData}" />
-		</Grid>
-		<Grid Grid.Row="1" Margin="4">
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition Width="Auto" />
-				<ColumnDefinition Width="*" />
-			</Grid.ColumnDefinitions>
-			<Grid>
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="*" />
-				</Grid.ColumnDefinitions>
-				<TextBlock
-					Margin="0,0,4,0"
-					VerticalAlignment="Center"
-					Text="Profile" />
-				<ComboBox
-					x:Name="ProfilesComboBox"
-					Grid.Column="1"
-					MinWidth="100"
-					MinHeight="16"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Center"
-					DisplayMemberPath="Name"
-					IsTextSearchEnabled="False"
-					ItemsSource="{Binding Profiles}"
-					SelectedIndex="{Binding SelectedProfileIndex}" />
-			</Grid>
-			<Grid Grid.Column="1" Margin="4,0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="*" />
-				</Grid.ColumnDefinitions>
-				<TextBlock
-					Margin="0,0,4,0"
-					VerticalAlignment="Center"
-					Text="Mod Order" />
-				<ComboBox
-					x:Name="OrdersComboBox"
-					Grid.Column="1"
-					MinWidth="100"
-					MinHeight="16"
-					HorizontalAlignment="Stretch"
-					VerticalAlignment="Center"
-					DisplayMemberPath="Name"
-					IsEditable="True"
-					IsTextSearchEnabled="True"
-					ItemsSource="{Binding ModOrderList}"
-					KeyDown="ComboBox_KeyDown_LoseFocus"
-					SelectedIndex="{Binding SelectedModOrderIndex}"
-					Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
-			</Grid>
-			<Grid Grid.Column="2" Margin="1,0,0,0">
-				<Grid.ColumnDefinitions>
-					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="*" />
-				</Grid.ColumnDefinitions>
-				<Grid.Resources>
-					<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
-				</Grid.Resources>
-				<StackPanel Orientation="Horizontal">
-					<Button x:Name="AddNewOrderButton" ToolTip="Add New Load Order">
-						<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
-					</Button>
-					<Button x:Name="SaveButton" ToolTip="Save Load Order to File">
-						<Button.Resources>
-							<Style TargetType="{x:Type Image}">
-								<Style.Triggers>
-									<Trigger Property="IsEnabled" Value="True">
-										<Setter Property="Source" Value="{StaticResource SaveImage}" />
-									</Trigger>
-									<Trigger Property="IsEnabled" Value="False">
-										<Setter Property="Source" Value="{StaticResource SaveDisabledImage}" />
-									</Trigger>
-								</Style.Triggers>
-							</Style>
-						</Button.Resources>
-						<Image
-							Width="16"
-							Height="16"
-							Stretch="Uniform" />
-					</Button>
-					<Button x:Name="SaveAsButton" ToolTip="Save Order As...">
-						<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
-					</Button>
-				</StackPanel>
-				<Rectangle Grid.Column="1" Style="{StaticResource VerticalSeparator}" />
-				<StackPanel Grid.Column="2" Orientation="Horizontal">
-					<TextBlock
-						Margin="0,0,6,0"
-						VerticalAlignment="Center"
-						Text="Export to Game" />
-					<Button x:Name="ExportToModSettingsButton" ToolTip="Export Load Order to Game for the Current Profile">
-						<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
-					</Button>
-					<Rectangle Style="{StaticResource VerticalSeparator}" />
-					<Label Content="Refresh" />
-					<Button x:Name="RefreshButton" ToolTip="Refresh Mods and Workshop Updates">
-						<controls:AutoGrayableImage Source="{StaticResource RefreshImage}" />
-					</Button>
-					<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
-					<Label Content="Shortcuts" />
-					<Button x:Name="OpenModsFolderButton" ToolTip="Open Mods Folder">
-						<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
-					</Button>
-					<Button x:Name="OpenWorkshopFolderButton" ToolTip="Open DOS2 Workshop Folder">
-						<controls:AutoGrayableImage Source="{StaticResource OpenSteamWorkshopFolderImage}" />
-					</Button>
-					<Button x:Name="OpenDOS2GameButton" ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
-						<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
-					</Button>
-					<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
-					<Label Content="Support" />
-					<Button x:Name="OpenDonationPageButton" ToolTip="Donate a Coffee to the Developer (LaughingLeader)">
-						<controls:AutoGrayableImage Source="{StaticResource OpenDonationLinkImage}" />
-					</Button>
-					<Button x:Name="OpenRepoPageButton" ToolTip="Open Project Page (Github)">
-						<controls:AutoGrayableImage Source="{StaticResource OpenRepoLinkImage}" />
-					</Button>
-				</StackPanel>
-			</Grid>
-		</Grid>
-		<ContentControl
-			x:Name="LayoutContent"
+			Height="1"
+			Background="LightGray"
+			BorderThickness="0" />
+		<ContentPresenter
+			x:Name="MainContentPresenter"
 			Grid.Row="2"
 			Content="{Binding}">
-			<ContentControl.Style>
-				<Style TargetType="{x:Type ContentControl}">
-					<Style.Triggers>
-						<DataTrigger Binding="{Binding LayoutMode}" Value="0">
-							<Setter Property="ContentTemplate" Value="{StaticResource HorizontalModLayout}" />
+			<ContentPresenter.ContentTemplate>
+				<DataTemplate>
+					<ContentControl x:Name="MainContentControl" Content="{StaticResource ModOrderPanel}" />
+					<DataTemplate.Triggers>
+						<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
+							<Setter TargetName="MainContentControl" Property="Content" Value="{StaticResource ModUpdaterPanel}" />
 						</DataTrigger>
-						<DataTrigger Binding="{Binding LayoutMode}" Value="1">
-							<Setter Property="ContentTemplate" Value="{StaticResource VerticalModLayout}" />
-						</DataTrigger>
-					</Style.Triggers>
-				</Style>
-			</ContentControl.Style>
-		</ContentControl>
+					</DataTemplate.Triggers>
+				</DataTemplate>
+			</ContentPresenter.ContentTemplate>
+		</ContentPresenter>
 		<StatusBar Grid.Row="3" MinHeight="16">
 			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 				<mbar:AlertBarWpf x:Name="AlertBar" Theme="Outline" />

@@ -94,6 +94,15 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		private long lastUpdateCheck = -1;
+
+		[DataMember]
+		public long LastUpdateCheck
+		{
+			get => lastUpdateCheck;
+			set { this.RaiseAndSetIfChanged(ref lastUpdateCheck, value); }
+		}
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
 

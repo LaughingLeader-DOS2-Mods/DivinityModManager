@@ -78,6 +78,8 @@
 						VerticalAlignment="Center"
 						Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
+					<Label Content="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
+					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 					<Label Content="DOS2 Workshop Path:" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
@@ -88,8 +90,6 @@
 						VerticalAlignment="Center"
 						Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
 						TextAlignment="Left" />
-					<Label Content="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
 			</TabItem>
 			<TabItem Header="Debug">

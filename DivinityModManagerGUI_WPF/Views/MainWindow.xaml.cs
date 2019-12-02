@@ -22,6 +22,7 @@ using DynamicData.Binding;
 using System.Diagnostics;
 using System.Globalization;
 using static AlertBarWpf.AlertBarWpf;
+using AutoUpdaterDotNET;
 
 namespace DivinityModManager.Views
 {
@@ -132,11 +133,27 @@ namespace DivinityModManager.Views
 
 			AlertBar.Show += AlertBar_Show;
 
+			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
+			AutoUpdater.ReportErrors = true;
+			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
+
 			this.WhenActivated(d =>
 			{
 				d.Add(ViewModel.Disposables);
 				ViewModel.OnViewActivated(this);
+
+				if(ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
+				{
+					AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				}
 			});
+		}
+
+		private void AutoUpdater_ApplicationExitEvent()
+		{
+			ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
+			ViewModel.SaveSettings();
+			App.Current.Shutdown();
 		}
 
 		private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject

@@ -9,9 +9,11 @@
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
+	xmlns:mbar="clr-namespace:AlertBarWpf;assembly=AlertBarWpf"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
+	xmlns:xc="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
 	Width="1400"
 	Height="800"
 	x:TypeArguments="vm:MainWindowViewModel"
@@ -27,6 +29,149 @@
 			</DataTemplate>
 			<DataTemplate x:Key="HorizontalModLayout">
 				<local:HorizontalModLayout />
+			</DataTemplate>
+			<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
+				<Setter Property="Background">
+					<Setter.Value>
+						<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
+					</Setter.Value>
+				</Setter>
+				<Setter Property="Template">
+					<Setter.Value>
+						<ControlTemplate TargetType="{x:Type Button}">
+							<Border Background="{TemplateBinding Background}">
+								<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+							</Border>
+						</ControlTemplate>
+					</Setter.Value>
+				</Setter>
+				<Style.Triggers>
+					<Trigger Property="IsMouseOver" Value="True">
+						<Setter Property="Background" Value="LightGreen" />
+					</Trigger>
+				</Style.Triggers>
+			</Style>
+			<DataTemplate x:Key="UpdatesButtonTemplate">
+				<StackPanel x:Name="UpdateViewPanel" VerticalAlignment="Stretch">
+					<Button
+						x:Name="UpdateViewToggleButton"
+						MinWidth="20"
+						Margin="0"
+						Padding="0"
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch"
+						BorderThickness="0"
+						Command="{Binding ToggleUpdatesViewCommand}"
+						Style="{StaticResource UpdateButtonStyle}"
+						ToolTip="Toggle the Mod Updates View">
+						<Button.Content>
+							<Grid>
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<TextBlock
+									Padding="4,0"
+									HorizontalAlignment="Center"
+									VerticalAlignment="Center"
+									Foreground="Black"
+									Text="Updates:" />
+								<controls:CircleDecorator
+									x:Name="RedUpdateBackground"
+									Grid.Column="1"
+									Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+									Height="16"
+									BorderBrush="DarkGray"
+									BorderThickness="1">
+									<controls:CircleDecorator.Background>
+										<LinearGradientBrush>
+											<GradientStop Offset="0.0" Color="LightGray" />
+											<GradientStop Offset="1.0" Color="LightSlateGray" />
+										</LinearGradientBrush>
+									</controls:CircleDecorator.Background>
+									<Label
+										x:Name="UpdateCountTextBlock"
+										Padding="1"
+										HorizontalAlignment="Center"
+										VerticalAlignment="Center"
+										Content="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
+										FontFamily="Arial"
+										FontSize="9"
+										FontWeight="Bold"
+										Foreground="Black"
+										TextBlock.TextAlignment="Center" />
+									<controls:CircleDecorator.ToolTip>
+										<TextBlock>
+											<Run Text="Total Pending Updates:" />
+											<Run Text="{Binding ModUpdatesViewData.TotalUpdates}" /></TextBlock>
+									</controls:CircleDecorator.ToolTip>
+								</controls:CircleDecorator>
+								<Image
+									x:Name="ExpandImage"
+									Grid.Column="3"
+									RenderOptions.BitmapScalingMode="Fant"
+									Source="{StaticResource ExpandDownImage}"
+									Stretch="Uniform"
+									StretchDirection="UpOnly" />
+							</Grid>
+						</Button.Content>
+					</Button>
+				</StackPanel>
+				<DataTemplate.Triggers>
+					<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
+						<Setter TargetName="RedUpdateBackground" Property="Background">
+							<Setter.Value>
+								<LinearGradientBrush>
+									<GradientStop Offset="0.0" Color="IndianRed" />
+									<GradientStop Offset="1.0" Color="Red" />
+								</LinearGradientBrush>
+							</Setter.Value>
+						</Setter>
+						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="#FFEE3D3D" />
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="White" />
+						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Bold" />
+					</DataTrigger>
+					<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
+						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="DarkGray" />
+						<Setter TargetName="RedUpdateBackground" Property="Background" Value="LightGray" />
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="Black" />
+						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Normal" />
+					</DataTrigger>
+					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
+						<Setter TargetName="UpdateViewPanel" Property="Background" Value="LightBlue" />
+					</DataTrigger>
+					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="False">
+						<Setter TargetName="UpdateViewPanel" Property="Background" Value="Transparent" />
+					</DataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition Binding="{Binding ModUpdatesViewVisible}" Value="False" />
+							<Condition Binding="{Binding ModUpdatesAvailable}" Value="True" />
+						</MultiDataTrigger.Conditions>
+						<MultiDataTrigger.Setters>
+							<Setter TargetName="ExpandImage" Property="Source" Value="{StaticResource ExpandDownImage}" />
+						</MultiDataTrigger.Setters>
+					</MultiDataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition Binding="{Binding ModUpdatesViewVisible}" Value="True" />
+							<Condition Binding="{Binding ModUpdatesAvailable}" Value="True" />
+						</MultiDataTrigger.Conditions>
+						<MultiDataTrigger.Setters>
+							<Setter TargetName="ExpandImage" Property="Source" Value="{StaticResource ExpandUpImage}" />
+						</MultiDataTrigger.Setters>
+					</MultiDataTrigger>
+					<MultiDataTrigger>
+						<MultiDataTrigger.Conditions>
+							<Condition Binding="{Binding ModUpdatesViewVisible}" Value="False" />
+							<Condition Binding="{Binding ModUpdatesAvailable}" Value="False" />
+						</MultiDataTrigger.Conditions>
+						<MultiDataTrigger.Setters>
+							<Setter TargetName="ExpandImage" Property="Source" Value="{StaticResource ExpandDownImageDisabled}" />
+						</MultiDataTrigger.Setters>
+					</MultiDataTrigger>
+				</DataTemplate.Triggers>
 			</DataTemplate>
 		</ResourceDictionary>
 	</Window.Resources>
@@ -82,121 +227,17 @@
 			</Menu>
 			<StackPanel
 				Grid.Column="2"
+				HorizontalAlignment="Left"
 				VerticalAlignment="Center"
-				IsEnabled="{Binding ModUpdatesAvailable, Mode=OneWay, FallbackValue=false}"
 				Orientation="Horizontal">
-				<StackPanel.Resources>
-					<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
-						<Setter Property="Background">
-							<Setter.Value>
-								<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
-							</Setter.Value>
-						</Setter>
-						<Setter Property="Template">
-							<Setter.Value>
-								<ControlTemplate TargetType="{x:Type Button}">
-									<Border Background="{TemplateBinding Background}">
-										<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-									</Border>
-								</ControlTemplate>
-							</Setter.Value>
-						</Setter>
-						<Style.Triggers>
-							<Trigger Property="IsMouseOver" Value="True">
-								<Setter Property="Background" Value="LightGreen" />
-							</Trigger>
-						</Style.Triggers>
-					</Style>
-					<DataTemplate x:Key="UpdatesButtonTemplate">
-						<StackPanel x:Name="UpdateViewPanel" VerticalAlignment="Stretch">
-							<Button
-								x:Name="UpdateViewToggleButton"
-								MinWidth="20"
-								Margin="0"
-								Padding="0"
-								HorizontalAlignment="Stretch"
-								VerticalAlignment="Stretch"
-								BorderThickness="0"
-								Command="{Binding ToggleUpdatesViewCommand}"
-								Style="{StaticResource UpdateButtonStyle}"
-								ToolTip="Toggle the Mod Updates View">
-								<Button.Content>
-									<Grid>
-										<Grid.ColumnDefinitions>
-											<ColumnDefinition Width="Auto" />
-											<ColumnDefinition Width="*" />
-										</Grid.ColumnDefinitions>
-										<TextBlock
-											Padding="4,0"
-											HorizontalAlignment="Center"
-											VerticalAlignment="Center"
-											Foreground="Black"
-											Text="Updates:" />
-										<controls:CircleDecorator
-											x:Name="RedUpdateBackground"
-											Grid.Column="1"
-											Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
-											Height="16"
-											BorderBrush="DarkGray"
-											BorderThickness="1">
-											<controls:CircleDecorator.Background>
-												<LinearGradientBrush>
-													<GradientStop Offset="0.0" Color="LightGray" />
-													<GradientStop Offset="1.0" Color="LightSlateGray" />
-												</LinearGradientBrush>
-											</controls:CircleDecorator.Background>
-											<Label
-												x:Name="UpdateCountTextBlock"
-												Padding="1"
-												HorizontalAlignment="Center"
-												VerticalAlignment="Center"
-												Content="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
-												FontFamily="Arial"
-												FontSize="9"
-												FontWeight="Bold"
-												Foreground="Black"
-												TextBlock.TextAlignment="Center" />
-											<controls:CircleDecorator.ToolTip>
-												<TextBlock>
-													<Run Text="Total Pending Updates:" />
-													<Run Text="{Binding ModUpdatesViewData.TotalUpdates}" /></TextBlock>
-											</controls:CircleDecorator.ToolTip>
-										</controls:CircleDecorator>
-									</Grid>
-								</Button.Content>
-							</Button>
-						</StackPanel>
-						<DataTemplate.Triggers>
-							<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
-								<Setter TargetName="RedUpdateBackground" Property="Background">
-									<Setter.Value>
-										<LinearGradientBrush>
-											<GradientStop Offset="0.0" Color="IndianRed" />
-											<GradientStop Offset="1.0" Color="Red" />
-										</LinearGradientBrush>
-									</Setter.Value>
-								</Setter>
-								<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="#FFEE3D3D" />
-								<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="White" />
-								<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Bold" />
-							</DataTrigger>
-							<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
-								<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="DarkGray" />
-								<Setter TargetName="RedUpdateBackground" Property="Background" Value="LightGray" />
-								<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="Black" />
-								<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Normal" />
-							</DataTrigger>
-							<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
-								<Setter TargetName="UpdateViewPanel" Property="Background" Value="LightBlue" />
-							</DataTrigger>
-							<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="False">
-								<Setter TargetName="UpdateViewPanel" Property="Background" Value="Transparent" />
-							</DataTrigger>
-						</DataTemplate.Triggers>
-					</DataTemplate>
-				</StackPanel.Resources>
-				<ContentControl Content="{Binding}" ContentTemplate="{StaticResource UpdatesButtonTemplate}" />
+				<ContentControl
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					Content="{Binding}"
+					ContentTemplate="{StaticResource UpdatesButtonTemplate}"
+					IsEnabled="{Binding ModUpdatesAvailable, Mode=OneWay, FallbackValue=false}" />
 			</StackPanel>
+
 		</Grid>
 		<Grid
 			Grid.Row="1"
@@ -260,21 +301,17 @@
 			<Grid Grid.Column="2" Margin="1,0,0,0">
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="10" />
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
+				<Grid.Resources>
+					<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
+				</Grid.Resources>
 				<StackPanel Orientation="Horizontal">
 					<Button x:Name="AddNewOrderButton" ToolTip="Add New Load Order">
-						<controls:AutoGrayableImage
-							Width="16"
-							Height="16"
-							Source="{StaticResource AddItemImage}"
-							Stretch="UniformToFill" />
+						<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
 					</Button>
-					<Button
-						x:Name="SaveButton"
-						Margin="8,0,0,0"
-						ToolTip="Save Load Order to File">
+					<Button x:Name="SaveButton" ToolTip="Save Load Order to File">
 						<Button.Resources>
 							<Style TargetType="{x:Type Image}">
 								<Style.Triggers>
@@ -290,30 +327,36 @@
 						<Image
 							Width="16"
 							Height="16"
-							Stretch="UniformToFill" />
+							Stretch="Uniform" />
 					</Button>
 					<Button x:Name="SaveAsButton" ToolTip="Save Order As...">
-						<controls:AutoGrayableImage
-							Width="16"
-							Height="16"
-							Source="{StaticResource SaveAsImage}"
-							Stretch="UniformToFill" />
+						<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
 					</Button>
 				</StackPanel>
-				<StackPanel
-					Grid.Column="2"
-					Margin="21,0,0,0"
-					Orientation="Horizontal">
+				<Rectangle Grid.Column="1" Style="{StaticResource VerticalSeparator}" />
+				<StackPanel Grid.Column="2" Orientation="Horizontal">
 					<TextBlock
-						Margin="4,0"
+						Margin="0,0,6,0"
 						VerticalAlignment="Center"
 						Text="Export to Game" />
 					<Button x:Name="ExportToModSettingsButton" ToolTip="Export Load Order to Game for the Current Profile">
-						<controls:AutoGrayableImage
-							Width="16"
-							Height="16"
-							Source="{StaticResource ExportDataImage}"
-							Stretch="UniformToFill" />
+						<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+					</Button>
+					<Rectangle Style="{StaticResource VerticalSeparator}" />
+					<Label Content="Refresh" />
+					<Button x:Name="RefreshButton" ToolTip="Refresh Mods and Workshop Updates">
+						<controls:AutoGrayableImage Source="{StaticResource RefreshImage}" />
+					</Button>
+					<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
+					<Label Content="Shortcuts" />
+					<Button x:Name="OpenModsFolderButton" ToolTip="Open Mods Folder">
+						<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
+					</Button>
+					<Button x:Name="OpenWorkshopFolderButton" ToolTip="Open DOS2 Workshop Folder">
+						<controls:AutoGrayableImage Source="{StaticResource OpenSteamWorkshopFolderImage}" />
+					</Button>
+					<Button x:Name="OpenDOS2GameButton" ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
+						<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
 					</Button>
 				</StackPanel>
 			</Grid>
@@ -335,14 +378,15 @@
 				</Style>
 			</ContentControl.Style>
 		</ContentControl>
-		<StatusBar Grid.Row="3">
-			<StatusBarItem HorizontalAlignment="Stretch">
-				<TextBox
+		<StatusBar Grid.Row="3" MinHeight="16">
+			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+				<mbar:AlertBarWpf x:Name="AlertBar" Theme="Outline" />
+				<!--<TextBox
 					HorizontalAlignment="Stretch"
 					Background="Transparent"
 					BorderThickness="0"
 					IsReadOnly="True"
-					Text="{Binding StatusText}" />
+					Text="{Binding StatusText}" />-->
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>

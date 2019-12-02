@@ -21,6 +21,7 @@ using DynamicData;
 using DynamicData.Binding;
 using System.Diagnostics;
 using System.Globalization;
+using static AlertBarWpf.AlertBarWpf;
 
 namespace DivinityModManager.Views
 {
@@ -90,22 +91,6 @@ namespace DivinityModManager.Views
 		{
 			InitializeComponent();
 
-			string exePath = Alphaleonis.Win32.Filesystem.Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
-
-			string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
-			string logsDirectory = exePath + "/_Logs/";
-			if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
-			{
-				Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
-			}
-
-			Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
-
-			string logFileName = Alphaleonis.Win32.Filesystem.Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
-			debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
-			Trace.Listeners.Add(debugLogListener);
-			Trace.AutoFlush = true;
-
 			self = this;
 
 			settingsWindow = new SettingsWindow();
@@ -123,6 +108,10 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveButton.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.SaveAsButton.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.ExportToModSettingsButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.RefreshButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenModsFolderCommand, view => view.OpenModsFolderButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenWorkshopFolderCommand, view => view.OpenWorkshopFolderButton.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenDOS2GameCommand, view => view.OpenDOS2GameButton.Command).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(ViewModel.Disposables);
 
@@ -137,11 +126,57 @@ namespace DivinityModManager.Views
 
 			DataContext = ViewModel;
 
+			AlertBar.Show += AlertBar_Show;
+
 			this.WhenActivated(d =>
 			{
 				d.Add(ViewModel.Disposables);
 				ViewModel.OnViewActivated(this);
 			});
+		}
+
+		private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
+		{
+			if (depObj != null)
+			{
+				for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+				{
+					DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
+					if (child != null && child is T)
+					{
+						yield return (T)child;
+					}
+
+					foreach (T childOfChild in FindVisualChildren<T>(child))
+					{
+						yield return childOfChild;
+					}
+				}
+			}
+		}
+
+		private void AlertBar_Show(object sender, RoutedEventArgs e)
+		{
+			var spStandard = (StackPanel)AlertBar.FindName("spStandard");
+			var spOutline = (StackPanel)AlertBar.FindName("spOutline");
+
+			Grid grdParent;
+			switch (AlertBar.Theme)
+			{
+				case ThemeType.Standard:
+					grdParent = FindVisualChildren<Grid>(spStandard).FirstOrDefault();
+					break;
+				case ThemeType.Outline:
+				default:
+					grdParent = FindVisualChildren<Grid>(spOutline).FirstOrDefault();
+					break;
+			}
+
+			TextBlock lblMessage = FindVisualChildren<TextBlock>(grdParent).FirstOrDefault();
+			if(lblMessage != null)
+			{
+				Trace.WriteLine(lblMessage);
+			}
 		}
 
 		public void ToggleConflictChecker(bool openWindow)

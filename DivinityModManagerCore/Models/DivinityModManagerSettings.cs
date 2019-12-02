@@ -55,7 +55,16 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		private bool logEnabled = false;
+
+		public bool LogEnabled
+		{
+			get => logEnabled;
+			set { this.RaiseAndSetIfChanged(ref logEnabled, value); }
+		}
+
 		public ICommand SaveSettingsCommand { get; set; }
+		public ICommand OpenSettingsFolderCommand { get; set; }
 
 		private bool canSaveSettings = false;
 
@@ -67,7 +76,10 @@ namespace DivinityModManager.Models
 
 		public DivinityModManagerSettings()
 		{
-			
+			OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(DivinityApp.SettingsFile);
+			});
 		}
 	}
 }

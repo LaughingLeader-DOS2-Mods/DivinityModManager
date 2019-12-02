@@ -24,6 +24,7 @@ using System.Reactive.Concurrency;
 using Newtonsoft.Json;
 using Microsoft.Win32;
 using DivinityModManager.Views;
+using System.Globalization;
 
 namespace DivinityModManager.ViewModels
 {
@@ -74,7 +75,9 @@ namespace DivinityModManager.ViewModels
 		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
 		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
 
-		public ModUpdatesViewData ModUpdatesViewData { get; set; } = new ModUpdatesViewData();
+		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
+
+		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData();
 
 		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
 
@@ -179,6 +182,15 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
 		}
 
+		private bool gameDirectoryFound = false;
+
+		public bool GameDirectoryFound
+		{
+			get => gameDirectoryFound;
+			set { this.RaiseAndSetIfChanged(ref gameDirectoryFound, value); }
+		}
+
+
 		private MainWindow view;
 		public DivinityModManagerSettings Settings { get; set; }
 
@@ -187,6 +199,9 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportOrderCommand { get; set; }
 		public ICommand AddOrderConfigCommand { get; set; }
 		public ICommand RefreshCommand { get; set; }
+		public ICommand OpenModsFolderCommand { get; set; }
+		public ICommand OpenWorkshopFolderCommand { get; set; }
+		public ICommand OpenDOS2GameCommand { get; set; }
 		public ICommand DebugCommand { get; set; }
 		public ICommand OpenConflictCheckerCommand { get; set; }
 		public ICommand ToggleUpdatesViewCommand { get; set; }
@@ -234,6 +249,35 @@ namespace DivinityModManager.ViewModels
 		}
 #endif
 
+		private TextWriterTraceListener debugLogListener;
+		private void ToggleLogging(bool enabled)
+		{
+			if(enabled)
+			{
+				string exePath = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
+
+				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+				string logsDirectory = exePath + "/_Logs/";
+				if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
+				{
+					Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
+					Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
+				}
+
+				string logFileName = Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
+				debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
+				Trace.Listeners.Add(debugLogListener);
+				Trace.AutoFlush = true;
+			}
+			else if(debugLogListener != null)
+			{
+				Trace.Listeners.Remove(debugLogListener);
+				debugLogListener.Dispose();
+				debugLogListener = null;
+				Trace.AutoFlush = false;
+			}
+		}
+
 		private bool LoadSettings()
 		{
 			bool loaded = false;
@@ -252,7 +296,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error loading settings at '{settingsFile}': {ex.ToString()}");
+				view.AlertBar.SetDangerAlert($"Error loading settings at '{settingsFile}': {ex.ToString()}");
 				Settings = null;
 			}
 
@@ -262,10 +306,18 @@ namespace DivinityModManager.ViewModels
 				SaveSettings();
 			}
 
-			if(String.IsNullOrEmpty(Settings.DOS2WorkshopPath))
+			if(String.IsNullOrEmpty(Settings.DOS2WorkshopPath) || !Directory.Exists(Settings.DOS2WorkshopPath))
 			{
 				Settings.DOS2WorkshopPath = DivinityRegistryHelper.GetDOS2WorkshopPath().Replace("\\", "/");
-				SaveSettings();
+				if(!String.IsNullOrEmpty(Settings.DOS2WorkshopPath) && Directory.Exists(Settings.DOS2WorkshopPath))
+				{
+					Trace.WriteLine($"Invalid workshop path set in settings file. Found DOS2 workshop folder at: '{Settings.DOS2WorkshopPath}'.");
+					SaveSettings();
+				}
+			}
+			else
+			{
+				Trace.WriteLine($"Found DOS2 workshop folder at: '{Settings.DOS2WorkshopPath}'.");
 			}
 
 			if (Settings.SaveSettingsCommand == null)
@@ -274,7 +326,22 @@ namespace DivinityModManager.ViewModels
 				Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings);
 			}
 
-			if (loaded) Settings.CanSaveSettings = false;
+			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
+
+			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
+			{
+				ToggleLogging(logEnabled);
+			});
+			if (Settings.LogEnabled)
+			{
+				ToggleLogging(true);
+			}
+
+			if (loaded)
+			{
+				Settings.CanSaveSettings = false;
+				view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.");
+			}
 
 			return loaded;
 		}
@@ -289,13 +356,13 @@ namespace DivinityModManager.ViewModels
 
 				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(settingsFile, contents);
-				StatusText = $"Saved settings to {settingsFile}";
+				view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.");
 				Settings.CanSaveSettings = false;
 				return true;
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error saving settings at '{settingsFile}': {ex.ToString()}");
+				view.AlertBar.SetDangerAlert($"Error saving settings at '{settingsFile}': {ex.ToString()}");
 			}
 			return false;
 		}
@@ -356,37 +423,87 @@ namespace DivinityModManager.ViewModels
 				workshopMods.AddOrUpdate(sortedWorkshopMods);
 
 				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-			}
+			} 
 		}
 
-		public void LoadMods()
+		private void SetDOS2Pathways(string currentGameDataPath)
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string modPakFolder = (Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods"));
 
-			List<DivinityModData> modPakData = null;
-			List<DivinityModData> projects = null;
-
-			if(Directory.Exists(modPakFolder))
+			string larianDocumentsFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition");
+			if(Directory.Exists(larianDocumentsFolder))
 			{
-				Trace.WriteLine($"Loading mods from '{modPakFolder}'.");
-				modPakData = DivinityModDataLoader.LoadModPackageData(modPakFolder);
+				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
+				Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
 			}
 
-			if(String.IsNullOrEmpty(Settings.GameDataPath) || !Directory.Exists(Settings.GameDataPath))
+			string modPakFolder = Path.Combine(larianDocumentsFolder, "Mods");
+			if(Directory.Exists(modPakFolder))
 			{
-				string p = DivinityRegistryHelper.GetDOS2Path();
-				if(!String.IsNullOrEmpty(p))
+				PathwayData.DocumentsModsPath = modPakFolder;
+				Trace.WriteLine($"Mods folder set to '{modPakFolder}'.");
+			}
+			else
+			{
+				Trace.WriteLine($"No mods folder found at '{modPakFolder}'.");
+			}
+
+			string profileFolder = (Path.Combine(larianDocumentsFolder, "PlayerProfiles"));
+			if (Directory.Exists(profileFolder))
+			{
+				PathwayData.DocumentsProfilesPath = profileFolder;
+				Trace.WriteLine($"Larian profile folder set to '{profileFolder}'.");
+			}
+
+			if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
+			{
+				string installPath = DivinityRegistryHelper.GetDOS2Path();
+				if (Directory.Exists(installPath))
 				{
-					string gameDataPath = Path.Combine(p, "DefEd/Data").Replace("\\", "/");
+					PathwayData.InstallPath = installPath;
+					string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+					if (File.Exists(exePath))
+					{
+						PathwayData.GameDOS2DEPath = exePath;
+						Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+					}
+					string gameDataPath = Path.Combine(installPath, "DefEd/Data").Replace("\\", "/");
 					Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
 					Settings.GameDataPath = gameDataPath;
 					SaveSettings();
 				}
 			}
-
-			if (Directory.Exists(Settings.GameDataPath))
+			else
 			{
+				string installPath = Path.GetFullPath(Path.Combine(Settings.GameDataPath, @"..\..\"));
+				PathwayData.InstallPath = installPath;
+				string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+				if (File.Exists(exePath))
+				{
+					PathwayData.GameDOS2DEPath = exePath;
+					Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+				}
+			}
+		}
+
+		public void LoadMods()
+		{
+			List<DivinityModData> modPakData = null;
+			List<DivinityModData> projects = null;
+
+			SetDOS2Pathways(Settings.GameDataPath);
+
+			if (Directory.Exists(PathwayData.DocumentsModsPath))
+			{
+				Trace.WriteLine($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
+				modPakData = DivinityModDataLoader.LoadModPackageData(PathwayData.DocumentsModsPath);
+			}
+
+			GameDirectoryFound = Directory.Exists(Settings.GameDataPath);
+
+			if (GameDirectoryFound)
+			{
+				GameDirectoryFound = true;
 				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
 				if(Directory.Exists(modsDirectory))
 				{
@@ -429,19 +546,16 @@ namespace DivinityModManager.ViewModels
 
 		public void LoadProfiles()
 		{
-			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string profileFolder = (Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\PlayerProfiles"));
-
-			if(Directory.Exists(profileFolder))
+			if(Directory.Exists(PathwayData.DocumentsProfilesPath))
 			{
-				Trace.WriteLine($"Loading profiles from '{profileFolder}'.");
+				Trace.WriteLine($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
 
-				var profiles = DivinityModDataLoader.LoadProfileData(profileFolder);
+				var profiles = DivinityModDataLoader.LoadProfileData(PathwayData.DocumentsProfilesPath);
 				Profiles.AddRange(profiles);
 
 				Trace.WriteLine($"Loaded '{Profiles.Count}' profiles.");
 
-				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(profileFolder);
+				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(PathwayData.DocumentsProfilesPath);
 				if (!String.IsNullOrWhiteSpace(selectedUUID))
 				{
 					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
@@ -456,7 +570,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{profileFolder}'.");
+				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
 		}
 
@@ -615,8 +729,17 @@ namespace DivinityModManager.ViewModels
 			LoadingOrder = false;
 		}
 
+		private bool refreshing = false;
+
+		public bool Refreshing
+		{
+			get => refreshing;
+			set { this.RaiseAndSetIfChanged(ref refreshing, value); }
+		}
+
 		public void Refresh()
 		{
+			Refreshing = true;
 			Trace.WriteLine($"Refreshing view.");
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
@@ -640,6 +763,7 @@ namespace DivinityModManager.ViewModels
 			}
 			LoadWorkshopMods();
 			CheckForModUpdates();
+			Refreshing = false;
 		}
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -736,13 +860,13 @@ namespace DivinityModManager.ViewModels
 				}
 				catch(Exception ex)
 				{
-					StatusText = $"Failed to save mod load order to '{outputPath}': {ex.Message}";
+					view.AlertBar.SetDangerAlert($"Failed to save mod load order to '{outputPath}': {ex.Message}");
 					result = false;
 				}
 
 				if (result)
 				{
-					StatusText = $"Saved mod load order to '{outputPath}'";
+					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{outputPath}'");
 				}
 			}
 
@@ -796,37 +920,34 @@ namespace DivinityModManager.ViewModels
 
 				if (result)
 				{
-					StatusText = $"Saved mod load order to '{dialog.FileName}'";
+					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'");
 				}
 				else
 				{
-					StatusText = $"Failed to save mod load order to '{dialog.FileName}'";
+					view.AlertBar.SetDangerAlert($"Failed to save mod load order to '{dialog.FileName}'");
 				}
 			}
 		}
 		private async Task<bool> ExportLoadOrder()
 		{
-			StatusText = "";
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
 				if(result)
 				{
-					StatusText = $"Exported load order to '{outputPath}'";
-					Trace.WriteLine(StatusText);
+					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'");
 				}
 				else
 				{
 					string msg = $"Problem exporting load order to '{outputPath}'";
-					StatusText = msg;
-					Trace.WriteLine(StatusText);
+					view.AlertBar.SetDangerAlert(msg);
 					MessageBox.Show(view, msg, "Mod Order Export Failed");
 				}
 			}
 			else
 			{
-				Trace.WriteLine("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
 			return false;
 		}
@@ -879,6 +1000,8 @@ namespace DivinityModManager.ViewModels
 			});
 		}
 
+		private IObservable<bool> canOpenWorkshopFolder;
+
 		public MainWindowViewModel() : base()
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
@@ -887,6 +1010,31 @@ namespace DivinityModManager.ViewModels
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
+
+			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
+			RefreshCommand = ReactiveCommand.Create(Refresh, canRefreshObservable);
+
+			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
+			OpenModsFolderCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(PathwayData.DocumentsModsPath);
+			}, canOpenModsFolder);
+
+			//canOpenWorkshopFolder.Subscribe((b) =>
+			//{
+			//	Trace.WriteLine($"Workshop folder exists: {b} | {Settings.DOS2WorkshopPath}");
+			//});
+
+			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(Settings.DOS2WorkshopPath);
+			}, canOpenWorkshopFolder);
+
+			var canOpenDOS2DEGame = this.WhenAnyValue(x => x.PathwayData.GameDOS2DEPath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
+			OpenDOS2GameCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(PathwayData.GameDOS2DEPath);
+			}, canOpenDOS2DEGame);
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);

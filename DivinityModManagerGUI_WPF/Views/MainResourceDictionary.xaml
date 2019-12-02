@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
@@ -14,6 +15,34 @@
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/SaveGrey_16x.png" />
 	<BitmapImage x:Key="AddItemImage" UriSource="pack://application:,,,/Resources/AddItem_16x.png" />
 	<BitmapImage x:Key="ExportDataImage" UriSource="pack://application:,,,/Resources/ExportData_16x.png" />
+	<BitmapImage x:Key="OpenFolderImage" UriSource="pack://application:,,,/Resources/OpenFolder_16x.png" />
+	<BitmapImage x:Key="RefreshImage" UriSource="pack://application:,,,/Resources/Refresh_16x.png" />
+	<BitmapImage x:Key="ExpandDownImage" UriSource="pack://application:,,,/Resources/ExpandChevronDown_16x.png" />
+	<BitmapImage x:Key="ExpandDownImageDisabled" UriSource="pack://application:,,,/Resources/ExpandChevronDown_lightGray_16x.png" />
+	<BitmapImage x:Key="ExpandUpImage" UriSource="pack://application:,,,/Resources/ExpandChevronUp_16x.png" />
+	<BitmapImage x:Key="ExpandUpImageDisabled" UriSource="pack://application:,,,/Resources/ExpandChevronUp_lightGrey_16x.png" />
+	<BitmapImage x:Key="OpenDOS2Image" UriSource="pack://application:,,,/Resources/DivinityOS2_EoCApp_16x.png" />
+	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Steam_16x.png" />
+
+	<Style x:Key="IconButtonStyle" TargetType="{x:Type Button}">
+		<Setter Property="Width" Value="24" />
+		<Setter Property="Height" Value="24" />
+		<Setter Property="Margin" Value="2,0,2,0" />
+	</Style>
+
+	<Style TargetType="{x:Type controls:AutoGrayableImage}">
+		<Setter Property="Width" Value="16" />
+		<Setter Property="Height" Value="16" />
+		<Setter Property="Margin" Value="2" />
+		<Setter Property="Stretch" Value="Uniform" />
+	</Style>
+
+	<Style x:Key="VerticalSeparator" TargetType="Rectangle">
+		<Setter Property="Width" Value="1" />
+		<Setter Property="Margin" Value="16,0,16,0" />
+		<Setter Property="VerticalAlignment" Value="Stretch" />
+		<Setter Property="Fill" Value="Black" />
+	</Style>
 
 	<DataTemplate DataType="{x:Type data:DivinityProfileData}">
 		<TextBlock Text="{Binding Name}" />

@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="DivinityModManager.Views.ModUpdatesLayout"
+﻿<local:ModUpdatesLayoutBase 
+			x:Class="DivinityModManager.Views.ModUpdatesLayout"
 			xmlns:reactiveui="http://reactiveui.net"
 			xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 			xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -13,8 +14,8 @@
 			xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 			mc:Ignorable="d" 
 			d:DesignHeight="450" d:DesignWidth="800"
-			IsEnabled="{Binding Unlocked}"
-			IsManipulationEnabled="{Binding Unlocked}"
+			IsEnabled="{Binding Unlocked, Mode=OneWay}"
+			IsManipulationEnabled="{Binding Unlocked, Mode=OneWay}"
 >
 	<d:DesignerProperties.DesignStyle>
 		<Style TargetType="UserControl">
@@ -39,9 +40,9 @@
 			</Grid.Resources>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="Auto" />
-				<RowDefinition Height="1*" />
+				<RowDefinition Height="1*" x:Name="NewModsGridRow" />
 				<RowDefinition Height="1" />
-				<RowDefinition Height="2*" />
+				<RowDefinition Height="2*" x:Name="UpdatesGridRow" />
 				<RowDefinition Height="Auto" />
 			</Grid.RowDefinitions>
 			<StackPanel Orientation="Vertical">
@@ -52,14 +53,14 @@
 					RowCount="2" Rows="auto,*" Columns="*" Grid.Row="1"
 				>
 				<TextBlock Text="New Mods" TextAlignment="Center" FontSize="20" Background="White"/>
-				<ListView ItemsSource="{Binding NewMods}" View="{DynamicResource NewModsGridView}" GridViewColumnHeader.Click="SortNewModsGridView" BorderThickness="0"/>
+				<ListView ItemsSource="{Binding NewMods}" View="{DynamicResource NewModsGridView}" IsEnabled="{Binding NewAvailable, Mode=OneWay}" GridViewColumnHeader.Click="SortNewModsGridView" BorderThickness="0"/>
 			</ag:AutoGrid>
 			<GridSplitter Grid.Row="2" ResizeDirection="Rows" VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Template="{StaticResource VerticalGridSplitter}" />
 			<ag:AutoGrid
 				RowCount="2" Rows="auto,*" Columns="*" Grid.Row="3"
 			>
 				<TextBlock Text="Updates" TextAlignment="Center" FontSize="20" Background="White" />
-				<ListView ItemsSource="{Binding Updates}" View="{DynamicResource ModUpdatesGridView}" GridViewColumnHeader.Click="SortModUpdatesGridView" BorderThickness="0"/>
+				<ListView ItemsSource="{Binding Updates}" View="{DynamicResource ModUpdatesGridView}" IsEnabled="{Binding UpdatesAvailable, Mode=OneWay}" GridViewColumnHeader.Click="SortModUpdatesGridView" BorderThickness="0"/>
 			</ag:AutoGrid>
 			<Grid Grid.Row="4" Margin="4">
 				<StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
@@ -68,4 +69,4 @@
 			</Grid>
 		</Grid>
 	</Border>
-</UserControl>
+</local:ModUpdatesLayoutBase>

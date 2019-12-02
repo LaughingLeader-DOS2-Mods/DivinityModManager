@@ -340,6 +340,8 @@ namespace DivinityModManager.ViewModels
 				ModUpdatesViewData.SelectAll(true);
 				Trace.WriteLine($"'{count}' mod updates pending.");
 			}
+
+			ModUpdatesViewData.OnLoaded?.Invoke();
 		}
 
 		public void LoadWorkshopMods()

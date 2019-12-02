@@ -78,9 +78,27 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref justUpdated, value); }
 		}
 
+		private bool allNewModsSelected = false;
+
+		public bool AllNewModsSelected
+		{
+			get => allNewModsSelected;
+			set { this.RaiseAndSetIfChanged(ref allNewModsSelected, value); }
+		}
+
+		private bool allModUpdatesSelected = false;
+
+		public bool AllModUpdatesSelected
+		{
+			get => allModUpdatesSelected;
+			set { this.RaiseAndSetIfChanged(ref allModUpdatesSelected, value); }
+		}
+
 		public ICommand CopySelectedModsCommand { get; set; }
 		public ICommand SelectAllNewModsCommand { get; set; }
 		public ICommand SelectAllUpdatesCommand { get; set; }
+
+		public Action OnLoaded { get; set; }
 
 		public Action<bool> CloseView { get; set; }
 
@@ -290,6 +308,7 @@ namespace DivinityModManager.ViewModels
 				{
 					AnySelected = true;
 				}
+				AllNewModsSelected = NewMods.Count > 0 && c.All(x => x.IsSelected);
 			});
 			Updates.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).ToCollection().Subscribe((c) =>
 			{
@@ -302,6 +321,7 @@ namespace DivinityModManager.ViewModels
 				{
 					AnySelected = true;
 				}
+				AllModUpdatesSelected = Updates.Count > 0 && c.All(x => x.IsSelected);
 			});
 		}
 	}

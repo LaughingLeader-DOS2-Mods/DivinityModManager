@@ -14,17 +14,67 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DivinityModManager.ViewModels;
+using ReactiveUI;
 
 namespace DivinityModManager.Views
 {
+	public class ModUpdatesLayoutBase : ReactiveUserControl<ModUpdatesViewData> { }
 	/// <summary>
 	/// Interaction logic for ModUpdatesLayout.xaml
 	/// </summary>
-	public partial class ModUpdatesLayout : UserControl
+	public partial class ModUpdatesLayout : ModUpdatesLayoutBase
 	{
 		public ModUpdatesLayout()
 		{
 			InitializeComponent();
+
+			Loaded += ModUpdatesLayout_Loaded;
+			DataContextChanged += ModUpdatesLayout_DataContextChanged;
+		}
+
+		private void ModUpdatesLayout_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if(DataContext is ModUpdatesViewData vm)
+			{
+				ViewModel = vm;
+
+				ViewModel.OnLoaded = new Action(() =>
+				{
+					var newModsGridRowDef = UpdateGrid.RowDefinitions.FirstOrDefault(x => x.Name == "NewModsGridRow");
+
+					if (newModsGridRowDef != null)
+					{
+						if (!ViewModel.NewAvailable)
+						{
+							newModsGridRowDef.Height = new GridLength(75, GridUnitType.Pixel);
+						}
+						else
+						{
+							newModsGridRowDef.Height = new GridLength(1, GridUnitType.Star);
+						}
+					}
+
+					var updatesGridRowDef = UpdateGrid.RowDefinitions.FirstOrDefault(x => x.Name == "UpdatesGridRow");
+
+					if (updatesGridRowDef != null)
+					{
+						if (!ViewModel.UpdatesAvailable)
+						{
+							updatesGridRowDef.Height = new GridLength(75, GridUnitType.Pixel);
+						}
+						else
+						{
+							updatesGridRowDef.Height = new GridLength(2, GridUnitType.Star);
+						}
+					}
+				});
+			}
+		}
+
+		private void ModUpdatesLayout_Loaded(object sender, RoutedEventArgs e)
+		{
+			
 		}
 
 		GridViewColumnHeader _lastHeaderClicked = null;

@@ -174,7 +174,7 @@
 			<GridViewColumn Width="40" HeaderContainerStyle="{StaticResource GridViewCenteredContainerStyle}">
 				<GridViewColumn.Header>
 					<CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding SelectAllNewModsCommand}" 
-							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" IsChecked="{Binding AllNewModsSelected}" />
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
@@ -220,7 +220,7 @@
 			<GridViewColumn Width="40" HeaderContainerStyle="{StaticResource GridViewCenteredContainerStyle}">
 				<GridViewColumn.Header>
 					<CheckBox HorizontalAlignment="Center" VerticalAlignment="Center" Command="{Binding SelectAllUpdatesCommand}" 
-							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" />
+							  CommandParameter="{Binding Path=IsChecked, RelativeSource={RelativeSource Mode=Self}}" IsChecked="{Binding AllModUpdatesSelected}" />
 				</GridViewColumn.Header>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>

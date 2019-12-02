@@ -124,6 +124,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Controls\AutoGrayableImage.cs" />
+    <Compile Include="Controls\CircleDecorator.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />

@@ -182,7 +182,6 @@ namespace DivinityModManager.Views
 				if(ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
 				{
 					AutoUpdater.Start(DivinityApp.URL_UPDATE);
-					AutoUpdater.Start(@"G:\DivinityModManager\Update.xml");
 				}
 			});
 		}

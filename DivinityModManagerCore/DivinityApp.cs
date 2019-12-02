@@ -12,6 +12,11 @@ namespace DivinityModManager
 		public const string URL_DONATION = @"https://ko-fi.com/laughingleader";
 		public const string URL_REPO = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager";
 		public const string URL_CHANGELOG = @"https://raw.githubusercontent.com/LaughingLeader-DOS2-Mods/DivinityModManager/master/CHANGELOG.md";
+#if DEBUG
+		public const string URL_UPDATE = @"G:\DivinityModManager\Update.xml";
+#else
 		public const string URL_UPDATE = @"https://raw.githubusercontent.com/LaughingLeader-DOS2-Mods/DivinityModManager/master/Update.xml";
+#endif
+
 	}
 }

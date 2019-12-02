@@ -199,6 +199,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportOrderCommand { get; private set; }
 		public ICommand AddOrderConfigCommand { get; private set; }
 		public ICommand RefreshCommand { get; private set; }
+		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
 		public ICommand OpenDOS2GameCommand { get; private set; }
@@ -207,6 +208,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand DebugCommand { get; private set; }
 		public ICommand OpenConflictCheckerCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
+		public ICommand CheckForAppUpdatesCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{

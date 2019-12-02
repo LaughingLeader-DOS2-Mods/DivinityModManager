@@ -380,6 +380,23 @@
 			Key="S"
 			Command="{Binding SaveOrderCommand}"
 			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="S"
+			Command="{Binding SaveOrderAsCommand}"
+			Modifiers="Ctrl+Alt" />
+		<KeyBinding
+			Key="E"
+			Command="{Binding ExportOrderCommand}"
+			Modifiers="Ctrl+Shift" />
+		<KeyBinding
+			Key="N"
+			Command="{Binding AddOrderConfigCommand}"
+			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="P"
+			Command="{Binding OpenPreferencesCommand}"
+			Modifiers="Ctrl" />
+		<KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
 	</Window.InputBindings>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -398,12 +415,42 @@
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<Menu x:Name="TopMenuBar" Padding="2">
-				<MenuItem Header="File" />
+				<MenuItem Header="File">
+					<MenuItem
+						x:Name="FileAddNewOrderMenuItem"
+						Header="Add New Order"
+						InputGestureText="CTRL+N" />
+					<Separator />
+					<MenuItem
+						x:Name="FileSaveOrderMenuItem"
+						Header="Save Load Order"
+						InputGestureText="CTRL+S" />
+					<MenuItem
+						x:Name="FileSaveOrderAsMenuItem"
+						Header="Save Load Order As..."
+						InputGestureText="CTRL+Alt+S" />
+					<Separator />
+					<MenuItem
+						x:Name="FileExportOrderToGameMenuItem"
+						Header="Export Order to Game"
+						InputGestureText="CTRL+Shift+E" />
+					<Separator />
+					<MenuItem
+						x:Name="FileRefreshMenuItem"
+						Header="Reload All"
+						InputGestureText="F5" />
+				</MenuItem>
 				<MenuItem Header="Settings">
 					<MenuItem
-						x:Name="Settings_Preferences_MenuItem"
-						Click="Settings_Preferences_MenuItem_Click"
-						Header="Preferences" />
+						x:Name="SettingsPreferencesMenuItem"
+						Header="Preferences..."
+						InputGestureText="CTRL+P" />
+				</MenuItem>
+				<MenuItem Header="Help">
+					<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
+					<Separator />
+					<MenuItem x:Name="HelpDonationMenuItem" Header="Donate a Coffee..." />
+					<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
 				</MenuItem>
 				<!--<MenuItem Header="Tools">
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />

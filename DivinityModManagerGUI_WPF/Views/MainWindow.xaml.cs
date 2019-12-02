@@ -99,9 +99,52 @@ namespace DivinityModManager.Views
 
 			ViewModel = new MainWindowViewModel();
 
+			AlertBar.Show += AlertBar_Show;
+
+			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
+			AutoUpdater.ReportErrors = true;
+			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
+
 			this.OneWayBind(ViewModel,
 				viewModel => viewModel.Title,
 				view => view.Title).DisposeWith(ViewModel.Disposables);
+
+			ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() => 
+			{
+				AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
+				ViewModel.SaveSettings();
+			});
+
+			ViewModel.OpenPreferencesCommand = ReactiveCommand.Create(() =>
+			{
+				if (!SettingsWindow.IsVisible)
+				{
+					if (SettingsWindow == null)
+					{
+						settingsWindow = new SettingsWindow();
+					}
+					SettingsWindow.Init(this.ViewModel.Settings);
+					SettingsWindow.Show();
+					settingsWindow.Owner = this;
+				}
+				else
+				{
+					SettingsWindow.Hide();
+				}
+			});
+
+			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.FileAddNewOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.FileSaveOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.FileSaveOrderAsMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.FileExportOrderToGameMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.FileRefreshMenuItem.Command).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.OpenPreferencesCommand, view => view.SettingsPreferencesMenuItem.Command).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.CheckForAppUpdatesCommand, view => view.HelpCheckForUpdateMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.HelpDonationMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.HelpOpenRepoPageMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
 			//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
@@ -131,12 +174,6 @@ namespace DivinityModManager.Views
 
 			DataContext = ViewModel;
 
-			AlertBar.Show += AlertBar_Show;
-
-			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
-			AutoUpdater.ReportErrors = true;
-			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
-
 			this.WhenActivated(d =>
 			{
 				d.Add(ViewModel.Disposables);
@@ -145,6 +182,7 @@ namespace DivinityModManager.Views
 				if(ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
 				{
 					AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					AutoUpdater.Start(@"G:\DivinityModManager\Update.xml");
 				}
 			});
 		}
@@ -243,24 +281,6 @@ namespace DivinityModManager.Views
 		private void MenuItem_Click(object sender, RoutedEventArgs e)
 		{
 
-		}
-
-		private void Settings_Preferences_MenuItem_Click(object sender, RoutedEventArgs e)
-		{
-			if(!SettingsWindow.IsVisible)
-			{
-				if (SettingsWindow == null)
-				{
-					settingsWindow = new SettingsWindow();
-				}
-				SettingsWindow.Init(this.ViewModel.Settings);
-				SettingsWindow.Show();
-				settingsWindow.Owner = this;
-			}
-			else
-			{
-				SettingsWindow.Hide();
-			}
 		}
 	}
 }

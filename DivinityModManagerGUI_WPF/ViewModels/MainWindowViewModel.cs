@@ -209,6 +209,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenConflictCheckerCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
+		public ICommand OpenAboutWindowCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{

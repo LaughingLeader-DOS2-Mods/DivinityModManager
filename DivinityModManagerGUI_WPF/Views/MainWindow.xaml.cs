@@ -88,6 +88,9 @@ namespace DivinityModManager.Views
 		private SettingsWindow settingsWindow;
 		public SettingsWindow SettingsWindow => settingsWindow;
 
+		private AboutWindow aboutWindow;
+		public AboutWindow AboutWindow => aboutWindow;
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -118,12 +121,13 @@ namespace DivinityModManager.Views
 
 			ViewModel.OpenPreferencesCommand = ReactiveCommand.Create(() =>
 			{
+				if (SettingsWindow == null)
+				{
+					settingsWindow = new SettingsWindow();
+				}
+
 				if (!SettingsWindow.IsVisible)
 				{
-					if (SettingsWindow == null)
-					{
-						settingsWindow = new SettingsWindow();
-					}
 					SettingsWindow.Init(this.ViewModel.Settings);
 					SettingsWindow.Show();
 					settingsWindow.Owner = this;
@@ -131,6 +135,25 @@ namespace DivinityModManager.Views
 				else
 				{
 					SettingsWindow.Hide();
+				}
+			});
+
+			ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
+			{
+				if (AboutWindow == null)
+				{
+					aboutWindow = new AboutWindow();
+				}
+
+				if (!AboutWindow.IsVisible)
+				{
+					AboutWindow.DataContext = ViewModel;
+					AboutWindow.Show();
+					AboutWindow.Owner = this;
+				}
+				else
+				{
+					AboutWindow.Hide();
 				}
 			});
 
@@ -145,6 +168,7 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.CheckForAppUpdatesCommand, view => view.HelpCheckForUpdateMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.HelpDonationMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.HelpOpenRepoPageMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.OpenAboutWindowCommand, view => view.HelpOpenAboutWindowMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
 			//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);

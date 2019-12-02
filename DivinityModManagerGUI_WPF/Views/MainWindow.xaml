@@ -397,6 +397,7 @@
 			Command="{Binding OpenPreferencesCommand}"
 			Modifiers="Ctrl" />
 		<KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
+		<KeyBinding Key="F1" Command="{Binding OpenAboutWindowCommand}" />
 	</Window.InputBindings>
 	<Grid>
 		<Grid.RowDefinitions>
@@ -451,6 +452,10 @@
 					<Separator />
 					<MenuItem x:Name="HelpDonationMenuItem" Header="Donate a Coffee..." />
 					<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
+					<MenuItem
+						x:Name="HelpOpenAboutWindowMenuItem"
+						Header="About Divinity Mod Manager"
+						InputGestureText="F1" />
 				</MenuItem>
 				<!--<MenuItem Header="Tools">
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />

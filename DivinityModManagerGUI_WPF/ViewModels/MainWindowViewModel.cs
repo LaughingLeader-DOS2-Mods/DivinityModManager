@@ -322,14 +322,15 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Found DOS2 workshop folder at: '{Settings.DOS2WorkshopPath}'.");
 			}
 
-			if (Settings.SaveSettingsCommand == null)
-			{
-				var canSaveSettings = Settings.WhenAnyValue(m => m.CanSaveSettings);
-				Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings);
-			}
-
+			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
+
+			Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings);
+			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(DivinityApp.DIR_DATA);
+			});
 
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
@@ -469,7 +470,7 @@ namespace DivinityModManager.ViewModels
 						string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
 						if (File.Exists(exePath))
 						{
-							Settings.DOS2DEGameExecutable = exePath;
+							Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
 							Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
 						}
 					}
@@ -489,7 +490,7 @@ namespace DivinityModManager.ViewModels
 					string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
 					if (File.Exists(exePath))
 					{
-						Settings.DOS2DEGameExecutable = exePath;
+						Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
 						Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
 					}
 				}
@@ -1010,6 +1011,7 @@ namespace DivinityModManager.ViewModels
 			});
 		}
 
+		private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenDOS2DEGame;
 
@@ -1043,7 +1045,15 @@ namespace DivinityModManager.ViewModels
 
 			OpenDOS2GameCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(Settings.DOS2DEGameExecutable);
+				if (!Settings.GameStoryLogEnabled)
+				{
+					Process.Start(Settings.DOS2DEGameExecutable);
+				}
+				else;
+				{
+					Process.Start(Settings.DOS2DEGameExecutable, "-storylog 1");
+				}
+				
 			}, canOpenDOS2DEGame);
 
 			OpenDonationPageCommand = ReactiveCommand.Create(() =>

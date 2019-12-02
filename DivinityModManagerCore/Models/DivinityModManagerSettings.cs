@@ -35,7 +35,24 @@ namespace DivinityModManager.Models
 		public string DOS2DEGameExecutable
 		{
 			get => gameExecutable;
-			set { this.RaiseAndSetIfChanged(ref gameExecutable, value); }
+			set
+			{
+				if (value != gameExecutable) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref gameExecutable, value);
+			}
+		}
+
+		private bool gameStoryLogEnabled = false;
+
+		[DataMember]
+		public bool GameStoryLogEnabled
+		{
+			get => gameStoryLogEnabled;
+			set
+			{
+				if (value != gameStoryLogEnabled) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref gameStoryLogEnabled, value);
+			}
 		}
 
 		private string dos2workshopPath = "";
@@ -70,7 +87,11 @@ namespace DivinityModManager.Models
 		public bool LogEnabled
 		{
 			get => logEnabled;
-			set { this.RaiseAndSetIfChanged(ref logEnabled, value); }
+			set
+			{
+				if (value != logEnabled) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref logEnabled, value);
+			}
 		}
 
 		public ICommand SaveSettingsCommand { get; set; }
@@ -86,10 +107,7 @@ namespace DivinityModManager.Models
 
 		public DivinityModManagerSettings()
 		{
-			OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
-			{
-				Process.Start(DivinityApp.DIR_DATA);
-			});
+
 		}
 	}
 }

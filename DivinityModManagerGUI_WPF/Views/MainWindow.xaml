@@ -283,11 +283,23 @@
 							<TextBlock
 								Margin="0,0,6,0"
 								VerticalAlignment="Center"
-								Text="Export to Game" />
+								Text="Export" />
 							<Button
 								x:Name="ExportToModSettingsButton"
 								Command="{Binding ExportOrderCommand}"
 								ToolTip="Export Load Order to Game for the Current Profile">
+								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+							</Button>
+							<Button
+								x:Name="ExportOrderToArchiveButton"
+								Command="{Binding ExportLoadOrderAsArchiveCommand}"
+								ToolTip="Export Active Mods">
+								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+							</Button>
+							<Button
+								x:Name="ExportOrderToArchiveAsButton"
+								Command="{Binding ExportLoadOrderAsArchiveToFileCommand}"
+								ToolTip="Export Active Mods As...">
 								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
 							</Button>
 							<Rectangle Style="{StaticResource VerticalSeparator}" />
@@ -435,6 +447,9 @@
 						x:Name="FileExportOrderToGameMenuItem"
 						Header="Export Order to Game"
 						InputGestureText="CTRL+Shift+E" />
+					<Separator />
+					<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods (.zip)" />
+					<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods As..." />
 					<Separator />
 					<MenuItem
 						x:Name="FileRefreshMenuItem"

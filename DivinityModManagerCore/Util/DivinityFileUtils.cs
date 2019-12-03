@@ -1,4 +1,5 @@
 ﻿using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;

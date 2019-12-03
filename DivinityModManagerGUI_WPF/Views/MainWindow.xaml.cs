@@ -173,6 +173,9 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.FileSaveOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.FileSaveOrderAsMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.FileExportOrderToGameMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.ExportLoadOrderAsArchiveCommand, view => view.FileExportOrderToArchiveMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.ExportLoadOrderAsArchiveToFileCommand, view => view.FileExportOrderToArchiveAsMenuItem.Command).DisposeWith(ViewModel.Disposables);
+
 			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.FileRefreshMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.OpenPreferencesCommand, view => view.SettingsPreferencesMenuItem.Command).DisposeWith(ViewModel.Disposables);

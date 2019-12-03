@@ -25,6 +25,7 @@ using Newtonsoft.Json;
 using Microsoft.Win32;
 using DivinityModManager.Views;
 using System.Globalization;
+using System.IO.Compression;
 
 namespace DivinityModManager.ViewModels
 {
@@ -210,6 +211,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand OpenAboutWindowCommand { get; set; }
+		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
+		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -941,13 +944,14 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 		}
+
 		private async Task<bool> ExportLoadOrder()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
-				if(result)
+				if (result)
 				{
 					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'");
 				}
@@ -965,10 +969,109 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
-		private bool ActiveModsChanging(DivinityModData m)
+		private async Task<bool> ExportLoadOrderToArchive()
 		{
-			Trace.WriteLine($"[ActiveModsChanging] Mod {m.Name}");
-			return true;
+			return await ExportLoadOrderToArchive("");
+		}
+
+		private async Task<bool> ExportLoadOrderToArchive(string outputPath)
+		{
+			if (SelectedProfile != null && SelectedModOrder != null)
+			{
+				if(String.IsNullOrEmpty(outputPath))
+				{
+					string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+					string baseOrderName = SelectedModOrder.Name;
+					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+					{
+						baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
+					}
+					outputPath = $"Export/{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH -mm-ss")}.zip";
+				}
+				
+				List<string> modPaks = new List<string>(Mods.Where(x => SelectedModOrder.Order.Any(o => o.UUID == x.UUID)).Select(x => x.FilePath));
+				try
+				{
+					using (MemoryStream zipStream = new MemoryStream())
+					{
+						using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create, true))
+						{
+							foreach (var f in modPaks)
+							{
+								var entry = archive.CreateEntry(Path.GetFileName(f));
+								var fileBytes = File.ReadAllBytes(f);
+								using(MemoryStream fileMemory = new MemoryStream(fileBytes))
+								{
+									using (var entryStream = entry.Open())
+									{
+										await entryStream.CopyToAsync(zipStream);
+									}
+								}
+								
+							}
+						}
+						using (FileStream fs = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+						{
+							await zipStream.CopyToAsync(fs);
+						}
+					}
+
+					var dir = Path.GetDirectoryName(outputPath);
+					Process.Start(dir);
+					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.");
+					return true;
+				}
+				catch(Exception ex)
+				{
+					string msg = $"Error writing load order archive '{outputPath}': {ex.ToString()}";
+					Trace.WriteLine(msg);
+					view.AlertBar.SetDangerAlert(msg);
+				}
+			}
+			else
+			{
+				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+			}
+			return false;
+		}
+
+		private async Task<bool> ExportLoadOrderToArchiveAs()
+		{
+			if (SelectedProfile != null && SelectedModOrder != null)
+			{
+				var startDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
+
+				var dialog = new SaveFileDialog();
+				dialog.AddExtension = true;
+				dialog.DefaultExt = ".zip";
+				dialog.Filter = "Archive file (*.zip)|*.zip";
+				dialog.InitialDirectory = startDirectory;
+
+				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+				string baseOrderName = SelectedModOrder.Name;
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+				{
+					baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
+				}
+				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH -mm-ss")}.zip";
+
+				//dialog.RestoreDirectory = true;
+				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
+				dialog.CheckFileExists = false;
+				dialog.CheckPathExists = false;
+				dialog.OverwritePrompt = true;
+				dialog.Title = "Export Load Order As...";
+
+				if (dialog.ShowDialog(view) == true)
+				{
+					return await ExportLoadOrderToArchive(dialog.FileName);
+				}
+			}
+			else
+			{
+				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+			}
+			return false;
 		}
 
 		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
@@ -1023,6 +1126,8 @@ namespace DivinityModManager.ViewModels
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
+			ExportLoadOrderAsArchiveCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderToArchive);
+			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderToArchiveAs);
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 

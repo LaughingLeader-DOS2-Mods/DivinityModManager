@@ -10,6 +10,7 @@
 	x:Name="MainResources">
 	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
+	<conv:StringToUriConverter x:Key="StringToUriConverter" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/SaveAs_16x.png" />
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/SaveGrey_16x.png" />

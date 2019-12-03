@@ -147,8 +147,12 @@
     <Compile Include="Controls\AutoGrayableImage.cs" />
     <Compile Include="Controls\CircleDecorator.cs" />
     <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
+    <Compile Include="Controls\HyperlinkText.xaml.cs">
+      <DependentUpon>HyperlinkText.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
+    <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
@@ -170,6 +174,10 @@
     <Compile Include="Views\VerticalModLayout.xaml.cs">
       <DependentUpon>VerticalModLayout.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\HyperlinkText.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\AboutWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

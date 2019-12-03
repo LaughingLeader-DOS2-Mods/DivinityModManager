@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Globalization;
 using static AlertBarWpf.AlertBarWpf;
 using AutoUpdaterDotNET;
+using System.Windows.Threading;
 
 namespace DivinityModManager.Views
 {
@@ -105,7 +106,9 @@ namespace DivinityModManager.Views
 			AlertBar.Show += AlertBar_Show;
 
 			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
+#if DEBUG
 			AutoUpdater.ReportErrors = true;
+#endif
 			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
 
 			this.OneWayBind(ViewModel,
@@ -114,9 +117,18 @@ namespace DivinityModManager.Views
 
 			ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() => 
 			{
+#if !DEBUG
+				AutoUpdater.ReportErrors = true;
+#endif
 				AutoUpdater.Start(DivinityApp.URL_UPDATE);
 				ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
 				ViewModel.SaveSettings();
+#if !DEBUG
+				Task.Delay(1000).ContinueWith(_ =>
+				{
+					AutoUpdater.ReportErrors = false;
+				});
+#endif
 			});
 
 			ViewModel.OpenPreferencesCommand = ReactiveCommand.Create(() =>

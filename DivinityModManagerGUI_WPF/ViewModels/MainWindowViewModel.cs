@@ -754,7 +754,6 @@ namespace DivinityModManager.ViewModels
 		public void Refresh()
 		{
 			Refreshing = true;
-			Trace.WriteLine($"Refreshing view.");
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
 			int lastOrderIndex = -1;

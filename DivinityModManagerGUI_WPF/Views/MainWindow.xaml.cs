@@ -215,9 +215,12 @@ namespace DivinityModManager.Views
 				d.Add(ViewModel.Disposables);
 				ViewModel.OnViewActivated(this);
 
-				if(ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
+				if(ViewModel.Settings.CheckForUpdates)
 				{
-					AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					if (ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
+					{
+						AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					}
 				}
 			});
 		}

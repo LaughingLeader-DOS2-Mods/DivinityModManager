@@ -65,9 +65,9 @@
 					ChildMargin="2"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="5"
+					RowCount="6"
 					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto">
+					Rows="auto,auto,auto,auto,auto,auto">
 					<Label Content="Game Data Path:" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
@@ -90,6 +90,8 @@
 						VerticalAlignment="Center"
 						Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
 						TextAlignment="Left" />
+					<Label Content="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
+					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
 			</TabItem>
 			<TabItem Header="Debug">

@@ -94,6 +94,14 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		private bool checkForUpdates = true;
+
+		public bool CheckForUpdates
+		{
+			get => checkForUpdates;
+			set { this.RaiseAndSetIfChanged(ref checkForUpdates, value); }
+		}
+
 		private long lastUpdateCheck = -1;
 
 		[DataMember]

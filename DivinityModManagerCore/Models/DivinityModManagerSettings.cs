@@ -96,6 +96,7 @@ namespace DivinityModManager.Models
 
 		private bool checkForUpdates = true;
 
+		[DataMember]
 		public bool CheckForUpdates
 		{
 			get => checkForUpdates;

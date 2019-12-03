@@ -18,19 +18,38 @@ namespace DivinityModManager.Util
 {
 	public static class DivinityModDataLoader
 	{
-		public static List<DivinityModData> IgnoredMods = new List<DivinityModData>()
+		public static List<DivinityModData> LarianMods { get; private set; } = new List<DivinityModData>()
 		{
 			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder = "Shared" },
 			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder = "Shared_DOS" },
-			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version = new DivinityModVersion(371465211)},
+			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version = new DivinityModVersion(372251161)},
 			new DivinityModData{ Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder = "DOS2_Arena"},
 			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder = "GameMaster"},
-			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack"}
+			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack"},
+			new DivinityModData{ Name = "Nine Lives", UUID = "015de505-6e7f-460c-844c-395de6c2ce34", Folder="AS_BlackCatPlus"},
+			new DivinityModData{ Name = "Herb Gardens", UUID = "38608c30-1658-4f6a-8adf-e826a5295808", Folder="AS_GrowYourHerbs"},
+			new DivinityModData{ Name = "Endless Runner", UUID = "ec27251d-acc0-4ab8-920e-dbc851e79bb4", Folder="AS_ToggleSpeedAddon"},
+			new DivinityModData{ Name = "8 Action Points", UUID = "9b45f7e5-d4e2-4fc2-8ef7-3b8e90a5256c", Folder="CMP_8AP_Kamil"},
+			new DivinityModData{ Name = "Hagglers", UUID = "f33ded5d-23ab-4f0c-b71e-1aff68eee2cd", Folder="CMP_BarterTweaks"},
+			new DivinityModData{ Name = "Crafter's Kit", UUID = "68a99fef-d125-4ed0-893f-bb6751e52c5e", Folder="CMP_CraftingOverhaul"},
+			new DivinityModData{ Name = "Combat Randomiser", UUID = "f30953bb-10d3-4ba4-958c-0f38d4906195", Folder="CMP_EnemyRandomizer_Kamil"},
+			new DivinityModData{ Name = "Animal Empathy", UUID = "423fae51-61e3-469a-9c1f-8ad3fd349f02", Folder="CMP_Free_PetPalTag_Kamil"},
+			new DivinityModData{ Name = "Fort Joy Magic Mirror", UUID = "2d42113c-681a-47b6-96a1-d90b3b1b07d3", Folder="CMP_FTJRespec_Kamil"},
+			new DivinityModData{ Name = "Sourcerous Sundries", UUID = "a945eefa-530c-4bca-a29c-a51450f8e181", Folder="CMP_LevelUpEquipment"},
+			new DivinityModData{ Name = "Improved Organisation", UUID = "f243c84f-9322-43ac-96b7-7504f990a8f0", Folder="CMP_OrganizedContainers_Marek"},
+			new DivinityModData{ Name = "Pet Power", UUID = "d2507d43-efce-48b8-ba5e-5dd136c715a7", Folder="CMP_SummoningImproved_Kamil"}
 		};
+
+		public static List<DivinityModData> IgnoredMods { get; set; } = new List<DivinityModData>(LarianMods);
 
 		public static bool IgnoreMod(string modUUID)
 		{
 			return IgnoredMods.Any(m => m.UUID == modUUID);
+		}
+
+		public static bool IgnoreModByFolder(string folder)
+		{
+			return IgnoredMods.Any(m => m.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
 		}
 
 		public static string MakeSafeFilename(string filename, char replaceChar)
@@ -128,7 +147,7 @@ namespace DivinityModManager.Util
 				if (Directory.Exists(modsFolderPath))
 				{
 					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
-					var filteredFolders = projectDirectories.Where(f => !IgnoredMods.Any(m => Path.GetFileName(f).Equals(m.Folder, StringComparison.OrdinalIgnoreCase)));
+					var filteredFolders = projectDirectories.Where(f => !IgnoreModByFolder(f));
 					Console.WriteLine("Project Folders: " + filteredFolders.Count());
 					foreach (var folder in filteredFolders)
 					{

@@ -29,7 +29,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private string gameExecutable;
+		private string gameExecutable = "";
 
 		[DataMember]
 		public string DOS2DEGameExecutable
@@ -110,6 +110,15 @@ namespace DivinityModManager.Models
 		{
 			get => lastUpdateCheck;
 			set { this.RaiseAndSetIfChanged(ref lastUpdateCheck, value); }
+		}
+
+		private string lastOrder = "";
+
+		[DataMember]
+		public string LastOrder
+		{
+			get => lastOrder;
+			set { this.RaiseAndSetIfChanged(ref lastOrder, value); }
 		}
 
 		public ICommand SaveSettingsCommand { get; set; }

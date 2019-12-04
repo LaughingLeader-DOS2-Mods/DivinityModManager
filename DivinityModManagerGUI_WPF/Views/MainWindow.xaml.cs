@@ -24,6 +24,7 @@ using System.Globalization;
 using static AlertBarWpf.AlertBarWpf;
 using AutoUpdaterDotNET;
 using System.Windows.Threading;
+using System.Reactive.Concurrency;
 
 namespace DivinityModManager.Views
 {
@@ -186,6 +187,14 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.HelpOpenRepoPageMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenAboutWindowCommand, view => view.HelpOpenAboutWindowMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
+			var res = this.TryFindResource("ModUpdaterPanel");
+			if(res != null && res is ModUpdatesLayout modUpdaterPanel)
+			{
+				Binding binding = new Binding("ModUpdatesViewData");
+				binding.Source = ViewModel.ModUpdatesViewData;
+				modUpdaterPanel.SetBinding(ModUpdatesLayout.DataContextProperty, binding);
+			}
+
 			//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
 			//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
 
@@ -323,6 +332,18 @@ namespace DivinityModManager.Views
 		private void MenuItem_Click(object sender, RoutedEventArgs e)
 		{
 
+		}
+
+		private void ProfileComboBox_OnUserClick(object sender, MouseButtonEventArgs e)
+		{
+			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(200), () =>
+			{
+				if (ViewModel.Settings != null && ViewModel.Settings.LastOrder != ViewModel.SelectedModOrder.Name)
+				{
+					ViewModel.Settings.LastOrder = ViewModel.SelectedModOrder.Name;
+					ViewModel.SaveSettings();
+				}
+			});
 		}
 	}
 }

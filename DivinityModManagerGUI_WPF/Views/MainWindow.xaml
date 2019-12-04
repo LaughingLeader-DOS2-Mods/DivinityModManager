@@ -13,7 +13,8 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
-	xmlns:xc="clr-namespace:Xceed.Wpf.Toolkit;assembly=Xceed.Wpf.Toolkit"
+	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
+	x:Name="Main"
 	Width="1400"
 	Height="800"
 	x:TypeArguments="vm:MainWindowViewModel"
@@ -173,10 +174,7 @@
 					</MultiDataTrigger>
 				</DataTemplate.Triggers>
 			</DataTemplate>
-			<local:ModUpdatesLayout
-				x:Key="ModUpdaterPanel"
-				Background="LightBlue"
-				DataContext="{Binding ModUpdatesViewData}" />
+			<local:ModUpdatesLayout x:Key="ModUpdaterPanel" Background="LightBlue" />
 			<Grid x:Key="ModOrderPanel">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
@@ -232,7 +230,13 @@
 							ItemsSource="{Binding ModOrderList}"
 							KeyDown="ComboBox_KeyDown_LoseFocus"
 							SelectedIndex="{Binding SelectedModOrderIndex}"
-							Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}" />
+							Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
+							<ComboBox.ItemContainerStyle>
+								<Style>
+									<EventSetter Event="ComboBoxItem.PreviewMouseDown" Handler="ProfileComboBox_OnUserClick" />
+								</Style>
+							</ComboBox.ItemContainerStyle>
+						</ComboBox>
 					</Grid>
 					<Grid Grid.Column="2" Margin="1,0,0,0">
 						<Grid.ColumnDefinitions>
@@ -413,104 +417,121 @@
 	</Window.InputBindings>
 	<Grid>
 		<Grid.RowDefinitions>
-			<RowDefinition Height="Auto" />
-			<RowDefinition Height="Auto" />
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<Grid>
-			<Grid.Background>
-				<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
-			</Grid.Background>
-			<Grid.ColumnDefinitions>
-				<ColumnDefinition Width="*" />
-				<ColumnDefinition Width="1" />
-				<ColumnDefinition Width="*" />
-			</Grid.ColumnDefinitions>
-			<Menu x:Name="TopMenuBar" Padding="2">
-				<MenuItem Header="File">
-					<MenuItem
-						x:Name="FileAddNewOrderMenuItem"
-						Header="Add New Order"
-						InputGestureText="CTRL+N" />
-					<Separator />
-					<MenuItem
-						x:Name="FileSaveOrderMenuItem"
-						Header="Save Load Order"
-						InputGestureText="CTRL+S" />
-					<MenuItem
-						x:Name="FileSaveOrderAsMenuItem"
-						Header="Save Load Order As..."
-						InputGestureText="CTRL+Alt+S" />
-					<Separator />
-					<MenuItem
-						x:Name="FileExportOrderToGameMenuItem"
-						Header="Export Order to Game"
-						InputGestureText="CTRL+Shift+E" />
-					<Separator />
-					<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods (.zip)" />
-					<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods As..." />
-					<Separator />
-					<MenuItem
-						x:Name="FileRefreshMenuItem"
-						Header="Reload All"
-						InputGestureText="F5" />
-				</MenuItem>
-				<MenuItem Header="Settings">
-					<MenuItem
-						x:Name="SettingsPreferencesMenuItem"
-						Header="Preferences..."
-						InputGestureText="CTRL+P" />
-				</MenuItem>
-				<MenuItem Header="Help">
-					<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
-					<Separator />
-					<MenuItem x:Name="HelpDonationMenuItem" Header="Donate a Coffee..." />
-					<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
-					<MenuItem
-						x:Name="HelpOpenAboutWindowMenuItem"
-						Header="About Divinity Mod Manager"
-						InputGestureText="F1" />
-				</MenuItem>
-				<!--<MenuItem Header="Tools">
+		<xc:WindowContainer
+			Grid.Row="0"
+			HorizontalAlignment="Stretch"
+			VerticalAlignment="Stretch"
+			Panel.ZIndex="99">
+			<xc:MessageBox x:Name="MainWindowMessageBox" />
+		</xc:WindowContainer>
+		<xc:BusyIndicator
+			x:Name="MainBusyIndicator"
+			BusyContent="{Binding}"
+			IsBusy="{Binding MainProgressIsActive}"
+			Style="{StaticResource BusyIndicatorProgressStyle}">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<Grid>
+					<Grid.Background>
+						<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
+					</Grid.Background>
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="1" />
+						<ColumnDefinition Width="*" />
+					</Grid.ColumnDefinitions>
+					<Menu x:Name="TopMenuBar" Padding="2">
+						<MenuItem Header="File">
+							<MenuItem
+								x:Name="FileAddNewOrderMenuItem"
+								Header="Add New Order"
+								InputGestureText="CTRL+N" />
+							<Separator />
+							<MenuItem
+								x:Name="FileSaveOrderMenuItem"
+								Header="Save Load Order"
+								InputGestureText="CTRL+S" />
+							<MenuItem
+								x:Name="FileSaveOrderAsMenuItem"
+								Header="Save Load Order As..."
+								InputGestureText="CTRL+Alt+S" />
+							<Separator />
+							<MenuItem
+								x:Name="FileExportOrderToGameMenuItem"
+								Header="Export Order to Game"
+								InputGestureText="CTRL+Shift+E" />
+							<Separator />
+							<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods (.zip)" />
+							<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods As..." />
+							<Separator />
+							<MenuItem
+								x:Name="FileRefreshMenuItem"
+								Header="Reload All"
+								InputGestureText="F5" />
+						</MenuItem>
+						<MenuItem Header="Settings">
+							<MenuItem
+								x:Name="SettingsPreferencesMenuItem"
+								Header="Preferences..."
+								InputGestureText="CTRL+P" />
+						</MenuItem>
+						<MenuItem Header="Help">
+							<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
+							<Separator />
+							<MenuItem x:Name="HelpDonationMenuItem" Header="Donate a Coffee..." />
+							<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
+							<MenuItem
+								x:Name="HelpOpenAboutWindowMenuItem"
+								Header="About Divinity Mod Manager"
+								InputGestureText="F1" />
+						</MenuItem>
+						<!--<MenuItem Header="Tools">
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
 			</MenuItem>-->
-			</Menu>
-			<StackPanel
-				Grid.Column="2"
-				HorizontalAlignment="Left"
-				VerticalAlignment="Center"
-				Orientation="Horizontal">
-				<ContentControl
-					HorizontalAlignment="Left"
-					VerticalAlignment="Center"
-					Content="{Binding}"
-					ContentTemplate="{StaticResource UpdatesButtonTemplate}"
-					IsEnabled="{Binding ModUpdatesAvailable, Mode=OneWay, FallbackValue=false}" />
-			</StackPanel>
-
-		</Grid>
-		<Separator
-			Grid.Row="1"
-			Height="1"
-			Background="LightGray"
-			BorderThickness="0" />
-		<ContentPresenter
-			x:Name="MainContentPresenter"
-			Grid.Row="2"
-			Content="{Binding}">
-			<ContentPresenter.ContentTemplate>
-				<DataTemplate>
-					<ContentControl x:Name="MainContentControl" Content="{StaticResource ModOrderPanel}" />
-					<DataTemplate.Triggers>
-						<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
-							<Setter TargetName="MainContentControl" Property="Content" Value="{StaticResource ModUpdaterPanel}" />
-						</DataTrigger>
-					</DataTemplate.Triggers>
-				</DataTemplate>
-			</ContentPresenter.ContentTemplate>
-		</ContentPresenter>
-		<StatusBar Grid.Row="3" MinHeight="16">
+					</Menu>
+					<StackPanel
+						Grid.Column="2"
+						HorizontalAlignment="Left"
+						VerticalAlignment="Center"
+						Orientation="Horizontal">
+						<ContentControl
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Content="{Binding}"
+							ContentTemplate="{StaticResource UpdatesButtonTemplate}"
+							IsEnabled="{Binding ModUpdatesAvailable, Mode=OneWay, FallbackValue=false}" />
+					</StackPanel>
+				</Grid>
+				<Separator
+					Grid.Row="1"
+					Height="1"
+					Background="LightGray"
+					BorderThickness="0" />
+				<ContentPresenter
+					x:Name="MainContentPresenter"
+					Grid.Row="2"
+					Content="{Binding}">
+					<ContentPresenter.ContentTemplate>
+						<DataTemplate>
+							<ContentControl x:Name="MainContentControl" Content="{StaticResource ModOrderPanel}" />
+							<DataTemplate.Triggers>
+								<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
+									<Setter TargetName="MainContentControl" Property="Content" Value="{StaticResource ModUpdaterPanel}" />
+								</DataTrigger>
+							</DataTemplate.Triggers>
+						</DataTemplate>
+					</ContentPresenter.ContentTemplate>
+				</ContentPresenter>
+			</Grid>
+		</xc:BusyIndicator>
+		<StatusBar Grid.Row="1" MinHeight="16">
 			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 				<mbar:AlertBarWpf x:Name="AlertBar" Theme="Outline" />
 				<!--<TextBox

@@ -6,11 +6,15 @@
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
+	xmlns:sys="clr-namespace:System;assembly=mscorlib"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
+	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
+	xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
 	x:Name="MainResources">
 	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 	<conv:StringToUriConverter x:Key="StringToUriConverter" />
+	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/SaveAs_16x.png" />
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/SaveGrey_16x.png" />
@@ -394,4 +398,230 @@
 			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
+	<Style x:Key="BusyIndicatorProgressStyle" TargetType="{x:Type xc:BusyIndicator}">
+		<Setter Property="BusyContentTemplate">
+			<Setter.Value>
+				<DataTemplate>
+					<Grid
+						Margin="4"
+						HorizontalAlignment="Stretch"
+						VerticalAlignment="Stretch">
+						<Grid.RowDefinitions>
+							<RowDefinition Height="Auto" />
+							<RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<TextBlock
+							HorizontalAlignment="Center"
+							FontSize="16"
+							FontWeight="Bold"
+							Text="{Binding MainProgressTitle, FallbackValue='Archiving...'}" />
+						<DockPanel Grid.Row="1" Margin="8">
+							<TextBlock
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center"
+								DockPanel.Dock="Bottom"
+								Text="{Binding MainProgressWorkText, FallbackValue='Archiving pak 4/10...'}"
+								TextAlignment="Center" />
+							<ProgressBar
+								MinHeight="15"
+								VerticalAlignment="Center"
+								DockPanel.Dock="Top"
+								Value="{Binding MainProgressValue, FallbackValue='40'}" />
+						</DockPanel>
+						<Button
+							Grid.Row="2"
+							Margin="8,0,8,8"
+							Padding="20,4"
+							HorizontalAlignment="Center"
+							VerticalAlignment="Center"
+							Command="{Binding CancelMainProgressCommand}"
+							Content="Cancel" />
+					</Grid>
+				</DataTemplate>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="OverlayStyle">
+			<Setter.Value>
+				<Style TargetType="Rectangle">
+					<Setter Property="Fill" Value="#ffffeeee" />
+				</Style>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="ProgressBarStyle">
+			<Setter.Value>
+				<Style TargetType="ProgressBar">
+					<Setter Property="Visibility" Value="Collapsed" />
+				</Style>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="{x:Type xc:BusyIndicator}">
+					<Grid>
+						<ContentControl
+							x:Name="content"
+							HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+							VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+							Content="{TemplateBinding Content}"
+							ContentTemplate="{TemplateBinding ContentTemplate}"
+							Focusable="False"
+							IsTabStop="False" />
+						<Rectangle x:Name="overlay" Style="{TemplateBinding OverlayStyle}" />
+						<ContentPresenter x:Name="busycontent">
+							<ContentPresenter.Content>
+								<Grid>
+									<Grid.RowDefinitions>
+										<RowDefinition Height="2*" />
+										<RowDefinition Height="1*" />
+										<RowDefinition Height="2*" />
+									</Grid.RowDefinitions>
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="2*" />
+										<ColumnDefinition Width="6*" />
+										<ColumnDefinition Width="2*" />
+									</Grid.ColumnDefinitions>
+									<Grid
+										Grid.Row="1"
+										Grid.Column="1"
+										HorizontalAlignment="Stretch"
+										VerticalAlignment="Stretch">
+										<Border
+											Background="White"
+											BorderThickness="1"
+											CornerRadius="2">
+											<Border.BorderBrush>
+												<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+													<GradientStop Offset="0" Color="#FFA3AEB9" />
+													<GradientStop Offset="0.375" Color="#FF8399A9" />
+													<GradientStop Offset="0.375" Color="#FF718597" />
+													<GradientStop Offset="1" Color="#FF617584" />
+												</LinearGradientBrush>
+											</Border.BorderBrush>
+											<Border Margin="1" CornerRadius="1.5">
+												<Border.Background>
+													<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+														<GradientStop Offset="0.02" Color="#FFF6F8F9" />
+														<GradientStop Offset="0.996" Color="#FFB8B8B8" />
+													</LinearGradientBrush>
+												</Border.Background>
+												<Grid x:Name="_grid" MinWidth="150">
+													<Grid.RowDefinitions>
+														<RowDefinition />
+														<RowDefinition Height="Auto" />
+													</Grid.RowDefinitions>
+													<ContentPresenter
+														x:Name="busyContent"
+														Margin="8"
+														HorizontalAlignment="Stretch"
+														Content="{TemplateBinding BusyContent}"
+														ContentTemplate="{TemplateBinding BusyContentTemplate}" />
+													<ProgressBar Grid.Row="1" Style="{TemplateBinding ProgressBarStyle}">
+														<ProgressBar.Width>
+															<MultiBinding Converter="{StaticResource ProgressBarWidthConverter}">
+																<Binding ElementName="busyContent" Path="ActualWidth" />
+																<Binding ElementName="_grid" Path="MinWidth" />
+															</MultiBinding>
+														</ProgressBar.Width>
+													</ProgressBar>
+												</Grid>
+											</Border>
+										</Border>
+									</Grid>
+								</Grid>
+							</ContentPresenter.Content>
+						</ContentPresenter>
+						<VisualStateManager.VisualStateGroups>
+							<VisualStateGroup x:Name="VisibilityStates">
+								<VisualState x:Name="Hidden">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="busycontent"
+											Storyboard.TargetProperty="(UIElement.Visibility)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="overlay"
+											Storyboard.TargetProperty="(UIElement.Visibility)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Collapsed</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Visible">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="busycontent"
+											Storyboard.TargetProperty="(UIElement.Visibility)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Visible</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="overlay"
+											Storyboard.TargetProperty="(UIElement.Visibility)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<Visibility>Visible</Visibility>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+							<VisualStateGroup x:Name="BusyStatusStates">
+								<VisualState x:Name="Idle">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="content"
+											Storyboard.TargetProperty="(Control.IsEnabled)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<sys:Boolean>True</sys:Boolean>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+								<VisualState x:Name="Busy">
+									<Storyboard>
+										<ObjectAnimationUsingKeyFrames
+											BeginTime="00:00:00"
+											Storyboard.TargetName="content"
+											Storyboard.TargetProperty="(Control.IsEnabled)"
+											Duration="00:00:00.001">
+											<DiscreteObjectKeyFrame KeyTime="00:00:00">
+												<DiscreteObjectKeyFrame.Value>
+													<sys:Boolean>False</sys:Boolean>
+												</DiscreteObjectKeyFrame.Value>
+											</DiscreteObjectKeyFrame>
+										</ObjectAnimationUsingKeyFrames>
+									</Storyboard>
+								</VisualState>
+							</VisualStateGroup>
+						</VisualStateManager.VisualStateGroups>
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
+	</Style>
 </ResourceDictionary>

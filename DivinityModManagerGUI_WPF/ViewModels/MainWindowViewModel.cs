@@ -26,6 +26,7 @@ using Microsoft.Win32;
 using DivinityModManager.Views;
 using System.Globalization;
 using System.IO.Compression;
+using System.Threading;
 
 namespace DivinityModManager.ViewModels
 {
@@ -191,6 +192,45 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref gameDirectoryFound, value); }
 		}
 
+		private string mainProgressTitle;
+
+		public string MainProgressTitle
+		{
+			get => mainProgressTitle;
+			set { this.RaiseAndSetIfChanged(ref mainProgressTitle, value); }
+		}
+
+		private string mainProgressWorkText;
+
+		public string MainProgressWorkText
+		{
+			get => mainProgressWorkText;
+			set { this.RaiseAndSetIfChanged(ref mainProgressWorkText, value); }
+		}
+
+		private bool mainProgressIsActive = false;
+
+		public bool MainProgressIsActive
+		{
+			get => mainProgressIsActive;
+			set { this.RaiseAndSetIfChanged(ref mainProgressIsActive, value); }
+		}
+
+		private int mainProgressValue;
+
+		public int MainProgressValue
+		{
+			get => mainProgressValue;
+			set { this.RaiseAndSetIfChanged(ref mainProgressValue, value); }
+		}
+
+		private CancellationTokenSource mainProgressToken;
+
+		public CancellationTokenSource MainProgressToken
+		{
+			get => mainProgressToken;
+			set { this.RaiseAndSetIfChanged(ref mainProgressToken, value); }
+		}
 
 		private MainWindow view;
 		public DivinityModManagerSettings Settings { get; set; }
@@ -211,8 +251,9 @@ namespace DivinityModManager.ViewModels
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand OpenAboutWindowCommand { get; set; }
-		public ReactiveCommand<System.Reactive.Unit, bool> ExportLoadOrderAsArchiveCommand { get; set; }
-		public ReactiveCommand<System.Reactive.Unit, bool> ExportLoadOrderAsArchiveToFileCommand { get; set; }
+		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
+		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
+		public ICommand CancelMainProgressCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -591,7 +632,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public void BuildModOrderList(bool selectLast = false)
+		public void BuildModOrderList(int selectLast = 0)
 		{
 			if (SelectedProfile != null)
 			{
@@ -616,21 +657,19 @@ namespace DivinityModManager.ViewModels
 
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
+				SelectedProfile.SavedLoadOrder.Name = "Current";
+				SelectedModOrderIndex = 0;
 				ModOrderList.AddRange(SavedModOrderList);
-				if (selectLast)
+
+				if (selectLast == 1)
 				{
-					view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => {
-						SelectedModOrderIndex = ModOrderList.Count - 1;
-						//Trace.WriteLine($"{SelectedProfile.SavedLoadOrder.Name}");
-					}));
+					RxApp.MainThreadScheduler.Schedule(_ => SelectedModOrderIndex = ModOrderList.Count - 1);
 				}
-				else
+				else if (selectLast == 0)
 				{
 					if(SelectedModOrderIndex < 0 || SelectedModOrderIndex >= ModOrderList.Count)
 					{
-						view.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(() => {
-							SelectedModOrderIndex = 0;
-						}));
+						RxApp.MainThreadScheduler.Schedule(_ => SelectedModOrderIndex = 0);
 					}
 				}
 				//LoadModOrder(SelectedProfile.SavedLoadOrder);
@@ -661,7 +700,7 @@ namespace DivinityModManager.ViewModels
 			{
 				SavedModOrderList.Clear();
 				SavedModOrderList.AddRange(lastOrders);
-				BuildModOrderList(false);
+				BuildModOrderList();
 				SelectedModOrderIndex = lastIndex;
 			};
 
@@ -674,7 +713,7 @@ namespace DivinityModManager.ViewModels
 				};
 
 				SavedModOrderList.Add(newOrder);
-				BuildModOrderList(true);
+				BuildModOrderList(1);
 			};
 
 			this.CreateSnapshot(undo, redo);
@@ -969,12 +1008,43 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
-		private async Task<bool> ExportLoadOrderToArchiveAsync_Start()
+		private void OnMainProgressComplete()
 		{
-			return await ExportLoadOrderToArchiveAsync("");
+			MainProgressValue = 100;
+			MainProgressToken.Dispose();
+			MainProgressToken = null;
+			MainProgressIsActive = false;
 		}
 
-		private async Task<bool> ExportLoadOrderToArchiveAsync(string outputPath)
+		private void ExportLoadOrderToArchive_Start()
+		{
+			//view.MainWindowMessageBox.Text = "Add active mods to a zip file?";
+			//view.MainWindowMessageBox.Caption = "Depending on the number of mods, this may take some time.";
+			view.MainWindowMessageBox.Closed += MainWindowMessageBox_Closed_ExportLoadOrderToArchive;
+			view.MainWindowMessageBox.ShowMessageBox("Depending on the number of mods, this may take some time.", "Add active mods to a zip file?", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
+		}
+
+		private void MainWindowMessageBox_Closed_ExportLoadOrderToArchive(object sender, EventArgs e)
+		{
+			view.MainWindowMessageBox.Closed -= MainWindowMessageBox_Closed_ExportLoadOrderToArchive;
+			if(view.MainWindowMessageBox.MessageBoxResult == MessageBoxResult.OK)
+			{
+				MainProgressTitle = "Adding active mods to zip...";
+				MainProgressWorkText = "";
+				MainProgressValue = 0;
+				MainProgressIsActive = true;
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+				{
+					MainProgressToken = new CancellationTokenSource();
+					await ExportLoadOrderToArchiveAsync("", MainProgressToken.Token);
+					await ctrl.Yield();
+					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
+					return Disposable.Empty;
+				});
+			}
+		}
+
+		private async Task<bool> ExportLoadOrderToArchiveAsync(string outputPath, CancellationToken t)
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
@@ -1001,12 +1071,16 @@ namespace DivinityModManager.ViewModels
 				}
 
 				var modPaks = new List<DivinityModData>(Mods.Where(x => SelectedModOrder.Order.Any(o => o.UUID == x.UUID)));
+
+				int incrementProgress = 100 / modPaks.Count;
+
 				try
 				{
 					using (var zip = ZipStorer.Create(outputPath))
 					{
 						foreach (var mod in modPaks)
 						{
+							if (t.IsCancellationRequested) return false;
 							if (!mod.IsEditorMod)
 							{
 								string fileName = Path.GetFileName(mod.FilePath);
@@ -1034,7 +1108,7 @@ namespace DivinityModManager.ViewModels
 
 								Trace.WriteLine($"Creating package for editor mod '{mod.Name}' - '{outputPackage}'.");
 
-								if (await DivinityFileUtils.CreatePackageAsync(gameDataFolder, sourceFolders, outputPackage, DivinityFileUtils.IgnoredPackageFiles))
+								if (await DivinityFileUtils.CreatePackageAsync(gameDataFolder, sourceFolders, outputPackage, DivinityFileUtils.IgnoredPackageFiles, t))
 								{
 									string fileName = Path.GetFileName(outputPackage);
 									using (var fs = File.OpenRead(outputPackage))
@@ -1044,31 +1118,43 @@ namespace DivinityModManager.ViewModels
 									File.Delete(outputPackage);
 								}
 							}
+
+							MainProgressValue += incrementProgress;
 						}
 					}
 
-					var dir = Path.GetDirectoryName(outputPath);
-					Process.Start(dir);
-					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.");
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						var dir = Path.GetDirectoryName(outputPath);
+						Process.Start(dir);
+						view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.");
+					});
 					return true;
 				}
 				catch (Exception ex)
 				{
-					string msg = $"Error writing load order archive '{outputPath}': {ex.ToString()}";
-					Trace.WriteLine(msg);
-					view.AlertBar.SetDangerAlert(msg);
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						string msg = $"Error writing load order archive '{outputPath}': {ex.ToString()}";
+						Trace.WriteLine(msg);
+						view.AlertBar.SetDangerAlert(msg);
+					});
 				}
 
 				Directory.Delete(tempDir);
 			}
 			else
 			{
-				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				});
 			}
+
 			return false;
 		}
 
-		private async Task<bool> ExportLoadOrderToArchiveAs()
+		private void ExportLoadOrderToArchiveAs()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
@@ -1097,14 +1183,20 @@ namespace DivinityModManager.ViewModels
 
 				if (dialog.ShowDialog(view) == true)
 				{
-					return await ExportLoadOrderToArchiveAsync(dialog.FileName);
+					RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+					{
+						MainProgressToken = new CancellationTokenSource();
+						await ExportLoadOrderToArchiveAsync(dialog.FileName, MainProgressToken.Token);
+						await ctrl.Yield();
+						RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
+						return Disposable.Empty;
+					});
 				}
 			}
 			else
 			{
 				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
-			return false;
 		}
 
 		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
@@ -1140,18 +1232,33 @@ namespace DivinityModManager.ViewModels
 				if (SavedModOrderList.Count > 0)
 				{
 					Trace.WriteLine($"{SavedModOrderList.Count} load orders found. Building mod order list.");
-					BuildModOrderList();
+					int select = String.IsNullOrWhiteSpace(Settings.LastOrder) ? 0 : -1;
+					BuildModOrderList(select);
+					if (!String.IsNullOrWhiteSpace(Settings.LastOrder) && Settings.LastOrder != "Current")
+					{
+						var order = ModOrderList.FirstOrDefault(x => x.Name.Equals(Settings.LastOrder, StringComparison.OrdinalIgnoreCase));
+						if (order != null)
+						{
+							int index = ModOrderList.IndexOf(order);
+							if (index > -1) RxApp.MainThreadScheduler.Schedule(() => SelectedModOrderIndex = index);
+							Trace.WriteLine($"Set active load order to last order '{index}' - '{order.Name}'");
+						}
+					}
 				}
 				else
 				{
 					Trace.WriteLine("No saved orders found.");
 				}
 			});
+
+			SaveSettings(); // New values
 		}
 
 		private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenDOS2DEGame;
+
+		public bool AutoChangedOrder { get; set; } = false;
 
 		public MainWindowViewModel() : base()
 		{
@@ -1159,16 +1266,22 @@ namespace DivinityModManager.ViewModels
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
-			ExportLoadOrderAsArchiveCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderToArchiveAsync_Start);
-			ExportLoadOrderAsArchiveCommand.ThrownExceptions.Subscribe(ex => { 
-				view.AlertBar.SetDangerAlert($"Error exporting load order: {ex.ToString()}"); 
-			});
-			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderToArchiveAs);
-			ExportLoadOrderAsArchiveToFileCommand.ThrownExceptions.Subscribe(ex => {
-				view.AlertBar.SetDangerAlert($"Error exporting load order: {ex.ToString()}");
-			});
+
+			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null);
+			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
+			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
+
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
+
+			CancelMainProgressCommand = ReactiveCommand.Create(() =>
+			{
+				if (MainProgressToken != null && MainProgressToken.Token.CanBeCanceled)
+				{
+					MainProgressToken.Token.Register(() => { MainProgressIsActive = false; });
+					MainProgressToken.Cancel();
+				}
+			});
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
 			RefreshCommand = ReactiveCommand.Create(Refresh, canRefreshObservable);
@@ -1226,6 +1339,19 @@ namespace DivinityModManager.ViewModels
 				if (SelectedModOrderIndex > -1 && !LoadingOrder)
 				{
 					LoadModOrder(SelectedModOrder);
+
+					//if(!AutoChangedOrder)
+					//{
+					//	RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(200), () =>
+					//	{
+					//		if (Settings != null && Settings.LastOrder != SelectedModOrder.Name)
+					//		{
+					//			Settings.LastOrder = SelectedModOrder.Name;
+					//			SaveSettings();
+					//		}
+					//	});
+					//}
+					//AutoChangedOrder = false;
 				}
 			}).DisposeWith(Disposables);
 

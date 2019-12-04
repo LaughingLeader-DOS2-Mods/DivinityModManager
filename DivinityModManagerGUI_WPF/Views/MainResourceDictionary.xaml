@@ -26,6 +26,9 @@
 	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Steam_16x.png" />
 	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Kofi_16x.png" />
 	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Github_16x.png" />
+	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/ExportScript_16x.png" />
+	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/ZipFile_16x.png" />
+	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/ZipFileAs_16x.png" />
 
 	<Style x:Key="IconButtonStyle" TargetType="{x:Type Button}">
 		<Setter Property="Width" Value="24" />

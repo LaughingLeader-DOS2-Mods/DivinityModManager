@@ -288,19 +288,19 @@
 								x:Name="ExportToModSettingsButton"
 								Command="{Binding ExportOrderCommand}"
 								ToolTip="Export Load Order to Game for the Current Profile">
-								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+								<controls:AutoGrayableImage Source="{StaticResource ExportScriptImage}" />
 							</Button>
 							<Button
 								x:Name="ExportOrderToArchiveButton"
 								Command="{Binding ExportLoadOrderAsArchiveCommand}"
 								ToolTip="Export Active Mods">
-								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+								<controls:AutoGrayableImage Source="{StaticResource ZipFileImage}" />
 							</Button>
 							<Button
 								x:Name="ExportOrderToArchiveAsButton"
 								Command="{Binding ExportLoadOrderAsArchiveToFileCommand}"
 								ToolTip="Export Active Mods As...">
-								<controls:AutoGrayableImage Source="{StaticResource ExportDataImage}" />
+								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
 							<Rectangle Style="{StaticResource VerticalSeparator}" />
 							<Label Content="Refresh" />

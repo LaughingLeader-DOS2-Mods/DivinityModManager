@@ -73,6 +73,7 @@ namespace DivinityModManager.Views
 		}
 	}
 #endif
+
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>

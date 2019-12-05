@@ -101,6 +101,10 @@ namespace DivinityModManager.Views
 			self = this;
 
 			settingsWindow = new SettingsWindow();
+			SettingsWindow.OnWorkshopPathChanged += delegate
+			{
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ => ViewModel.LoadWorkshopMods());
+			};
 			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
@@ -135,15 +139,6 @@ namespace DivinityModManager.Views
 
 			var c = ReactiveCommand.Create(() =>
 			{
-				if (SettingsWindow == null)
-				{
-					settingsWindow = new SettingsWindow();
-					settingsWindow.OnWorkshopPathChanged += delegate
-					{
-						ViewModel.LoadWorkshopMods();
-					};
-				}
-
 				if (!SettingsWindow.IsVisible)
 				{
 					SettingsWindow.Init(this.ViewModel.Settings);
@@ -200,7 +195,7 @@ namespace DivinityModManager.Views
 			if(res != null && res is ModUpdatesLayout modUpdaterPanel)
 			{
 				Binding binding = new Binding("ModUpdatesViewData");
-				binding.Source = ViewModel.ModUpdatesViewData;
+				binding.Source = ViewModel;
 				modUpdaterPanel.SetBinding(ModUpdatesLayout.DataContextProperty, binding);
 			}
 

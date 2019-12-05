@@ -32,8 +32,9 @@ namespace DivinityModManager.Models
 		public string Author { get; set; }
 		public DivinityModVersion Version { get; set; }
 		public string Folder { get; set; }
-
 		public string MD5 { get; set; }
+		public string Type { get; set; }
+		public string Targets { get; set; }
 
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 

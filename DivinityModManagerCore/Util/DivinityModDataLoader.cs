@@ -103,7 +103,8 @@ namespace DivinityModManager.Util
 						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
 						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
 						Description = GetAttribute(moduleInfoNode, "Description", ""),
-						MD5 = GetAttribute(moduleInfoNode, "MD5", "")
+						MD5 = GetAttribute(moduleInfoNode, "MD5", ""),
+						Type = GetAttribute(moduleInfoNode, "Type", "")
 					};
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
@@ -128,6 +129,22 @@ namespace DivinityModManager.Util
 						}
 					}
 					modData.UpdateDependencyText();
+
+					var targets = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "Target");
+					if(targets != null)
+					{
+						List<string> allTargetValues = new List<string>();
+						foreach (var node in targets)
+						{
+							var target = GetAttribute(node, "Object", "");
+							if(!String.IsNullOrEmpty(target))
+							{
+								allTargetValues.Add(target);
+							}
+						}
+						modData.Targets = string.Join(", ", allTargetValues);
+					}
+
 					return modData;
 				}
 			}

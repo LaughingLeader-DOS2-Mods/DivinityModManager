@@ -301,6 +301,26 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
+			<GridViewColumn
+				Width="80"
+				Header="Type"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Type}" ToolTip="{Binding Type}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="80"
+				Header="Modes"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Targets}" ToolTip="{Binding Targets}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
 	<DataTemplate x:Key="ModUpdateNameTemplate" DataType="{x:Type data:DivinityModUpdateData}">
@@ -393,6 +413,26 @@
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding WorkshopMod.Version.Version}" ToolTip="{Binding WorkshopMod.Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="80"
+				Header="Type"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding WorkshopMod.Type}" ToolTip="{Binding WorkshopMod.Type}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="100"
+				Header="Modes"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding WorkshopMod.Targets}" ToolTip="{Binding WorkshopMod.Targets}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>

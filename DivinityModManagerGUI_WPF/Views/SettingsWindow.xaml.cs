@@ -27,12 +27,15 @@ namespace DivinityModManager.Views
 	/// <summary>
 	/// Interaction logic for SettingsWindow.xaml
 	/// </summary>
-	public partial class SettingsWindow : ReactiveWindow<DivinityModManagerSettings>
+	public partial class SettingsWindow : HideWindowBase, IViewFor<DivinityModManagerSettings>
 	{
 		public SettingsWindow()
 		{
 			InitializeComponent();
 		}
+
+		public DivinityModManagerSettings ViewModel { get; set; }
+		object IViewFor.ViewModel { get; set; }
 
 		public void Init(DivinityModManagerSettings vm)
 		{

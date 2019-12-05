@@ -1,4 +1,4 @@
-﻿<reactiveui:ReactiveWindow
+﻿<local:HideWindowBase
 	x:Class="DivinityModManager.Views.SettingsWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -16,7 +16,6 @@
 	Title="Preferences"
 	Width="600"
 	Height="450"
-	x:TypeArguments="data:DivinityModManagerSettings"
 	mc:Ignorable="d">
 	<Window.Resources>
 		<ResourceDictionary>
@@ -124,4 +123,4 @@
 
 
 	</Grid>
-</reactiveui:ReactiveWindow>
+</local:HideWindowBase>

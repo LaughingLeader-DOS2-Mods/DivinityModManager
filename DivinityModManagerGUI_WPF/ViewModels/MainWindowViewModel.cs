@@ -27,6 +27,8 @@ using DivinityModManager.Views;
 using System.Globalization;
 using System.IO.Compression;
 using System.Threading;
+using SharpCompress.Writers;
+using SharpCompress.Common;
 
 namespace DivinityModManager.ViewModels
 {
@@ -387,6 +389,14 @@ namespace DivinityModManager.ViewModels
 			{
 				ToggleLogging(true);
 			}
+
+			//this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath).Subscribe((p) =>
+			//{
+			//	if(Directory.Exists(p))
+			//	{
+			//		RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(150), _ => LoadWorkshopMods());
+			//	}
+			//});
 
 			if (loaded)
 			{
@@ -1077,7 +1087,8 @@ namespace DivinityModManager.ViewModels
 
 				try
 				{
-					using (var zip = ZipStorer.Create(outputPath))
+					using (var zip = File.OpenWrite(outputPath))
+					using (var zipWriter = WriterFactory.Open(zip, ArchiveType.Zip, CompressionType.Deflate))
 					{
 						foreach (var mod in modPaks)
 						{
@@ -1085,10 +1096,7 @@ namespace DivinityModManager.ViewModels
 							if (!mod.IsEditorMod)
 							{
 								string fileName = Path.GetFileName(mod.FilePath);
-								using (var fs = new FileStream(mod.FilePath, FileMode.Open))
-								{
-									await zip.AddStreamAsync(ZipStorer.Compression.Deflate, fileName, fs, DateTime.Now);
-								}
+								await WriteZipAsync(zipWriter, fileName, mod.FilePath, t);
 							}
 							else
 							{
@@ -1112,10 +1120,7 @@ namespace DivinityModManager.ViewModels
 								if (await DivinityFileUtils.CreatePackageAsync(gameDataFolder, sourceFolders, outputPackage, DivinityFileUtils.IgnoredPackageFiles, t))
 								{
 									string fileName = Path.GetFileName(outputPackage);
-									using (var fs = File.OpenRead(outputPackage))
-									{
-										await zip.AddStreamAsync(ZipStorer.Compression.Deflate, fileName, fs, DateTime.Now);
-									}
+									await WriteZipAsync(zipWriter, fileName, outputPackage, t);
 									File.Delete(outputPackage);
 								}
 							}
@@ -1154,6 +1159,39 @@ namespace DivinityModManager.ViewModels
 			}
 
 			return success;
+		}
+
+		private static Task WriteZipAsync(IWriter writer, string entryName, string source, CancellationToken token)
+		{
+			if (token.IsCancellationRequested)
+			{
+				return Task.FromCanceled(token);
+			}
+
+			var task = Task.Run(async () =>
+			{
+				// execute actual operation in child task
+				var childTask = Task.Factory.StartNew(() =>
+				{
+					try
+					{
+						writer.Write(entryName, source);
+					}
+					catch (Exception)
+					{
+						// ignored because an exception on a cancellation request 
+						// cannot be avoided if the stream gets disposed afterwards 
+					}
+				}, TaskCreationOptions.AttachedToParent);
+
+				var awaiter = childTask.GetAwaiter();
+				while (!awaiter.IsCompleted)
+				{
+					await Task.Delay(0, token);
+				}
+			}, token);
+
+			return task;
 		}
 
 		private void ExportLoadOrderToArchiveAs()

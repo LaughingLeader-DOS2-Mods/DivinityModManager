@@ -44,5 +44,22 @@ namespace DivinityModManager.Views
 
 			this.OneWayBind(ViewModel, x => x.SaveSettingsCommand, view => view.SaveSettingsButton.Command);
 		}
+
+		private string lastWorkshopPath = "";
+
+		public EventHandler OnWorkshopPathChanged { get; set; }
+
+		private void WorkshopPathTextbox_GotFocus(object sender, RoutedEventArgs e)
+		{
+			lastWorkshopPath = ViewModel.DOS2WorkshopPath;
+		}
+
+		private void WorkshopPathTextbox_LostFocus(object sender, RoutedEventArgs e)
+		{
+			if (sender is TextBox tb && tb.Text != lastWorkshopPath)
+			{
+				OnWorkshopPathChanged?.Invoke(this, EventArgs.Empty);
+			}
+		}
 	}
 }

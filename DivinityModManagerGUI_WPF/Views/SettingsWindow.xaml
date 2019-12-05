@@ -81,7 +81,10 @@
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 					<Label Content="DOS2 Workshop Path:" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 					<controls:UnfocusableTextBox
+						x:Name="WorkshopPathTextbox"
 						VerticalAlignment="Center"
+						GotFocus="WorkshopPathTextbox_GotFocus"
+						LostFocus="WorkshopPathTextbox_LostFocus"
 						Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
 					<Label Content="Saved Load Orders Path:" ToolTip="The folder to save and load load orders to." />

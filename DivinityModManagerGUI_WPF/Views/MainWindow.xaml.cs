@@ -133,11 +133,15 @@ namespace DivinityModManager.Views
 #endif
 			});
 
-			ViewModel.OpenPreferencesCommand = ReactiveCommand.Create(() =>
+			var c = ReactiveCommand.Create(() =>
 			{
 				if (SettingsWindow == null)
 				{
 					settingsWindow = new SettingsWindow();
+					settingsWindow.OnWorkshopPathChanged += delegate
+					{
+						ViewModel.LoadWorkshopMods();
+					};
 				}
 
 				if (!SettingsWindow.IsVisible)
@@ -151,6 +155,11 @@ namespace DivinityModManager.Views
 					SettingsWindow.Hide();
 				}
 			});
+			c.ThrownExceptions.Subscribe((ex) =>
+			{
+				Trace.WriteLine("Error opening settings window: " + ex.ToString());
+			});
+			ViewModel.OpenPreferencesCommand = c;
 
 			ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
 			{

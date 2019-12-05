@@ -20,6 +20,9 @@
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>
 	</Window.Resources>
+	<Window.InputBindings>
+		<KeyBinding Key="F1" Command="{Binding OpenAboutWindowCommand}" />
+	</Window.InputBindings>
 	<wpfautogrid:AutoGrid
 		Margin="16"
 		Columns="*"

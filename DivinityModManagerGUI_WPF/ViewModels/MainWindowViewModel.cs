@@ -1021,7 +1021,7 @@ namespace DivinityModManager.ViewModels
 			//view.MainWindowMessageBox.Text = "Add active mods to a zip file?";
 			//view.MainWindowMessageBox.Caption = "Depending on the number of mods, this may take some time.";
 			view.MainWindowMessageBox.Closed += MainWindowMessageBox_Closed_ExportLoadOrderToArchive;
-			view.MainWindowMessageBox.ShowMessageBox("Depending on the number of mods, this may take some time.", "Add active mods to a zip file?", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
+			view.MainWindowMessageBox.ShowMessageBox($"Save active mods to a zip file?{Environment.NewLine}Depending on the number of mods, this may take some time.", "Confirm Archive Creation", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
 		}
 
 		private void MainWindowMessageBox_Closed_ExportLoadOrderToArchive(object sender, EventArgs e)
@@ -1046,6 +1046,7 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<bool> ExportLoadOrderToArchiveAsync(string outputPath, CancellationToken t)
 		{
+			bool success = false;
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
@@ -1129,7 +1130,8 @@ namespace DivinityModManager.ViewModels
 						Process.Start(dir);
 						view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.");
 					});
-					return true;
+
+					success = true;
 				}
 				catch (Exception ex)
 				{
@@ -1151,7 +1153,7 @@ namespace DivinityModManager.ViewModels
 				});
 			}
 
-			return false;
+			return success;
 		}
 
 		private void ExportLoadOrderToArchiveAs()
@@ -1172,7 +1174,7 @@ namespace DivinityModManager.ViewModels
 				{
 					baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
 				}
-				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH -mm-ss")}.zip";
+				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
 
 				//dialog.RestoreDirectory = true;
 				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
@@ -1183,6 +1185,11 @@ namespace DivinityModManager.ViewModels
 
 				if (dialog.ShowDialog(view) == true)
 				{
+					MainProgressTitle = "Adding active mods to zip...";
+					MainProgressWorkText = "";
+					MainProgressValue = 0;
+					MainProgressIsActive = true;
+
 					RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 					{
 						MainProgressToken = new CancellationTokenSource();

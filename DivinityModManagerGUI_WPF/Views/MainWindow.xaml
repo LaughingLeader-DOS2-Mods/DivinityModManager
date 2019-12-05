@@ -425,7 +425,10 @@
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
 			Panel.ZIndex="99">
-			<xc:MessageBox x:Name="MainWindowMessageBox" />
+			<xc:MessageBox
+				x:Name="MainWindowMessageBox"
+				CaptionForeground="White"
+				Foreground="Black" />
 		</xc:WindowContainer>
 		<xc:BusyIndicator
 			x:Name="MainBusyIndicator"

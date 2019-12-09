@@ -15,7 +15,7 @@ using System.Windows;
 [assembly: AssemblyProduct("DivinityModManager")]
 [assembly: AssemblyCopyright("Copyright © 2019")]
 [assembly: AssemblyTrademark("")]
-[assembly: System.Resources.NeutralResourcesLanguageAttribute("en")]
+[assembly: NeutralResourcesLanguageAttribute("en")]
 [assembly: AssemblyCulture("")]
 
 [assembly: ComVisible(false)]

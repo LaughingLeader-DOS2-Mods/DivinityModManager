@@ -407,12 +407,27 @@
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.HeaderContainerStyle>
 					<Style BasedOn="{StaticResource GridViewLeftContainerStyle}" TargetType="{x:Type GridViewColumnHeader}">
-						<Setter Property="Control.ToolTip" Value="New Version" />
+						<Setter Property="Control.ToolTip" Value="Workshop Mod's Version" />
 					</Style>
 				</GridViewColumn.HeaderContainerStyle>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding WorkshopMod.Version.Version}" ToolTip="{Binding WorkshopMod.Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="80"
+				Header="Modified Date"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.HeaderContainerStyle>
+					<Style BasedOn="{StaticResource GridViewLeftContainerStyle}" TargetType="{x:Type GridViewColumnHeader}">
+						<Setter Property="Control.ToolTip" Value="Workshop Mod's Last Modified Date" />
+					</Style>
+				</GridViewColumn.HeaderContainerStyle>
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding WorkshopMod.LastModified}" ToolTip="{Binding WorkshopMod.LastModified}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>

@@ -35,6 +35,7 @@ namespace DivinityModManager.Models
 		public string MD5 { get; set; }
 		public string Type { get; set; }
 		public string Targets { get; set; }
+		public DateTime LastModified { get; set; }
 
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 

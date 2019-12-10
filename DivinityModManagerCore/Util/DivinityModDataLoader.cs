@@ -176,6 +176,14 @@ namespace DivinityModManager.Util
 							var modData = ParseMetaFile(str);
 							modData.IsEditorMod = true;
 							modData.FilePath = folder;
+							try
+							{
+								modData.LastModified = File.GetChangeTime(metaFile);
+							}
+							catch (PlatformNotSupportedException ex)
+							{
+								Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+							}
 							if (modData != null) projects.Add(modData);
 						}
 					}
@@ -239,6 +247,14 @@ namespace DivinityModManager.Util
 										if (modData != null)
 										{
 											modData.FilePath = pakPath;
+											try
+											{
+												modData.LastModified = File.GetChangeTime(pakPath);
+											}
+											catch (PlatformNotSupportedException ex)
+											{
+												Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
+											}
 											mods.Add(modData);
 										}
 									}

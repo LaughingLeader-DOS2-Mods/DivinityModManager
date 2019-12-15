@@ -297,7 +297,7 @@
 							<Button
 								x:Name="ExportOrderToArchiveButton"
 								Command="{Binding ExportLoadOrderAsArchiveCommand}"
-								ToolTip="Export Active Mods">
+								ToolTip="Export Active Mods to Zip">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileImage}" />
 							</Button>
 							<Button

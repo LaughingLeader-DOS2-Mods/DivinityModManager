@@ -415,6 +415,9 @@
 		<KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
 		<KeyBinding Key="F1" Command="{Binding OpenAboutWindowCommand}" />
 	</Window.InputBindings>
+	<Window.TaskbarItemInfo>
+		<TaskbarItemInfo />
+	</Window.TaskbarItemInfo>
 	<Grid>
 		<Grid.RowDefinitions>
 			<RowDefinition Height="*" />

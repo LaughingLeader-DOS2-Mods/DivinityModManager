@@ -482,7 +482,8 @@
 								MinHeight="15"
 								VerticalAlignment="Center"
 								DockPanel.Dock="Top"
-								Value="{Binding MainProgressValue, FallbackValue='40'}" />
+								Maximum="1"
+								Value="{Binding MainProgressValue, FallbackValue='0'}" />
 						</DockPanel>
 						<Button
 							Grid.Row="2"

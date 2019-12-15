@@ -108,6 +108,7 @@ namespace DivinityModManager.Views
 			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
+			this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
 
 			AlertBar.Show += AlertBar_Show;
 
@@ -174,6 +175,20 @@ namespace DivinityModManager.Views
 					AboutWindow.Hide();
 				}
 			});
+
+			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
+			{
+				if (b)
+				{
+					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+				}
+				else
+				{
+					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
+				}
+			}).DisposeWith(ViewModel.Disposables);
+
+			this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.FileAddNewOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.FileSaveOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);

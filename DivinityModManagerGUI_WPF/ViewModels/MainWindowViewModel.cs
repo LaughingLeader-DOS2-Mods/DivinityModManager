@@ -218,9 +218,9 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref mainProgressIsActive, value); }
 		}
 
-		private int mainProgressValue;
+		private double mainProgressValue = 0d;
 
-		public int MainProgressValue
+		public double MainProgressValue
 		{
 			get => mainProgressValue;
 			set { this.RaiseAndSetIfChanged(ref mainProgressValue, value); }
@@ -1020,7 +1020,7 @@ namespace DivinityModManager.ViewModels
 
 		private void OnMainProgressComplete()
 		{
-			MainProgressValue = 100;
+			MainProgressValue = 1d;
 			MainProgressToken.Dispose();
 			MainProgressToken = null;
 			MainProgressIsActive = false;
@@ -1041,7 +1041,7 @@ namespace DivinityModManager.ViewModels
 			{
 				MainProgressTitle = "Adding active mods to zip...";
 				MainProgressWorkText = "";
-				MainProgressValue = 0;
+				MainProgressValue = 0d;
 				MainProgressIsActive = true;
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 				{
@@ -1083,7 +1083,7 @@ namespace DivinityModManager.ViewModels
 
 				var modPaks = new List<DivinityModData>(Mods.Where(x => SelectedModOrder.Order.Any(o => o.UUID == x.UUID)));
 
-				int incrementProgress = 100 / modPaks.Count;
+				double incrementProgress = 1d / modPaks.Count;
 
 				try
 				{
@@ -1125,7 +1125,7 @@ namespace DivinityModManager.ViewModels
 								}
 							}
 
-							MainProgressValue += incrementProgress;
+							RxApp.MainThreadScheduler.Schedule(_ => MainProgressValue += incrementProgress);
 						}
 					}
 
@@ -1225,7 +1225,7 @@ namespace DivinityModManager.ViewModels
 				{
 					MainProgressTitle = "Adding active mods to zip...";
 					MainProgressWorkText = "";
-					MainProgressValue = 0;
+					MainProgressValue = 0d;
 					MainProgressIsActive = true;
 
 					RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>

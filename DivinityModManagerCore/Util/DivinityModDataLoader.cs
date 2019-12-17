@@ -154,6 +154,9 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
+		//BOM
+		private static string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+
 		public static List<DivinityModData> LoadEditorProjects(string modsFolderPath)
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
@@ -172,18 +175,86 @@ namespace DivinityModManager.Util
 						if (File.Exists(metaFile))
 						{
 							var str = File.ReadAllText(metaFile);
-							var modData = ParseMetaFile(str);
-							modData.IsEditorMod = true;
-							modData.FilePath = folder;
-							try
+							if(!String.IsNullOrEmpty(str))
 							{
-								modData.LastModified = File.GetChangeTime(metaFile);
+								//BOM stripping
+								if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
+								{
+									str = str.Remove(0, _byteOrderMarkUtf8.Length);
+								}
+
+								var modData = ParseMetaFile(str);
+								modData.IsEditorMod = true;
+								modData.FilePath = folder;
+								try
+								{
+									modData.LastModified = File.GetChangeTime(metaFile);
+								}
+								catch (PlatformNotSupportedException ex)
+								{
+									Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+								}
+								if (modData != null) projects.Add(modData);
 							}
-							catch (PlatformNotSupportedException ex)
+						}
+					}
+				}
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error loading mod projects: {ex.ToString()}");
+			}
+			return projects;
+		}
+
+		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath)
+		{
+			List<DivinityModData> projects = new List<DivinityModData>();
+
+			try
+			{
+				if (Directory.Exists(modsFolderPath))
+				{
+					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
+					var filteredFolders = projectDirectories.Where(f => !IgnoreModByFolder(f));
+					Console.WriteLine($"Project Folders: {filteredFolders.Count()} / {projectDirectories.Count()}");
+					foreach (var folder in filteredFolders)
+					{
+						//Trace.WriteLine($"Reading meta file from folder: {folder}");
+						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
+						var metaFile = Path.Combine(folder, "meta.lsx");
+						if (File.Exists(metaFile))
+						{
+							using (var fileStream = new System.IO.FileStream(metaFile, 
+								System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
 							{
-								Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+								var result = new byte[fileStream.Length];
+								await fileStream.ReadAsync(result, 0, (int)fileStream.Length);
+
+								string str = Encoding.UTF8.GetString(result, 0, result.Length);
+
+								if(!String.IsNullOrEmpty(str))
+								{
+									//XML parsing doesn't like the BOM for some reason
+									if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
+									{
+										str = str.Remove(0, _byteOrderMarkUtf8.Length);
+									}
+
+									var modData = ParseMetaFile(str);
+									modData.IsEditorMod = true;
+									modData.FilePath = folder;
+									try
+									{
+										modData.LastModified = File.GetChangeTime(metaFile);
+									}
+									catch (PlatformNotSupportedException ex)
+									{
+										Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+									}
+									if (modData != null) projects.Add(modData);
+								}
 							}
-							if (modData != null) projects.Add(modData);
 						}
 					}
 				}
@@ -273,6 +344,84 @@ namespace DivinityModManager.Util
 				
 			}
 			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error loading mod paks: {ex.ToString()}");
+			}
+
+			return mods;
+		}
+
+		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath)
+		{
+			List<DivinityModData> mods = new List<DivinityModData>();
+
+			if (Directory.Exists(modsFolderPath))
+			{
+				List<string> modPaks = new List<string>();
+				try
+				{
+					var files = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive,
+						new DirectoryEnumerationFilters()
+						{
+							InclusionFilter = CanProcessPak
+						});
+					if (files != null)
+					{
+						modPaks.AddRange(files);
+					}
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error enumerating pak folder '{modsFolderPath}': {ex.ToString()}");
+				}
+
+				Trace.WriteLine("Mod Packages: " + modPaks.Count());
+				foreach (var pakPath in modPaks)
+				{
+					try
+					{
+						using (var pr = new LSLib.LS.PackageReader(pakPath))
+						{
+							var pak = pr.Read();
+							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+							if (metaFile != null)
+							{
+								using (var stream = metaFile.MakeStream())
+								{
+									using (var sr = new System.IO.StreamReader(stream))
+									{
+										string text = await sr.ReadToEndAsync();
+										var modData = ParseMetaFile(text);
+										if (modData != null)
+										{
+											modData.FilePath = pakPath;
+											try
+											{
+												modData.LastModified = File.GetChangeTime(pakPath);
+											}
+											catch (PlatformNotSupportedException ex)
+											{
+												Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
+											}
+											mods.Add(modData);
+										}
+									}
+								}
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Error loading pak '{pakPath}': {ex.ToString()}");
+					}
+				}
+			}
+
+			try
+			{
+
+			}
+			catch (Exception ex)
 			{
 				Trace.WriteLine($"Error loading mod paks: {ex.ToString()}");
 			}

@@ -243,6 +243,11 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref mainProgressValue, value); }
 		}
 
+		public void IncreaseMainProgressValue(double val)
+		{
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressValue += val);
+		}
+
 		private CancellationTokenSource mainProgressToken;
 
 		public CancellationTokenSource MainProgressToken
@@ -504,6 +509,19 @@ namespace DivinityModManager.ViewModels
 			} 
 		}
 
+		public async Task<List<DivinityModData>> LoadWorkshopModsAsync()
+		{
+			List<DivinityModData> workshopMods = new List<DivinityModData>();
+
+			if (Directory.Exists(Settings.DOS2WorkshopPath))
+			{
+				workshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath);
+				return workshopMods.OrderBy(m => m.Name).ToList();
+			}
+
+			return workshopMods;
+		}
+
 		private void SetDOS2Pathways(string currentGameDataPath)
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -624,6 +642,40 @@ namespace DivinityModManager.ViewModels
 			//}
 		}
 
+		public async Task<List<DivinityModData>> LoadModsAsync()
+		{
+			List<DivinityModData> modPakData = null;
+			List<DivinityModData> projects = null;
+
+			SetDOS2Pathways(Settings.GameDataPath);
+
+			if (Directory.Exists(PathwayData.DocumentsModsPath))
+			{
+				Trace.WriteLine($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
+				modPakData = await DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath);
+			}
+
+			GameDirectoryFound = Directory.Exists(Settings.GameDataPath);
+
+			if (GameDirectoryFound)
+			{
+				GameDirectoryFound = true;
+				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
+				if (Directory.Exists(modsDirectory))
+				{
+					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
+					projects = await DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory);
+				}
+			}
+
+			if (modPakData == null) modPakData = new List<DivinityModData>();
+			if (projects == null) projects = new List<DivinityModData>();
+
+			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name).ToList();
+			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
+			return finalMods;
+		}
+
 		public bool ModIsAvailable(IDivinityModData divinityModData)
 		{
 			return mods.Keys.Any(k => k == divinityModData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
@@ -657,6 +709,23 @@ namespace DivinityModManager.ViewModels
 			{
 				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
+		}
+
+		public async Task<List<DivinityProfileData>> LoadProfilesAsync()
+		{
+			if (Directory.Exists(PathwayData.DocumentsProfilesPath))
+			{
+				Trace.WriteLine($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
+
+				var profiles = DivinityModDataLoader.LoadProfileData(PathwayData.DocumentsProfilesPath);
+				Trace.WriteLine($"Loaded '{profiles.Count}' profiles.");
+				return profiles;
+			}
+			else
+			{
+				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
+			}
+			return null;
 		}
 
 		public void BuildModOrderList(int selectLast = 0)
@@ -846,6 +915,81 @@ namespace DivinityModManager.ViewModels
 			LoadWorkshopMods();
 			CheckForModUpdates();
 			Refreshing = false;
+		}
+
+		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
+		{
+			double taskStepAmount = 1.0 / 4;
+
+			List<DivinityLoadOrderEntry> lastActiveOrder = null;
+			int lastOrderIndex = -1;
+			if (SelectedModOrder != null)
+			{
+				lastActiveOrder = SelectedModOrder.Order.ToList();
+				lastOrderIndex = SelectedModOrderIndex;
+			}
+
+			var loadedMods = await LoadModsAsync();
+			IncreaseMainProgressValue(taskStepAmount);
+
+			var loadedProfiles = await LoadProfilesAsync();
+			IncreaseMainProgressValue(taskStepAmount);
+
+			var loadedWorkshopMods = await LoadWorkshopModsAsync();
+			IncreaseMainProgressValue(taskStepAmount);
+
+			RxApp.MainThreadScheduler.Schedule(_ =>
+			{
+				mods.AddOrUpdate(loadedMods);
+				profiles.AddRange(loadedProfiles);
+				workshopMods.AddOrUpdate(loadedWorkshopMods);
+
+				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(PathwayData.DocumentsProfilesPath);
+				if (!String.IsNullOrWhiteSpace(selectedUUID))
+				{
+					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
+					if (index > -1)
+					{
+						SelectedProfileIndex = index;
+						Debug_TraceProfileModOrder(Profiles[index]);
+					}
+				}
+
+				BuildModOrderList();
+
+				if (lastActiveOrder != null)
+				{
+					var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
+					SelectedModOrderIndex = lastOrderIndex;
+					SelectedModOrder.SetOrder(lastActiveOrder);
+				}
+				
+				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+
+				CheckForModUpdates();
+
+				Refreshing = false;
+
+				OnMainProgressComplete();
+			});
+
+			IncreaseMainProgressValue(taskStepAmount);
+
+			await ctrl.Yield();
+			return Disposable.Empty;
+		}
+
+		public void RefreshAsync_Start()
+		{
+			MainProgressTitle = "Refreshing...";
+			MainProgressWorkText = "";
+			MainProgressValue = 0d;
+			MainProgressIsActive = true;
+			Refreshing = true;
+			mods.Clear();
+			Profiles.Clear();
+			workshopMods.Clear();
+			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
 		}
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -1042,9 +1186,12 @@ namespace DivinityModManager.ViewModels
 		private void OnMainProgressComplete()
 		{
 			MainProgressValue = 1d;
-			MainProgressToken.Dispose();
-			MainProgressToken = null;
-			MainProgressIsActive = false;
+			if(MainProgressToken != null)
+			{
+				MainProgressToken.Dispose();
+				MainProgressToken = null;
+			}
+			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(500), _ => MainProgressIsActive = false);
 		}
 
 		private void ExportLoadOrderToArchive_Start()
@@ -1455,7 +1602,7 @@ namespace DivinityModManager.ViewModels
 			});
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
-			RefreshCommand = ReactiveCommand.Create(Refresh, canRefreshObservable);
+			RefreshCommand = ReactiveCommand.Create(RefreshAsync_Start, canRefreshObservable);
 
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
 			OpenModsFolderCommand = ReactiveCommand.Create(() =>

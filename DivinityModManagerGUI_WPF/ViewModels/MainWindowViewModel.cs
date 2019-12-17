@@ -29,6 +29,7 @@ using System.IO.Compression;
 using System.Threading;
 using SharpCompress.Writers;
 using SharpCompress.Common;
+using System.Text.RegularExpressions;
 
 namespace DivinityModManager.ViewModels
 {
@@ -88,6 +89,22 @@ namespace DivinityModManager.ViewModels
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
+
+		private string activeModSearchText = "";
+
+		public string ActiveModSearchText
+		{
+			get => activeModSearchText;
+			set { this.RaiseAndSetIfChanged(ref activeModSearchText, value); }
+		}
+
+		private string inactiveModSearchText = "";
+
+		public string InactiveModSearchText
+		{
+			get => inactiveModSearchText;
+			set { this.RaiseAndSetIfChanged(ref inactiveModSearchText, value); }
+		}
 
 		private int selectedProfileIndex = 0;
 
@@ -864,6 +881,8 @@ namespace DivinityModManager.ViewModels
 					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Reordered saved order {String.Join(",", SelectedModOrder.Order.Select(x => x.Name))}.");
 				}
 			}
+
+			OnSearchTextChanged(ActiveModSearchText, ActiveMods);
 		}
 
 		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -876,6 +895,8 @@ namespace DivinityModManager.ViewModels
 					m.Index = -1;
 					//Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
 				}
+
+				OnSearchTextChanged(InactiveModSearchText, InactiveMods);
 			}
 		}
 
@@ -1305,6 +1326,113 @@ namespace DivinityModManager.ViewModels
 
 		public bool AutoChangedOrder { get; set; } = false;
 
+		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
+		private Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
+
+		private void OnSearchTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
+		{
+			Trace.WriteLine("Filtering mod list with search term " + searchText);
+			if (String.IsNullOrWhiteSpace(searchText))
+			{
+				foreach (var m in modDataList)
+				{
+					m.Visibility = Visibility.Visible;
+				}
+			}
+			else
+			{
+				if(searchText.IndexOf("@") > -1)
+				{
+					string remainingSearch = searchText;
+					List<DivinityModFilterData> searchProps = new List<DivinityModFilterData>();
+
+					MatchCollection matches;
+
+					if(searchText.IndexOf("\"") > -1)
+					{
+						matches = filterPropertyPatternWithQuotes.Matches(searchText);
+					}
+					else
+					{
+						matches = filterPropertyPattern.Matches(searchText);
+					}
+
+					if(matches.Count > 0)
+					{
+						foreach(Match match in matches)
+						{
+							if(match.Success)
+							{
+								var prop = match.Groups[1]?.Value;
+								var value = match.Groups[3]?.Value;
+								if (String.IsNullOrEmpty(value)) value = "";
+								Trace.WriteLine($"New filter: {prop} -> {value}");
+								if(!String.IsNullOrWhiteSpace(prop))
+								{
+									searchProps.Add(new DivinityModFilterData()
+									{
+										FilterProperty = prop,
+										FilterValue = value
+									});
+
+									remainingSearch = remainingSearch.Replace(match.Value, "");
+								}
+							}
+						}
+					}
+
+					remainingSearch = remainingSearch.Replace("\"", "");
+
+					//If no Name property is specified, use the remaining unmatched text for that
+					if(!String.IsNullOrWhiteSpace(remainingSearch) && !searchProps.Any(f => f.PropertyContains("Name")))
+					{
+						remainingSearch = remainingSearch.Trim();
+						searchProps.Add(new DivinityModFilterData()
+						{
+							FilterProperty = "Name",
+							FilterValue = remainingSearch
+						});
+					}
+
+					foreach (var mod in modDataList)
+					{
+						//@Mode GM @Author Leader
+						int totalMatches = 0;
+						foreach (var f in searchProps)
+						{
+							if (f.Match(mod))
+							{
+								totalMatches += 1;
+							}
+							Trace.WriteLine($"{mod.Name} Matching filter: '{f.FilterProperty}' => '{f.FilterValue}' | {totalMatches}");
+						}
+						if (totalMatches >= searchProps.Count)
+						{
+							mod.Visibility = Visibility.Visible;
+						}
+						else
+						{
+							mod.Visibility = Visibility.Collapsed;
+						}
+					}
+				}
+				else
+				{
+					foreach (var m in modDataList)
+					{
+						if (CultureInfo.CurrentCulture.CompareInfo.IndexOf(m.Name, searchText, CompareOptions.IgnoreCase) >= 0)
+						{
+							m.Visibility = Visibility.Visible;
+						}
+						else
+						{
+							m.Visibility = Visibility.Collapsed;
+						}
+					}
+				}
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
@@ -1437,6 +1565,9 @@ namespace DivinityModManager.ViewModels
 			//});
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
+
+			this.WhenAnyValue(x => x.ActiveModSearchText).Delay(TimeSpan.FromMilliseconds(50)).Subscribe((s) => { OnSearchTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
+			this.WhenAnyValue(x => x.InactiveModSearchText).Delay(TimeSpan.FromMilliseconds(50)).Subscribe((s) => { OnSearchTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
 
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;

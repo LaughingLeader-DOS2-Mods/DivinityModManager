@@ -1331,7 +1331,7 @@ namespace DivinityModManager.ViewModels
 
 		private void OnSearchTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
 		{
-			Trace.WriteLine("Filtering mod list with search term " + searchText);
+			//Trace.WriteLine("Filtering mod list with search term " + searchText);
 			if (String.IsNullOrWhiteSpace(searchText))
 			{
 				foreach (var m in modDataList)
@@ -1366,7 +1366,6 @@ namespace DivinityModManager.ViewModels
 								var prop = match.Groups[1]?.Value;
 								var value = match.Groups[3]?.Value;
 								if (String.IsNullOrEmpty(value)) value = "";
-								Trace.WriteLine($"New filter: {prop} -> {value}");
 								if(!String.IsNullOrWhiteSpace(prop))
 								{
 									searchProps.Add(new DivinityModFilterData()
@@ -1404,7 +1403,6 @@ namespace DivinityModManager.ViewModels
 							{
 								totalMatches += 1;
 							}
-							Trace.WriteLine($"{mod.Name} Matching filter: '{f.FilterProperty}' => '{f.FilterValue}' | {totalMatches}");
 						}
 						if (totalMatches >= searchProps.Count)
 						{
@@ -1566,8 +1564,10 @@ namespace DivinityModManager.ViewModels
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 
-			this.WhenAnyValue(x => x.ActiveModSearchText).Delay(TimeSpan.FromMilliseconds(50)).Subscribe((s) => { OnSearchTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
-			this.WhenAnyValue(x => x.InactiveModSearchText).Delay(TimeSpan.FromMilliseconds(50)).Subscribe((s) => { OnSearchTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
+			this.WhenAnyValue(x => x.ActiveModSearchText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnSearchTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
+			this.WhenAnyValue(x => x.InactiveModSearchText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnSearchTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
 
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;

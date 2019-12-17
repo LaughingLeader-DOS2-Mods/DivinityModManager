@@ -62,7 +62,7 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding ActiveModSearchText, UpdateSourceTrigger=Explicit}"
+					Text="{Binding ActiveModSearchText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Active Mods"
 					UpdateBindingOnFocusLost="True" />
@@ -123,7 +123,7 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding InactiveModSearchText, UpdateSourceTrigger=LostFocus}"
+					Text="{Binding InactiveModSearchText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Inactive Mods"
 					UpdateBindingOnFocusLost="True" />

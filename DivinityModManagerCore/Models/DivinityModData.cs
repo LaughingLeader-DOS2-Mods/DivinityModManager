@@ -3,6 +3,7 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Windows;
 
 namespace DivinityModManager.Models
 {
@@ -34,6 +35,7 @@ namespace DivinityModManager.Models
 		public string Folder { get; set; }
 		public string MD5 { get; set; }
 		public string Type { get; set; }
+		public List<string> Modes { get; set; } = new List<string>();
 		public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
@@ -93,6 +95,14 @@ namespace DivinityModManager.Models
 		{
 			get => isSelected;
 			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
+		}
+
+		private Visibility visibility = Visibility.Visible;
+
+		public Visibility Visibility
+		{
+			get => visibility;
+			set { this.RaiseAndSetIfChanged(ref visibility, value); }
 		}
 
 		public void UpdateDependencyText()

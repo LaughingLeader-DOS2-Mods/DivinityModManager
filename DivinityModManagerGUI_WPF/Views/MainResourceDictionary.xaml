@@ -40,14 +40,12 @@
 		<Setter Property="Margin" Value="2,0,2,0" />
 		<Setter Property="ToolTipService.ShowOnDisabled" Value="True" />
 	</Style>
-
 	<Style TargetType="{x:Type controls:AutoGrayableImage}">
 		<Setter Property="Width" Value="16" />
 		<Setter Property="Height" Value="16" />
 		<Setter Property="Margin" Value="2" />
 		<Setter Property="Stretch" Value="Uniform" />
 	</Style>
-
 	<Style x:Key="VerticalSeparator" TargetType="Rectangle">
 		<Setter Property="Width" Value="1" />
 		<Setter Property="Margin" Value="16,0,16,0" />
@@ -108,6 +106,7 @@
 
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+		<Setter Property="Visibility" Value="{Binding Visibility, FallbackValue='Visible'}" />
 		<Style.Triggers>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>

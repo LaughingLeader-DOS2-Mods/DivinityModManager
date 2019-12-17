@@ -50,6 +50,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AdonisUI, Version=1.12.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdonisUI.1.12.1\lib\net45\AdonisUI.dll</HintPath>
+    </Reference>
     <Reference Include="AlertBarWpf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AlertBarWpf.1.0.4\lib\AlertBarWpf.dll</HintPath>
     </Reference>

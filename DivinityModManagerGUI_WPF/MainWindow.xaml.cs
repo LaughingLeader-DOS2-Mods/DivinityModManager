@@ -25,6 +25,8 @@ using static AlertBarWpf.AlertBarWpf;
 using AutoUpdaterDotNET;
 using System.Windows.Threading;
 using System.Reactive.Concurrency;
+using AdonisUI.Controls;
+using System.Reactive;
 
 namespace DivinityModManager.Views
 {
@@ -78,7 +80,7 @@ namespace DivinityModManager.Views
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : ReactiveWindow<MainWindowViewModel>
+	public partial class MainWindow : AdonisWindow, IViewFor<MainWindowViewModel>
 	{
 		private static MainWindow self;
 		public static MainWindow Self => self;
@@ -93,6 +95,9 @@ namespace DivinityModManager.Views
 
 		private AboutWindow aboutWindow;
 		public AboutWindow AboutWindow => aboutWindow;
+
+		public MainWindowViewModel ViewModel { get; set; }
+		object IViewFor.ViewModel { get; set; }
 
 		public MainWindow()
 		{
@@ -200,6 +205,7 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.FileRefreshMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.OpenPreferencesCommand, view => view.SettingsPreferencesMenuItem.Command).DisposeWith(ViewModel.Disposables);
+			this.OneWayBind(ViewModel, vm => vm.ToggleDarkModeCommand, view => view.SettingsDarkModeMenuItem.Command).DisposeWith(ViewModel.Disposables);
 
 			this.OneWayBind(ViewModel, vm => vm.CheckForAppUpdatesCommand, view => view.HelpCheckForUpdateMenuItem.Command).DisposeWith(ViewModel.Disposables);
 			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.HelpDonationMenuItem.Command).DisposeWith(ViewModel.Disposables);
@@ -244,7 +250,6 @@ namespace DivinityModManager.Views
 
 			this.WhenActivated(d =>
 			{
-				d.Add(ViewModel.Disposables);
 				ViewModel.OnViewActivated(this);
 
 				if(ViewModel.Settings.CheckForUpdates)

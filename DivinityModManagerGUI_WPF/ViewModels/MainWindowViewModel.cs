@@ -30,6 +30,7 @@ using System.Threading;
 using SharpCompress.Writers;
 using SharpCompress.Common;
 using System.Text.RegularExpressions;
+using AdonisUI;
 
 namespace DivinityModManager.ViewModels
 {
@@ -66,7 +67,7 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
-	public class MainWindowViewModel : BaseHistoryViewModel
+	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel
 	{
 		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -278,6 +279,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
+		public ICommand ToggleDarkModeCommand { get; set; }
 
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
@@ -353,6 +355,11 @@ namespace DivinityModManager.ViewModels
 
 		private bool LoadSettings()
 		{
+			if (Settings != null)
+			{
+				Settings.Dispose();
+			}
+
 			bool loaded = false;
 			string settingsFile = @"Data\settings.json";
 			try
@@ -397,16 +404,23 @@ namespace DivinityModManager.ViewModels
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 
-			Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings);
+			Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings).DisposeWith(Settings.Disposables);
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
 				Process.Start(DivinityApp.DIR_DATA);
-			});
+			}).DisposeWith(Settings.Disposables);
 
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
 				ToggleLogging(logEnabled);
-			});
+			}).DisposeWith(Disposables);
+
+			this.WhenAnyValue(x => x.Settings.DarkThemeEnabled).Throttle(TimeSpan.FromMilliseconds(250)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+			{
+				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+				SaveSettings();
+			}).DisposeWith(Settings.Disposables);
+
 			if (Settings.LogEnabled)
 			{
 				ToggleLogging(true);
@@ -1418,6 +1432,8 @@ namespace DivinityModManager.ViewModels
 		{
 			view = parentView;
 
+			Trace.WriteLine("View activated");
+
 			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
 			{
 				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
@@ -1472,6 +1488,7 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenDOS2DEGame;
 
 		public bool AutoChangedOrder { get; set; } = false;
+		public ViewModelActivator Activator { get; }
 
 		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
 		private Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
@@ -1580,6 +1597,13 @@ namespace DivinityModManager.ViewModels
 
 		public MainWindowViewModel() : base()
 		{
+			Activator = new ViewModelActivator();
+
+			this.WhenActivated((CompositeDisposable disposables) =>
+			{
+				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
+			});
+
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
@@ -1641,6 +1665,14 @@ namespace DivinityModManager.ViewModels
 			OpenRepoPageCommand = ReactiveCommand.Create(() =>
 			{
 				Process.Start(DivinityApp.URL_REPO);
+			});
+
+			ToggleDarkModeCommand = ReactiveCommand.Create(() =>
+			{
+				if (Settings != null)
+				{
+					Settings.DarkThemeEnabled = !Settings.DarkThemeEnabled;
+				}
 			});
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).

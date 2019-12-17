@@ -10,11 +10,12 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using System.Windows.Input;
 using DivinityModManager.Util;
+using System.Reactive.Disposables;
 
 namespace DivinityModManager.Models
 {
 	[DataContract]
-	public class DivinityModManagerSettings : ReactiveObject
+	public class DivinityModManagerSettings : ReactiveObject, IDisposable
 	{
 		private string gameDataPath = "";
 
@@ -121,8 +122,19 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref lastOrder, value); }
 		}
 
+		private bool darkThemeEnabled = false;
+
+		[DataMember]
+		public bool DarkThemeEnabled
+		{
+			get => darkThemeEnabled;
+			set { this.RaiseAndSetIfChanged(ref darkThemeEnabled, value); }
+		}
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
+
+		public CompositeDisposable Disposables { get; internal set; }
 
 		private bool canSaveSettings = false;
 
@@ -134,7 +146,13 @@ namespace DivinityModManager.Models
 
 		public DivinityModManagerSettings()
 		{
+			Disposables = new CompositeDisposable();
+		}
 
+		public void Dispose()
+		{
+			Disposables?.Dispose();
+			Disposables = null;
 		}
 	}
 }

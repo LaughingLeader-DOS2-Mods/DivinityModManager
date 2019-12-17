@@ -20,7 +20,7 @@
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Views/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<Style x:Key="TabItemConflictHeader" TargetType="TabItem">
 				<Style.Setters>

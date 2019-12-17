@@ -1,7 +1,10 @@
-﻿<reactiveui:ReactiveWindow
+﻿<adonisControls:AdonisWindow
 	x:Class="DivinityModManager.Views.MainWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+	xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
 	xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
@@ -15,15 +18,18 @@
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	x:Name="Main"
+	Title="{Binding Title}"
 	Width="1400"
 	Height="800"
-	x:TypeArguments="vm:MainWindowViewModel"
 	mc:Ignorable="d">
+	<Window.Style>
+		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />
+	</Window.Style>
 	<!--  d:DataContext="{d:DesignInstance IsDesignTimeCreatable=True, Type=local:MainWindowDebugData}"  -->
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Views/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<DataTemplate x:Key="VerticalModLayout">
 				<local:VerticalModLayout />
@@ -487,6 +493,10 @@
 								x:Name="SettingsPreferencesMenuItem"
 								Header="Preferences..."
 								InputGestureText="CTRL+P" />
+							<MenuItem
+								x:Name="SettingsDarkModeMenuItem"
+								Command="{Binding ToggleDarkModeCommand}"
+								Header="Toggle Dark/Light Mode" />
 						</MenuItem>
 						<MenuItem Header="Help">
 							<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
@@ -549,4 +559,4 @@
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>
-</reactiveui:ReactiveWindow>
+</adonisControls:AdonisWindow>

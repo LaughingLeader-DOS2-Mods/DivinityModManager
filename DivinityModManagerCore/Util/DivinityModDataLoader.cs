@@ -133,16 +133,15 @@ namespace DivinityModManager.Util
 					var targets = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "Target");
 					if(targets != null)
 					{
-						List<string> allTargetValues = new List<string>();
 						foreach (var node in targets)
 						{
 							var target = GetAttribute(node, "Object", "");
 							if(!String.IsNullOrEmpty(target))
 							{
-								allTargetValues.Add(target);
+								modData.Modes.Add(target);
 							}
 						}
-						modData.Targets = string.Join(", ", allTargetValues);
+						modData.Targets = string.Join(", ", modData.Modes);
 					}
 
 					return modData;

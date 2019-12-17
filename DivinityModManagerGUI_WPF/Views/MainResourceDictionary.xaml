@@ -156,6 +156,8 @@
 							BorderThickness="0"
 							ItemsSource="{Binding Dependencies}" />
 					</StackPanel>
+					<TextBlock FontWeight="Bold" Text="{Binding Type}" />
+					<TextBlock FontWeight="Bold" Text="{Binding Targets}" />
 				</StackPanel>
 			</TextBlock.ToolTip>
 		</TextBlock>
@@ -216,6 +218,26 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
+			<GridViewColumn
+				Width="50"
+				Header="Type"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Type}" ToolTip="{Binding Type}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="75"
+				Header="Modes"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Targets}" ToolTip="{Binding Targets}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
 	<GridView
@@ -246,6 +268,26 @@
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
 						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="50"
+				Header="Type"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Type}" ToolTip="{Binding Type}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn
+				Width="75"
+				Header="Modes"
+				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Targets}" ToolTip="{Binding Targets}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
@@ -341,6 +383,14 @@
 							Padding="0"
 							BorderThickness="0"
 							ItemsSource="{Binding LocalMod.Dependencies}" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Padding="0,0,2,0" Text="Mod Type: " />
+						<TextBlock Text="{Binding LocalMod.Type}" />
+					</StackPanel>
+					<StackPanel Orientation="Horizontal">
+						<TextBlock Padding="0,0,4,0" Text="Modes" />
+						<TextBlock Text="{Binding LocalMod.Targets}" />
 					</StackPanel>
 				</StackPanel>
 			</TextBlock.ToolTip>

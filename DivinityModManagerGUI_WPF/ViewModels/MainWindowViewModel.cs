@@ -457,7 +457,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if(!pakMod.IsEditorMod)
 					{
-						Trace.WriteLine($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
+						//Trace.WriteLine($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
 						if (workshopMod.Version.VersionInt > pakMod.Version.VersionInt || workshopMod.LastModified > pakMod.LastModified)
 						{
 							ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()

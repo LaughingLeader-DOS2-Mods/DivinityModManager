@@ -49,7 +49,7 @@ namespace DivinityModManager.Util
 
 		public static bool IgnoreModByFolder(string folder)
 		{
-			return IgnoredMods.Any(m => m.Folder.Equals(folder, StringComparison.OrdinalIgnoreCase));
+			return IgnoredMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
 		}
 
 		public static string MakeSafeFilename(string filename, char replaceChar)
@@ -164,7 +164,7 @@ namespace DivinityModManager.Util
 				{
 					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
 					var filteredFolders = projectDirectories.Where(f => !IgnoreModByFolder(f));
-					Console.WriteLine("Project Folders: " + filteredFolders.Count());
+					Console.WriteLine($"Project Folders: {filteredFolders.Count()} / {projectDirectories.Count()}");
 					foreach (var folder in filteredFolders)
 					{
 						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");

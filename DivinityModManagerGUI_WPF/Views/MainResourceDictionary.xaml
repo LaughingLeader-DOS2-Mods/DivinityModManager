@@ -141,21 +141,24 @@
 			<TextBlock.ToolTip>
 				<StackPanel MaxWidth="700" Orientation="Vertical">
 					<TextBlock FontWeight="Bold" Text="{Binding Name}" />
+					<Separator />
 					<TextBlock
 						Text="{Binding Description}"
 						TextWrapping="Wrap"
 						Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
-					<StackPanel
-						Margin="2"
-						Orientation="Vertical"
-						Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
-						<TextBlock FontWeight="Bold" Text="Dependencies:" />
-						<ListBox
-							Margin="0"
-							Padding="0"
-							BorderThickness="0"
-							ItemsSource="{Binding Dependencies}" />
-					</StackPanel>
+					<Border BorderBrush="Black" BorderThickness="1">
+						<StackPanel
+							Margin="2"
+							Orientation="Vertical"
+							Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+							<TextBlock FontWeight="Bold" Text="Dependencies:" />
+							<ListBox
+								Margin="0"
+								Padding="0"
+								BorderThickness="0"
+								ItemsSource="{Binding Dependencies}" />
+						</StackPanel>
+					</Border>
 					<TextBlock FontWeight="Bold" Text="{Binding Type}" />
 					<TextBlock FontWeight="Bold" Text="{Binding Targets}" />
 				</StackPanel>

@@ -2,6 +2,7 @@
 	x:Class="DivinityModManager.Views.HorizontalModLayout"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:c="clr-namespace:DivinityModManager.Controls"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
@@ -29,13 +30,13 @@
 			<Grid>
 				<Grid.ColumnDefinitions>
 					<ColumnDefinition Width="Auto" />
-					<ColumnDefinition Width="4" />
 					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="4" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Padding="4" Text="Active Mods" />
 				<Border
-					Grid.Column="2"
+					Grid.Column="1"
 					Width="16"
 					Height="16"
 					BorderBrush="Black"
@@ -51,6 +52,39 @@
 						</Rectangle.ToolTip>
 					</Rectangle>
 				</Border>
+				<c:UnfocusableTextBox
+					x:Name="ActiveModsSearchTextBox"
+					Grid.Column="3"
+					Margin="0,0,4,0"
+					Padding="2"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Center"
+					AcceptsReturn="False"
+					AcceptsTab="False"
+					CanUndoTextOnEscape="True"
+					Text="{Binding ActiveModSearchText, UpdateSourceTrigger=Explicit}"
+					TextAlignment="Left"
+					ToolTip="Filter Active Mods"
+					UpdateBindingOnFocusLost="True" />
+				<TextBlock
+					Grid.Column="3"
+					Margin="10,0,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					Foreground="DarkGray"
+					IsHitTestVisible="False"
+					Text="Filter Active Mods">
+					<TextBlock.Style>
+						<Style TargetType="{x:Type TextBlock}">
+							<Setter Property="Visibility" Value="Collapsed" />
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding Text, ElementName=ActiveModsSearchTextBox}" Value="">
+									<Setter Property="Visibility" Value="Visible" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBlock.Style>
+				</TextBlock>
 			</Grid>
 			<ListView
 				Grid.Row="1"
@@ -72,7 +106,47 @@
 				<RowDefinition Height="Auto" />
 				<RowDefinition Height="*" />
 			</Grid.RowDefinitions>
-			<TextBlock Padding="4" Text="Inactive Mods" />
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="4" />
+					<ColumnDefinition Width="*" />
+				</Grid.ColumnDefinitions>
+				<TextBlock Padding="4" Text="Inactive Mods" />
+				<c:UnfocusableTextBox
+					x:Name="InactiveModsSearchTextBox"
+					Grid.Column="2"
+					Margin="0,0,4,0"
+					Padding="2"
+					HorizontalAlignment="Stretch"
+					VerticalAlignment="Center"
+					AcceptsReturn="False"
+					AcceptsTab="False"
+					CanUndoTextOnEscape="True"
+					Text="{Binding InactiveModSearchText, UpdateSourceTrigger=LostFocus}"
+					TextAlignment="Left"
+					ToolTip="Filter Inactive Mods"
+					UpdateBindingOnFocusLost="True" />
+				<TextBlock
+					Grid.Column="2"
+					Margin="10,0,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					Foreground="DarkGray"
+					IsHitTestVisible="False"
+					Text="Filter Inactive Mods">
+					<TextBlock.Style>
+						<Style TargetType="{x:Type TextBlock}">
+							<Setter Property="Visibility" Value="Collapsed" />
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding Text, ElementName=InactiveModsSearchTextBox}" Value="">
+									<Setter Property="Visibility" Value="Visible" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</TextBlock.Style>
+				</TextBlock>
+			</Grid>
 			<ListView
 				Grid.Row="1"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"

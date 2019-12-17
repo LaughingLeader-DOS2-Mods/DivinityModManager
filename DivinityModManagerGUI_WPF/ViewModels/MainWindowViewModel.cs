@@ -90,20 +90,20 @@ namespace DivinityModManager.ViewModels
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
-		private string activeModSearchText = "";
+		private string activeModFilterText = "";
 
-		public string ActiveModSearchText
+		public string ActiveModFilterText
 		{
-			get => activeModSearchText;
-			set { this.RaiseAndSetIfChanged(ref activeModSearchText, value); }
+			get => activeModFilterText;
+			set { this.RaiseAndSetIfChanged(ref activeModFilterText, value); }
 		}
 
-		private string inactiveModSearchText = "";
+		private string inactiveModFilterText = "";
 
-		public string InactiveModSearchText
+		public string InactiveModFilterText
 		{
-			get => inactiveModSearchText;
-			set { this.RaiseAndSetIfChanged(ref inactiveModSearchText, value); }
+			get => inactiveModFilterText;
+			set { this.RaiseAndSetIfChanged(ref inactiveModFilterText, value); }
 		}
 
 		private int selectedProfileIndex = 0;
@@ -882,7 +882,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			OnSearchTextChanged(ActiveModSearchText, ActiveMods);
+			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 		}
 
 		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -896,7 +896,7 @@ namespace DivinityModManager.ViewModels
 					//Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
 				}
 
-				OnSearchTextChanged(InactiveModSearchText, InactiveMods);
+				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
 			}
 		}
 
@@ -1329,7 +1329,7 @@ namespace DivinityModManager.ViewModels
 		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
 		private Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
 
-		private void OnSearchTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
+		private void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
 		{
 			//Trace.WriteLine("Filtering mod list with search term " + searchText);
 			if (String.IsNullOrWhiteSpace(searchText))
@@ -1564,10 +1564,13 @@ namespace DivinityModManager.ViewModels
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 
-			this.WhenAnyValue(x => x.ActiveModSearchText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnSearchTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
-			this.WhenAnyValue(x => x.InactiveModSearchText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnSearchTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
+			//Throttle filters so they only happen when typing stops for 500ms
+
+			this.WhenAnyValue(x => x.ActiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnFilterTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
+
+			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
 
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;

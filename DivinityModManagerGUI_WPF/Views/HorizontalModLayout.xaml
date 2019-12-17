@@ -53,7 +53,7 @@
 					</Rectangle>
 				</Border>
 				<c:UnfocusableTextBox
-					x:Name="ActiveModsSearchTextBox"
+					x:Name="ActiveModsFilterTextBox"
 					Grid.Column="3"
 					Margin="0,0,4,0"
 					Padding="2"
@@ -62,7 +62,7 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding ActiveModSearchText, UpdateSourceTrigger=PropertyChanged}"
+					Text="{Binding ActiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Active Mods"
 					UpdateBindingOnFocusLost="True" />
@@ -78,7 +78,7 @@
 						<Style TargetType="{x:Type TextBlock}">
 							<Setter Property="Visibility" Value="Collapsed" />
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding Text, ElementName=ActiveModsSearchTextBox}" Value="">
+								<DataTrigger Binding="{Binding Text, ElementName=ActiveModsFilterTextBox}" Value="">
 									<Setter Property="Visibility" Value="Visible" />
 								</DataTrigger>
 							</Style.Triggers>
@@ -114,7 +114,7 @@
 				</Grid.ColumnDefinitions>
 				<TextBlock Padding="4" Text="Inactive Mods" />
 				<c:UnfocusableTextBox
-					x:Name="InactiveModsSearchTextBox"
+					x:Name="InactiveModsFilterTextBox"
 					Grid.Column="2"
 					Margin="0,0,4,0"
 					Padding="2"
@@ -123,7 +123,7 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding InactiveModSearchText, UpdateSourceTrigger=PropertyChanged}"
+					Text="{Binding InactiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Inactive Mods"
 					UpdateBindingOnFocusLost="True" />
@@ -139,7 +139,7 @@
 						<Style TargetType="{x:Type TextBlock}">
 							<Setter Property="Visibility" Value="Collapsed" />
 							<Style.Triggers>
-								<DataTrigger Binding="{Binding Text, ElementName=InactiveModsSearchTextBox}" Value="">
+								<DataTrigger Binding="{Binding Text, ElementName=InactiveModsFilterTextBox}" Value="">
 									<Setter Property="Visibility" Value="Visible" />
 								</DataTrigger>
 							</Style.Triggers>

@@ -2,6 +2,7 @@
 	x:Class="DivinityModManager.Views.ModUpdatesLayout"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
 	xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
@@ -17,11 +18,6 @@
 	IsEnabled="{Binding Unlocked, Mode=OneWay}"
 	IsManipulationEnabled="{Binding Unlocked, Mode=OneWay}"
 	mc:Ignorable="d">
-	<d:DesignerProperties.DesignStyle>
-		<Style TargetType="UserControl">
-			<Setter Property="Background" Value="White" />
-		</Style>
-	</d:DesignerProperties.DesignStyle>
 	<UserControl.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
@@ -40,7 +36,7 @@
 						<TextBlock
 							Height="1"
 							HorizontalAlignment="Stretch"
-							Background="Black" />
+							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}" />
 					</Border>
 				</ControlTemplate>
 			</Grid.Resources>
@@ -53,7 +49,7 @@
 			</Grid.RowDefinitions>
 			<StackPanel Orientation="Vertical">
 				<TextBlock
-					Background="White"
+					Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
 					FontSize="24"
 					Text="Mod Updates"
 					TextAlignment="Center" />
@@ -65,7 +61,7 @@
 				RowCount="2"
 				Rows="auto,*">
 				<TextBlock
-					Background="White"
+					Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}"
 					FontSize="20"
 					Text="New Mods"
 					TextAlignment="Center" />
@@ -88,7 +84,7 @@
 				RowCount="2"
 				Rows="auto,*">
 				<TextBlock
-					Background="White"
+					Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}"
 					FontSize="20"
 					Text="Updates"
 					TextAlignment="Center" />

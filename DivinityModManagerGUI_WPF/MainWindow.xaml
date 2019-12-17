@@ -4,7 +4,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
 	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
-	xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
 	xmlns:ag="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
@@ -38,11 +38,7 @@
 				<local:HorizontalModLayout />
 			</DataTemplate>
 			<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
-				<Setter Property="Background">
-					<Setter.Value>
-						<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
-					</Setter.Value>
-				</Setter>
+				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
 				<Setter Property="Template">
 					<Setter.Value>
 						<ControlTemplate TargetType="{x:Type Button}">
@@ -82,7 +78,7 @@
 									Padding="4,0"
 									HorizontalAlignment="Center"
 									VerticalAlignment="Center"
-									Foreground="Black"
+									Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
 									Text="Updates:" />
 								<controls:CircleDecorator
 									x:Name="RedUpdateBackground"
@@ -106,7 +102,7 @@
 										FontFamily="Arial"
 										FontSize="9"
 										FontWeight="Bold"
-										Foreground="Black"
+										Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}"
 										TextBlock.TextAlignment="Center" />
 									<controls:CircleDecorator.ToolTip>
 										<TextBlock>
@@ -136,17 +132,17 @@
 							</Setter.Value>
 						</Setter>
 						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="#FFEE3D3D" />
-						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="White" />
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
 						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Bold" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
-						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="DarkGray" />
-						<Setter TargetName="RedUpdateBackground" Property="Background" Value="LightGray" />
-						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="Black" />
+						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
+						<Setter TargetName="RedUpdateBackground" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1InteractionForegroundBrush}}" />
 						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Normal" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
-						<Setter TargetName="UpdateViewPanel" Property="Background" Value="LightBlue" />
+						<Setter TargetName="UpdateViewPanel" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="False">
 						<Setter TargetName="UpdateViewPanel" Property="Background" Value="Transparent" />
@@ -180,7 +176,7 @@
 					</MultiDataTrigger>
 				</DataTemplate.Triggers>
 			</DataTemplate>
-			<local:ModUpdatesLayout x:Key="ModUpdaterPanel" Background="LightBlue" />
+			<local:ModUpdatesLayout x:Key="ModUpdaterPanel" Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
 			<Grid x:Key="ModOrderPanel">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
@@ -360,7 +356,7 @@
 				<Separator
 					Grid.Row="1"
 					Height="1"
-					Background="Gray" />
+					Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BorderBrush}}" />
 				<ContentControl
 					x:Name="LayoutContent"
 					Grid.Row="2"
@@ -436,8 +432,8 @@
 			Panel.ZIndex="99">
 			<xc:MessageBox
 				x:Name="MainWindowMessageBox"
-				CaptionForeground="White"
-				Foreground="Black" />
+				CaptionForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
 		</xc:WindowContainer>
 		<xc:BusyIndicator
 			x:Name="MainBusyIndicator"
@@ -450,10 +446,7 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
-				<Grid>
-					<Grid.Background>
-						<SolidColorBrush Color="{DynamicResource {x:Static SystemColors.GradientInactiveCaptionColorKey}}" />
-					</Grid.Background>
+				<Grid Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}">
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*" />
 						<ColumnDefinition Width="1" />
@@ -548,14 +541,13 @@
 			</Grid>
 		</xc:BusyIndicator>
 		<StatusBar Grid.Row="1" MinHeight="16">
+			<StatusBar.Resources>
+				<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
+				</Style>
+			</StatusBar.Resources>
 			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 				<mbar:AlertBarWpf x:Name="AlertBar" Theme="Outline" />
-				<!--<TextBox
-					HorizontalAlignment="Stretch"
-					Background="Transparent"
-					BorderThickness="0"
-					IsReadOnly="True"
-					Text="{Binding StatusText}" />-->
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>

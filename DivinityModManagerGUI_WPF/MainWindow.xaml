@@ -21,6 +21,7 @@
 	Title="{Binding Title}"
 	Width="1400"
 	Height="800"
+	TitleBarBackground="#4e38c9"
 	mc:Ignorable="d">
 	<Window.Style>
 		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />

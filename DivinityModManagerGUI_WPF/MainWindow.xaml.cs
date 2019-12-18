@@ -123,95 +123,6 @@ namespace DivinityModManager.Views
 #endif
 			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
 
-			this.OneWayBind(ViewModel,
-				viewModel => viewModel.Title,
-				view => view.Title).DisposeWith(ViewModel.Disposables);
-
-			ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() => 
-			{
-#if !DEBUG
-				AutoUpdater.ReportErrors = true;
-#endif
-				AutoUpdater.Start(DivinityApp.URL_UPDATE);
-				ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
-				ViewModel.SaveSettings();
-#if !DEBUG
-				Task.Delay(1000).ContinueWith(_ =>
-				{
-					AutoUpdater.ReportErrors = false;
-				});
-#endif
-			});
-
-			var c = ReactiveCommand.Create(() =>
-			{
-				if (!SettingsWindow.IsVisible)
-				{
-					SettingsWindow.Init(this.ViewModel.Settings);
-					SettingsWindow.Show();
-					settingsWindow.Owner = this;
-				}
-				else
-				{
-					SettingsWindow.Hide();
-				}
-			});
-			c.ThrownExceptions.Subscribe((ex) =>
-			{
-				Trace.WriteLine("Error opening settings window: " + ex.ToString());
-			});
-			ViewModel.OpenPreferencesCommand = c;
-
-			ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
-			{
-				if (AboutWindow == null)
-				{
-					aboutWindow = new AboutWindow();
-				}
-
-				if (!AboutWindow.IsVisible)
-				{
-					AboutWindow.DataContext = ViewModel;
-					AboutWindow.Show();
-					AboutWindow.Owner = this;
-				}
-				else
-				{
-					AboutWindow.Hide();
-				}
-			});
-
-			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
-			{
-				if (b)
-				{
-					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
-				}
-				else
-				{
-					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
-				}
-			}).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.FileAddNewOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.FileSaveOrderMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.FileSaveOrderAsMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.FileExportOrderToGameMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.ExportLoadOrderAsArchiveCommand, view => view.FileExportOrderToArchiveMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.ExportLoadOrderAsArchiveToFileCommand, view => view.FileExportOrderToArchiveAsMenuItem.Command).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.FileRefreshMenuItem.Command).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.OpenPreferencesCommand, view => view.SettingsPreferencesMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.ToggleDarkModeCommand, view => view.SettingsDarkModeMenuItem.Command).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.CheckForAppUpdatesCommand, view => view.HelpCheckForUpdateMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.HelpDonationMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.HelpOpenRepoPageMenuItem.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenAboutWindowCommand, view => view.HelpOpenAboutWindowMenuItem.Command).DisposeWith(ViewModel.Disposables);
-
 			var res = this.TryFindResource("ModUpdaterPanel");
 			if(res != null && res is ModUpdatesLayout modUpdaterPanel)
 			{
@@ -220,39 +131,102 @@ namespace DivinityModManager.Views
 				modUpdaterPanel.SetBinding(ModUpdatesLayout.DataContextProperty, binding);
 			}
 
-			//this.OneWayBind(ViewModel, vm => vm, view => view.DataContext).DisposeWith(disposableRegistration);
-			//this.OneWayBind(ViewModel, vm => vm, view => view.LayoutContent.Content).DisposeWith(disposableRegistration);
-
-			/*
-			this.OneWayBind(ViewModel, vm => vm.SaveOrderCommand, view => view.SaveButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.SaveOrderAsCommand, view => view.SaveAsButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.ExportOrderCommand, view => view.ExportToModSettingsButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.RefreshCommand, view => view.RefreshButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenModsFolderCommand, view => view.OpenModsFolderButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenWorkshopFolderCommand, view => view.OpenWorkshopFolderButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenDOS2GameCommand, view => view.OpenDOS2GameButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenDonationPageCommand, view => view.OpenDonationPageButton.Command).DisposeWith(ViewModel.Disposables);
-			this.OneWayBind(ViewModel, vm => vm.OpenRepoPageCommand, view => view.OpenRepoPageButton.Command).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.AddOrderConfigCommand, view => view.AddNewOrderButton.Command).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.Profiles, view => view.ProfilesComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
-			this.Bind(ViewModel, vm => vm.SelectedProfileIndex, view => view.ProfilesComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
-
-			this.OneWayBind(ViewModel, vm => vm.ModOrderList, view => view.OrdersComboBox.ItemsSource).DisposeWith(ViewModel.Disposables);
-			this.Bind(ViewModel, vm => vm.SelectedModOrderIndex, view => view.OrdersComboBox.SelectedIndex).DisposeWith(ViewModel.Disposables);
-			*/
-
-			//Menu Items
-			//this.OneWayBind(ViewModel, vm => vm.OpenConflictCheckerCommand, view => view.ConflictCheckerMenuItem.Command).DisposeWith(ViewModel.Disposables);
-
 			DataContext = ViewModel;
 
 			this.WhenActivated(d =>
 			{
 				ViewModel.OnViewActivated(this);
 
-				if(ViewModel.Settings.CheckForUpdates)
+				this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
+
+				ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
+				{
+#if !DEBUG
+				AutoUpdater.ReportErrors = true;
+#endif
+					AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
+					ViewModel.SaveSettings();
+#if !DEBUG
+				Task.Delay(1000).ContinueWith(_ =>
+				{
+					AutoUpdater.ReportErrors = false;
+				});
+#endif
+				});
+
+				var c = ReactiveCommand.Create(() =>
+				{
+					if (!SettingsWindow.IsVisible)
+					{
+						SettingsWindow.Init(this.ViewModel.Settings);
+						SettingsWindow.Show();
+						settingsWindow.Owner = this;
+					}
+					else
+					{
+						SettingsWindow.Hide();
+					}
+				});
+				c.ThrownExceptions.Subscribe((ex) =>
+				{
+					Trace.WriteLine("Error opening settings window: " + ex.ToString());
+				});
+				ViewModel.OpenPreferencesCommand = c;
+
+				ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
+				{
+					if (AboutWindow == null)
+					{
+						aboutWindow = new AboutWindow();
+					}
+
+					if (!AboutWindow.IsVisible)
+					{
+						AboutWindow.DataContext = ViewModel;
+						AboutWindow.Show();
+						AboutWindow.Owner = this;
+					}
+					else
+					{
+						AboutWindow.Hide();
+					}
+				});
+
+				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
+				{
+					if (b)
+					{
+						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+					}
+					else
+					{
+						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
+					}
+				});
+
+				//this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
+
+				this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
+
+				this.WhenAnyValue(x => x.ViewModel.AddOrderConfigCommand).BindTo(this, view => view.FileAddNewOrderMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.SaveOrderCommand).BindTo(this, view => view.FileSaveOrderMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.SaveOrderAsCommand).BindTo(this, view => view.FileSaveOrderAsMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ExportOrderCommand).BindTo(this, view => view.FileExportOrderToGameMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
+
+				this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
+
+				this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
+
+				this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
+
+				if (ViewModel.Settings.CheckForUpdates)
 				{
 					if (ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
 					{

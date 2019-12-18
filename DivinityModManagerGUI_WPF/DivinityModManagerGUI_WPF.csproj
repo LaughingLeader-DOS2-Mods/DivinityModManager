@@ -49,6 +49,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="AdonisUI, Version=1.12.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AdonisUI.1.12.1\lib\net45\AdonisUI.dll</HintPath>
@@ -355,6 +358,9 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Controls\Behavior\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="DivinityModManager.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

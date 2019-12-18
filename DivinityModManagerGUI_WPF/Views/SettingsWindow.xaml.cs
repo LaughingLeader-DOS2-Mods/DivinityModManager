@@ -42,7 +42,7 @@ namespace DivinityModManager.Views
 			ViewModel = vm;
 			DataContext = ViewModel;
 
-			this.OneWayBind(ViewModel, x => x.SaveSettingsCommand, view => view.SaveSettingsButton.Command);
+			this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
 		}
 
 		private string lastWorkshopPath = "";

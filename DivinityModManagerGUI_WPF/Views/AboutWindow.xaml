@@ -13,6 +13,9 @@
 	Width="600"
 	Height="300"
 	mc:Ignorable="d">
+	<Window.Style>
+		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />
+	</Window.Style>
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

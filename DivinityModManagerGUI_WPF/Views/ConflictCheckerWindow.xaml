@@ -17,6 +17,9 @@
 	Height="450"
 	x:TypeArguments="vm:ConflictCheckerWindowViewModel"
 	mc:Ignorable="d">
+	<Window.Style>
+		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />
+	</Window.Style>
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>

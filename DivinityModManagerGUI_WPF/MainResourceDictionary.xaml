@@ -34,6 +34,7 @@
 	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/ExportScript_16x.png" />
 	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/ZipFile_16x.png" />
 	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/ZipFileAs_16x.png" />
+
 	<Style x:Key="IconButtonStyle" TargetType="Button">
 		<Setter Property="Width" Value="24" />
 		<Setter Property="Height" Value="24" />

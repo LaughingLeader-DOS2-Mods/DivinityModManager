@@ -21,7 +21,6 @@ using DynamicData;
 using DynamicData.Binding;
 using System.Diagnostics;
 using System.Globalization;
-using static AlertBarWpf.AlertBarWpf;
 using AutoUpdaterDotNET;
 using System.Windows.Threading;
 using System.Reactive.Concurrency;
@@ -271,10 +270,10 @@ namespace DivinityModManager.Views
 			Grid grdParent;
 			switch (AlertBar.Theme)
 			{
-				case ThemeType.Standard:
+				case DivinityModManager.Controls.AlertBar.ThemeType.Standard:
 					grdParent = FindVisualChildren<Grid>(spStandard).FirstOrDefault();
 					break;
-				case ThemeType.Outline:
+				case DivinityModManager.Controls.AlertBar.ThemeType.Outline:
 				default:
 					grdParent = FindVisualChildren<Grid>(spOutline).FirstOrDefault();
 					break;
@@ -283,7 +282,8 @@ namespace DivinityModManager.Views
 			TextBlock lblMessage = FindVisualChildren<TextBlock>(grdParent).FirstOrDefault();
 			if(lblMessage != null)
 			{
-				Trace.WriteLine(lblMessage);
+				Trace.WriteLine(lblMessage.Text);
+				Trace.WriteLine($"Alert TextBlock Foreground {lblMessage.Foreground}");
 			}
 		}
 

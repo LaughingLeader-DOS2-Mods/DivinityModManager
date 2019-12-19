@@ -12,7 +12,6 @@
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
-	xmlns:mbar="clr-namespace:AlertBarWpf;assembly=AlertBarWpf"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
@@ -542,13 +541,8 @@
 			</Grid>
 		</xc:BusyIndicator>
 		<StatusBar Grid.Row="1" MinHeight="16">
-			<StatusBar.Resources>
-				<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-					<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
-				</Style>
-			</StatusBar.Resources>
 			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-				<mbar:AlertBarWpf x:Name="AlertBar" Theme="Outline" />
+				<controls:AlertBar x:Name="AlertBar" Theme="Standard" />
 			</StatusBarItem>
 		</StatusBar>
 	</Grid>

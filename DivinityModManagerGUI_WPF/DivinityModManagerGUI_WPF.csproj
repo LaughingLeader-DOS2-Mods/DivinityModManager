@@ -59,9 +59,6 @@
     <Reference Include="AdonisUI.ClassicTheme, Version=1.12.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AdonisUI.ClassicTheme.1.12.1\lib\net45\AdonisUI.ClassicTheme.dll</HintPath>
     </Reference>
-    <Reference Include="AlertBarWpf, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AlertBarWpf.1.0.4\lib\AlertBarWpf.dll</HintPath>
-    </Reference>
     <Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
       <HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
     </Reference>
@@ -158,6 +155,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Controls\AlertBar.xaml.cs">
+      <DependentUpon>AlertBar.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\AutoGrayableImage.cs" />
     <Compile Include="Controls\CircleDecorator.cs" />
     <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
@@ -189,6 +189,10 @@
     <Compile Include="Views\VerticalModLayout.xaml.cs">
       <DependentUpon>VerticalModLayout.xaml</DependentUpon>
     </Compile>
+    <Page Include="Controls\AlertBar.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\HyperlinkText.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -361,6 +365,26 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="DivinityModManager.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\AlertBar_Close.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\AlertBar_Close_Hover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\AlertBar_Danger_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\AlertBar_Information_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\AlertBar_Success_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\AlertBar_Warning_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

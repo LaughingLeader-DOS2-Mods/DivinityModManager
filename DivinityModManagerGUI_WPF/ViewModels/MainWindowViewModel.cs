@@ -85,8 +85,6 @@ namespace DivinityModManager.ViewModels
 
 		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData();
 
-		private SourceList<DivinityProfileData> profiles = new SourceList<DivinityProfileData>();
-
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
@@ -255,6 +253,14 @@ namespace DivinityModManager.ViewModels
 		{
 			get => mainProgressToken;
 			set { this.RaiseAndSetIfChanged(ref mainProgressToken, value); }
+		}
+
+		private bool canCancelProgress = true;
+
+		public bool CanCancelProgress
+		{
+			get => canCancelProgress;
+			set { this.RaiseAndSetIfChanged(ref canCancelProgress, value); }
 		}
 
 		private MainWindow view;
@@ -731,7 +737,7 @@ namespace DivinityModManager.ViewModels
 			{
 				Trace.WriteLine($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
 
-				var profiles = DivinityModDataLoader.LoadProfileData(PathwayData.DocumentsProfilesPath);
+				var profiles = await DivinityModDataLoader.LoadProfileDataAsync(PathwayData.DocumentsProfilesPath);
 				Trace.WriteLine($"Loaded '{profiles.Count}' profiles.");
 				return profiles;
 			}
@@ -943,32 +949,46 @@ namespace DivinityModManager.ViewModels
 				lastOrderIndex = SelectedModOrderIndex;
 			}
 
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
+
 			var loadedMods = await LoadModsAsync();
 			IncreaseMainProgressValue(taskStepAmount);
 
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
+			var loadedWorkshopMods = await LoadWorkshopModsAsync();
+			IncreaseMainProgressValue(taskStepAmount);
+
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading profiles...");
 			var loadedProfiles = await LoadProfilesAsync();
 			IncreaseMainProgressValue(taskStepAmount);
 
-			var loadedWorkshopMods = await LoadWorkshopModsAsync();
-			IncreaseMainProgressValue(taskStepAmount);
+			var selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);
 
 			RxApp.MainThreadScheduler.Schedule(_ =>
 			{
 				mods.AddOrUpdate(loadedMods);
-				profiles.AddRange(loadedProfiles);
 				workshopMods.AddOrUpdate(loadedWorkshopMods);
+				Profiles.AddRange(loadedProfiles);
 
-				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(PathwayData.DocumentsProfilesPath);
-				if (!String.IsNullOrWhiteSpace(selectedUUID))
+				if (!String.IsNullOrWhiteSpace(selectedProfileUUID))
 				{
-					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
+					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedProfileUUID));
 					if (index > -1)
 					{
 						SelectedProfileIndex = index;
-						Debug_TraceProfileModOrder(Profiles[index]);
+					}
+					else
+					{
+						SelectedProfileIndex = 0;
+						Trace.WriteLine($"Profile '{selectedProfileUUID}' not found {Profiles.Count}/{loadedProfiles.Count}.");
 					}
 				}
+				else
+				{
+					SelectedProfileIndex = 0;
+				}
 
+				MainProgressWorkText = "Building mod order list...";
 				BuildModOrderList();
 
 				if (lastActiveOrder != null)
@@ -980,24 +1000,28 @@ namespace DivinityModManager.ViewModels
 				
 				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
 
+				MainProgressWorkText = "Checking for mod updates...";
 				CheckForModUpdates();
-
-				Refreshing = false;
-
-				OnMainProgressComplete();
 			});
 
 			IncreaseMainProgressValue(taskStepAmount);
 
 			await ctrl.Yield();
+
+			RxApp.MainThreadScheduler.Schedule(_ =>
+			{
+				Refreshing = false;
+				OnMainProgressComplete();
+			});
+
 			return Disposable.Empty;
 		}
 
 		public void RefreshAsync_Start()
 		{
 			MainProgressTitle = "Refreshing...";
-			MainProgressWorkText = "";
 			MainProgressValue = 0d;
+			CanCancelProgress = false;
 			MainProgressIsActive = true;
 			Refreshing = true;
 			mods.Clear();
@@ -1205,7 +1229,10 @@ namespace DivinityModManager.ViewModels
 				MainProgressToken.Dispose();
 				MainProgressToken = null;
 			}
-			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(500), _ => MainProgressIsActive = false);
+			RxApp.MainThreadScheduler.Schedule(_ => {
+				MainProgressIsActive = false;
+				CanCancelProgress = true;
+			});
 		}
 
 		private void ExportLoadOrderToArchive_Start()
@@ -1616,6 +1643,7 @@ namespace DivinityModManager.ViewModels
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 
+			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress);
 			CancelMainProgressCommand = ReactiveCommand.Create(() =>
 			{
 				if (MainProgressToken != null && MainProgressToken.Token.CanBeCanceled)
@@ -1623,7 +1651,7 @@ namespace DivinityModManager.ViewModels
 					MainProgressToken.Token.Register(() => { MainProgressIsActive = false; });
 					MainProgressToken.Cancel();
 				}
-			});
+			}, canCancelProgress);
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
 			RefreshCommand = ReactiveCommand.Create(RefreshAsync_Start, canRefreshObservable);

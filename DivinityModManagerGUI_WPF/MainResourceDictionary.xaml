@@ -562,7 +562,8 @@
 							HorizontalAlignment="Center"
 							VerticalAlignment="Center"
 							Command="{Binding CancelMainProgressCommand}"
-							Content="Cancel" />
+							Content="Cancel"
+							Visibility="{Binding CanCancelProgress, Converter={StaticResource BoolToVisibilityConverter}}" />
 					</Grid>
 				</DataTemplate>
 			</Setter.Value>
@@ -570,7 +571,8 @@
 		<Setter Property="OverlayStyle">
 			<Setter.Value>
 				<Style TargetType="Rectangle">
-					<Setter Property="Fill" Value="#ffffeeee" />
+					<Setter Property="Fill" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
+					<Setter Property="Opacity" Value="0.75" />
 				</Style>
 			</Setter.Value>
 		</Setter>
@@ -578,6 +580,7 @@
 			<Setter.Value>
 				<Style BasedOn="{StaticResource {x:Type ProgressBar}}" TargetType="ProgressBar">
 					<Setter Property="Visibility" Value="Collapsed" />
+					<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBrush}}" />
 				</Style>
 			</Setter.Value>
 		</Setter>
@@ -614,23 +617,14 @@
 										VerticalAlignment="Stretch">
 										<Border
 											Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}"
+											BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer4InteractionBorderBrush}}"
 											BorderThickness="1"
 											CornerRadius="2">
-											<Border.BorderBrush>
-												<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-													<GradientStop Offset="0" Color="#FFA3AEB9" />
-													<GradientStop Offset="0.375" Color="#FF8399A9" />
-													<GradientStop Offset="0.375" Color="#FF718597" />
-													<GradientStop Offset="1" Color="#FF617584" />
-												</LinearGradientBrush>
-											</Border.BorderBrush>
-											<Border Margin="1" CornerRadius="1.5">
-												<Border.Background>
-													<LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-														<GradientStop Offset="0.02" Color="#FFF6F8F9" />
-														<GradientStop Offset="0.996" Color="#FFB8B8B8" />
-													</LinearGradientBrush>
-												</Border.Background>
+
+											<Border
+												Margin="1"
+												Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}"
+												CornerRadius="1.5">
 												<Grid x:Name="_grid" MinWidth="150">
 													<Grid.RowDefinitions>
 														<RowDefinition />

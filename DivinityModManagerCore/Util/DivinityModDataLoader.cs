@@ -13,6 +13,7 @@ using System.Resources;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace DivinityModManager.Util
 {
@@ -569,6 +570,149 @@ namespace DivinityModManager.Util
 			return profiles;
 		}
 
+		public static async Task<List<DivinityProfileData>> LoadProfileDataAsync(string profilePath)
+		{
+			List<DivinityProfileData> profiles = new List<DivinityProfileData>();
+			if (Directory.Exists(profilePath))
+			{
+				var profileDirectories = Directory.EnumerateDirectories(profilePath);
+				foreach (var folder in profileDirectories)
+				{
+					string displayName = Path.GetFileName(folder);
+					string storedDisplayedName = displayName;
+					string profileUUID = "";
+
+					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
+					var profileFile = Path.Combine(folder, "profile.lsb");
+					if (File.Exists(profileFile))
+					{
+						var profileRes = await LoadResourceAsync(profileFile, LSLib.LS.Enums.ResourceFormat.LSB);
+						if (profileRes != null && profileRes.Regions.TryGetValue("PlayerProfile", out var region))
+						{
+							if (region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
+							{
+								storedDisplayedName = (string)profileDisplayNameAtt.Value;
+							}
+							if (region.Attributes.TryGetValue("PlayerProfileID", out var profileIdAtt))
+							{
+								profileUUID = (string)profileIdAtt.Value;
+							}
+						}
+					}
+
+					var profileData = new DivinityProfileData()
+					{
+						Name = displayName,
+						ProfileName = storedDisplayedName,
+						UUID = profileUUID,
+						Folder = Path.GetFullPath(folder)
+					};
+
+					var modSettingsFile = Path.Combine(folder, "modsettings.lsx");
+					if (File.Exists(modSettingsFile))
+					{
+						Resource modSettingsRes = null;
+						try
+						{
+							modSettingsRes = await LoadResourceAsync(modSettingsFile, LSLib.LS.Enums.ResourceFormat.LSX);
+						}
+						catch (Exception ex)
+						{
+							Trace.WriteLine($"Error reading '{modSettingsFile}': '{ex.ToString()}'");
+						}
+
+						if (modSettingsRes != null && modSettingsRes.Regions.TryGetValue("ModuleSettings", out var region))
+						{
+							if (region.Children.TryGetValue("ModOrder", out var modOrderRootNode))
+							{
+								var modOrderChildrenRoot = modOrderRootNode.FirstOrDefault();
+								if (modOrderChildrenRoot != null)
+								{
+									var modOrder = modOrderChildrenRoot.Children.Values.FirstOrDefault();
+									if (modOrder != null)
+									{
+										foreach (var c in modOrder)
+										{
+											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
+											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											{
+												var uuid = (string)attribute.Value;
+												if (!string.IsNullOrEmpty(uuid))
+												{
+													profileData.ModOrder.Add(uuid);
+												}
+											}
+										}
+									}
+								}
+							}
+
+							if (region.Children.TryGetValue("Mods", out var modListRootNode))
+							{
+								var modListChildrenRoot = modListRootNode.FirstOrDefault();
+								if (modListChildrenRoot != null)
+								{
+									var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
+									if (modList != null)
+									{
+										foreach (var c in modList)
+										{
+											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
+											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											{
+												var uuid = (string)attribute.Value;
+												if (!string.IsNullOrEmpty(uuid))
+												{
+													profileData.ActiveMods.Add(uuid);
+												}
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+
+					profiles.Add(profileData);
+				}
+			}
+			return profiles;
+		}
+
+		public static async Task<Resource> LoadResourceAsync(string path, LSLib.LS.Enums.ResourceFormat resourceFormat, CancellationToken? token = null)
+		{
+			return await Task.Run(() =>
+			{
+				try
+				{
+					var resource = LSLib.LS.ResourceUtils.LoadResource(path, resourceFormat);
+					return resource;
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error loading '{path}': {ex.ToString()}");
+					return null;
+				}
+			});
+		}
+
+		public static async Task<Resource> LoadResourceAsync(System.IO.Stream stream, LSLib.LS.Enums.ResourceFormat resourceFormat, CancellationToken? token = null)
+		{
+			return await Task.Run(() =>
+			{
+				try
+				{
+					var resource = LSLib.LS.ResourceUtils.LoadResource(stream, resourceFormat);
+					return resource;
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error loading resource: {ex.ToString()}");
+					return null;
+				}
+			});
+		}
+
 		public static string GetSelectedProfileUUID(string profilePath)
 		{
 			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
@@ -584,6 +728,28 @@ namespace DivinityModManager.Util
 					if (region.Attributes.TryGetValue("ActiveProfile", out var att))
 					{
 						Trace.WriteLine($"ActiveProfile | '{att.Type} {att.Value}'");
+						activeProfileUUID = (string)att.Value;
+					}
+				}
+			}
+			return activeProfileUUID;
+		}
+
+		public static async Task<string> GetSelectedProfileUUIDAsync(string profilePath)
+		{
+			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
+			string activeProfileUUID = "";
+			if (File.Exists(playerprofilesFile))
+			{
+				Trace.WriteLine($"Loading playerprofiles.lsb at '{playerprofilesFile}'");
+				var res = await LoadResourceAsync(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+				if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
+				{
+					//Trace.WriteLine($"ActiveProfile | Getting root node '{String.Join(";", region.Attributes.Keys)}'");
+
+					if (region.Attributes.TryGetValue("ActiveProfile", out var att))
+					{
+						Trace.WriteLine($"ActiveProfile | '{att.Value}'");
 						activeProfileUUID = (string)att.Value;
 					}
 				}

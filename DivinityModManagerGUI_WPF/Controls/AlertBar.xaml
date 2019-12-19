@@ -13,12 +13,11 @@
 		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
 	</UserControl.Style>
 	<UserControl.Resources>
-		<BitmapImage x:Key="AlertBar_Close" UriSource="pack://application:,,,/Resources/AlertBar_Close.png" />
-		<BitmapImage x:Key="AlertBar_Close_Hover" UriSource="pack://application:,,,/Resources/AlertBar_Close_Hover.png" />
-		<BitmapImage x:Key="AlertBar_Danger" UriSource="pack://application:,,,/Resources/AlertBar_Danger_16x.png" />
-		<BitmapImage x:Key="AlertBar_Information" UriSource="pack://application:,,,/Resources/AlertBar_Information_16x.png" />
-		<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/AlertBar_Success_16x.png" />
-		<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/AlertBar_Warning_16x.png" />
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
 	</UserControl.Resources>
 	<UserControl.Triggers>
 		<EventTrigger RoutedEvent="local:AlertBar.Show">
@@ -73,10 +72,10 @@
 					MouseUp="Image_MouseUp">
 					<Image.Style>
 						<Style>
-							<Setter Property="Image.Source" Value="{StaticResource AlertBar_Close}" />
+							<Setter Property="Image.Source" Value="../Resources/AlertBar_Close.png" />
 							<Style.Triggers>
 								<Trigger Property="Image.IsMouseOver" Value="True">
-									<Setter Property="Image.Source" Value="{StaticResource AlertBar_Close_Hover}" />
+									<Setter Property="Image.Source" Value="../Resources/AlertBar_Close_Hover.png" />
 								</Trigger>
 							</Style.Triggers>
 						</Style>
@@ -117,10 +116,10 @@
 							MouseUp="Image_MouseUp">
 							<Image.Style>
 								<Style>
-									<Setter Property="Image.Source" Value="{StaticResource AlertBar_Close}" />
+									<Setter Property="Image.Source" Value="../Resources/AlertBar_Close.png" />
 									<Style.Triggers>
 										<Trigger Property="Image.IsMouseOver" Value="True">
-											<Setter Property="Image.Source" Value="{StaticResource AlertBar_Close_Hover}" />
+											<Setter Property="Image.Source" Value="../Resources/AlertBar_Close_Hover.png" />
 										</Trigger>
 									</Style.Triggers>
 								</Style>

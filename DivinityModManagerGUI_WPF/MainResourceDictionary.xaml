@@ -35,6 +35,13 @@
 	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/ZipFile_16x.png" />
 	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/ZipFileAs_16x.png" />
 
+	<BitmapImage x:Key="AlertBar_Close" UriSource="pack://application:,,,/Resources/AlertBar_Close.png" />
+	<BitmapImage x:Key="AlertBar_Close_Hover" UriSource="pack://application:,,,/Resources/AlertBar_Close_Hover.png" />
+	<BitmapImage x:Key="AlertBar_Danger" UriSource="pack://application:,,,/Resources/AlertBar_Danger_16x.png" />
+	<BitmapImage x:Key="AlertBar_Information" UriSource="pack://application:,,,/Resources/AlertBar_Information_16x.png" />
+	<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/AlertBar_Success_16x.png" />
+	<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/AlertBar_Warning_16x.png" />
+
 	<Style x:Key="IconButtonStyle" TargetType="Button">
 		<Setter Property="Width" Value="24" />
 		<Setter Property="Height" Value="24" />

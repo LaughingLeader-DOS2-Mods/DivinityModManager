@@ -21,7 +21,7 @@
 	Width="1400"
 	Height="800"
 	TitleBarBackground="#4e38c9"
-	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
+	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
 	mc:Ignorable="d">
 	<Window.Style>
 		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />

@@ -360,8 +360,8 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private Brush darkThemeWindowBG = new SolidColorBrush(Color.FromRgb(78, 56, 201));
-		private Brush lightThemeWindowBG = new SolidColorBrush(Color.FromRgb(142, 125, 239));
+		//private Brush darkThemeWindowBG = new SolidColorBrush(Color.FromRgb(78, 56, 201));
+		//private Brush lightThemeWindowBG = new SolidColorBrush(Color.FromRgb(142, 125, 239));
 
 		private bool LoadSettings()
 		{
@@ -430,14 +430,14 @@ namespace DivinityModManager.ViewModels
 				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 				SaveSettings();
 
-				if (b)
-				{
-					view.TitleBarBackground = darkThemeWindowBG;
-				}
-				else
-				{
-					view.TitleBarBackground = lightThemeWindowBG;
-				}
+				//if (b)
+				//{
+				//	view.TitleBarBackground = darkThemeWindowBG;
+				//}
+				//else
+				//{
+				//	view.TitleBarBackground = lightThemeWindowBG;
+				//}
 			}).DisposeWith(Settings.Disposables);
 
 			if (Settings.LogEnabled)

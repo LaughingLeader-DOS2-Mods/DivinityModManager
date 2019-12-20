@@ -262,27 +262,27 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\AddItem_16x.png">
+    <Resource Include="Resources\Icons\AddItem_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\ExportData_16x.png">
+    <Resource Include="Resources\Icons\ExportData_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Save_16x.png">
+    <Resource Include="Resources\Icons\Save_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\SaveAs_16x.png">
+    <Resource Include="Resources\Icons\SaveAs_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\SaveGrey_16x.png">
+    <Resource Include="Resources\Icons\SaveGrey_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -302,61 +302,61 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Folder_16x.png">
+    <Resource Include="Resources\Icons\Folder_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\OpenFile_16x.png">
+    <Resource Include="Resources\Icons\OpenFile_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\OpenFolder_16x.png">
+    <Resource Include="Resources\Icons\OpenFolder_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\Refresh_16x.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\ExpandChevronDown_16x.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\ExpandChevronDown_lightGray_16x.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\ExpandChevronUp_16x.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Resources\ExpandChevronUp_lightGrey_16x.png">
+    <Resource Include="Resources\Icons\Refresh_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\DivinityOS2_EoCApp_16x.png">
+    <Resource Include="Resources\Icons\ExpandChevronDown_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronDown_lightGray_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronUp_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronUp_lightGrey_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Steam_16x.png">
+    <Resource Include="Resources\Icons\DivinityOS2_EoCApp_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Kofi_16x.png">
+    <Resource Include="Resources\Icons\Steam_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\Github_16x.png">
+    <Resource Include="Resources\Icons\Kofi_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\ExportScript_16x.png">
+    <Resource Include="Resources\Icons\Github_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\ZipFileAs_16x.png">
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\ExportScript_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\ZipFile_16x.png">
+    <Resource Include="Resources\Icons\ZipFileAs_16x.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ZipFile_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
@@ -367,27 +367,27 @@
     <Resource Include="DivinityModManager.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\AlertBar_Close.png">
+    <Resource Include="Resources\Icons\AlertBar_Close.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\AlertBar_Close_Hover.png">
+    <Resource Include="Resources\Icons\AlertBar_Close_Hover.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\AlertBar_Danger_16x.png">
+    <Resource Include="Resources\Icons\AlertBar_Danger_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\AlertBar_Information_16x.png">
+    <Resource Include="Resources\Icons\AlertBar_Information_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\AlertBar_Success_16x.png">
+    <Resource Include="Resources\Icons\AlertBar_Success_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="Resources\AlertBar_Warning_16x.png">
+    <Resource Include="Resources\Icons\AlertBar_Warning_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Resources\DivinityEngineGlasses_64x.png">
+    <Resource Include="Resources\Icons\DivinityEngineGlasses_64x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>

@@ -16,33 +16,33 @@
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 	<conv:StringToUriConverter x:Key="StringToUriConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
-	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Save_16x.png" />
-	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/SaveAs_16x.png" />
-	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/SaveGrey_16x.png" />
-	<BitmapImage x:Key="AddItemImage" UriSource="pack://application:,,,/Resources/AddItem_16x.png" />
-	<BitmapImage x:Key="ExportDataImage" UriSource="pack://application:,,,/Resources/ExportData_16x.png" />
-	<BitmapImage x:Key="OpenFolderImage" UriSource="pack://application:,,,/Resources/OpenFolder_16x.png" />
-	<BitmapImage x:Key="RefreshImage" UriSource="pack://application:,,,/Resources/Refresh_16x.png" />
-	<BitmapImage x:Key="ExpandDownImage" UriSource="pack://application:,,,/Resources/ExpandChevronDown_16x.png" />
-	<BitmapImage x:Key="ExpandDownImageDisabled" UriSource="pack://application:,,,/Resources/ExpandChevronDown_lightGray_16x.png" />
-	<BitmapImage x:Key="ExpandUpImage" UriSource="pack://application:,,,/Resources/ExpandChevronUp_16x.png" />
-	<BitmapImage x:Key="ExpandUpImageDisabled" UriSource="pack://application:,,,/Resources/ExpandChevronUp_lightGrey_16x.png" />
-	<BitmapImage x:Key="OpenDOS2Image" UriSource="pack://application:,,,/Resources/DivinityOS2_EoCApp_16x.png" />
-	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Steam_16x.png" />
-	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Kofi_16x.png" />
-	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Github_16x.png" />
-	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/ExportScript_16x.png" />
-	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/ZipFile_16x.png" />
-	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/ZipFileAs_16x.png" />
+	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Icons/Save_16x.png" />
+	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/Icons/SaveAs_16x.png" />
+	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/Icons/SaveGrey_16x.png" />
+	<BitmapImage x:Key="AddItemImage" UriSource="pack://application:,,,/Resources/Icons/AddItem_16x.png" />
+	<BitmapImage x:Key="ExportDataImage" UriSource="pack://application:,,,/Resources/Icons/ExportData_16x.png" />
+	<BitmapImage x:Key="OpenFolderImage" UriSource="pack://application:,,,/Resources/Icons/OpenFolder_16x.png" />
+	<BitmapImage x:Key="RefreshImage" UriSource="pack://application:,,,/Resources/Icons/Refresh_16x.png" />
+	<BitmapImage x:Key="ExpandDownImage" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronDown_16x.png" />
+	<BitmapImage x:Key="ExpandDownImageDisabled" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronDown_lightGray_16x.png" />
+	<BitmapImage x:Key="ExpandUpImage" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronUp_16x.png" />
+	<BitmapImage x:Key="ExpandUpImageDisabled" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronUp_lightGrey_16x.png" />
+	<BitmapImage x:Key="OpenDOS2Image" UriSource="pack://application:,,,/Resources/Icons/DivinityOS2_EoCApp_16x.png" />
+	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Icons/Steam_16x.png" />
+	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Icons/Kofi_16x.png" />
+	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Icons/Github_16x.png" />
+	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/Icons/ExportScript_16x.png" />
+	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/Icons/ZipFile_16x.png" />
+	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/Icons/ZipFileAs_16x.png" />
 
-	<BitmapImage x:Key="DivinityEngine" UriSource="pack://application:,,,/Resources/DivinityEngineGlasses_64x.png" />
+	<BitmapImage x:Key="DivinityEngine" UriSource="pack://application:,,,/Resources/Icons/DivinityEngineGlasses_64x.png" />
 
-	<BitmapImage x:Key="AlertBar_Close" UriSource="pack://application:,,,/Resources/AlertBar_Close.png" />
-	<BitmapImage x:Key="AlertBar_Close_Hover" UriSource="pack://application:,,,/Resources/AlertBar_Close_Hover.png" />
-	<BitmapImage x:Key="AlertBar_Danger" UriSource="pack://application:,,,/Resources/AlertBar_Danger_16x.png" />
-	<BitmapImage x:Key="AlertBar_Information" UriSource="pack://application:,,,/Resources/AlertBar_Information_16x.png" />
-	<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/AlertBar_Success_16x.png" />
-	<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/AlertBar_Warning_16x.png" />
+	<BitmapImage x:Key="AlertBar_Close" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Close.png" />
+	<BitmapImage x:Key="AlertBar_Close_Hover" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Close_Hover.png" />
+	<BitmapImage x:Key="AlertBar_Danger" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Danger_16x.png" />
+	<BitmapImage x:Key="AlertBar_Information" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Information_16x.png" />
+	<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Success_16x.png" />
+	<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Warning_16x.png" />
 
 	<Style x:Key="IconButtonStyle" TargetType="Button">
 		<Setter Property="Width" Value="24" />

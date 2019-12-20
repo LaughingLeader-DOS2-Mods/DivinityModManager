@@ -72,10 +72,10 @@
 					MouseUp="Image_MouseUp">
 					<Image.Style>
 						<Style>
-							<Setter Property="Image.Source" Value="../Resources/AlertBar_Close.png" />
+							<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close.png" />
 							<Style.Triggers>
 								<Trigger Property="Image.IsMouseOver" Value="True">
-									<Setter Property="Image.Source" Value="../Resources/AlertBar_Close_Hover.png" />
+									<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close_Hover.png" />
 								</Trigger>
 							</Style.Triggers>
 						</Style>
@@ -116,10 +116,10 @@
 							MouseUp="Image_MouseUp">
 							<Image.Style>
 								<Style>
-									<Setter Property="Image.Source" Value="../Resources/AlertBar_Close.png" />
+									<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close.png" />
 									<Style.Triggers>
 										<Trigger Property="Image.IsMouseOver" Value="True">
-											<Setter Property="Image.Source" Value="../Resources/AlertBar_Close_Hover.png" />
+											<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close_Hover.png" />
 										</Trigger>
 									</Style.Triggers>
 								</Style>

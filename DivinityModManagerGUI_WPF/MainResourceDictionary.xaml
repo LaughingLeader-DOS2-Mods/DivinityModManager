@@ -6,7 +6,6 @@
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
-	xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.WPF;assembly=HtmlRenderer.WPF"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
@@ -35,6 +34,8 @@
 	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/ExportScript_16x.png" />
 	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/ZipFile_16x.png" />
 	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/ZipFileAs_16x.png" />
+
+	<BitmapImage x:Key="DivinityEngine" UriSource="pack://application:,,,/Resources/DivinityEngineGlasses_64x.png" />
 
 	<BitmapImage x:Key="AlertBar_Close" UriSource="pack://application:,,,/Resources/AlertBar_Close.png" />
 	<BitmapImage x:Key="AlertBar_Close_Hover" UriSource="pack://application:,,,/Resources/AlertBar_Close_Hover.png" />

@@ -31,6 +31,7 @@ using SharpCompress.Writers;
 using SharpCompress.Common;
 using System.Text.RegularExpressions;
 using AdonisUI;
+using System.Windows.Media;
 
 namespace DivinityModManager.ViewModels
 {
@@ -359,6 +360,9 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private Brush darkThemeWindowBG = new SolidColorBrush(Color.FromRgb(78, 56, 201));
+		private Brush lightThemeWindowBG = new SolidColorBrush(Color.FromRgb(142, 125, 239));
+
 		private bool LoadSettings()
 		{
 			if (Settings != null)
@@ -421,10 +425,19 @@ namespace DivinityModManager.ViewModels
 				ToggleLogging(logEnabled);
 			}).DisposeWith(Disposables);
 
-			this.WhenAnyValue(x => x.Settings.DarkThemeEnabled).Throttle(TimeSpan.FromMilliseconds(250)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+			this.WhenAnyValue(x => x.Settings.DarkThemeEnabled).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
 			{
 				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 				SaveSettings();
+
+				if (b)
+				{
+					view.TitleBarBackground = darkThemeWindowBG;
+				}
+				else
+				{
+					view.TitleBarBackground = lightThemeWindowBG;
+				}
 			}).DisposeWith(Settings.Disposables);
 
 			if (Settings.LogEnabled)

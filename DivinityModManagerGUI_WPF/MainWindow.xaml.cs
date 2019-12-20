@@ -283,7 +283,6 @@ namespace DivinityModManager.Views
 			if(lblMessage != null)
 			{
 				Trace.WriteLine(lblMessage.Text);
-				Trace.WriteLine($"Alert TextBlock Foreground {lblMessage.Foreground}");
 			}
 		}
 

@@ -245,7 +245,7 @@
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
-							<ColumnDefinition Width="*" />
+							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
 						<Grid.Resources>
 							<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
@@ -285,12 +285,21 @@
 								<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
 							</Button>
 						</StackPanel>
-						<Rectangle Grid.Column="1" Style="{StaticResource VerticalSeparator}" />
+						<Rectangle
+							Grid.Column="1"
+							Margin="8,0,6,0"
+							Style="{StaticResource VerticalSeparator}" />
 						<StackPanel Grid.Column="2" Orientation="Horizontal">
-							<TextBlock
-								Margin="0,0,6,0"
-								VerticalAlignment="Center"
-								Text="Export" />
+							<StackPanel.Resources>
+								<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+									<Setter Property="VerticalAlignment" Value="Center" />
+									<Setter Property="Margin" Value="2,0,2,0" />
+								</Style>
+								<Style BasedOn="{StaticResource VerticalSeparator}" TargetType="Rectangle">
+									<Setter Property="Margin" Value="8,0,6,0" />
+								</Style>
+							</StackPanel.Resources>
+							<TextBlock Text="Export" />
 							<Button
 								x:Name="ExportToModSettingsButton"
 								Command="{Binding ExportOrderCommand}"
@@ -309,16 +318,16 @@
 								ToolTip="Export Active Mods As...">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
-							<Rectangle Style="{StaticResource VerticalSeparator}" />
-							<Label Content="Refresh" />
+							<Rectangle />
+							<TextBlock Text="Refresh" />
 							<Button
 								x:Name="RefreshButton"
 								Command="{Binding RefreshCommand}"
 								ToolTip="Refresh Mods and Workshop Updates">
 								<controls:AutoGrayableImage Source="{StaticResource RefreshImage}" />
 							</Button>
-							<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
-							<Label Content="Shortcuts" />
+							<Rectangle />
+							<TextBlock Text="Shortcuts" />
 							<Button
 								x:Name="OpenModsFolderButton"
 								Command="{Binding OpenModsFolderCommand}"
@@ -337,8 +346,8 @@
 								ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
 								<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
 							</Button>
-							<Rectangle Margin="16,0,8,0" Style="{StaticResource VerticalSeparator}" />
-							<Label Content="Support" />
+							<Rectangle />
+							<TextBlock Text="Support" />
 							<Button
 								x:Name="OpenDonationPageButton"
 								Command="{Binding OpenDonationPageCommand}"

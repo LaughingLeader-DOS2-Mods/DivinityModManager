@@ -3,6 +3,12 @@ LaughingLeader's Divinity Mod Manager
 
 A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition.
 
+# Setup
+
+The Divinity Mod Manager is portable, so grab a release here and extract it wherever you wish:
+
+[https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases)
+
 # Current Features:
 
 * Reorganize mod load orders with a quick drag-and-drop interface. Allows reordering multiple mods at once.
@@ -11,11 +17,6 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Export load order mods to zip files (including editor mods), for easier sharing of playthrough mods between friends.
 * View pending Steam Workshop mod updates and update with a few clicks.
 * Dark & Light themes.
-
-# Installation
-
-The Divinity Mod Manager is portable, so grab a release here (not the zips with Source in the name), and extract it wherever you want:
-[https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases)
 
 # Links
 

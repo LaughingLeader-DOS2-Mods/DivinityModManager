@@ -41,20 +41,32 @@ namespace DivinityModManager.Views
 
 		object IViewFor.ViewModel { get; set; }
 
+		private MainWindowViewModel _lastVM;
+
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
 
 			this.WhenActivated((d) =>
 			{
-				ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
-				ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
+				_lastVM = ViewModel;
+
+				if(ViewModel != null)
+				{
+					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
+					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
+				}
 
 				// when the view model gets deactivated
 				Disposable.Create(() =>
 				{
-					ViewModel.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
-					ViewModel.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
+					if(_lastVM != null)
+					{
+						_lastVM.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
+						_lastVM.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
+
+						_lastVM = null;
+					}
 				}).DisposeWith(d);
 			});
 		}

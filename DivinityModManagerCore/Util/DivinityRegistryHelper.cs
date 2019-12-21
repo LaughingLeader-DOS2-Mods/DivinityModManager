@@ -15,6 +15,11 @@ namespace DivinityModManager.Util
 	{
 		const string REG_Steam_32 = @"SOFTWARE\Valve\Steam";
 		const string REG_Steam_64 = @"SOFTWARE\Wow6432Node\Valve\Steam";
+		const string REG_Steam_32_DOS2 = @"SOFTWARE\Valve\Steam\Apps\435150";
+		const string REG_Steam_64_DOS2 = @"SOFTWARE\Wow6432Node\Valve\Steam\Apps\435150";
+		const string REG_GOG_32_DOS2 = @"SOFTWARE\GOG.com\Games\1584823040";
+		const string REG_GOG_64_DOS2 = @"SOFTWARE\Wow6432Node\GOG.com\Games\1584823040";
+
 		const string PATH_Steam_WorkshopFolder = @"steamapps/workshop";
 		const string PATH_Steam_LibraryFile = @"steamapps/libraryfolders.vdf";
 		const string PATH_Steam_DivinityOriginalSin2 = @"steamapps/common/Divinity Original Sin 2";
@@ -109,6 +114,21 @@ namespace DivinityModManager.Util
 			return "";
 		}
 
+		public static string GetGOGDOS2InstallPath()
+		{
+			RegistryKey reg = Registry.LocalMachine;
+			object installPath = GetKey(reg, REG_GOG_64_DOS2, "path");
+			if (installPath == null)
+			{
+				installPath = GetKey(reg, REG_GOG_32_DOS2, "path");
+			}
+			if (installPath != null)
+			{
+				return (string)installPath;
+			}
+			return "";
+		}
+
 		public static string GetDOS2Path()
 		{
 			if (LastSteamInstallPath != "")
@@ -122,7 +142,7 @@ namespace DivinityModManager.Util
 				{
 					Trace.WriteLine($"Found Divinity Original Sin 2 at '{folder}'.");
 					lastDivinityOriginalSin2Path = folder;
-					return folder;
+					return lastDivinityOriginalSin2Path;
 				}
 				else
 				{
@@ -168,6 +188,15 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
+
+			string gogGamePath = GetGOGDOS2InstallPath();
+			if(!String.IsNullOrEmpty(gogGamePath) && Directory.Exists(gogGamePath))
+			{
+				lastDivinityOriginalSin2Path = gogGamePath;
+				Trace.WriteLine($"Found Divinity Original Sin 2 (GoG) install at '{lastDivinityOriginalSin2Path}'.");
+				return lastDivinityOriginalSin2Path;
+			}
+
 			return "";
 		}
 	}

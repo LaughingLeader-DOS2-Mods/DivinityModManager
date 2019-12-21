@@ -312,7 +312,7 @@
 							<Button
 								x:Name="ExportToModSettingsButton"
 								Command="{Binding ExportOrderCommand}"
-								ToolTip="Export Load Order to Game for the Current Profile">
+								ToolTip="Export Order to Game">
 								<controls:AutoGrayableImage Source="{StaticResource ExportScriptImage}" />
 							</Button>
 							<Button

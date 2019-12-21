@@ -25,7 +25,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<Style TargetType="Button">
+			<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
 				<Setter Property="Padding" Value="20,2" />
 				<Setter Property="Margin" Value="2,0,2,0" />
 			</Style>
@@ -33,6 +33,14 @@
 				<Setter Property="VerticalAlignment" Value="Center" />
 				<Setter Property="Orientation" Value="Horizontal" />
 				<Setter Property="Margin" Value="10" />
+			</Style>
+			<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+				<Setter Property="VerticalAlignment" Value="Center" />
+
+			</Style>
+			<Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox" />
+			<Style BasedOn="{StaticResource {x:Type CheckBox}}" TargetType="CheckBox">
+				<Setter Property="VerticalAlignment" Value="Center" />
 			</Style>
 		</ResourceDictionary>
 	</Window.Resources>
@@ -42,7 +50,10 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<StackPanel Margin="4" HorizontalAlignment="Left">
+		<StackPanel
+			Margin="4"
+			HorizontalAlignment="Left"
+			Orientation="Horizontal">
 			<Button
 				Command="{Binding SaveSettingsCommand}"
 				Style="{StaticResource IconButtonStyle}"
@@ -64,25 +75,25 @@
 			<TabItem Header="General">
 				<autogrid:AutoGrid
 					Margin="20"
-					ChildMargin="2"
+					ChildMargin="4"
 					ColumnCount="2"
 					Columns="auto,*"
 					RowCount="6"
 					RowHeight="*"
 					Rows="auto,auto,auto,auto,auto,auto">
-					<Label Content="Game Data Path:" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
+					<TextBlock Text="Game Data Path:" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<Label Content="Game Executable Path:" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
+					<TextBlock Text="Game Executable Path:" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<Label Content="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
+					<TextBlock Text="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
-					<Label Content="DOS2 Workshop Path:" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
+					<TextBlock Text="DOS2 Workshop Path:" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 					<controls:UnfocusableTextBox
 						x:Name="WorkshopPathTextbox"
 						VerticalAlignment="Center"
@@ -90,12 +101,12 @@
 						LostFocus="WorkshopPathTextbox_LostFocus"
 						Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<Label Content="Saved Load Orders Path:" ToolTip="The folder to save and load load orders to." />
+					<TextBlock Text="Saved Load Orders Path:" ToolTip="The folder to save and load load orders to." />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
 						TextAlignment="Left" />
-					<Label Content="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
+					<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
 			</TabItem>
@@ -108,7 +119,7 @@
 					RowCount="1"
 					RowHeight="*"
 					Rows="auto">
-					<Label Content="Enable Logging" ToolTip="Automatically save logs to _Logs." />
+					<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
 			</TabItem>

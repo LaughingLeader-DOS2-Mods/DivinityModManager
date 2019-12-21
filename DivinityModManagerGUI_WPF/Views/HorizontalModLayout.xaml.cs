@@ -45,28 +45,17 @@ namespace DivinityModManager.Views
 		{
 			InitializeComponent();
 
-			this.WhenActivated((disposables) =>
+			this.WhenActivated((d) =>
 			{
-				//ViewModel.OnLoaded += AutoSizeNameColumn_InactiveMods;
-				//ViewModel.OnRefreshed += AutoSizeNameColumn_InactiveMods;
-
 				ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
 				ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 
-				//this.WhenAnyValue(x => x.ViewModel.SelectedModOrderIndex).
-				//Throttle(TimeSpan.FromMilliseconds(25)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(_ =>
-				//{
-				//	AutoSizeNameColumn_ActiveMods();
-				//}).DisposeWith(disposables);
-
-				//this.WhenAnyValue(x => x.ViewModel.Refreshing, (r) => r == false).
-				//Throttle(TimeSpan.FromMilliseconds(25)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(_ =>
-				//{
-				//	RxApp.MainThreadScheduler.Schedule(() => AutoSizeNameColumn_InactiveMods());
-				//}).DisposeWith(disposables);
-
-				//ViewModel.ActiveMods.CollectionChanged += AutoSizeNameColumn_ActiveMods;
-				//ViewModel.InactiveMods.CollectionChanged += AutoSizeNameColumn_InactiveMods;
+				// when the view model gets deactivated
+				Disposable.Create(() =>
+				{
+					ViewModel.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
+					ViewModel.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
+				}).DisposeWith(d);
 			});
 		}
 
@@ -176,6 +165,7 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		// Source: https://stackoverflow.com/a/22420728
 		private static Size MeasureTextSize(string text, FontFamily fontFamily, FontStyle fontStyle,
 			FontWeight fontWeight, FontStretch fontStretch, double fontSize)
 		{

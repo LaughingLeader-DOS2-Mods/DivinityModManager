@@ -17,7 +17,7 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Reorganize mod load orders with a quick drag-and-drop interface. Allows reordering multiple mods at once.
   * View details about each mod, including the description and dependencies.
 * Save your mod load orders to external json files.
-* Export load order mods to zip files (including editor mods), for easier sharing of playthrough mods between friends.
+* Export load order mods to zip files (including editor mods), for easier sharing of a playthrough's mods between friends.
 * View pending Steam Workshop mod updates and update with a few clicks.
 * Dark and light theme support.
 

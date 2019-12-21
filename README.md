@@ -5,11 +5,12 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 
 # Setup
 
-Currently for Windows only, make sure you have [Microsoft .NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) installed.
-
-The Divinity Mod Manager is portable, so grab a release here and extract it wherever you wish:
-
-[https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases)
+1. Make sure you have [Microsoft .NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) installed
+2. [Grab the latest release.](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases/latest/download/DivinityModManager_Latest.zip)
+3. The Divinity Mod Manager is portable, so extract it wherever you wish.
+4. Upon opening the program, pathways to the game data and exe should be automatically detected. If this fails, you can manually set the pathways in Settings -> Preferences.
+5. Organize your active mods for a given profile, then click the first export button (Export Load Order to Game), or click File -> Export Order to Game, to export your active load order to the game.
+ [![Exporting Load Orders](https://i.imgur.com/evJ9ulQl.jpg)](https://i.imgur.com/evJ9ulQ.png)
 
 # Current Features:
 
@@ -22,6 +23,7 @@ The Divinity Mod Manager is portable, so grab a release here and extract it wher
 
 # Links
 
+* [Latest Release](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases/latest)
 * [Changelog](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/wiki/Changelog)
 * [Divinity: Original Sin 2](http://store.steampowered.com/app/435150/Divinity_Original_Sin_2/), a wonderful game from [Larian Studios](http://larian.com/)
 

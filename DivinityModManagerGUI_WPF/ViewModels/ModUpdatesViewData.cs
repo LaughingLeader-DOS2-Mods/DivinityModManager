@@ -43,7 +43,7 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref newAvailable, value); }
 		}
 
-		private bool updatesAvailable;
+		private bool updatesAvailable = false;
 
 		public bool UpdatesAvailable
 		{

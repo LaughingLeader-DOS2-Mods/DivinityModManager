@@ -39,7 +39,7 @@
 				<local:HorizontalModLayout />
 			</DataTemplate>
 			<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
-				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
+				<Setter Property="Background" Value="Transparent" />
 				<Setter Property="Template">
 					<Setter.Value>
 						<ControlTemplate TargetType="{x:Type Button}">
@@ -79,9 +79,10 @@
 									Padding="4,0"
 									HorizontalAlignment="Center"
 									VerticalAlignment="Center"
-									Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
-									Text="Updates:" />
-								<controls:CircleDecorator
+									Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
+									Text="Updates:"
+									TextAlignment="Center" />
+								<!--<controls:CircleDecorator
 									x:Name="RedUpdateBackground"
 									Grid.Column="1"
 									Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
@@ -90,41 +91,49 @@
 									BorderThickness="1">
 									<controls:CircleDecorator.Background>
 										<LinearGradientBrush>
-											<GradientStop Offset="0.0" Color="LightGray" />
-											<GradientStop Offset="1.0" Color="LightSlateGray" />
+											<GradientStop Offset="0.0" Color="{DynamicResource {x:Static adonisUI:Colors.WindowButtonHighlightColor}}" />
+											<GradientStop Offset="1.0" Color="{DynamicResource {x:Static adonisUI:Colors.WindowButtonInteractionColor}}" />
 										</LinearGradientBrush>
 									</controls:CircleDecorator.Background>
-									<Label
-										x:Name="UpdateCountTextBlock"
-										Padding="1"
-										HorizontalAlignment="Center"
-										VerticalAlignment="Center"
-										Content="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
-										FontFamily="Arial"
-										FontSize="9"
-										FontWeight="Bold"
-										Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}"
-										TextBlock.TextAlignment="Center" />
 									<controls:CircleDecorator.ToolTip>
 										<TextBlock>
 											<Run Text="Total Pending Updates:" />
 											<Run Text="{Binding ModUpdatesViewData.TotalUpdates}" /></TextBlock>
 									</controls:CircleDecorator.ToolTip>
-								</controls:CircleDecorator>
+								</controls:CircleDecorator>-->
+								<TextBlock
+									x:Name="UpdateCountTextBlock"
+									Grid.Column="1"
+									Padding="4,0"
+									HorizontalAlignment="Center"
+									VerticalAlignment="Center"
+									Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
+									Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
+									TextAlignment="Center">
+									<TextBlock.Effect>
+										<DropShadowEffect
+											BlurRadius="4"
+											Direction="330"
+											Opacity="0.5"
+											ShadowDepth="1"
+											Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+									</TextBlock.Effect>
+								</TextBlock>
 								<Image
 									x:Name="ExpandImage"
 									Grid.Column="3"
 									RenderOptions.BitmapScalingMode="Fant"
 									Source="{StaticResource ExpandDownImage}"
 									Stretch="Uniform"
-									StretchDirection="UpOnly" />
+									StretchDirection="UpOnly"
+									Visibility="{Binding ModUpdatesAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Hidden'}" />
 							</Grid>
 						</Button.Content>
 					</Button>
 				</StackPanel>
 				<DataTemplate.Triggers>
 					<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="True">
-						<Setter TargetName="RedUpdateBackground" Property="Background">
+						<!--<Setter TargetName="RedUpdateBackground" Property="Background">
 							<Setter.Value>
 								<LinearGradientBrush>
 									<GradientStop Offset="0.0" Color="IndianRed" />
@@ -132,18 +141,18 @@
 								</LinearGradientBrush>
 							</Setter.Value>
 						</Setter>
-						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="#FFEE3D3D" />
-						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
+						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="#FFEE3D3D" />-->
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ErrorBrush}}" />
 						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Bold" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesAvailable}" Value="False">
-						<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
-						<Setter TargetName="RedUpdateBackground" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />
-						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1InteractionForegroundBrush}}" />
+						<!--<Setter TargetName="RedUpdateBackground" Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
+						<Setter TargetName="RedUpdateBackground" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />-->
+						<Setter TargetName="UpdateCountTextBlock" Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.DisabledForegroundBrush}}" />
 						<Setter TargetName="UpdateCountTextBlock" Property="FontWeight" Value="Normal" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="True">
-						<Setter TargetName="UpdateViewPanel" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
+						<Setter TargetName="UpdateViewPanel" Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
 					</DataTrigger>
 					<DataTrigger Binding="{Binding ModUpdatesViewVisible}" Value="False">
 						<Setter TargetName="UpdateViewPanel" Property="Background" Value="Transparent" />

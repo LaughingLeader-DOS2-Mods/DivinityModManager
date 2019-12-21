@@ -169,6 +169,7 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
+    <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">

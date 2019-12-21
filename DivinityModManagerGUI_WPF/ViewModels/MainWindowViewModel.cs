@@ -1687,8 +1687,13 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private MainWindowExceptionHandler exceptionHandler;
+
 		public MainWindowViewModel() : base()
 		{
+			exceptionHandler = new MainWindowExceptionHandler(this);
+			RxApp.DefaultExceptionHandler = exceptionHandler;
+
 			Activator = new ViewModelActivator();
 
 			this.WhenActivated((CompositeDisposable disposables) =>

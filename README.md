@@ -20,3 +20,17 @@ The Divinity Mod Manager is portable, so grab a release here (not the zips with 
 # Links
 
 * [Changelog](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/wiki/Changelog)
+* [Divinity: Original Sin 2](http://store.steampowered.com/app/435150/Divinity_Original_Sin_2/), a wonderful game from [Larian Studios](http://larian.com/)
+
+# Support
+
+If you're feeling generous, an easy way to show support is by tipping me a coffee:
+
+[![Tip Me a Coffee](https://i.imgur.com/NkmwXff.png)](https://ko-fi.com/LaughingLeader)
+
+All coffee goes toward fueling future and current development efforts. Thanks!
+
+# Credits
+
+* Thanks to [Norbyte](https://github.com/Norbyte) for creating [LSLib](https://github.com/Norbyte/lslib), which allows various features of the manager (getting data from paks, reading lsb files, just to name a few).
+* [Dan Iorgulescu](https://www.artstation.com/daniorgulescu) (Concept Artist on Baldur's Gate III at Larian Studios) for the [beautiful key/box art](https://www.artstation.com/artwork/mV159) used for the app icon (Fane's head) as of 12/20/2019.

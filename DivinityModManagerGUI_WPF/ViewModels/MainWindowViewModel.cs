@@ -66,6 +66,15 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 			}
+
+			_viewModel.OnOrderChanged?.Invoke(_viewModel, null);
+		}
+
+		private MainWindowViewModel _viewModel;
+
+		public ModListDropHandler(MainWindowViewModel vm) : base()
+		{
+			_viewModel = vm;
 		}
 	}
 
@@ -1558,7 +1567,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public ModListDropHandler DropHandler { get; set; } = new ModListDropHandler();
+		public ModListDropHandler DropHandler { get; set; }
 
 		public void OnViewActivated(MainWindow parentView)
 		{
@@ -1693,6 +1702,8 @@ namespace DivinityModManager.ViewModels
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
 			RxApp.DefaultExceptionHandler = exceptionHandler;
+
+			this.DropHandler = new ModListDropHandler(this);
 
 			Activator = new ViewModelActivator();
 

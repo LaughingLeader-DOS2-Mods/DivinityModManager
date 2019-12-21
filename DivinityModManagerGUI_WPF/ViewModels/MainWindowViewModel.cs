@@ -17,6 +17,7 @@ using GongSolutions.Wpf.DragDrop;
 using System.Windows;
 using System.Windows.Controls;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using ReactiveUI.Legacy;
 using System.ComponentModel;
 using System.IO;
@@ -227,7 +228,7 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref mainProgressWorkText, value); }
 		}
 
-		private bool mainProgressIsActive = false;
+		private bool mainProgressIsActive = true;
 
 		public bool MainProgressIsActive
 		{
@@ -243,9 +244,12 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref mainProgressValue, value); }
 		}
 
-		public void IncreaseMainProgressValue(double val)
+		public void IncreaseMainProgressValue(double val, string message = "")
 		{
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressValue += val);
+			RxApp.MainThreadScheduler.Schedule(_ => {
+				MainProgressValue += val;
+				if (!String.IsNullOrEmpty(message)) MainProgressWorkText = message;
+			});
 		}
 
 		private CancellationTokenSource mainProgressToken;
@@ -444,13 +448,7 @@ namespace DivinityModManager.ViewModels
 				ToggleLogging(true);
 			}
 
-			//this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath).Subscribe((p) =>
-			//{
-			//	if(Directory.Exists(p))
-			//	{
-			//		RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(150), _ => LoadWorkshopMods());
-			//	}
-			//});
+			SetDOS2Pathways(Settings.GameDataPath);
 
 			if (loaded)
 			{
@@ -624,8 +622,6 @@ namespace DivinityModManager.ViewModels
 			List<DivinityModData> modPakData = null;
 			List<DivinityModData> projects = null;
 
-			SetDOS2Pathways(Settings.GameDataPath);
-
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
 				Trace.WriteLine($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
@@ -676,8 +672,6 @@ namespace DivinityModManager.ViewModels
 		{
 			List<DivinityModData> modPakData = null;
 			List<DivinityModData> projects = null;
-
-			SetDOS2Pathways(Settings.GameDataPath);
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
@@ -758,10 +752,12 @@ namespace DivinityModManager.ViewModels
 			return null;
 		}
 
-		public void BuildModOrderList(int selectLast = 0)
+		public void BuildModOrderList(bool selectLast = false)
 		{
 			if (SelectedProfile != null)
 			{
+				LoadingOrder = true;
+
 				if (SelectedProfile.SavedLoadOrder == null)
 				{
 					DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current" };
@@ -784,25 +780,34 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
 				SelectedProfile.SavedLoadOrder.Name = "Current";
-				SelectedModOrderIndex = 0;
 				ModOrderList.AddRange(SavedModOrderList);
 
-				if (selectLast == 1)
+				int nextOrderIndex = 0;
+
+				if (selectLast)
 				{
-					RxApp.MainThreadScheduler.Schedule(_ => SelectedModOrderIndex = ModOrderList.Count - 1);
-				}
-				else if (selectLast == 0)
-				{
-					if(SelectedModOrderIndex < 0 || SelectedModOrderIndex >= ModOrderList.Count)
-					{
-						RxApp.MainThreadScheduler.Schedule(_ => SelectedModOrderIndex = 0);
-					}
+					if (ModOrderList.Count > 0) nextOrderIndex = ModOrderList.Count - 1;
 				}
 				else
 				{
-					SelectedModOrderIndex = 0;
+					if (!String.IsNullOrWhiteSpace(Settings.LastOrder) && Settings.LastOrder != "Current")
+					{
+						var order = ModOrderList.FirstOrDefault(x => x.Name.Equals(Settings.LastOrder, StringComparison.OrdinalIgnoreCase));
+						if (order != null)
+						{
+							int index = ModOrderList.IndexOf(order);
+							if (index > -1) nextOrderIndex = index;
+							Trace.WriteLine($"Set active load order to last order '{index}' - '{order.Name}'");
+						}
+					}
 				}
-				//LoadModOrder(SelectedProfile.SavedLoadOrder);
+
+				RxApp.MainThreadScheduler.Schedule(_ =>
+				{
+					SelectedModOrderIndex = nextOrderIndex;
+					LoadModOrder(SelectedModOrder);
+					LoadingOrder = false;
+				});
 			}
 		}
 
@@ -843,7 +848,7 @@ namespace DivinityModManager.ViewModels
 				};
 
 				SavedModOrderList.Add(newOrder);
-				BuildModOrderList(1);
+				BuildModOrderList(true);
 			};
 
 			this.CreateSnapshot(undo, redo);
@@ -862,7 +867,6 @@ namespace DivinityModManager.ViewModels
 
 			ActiveMods.Clear();
 			InactiveMods.Clear();
-			
 
 			IEnumerable<DivinityLoadOrderEntry> loadFrom = order.Order;
 
@@ -926,6 +930,7 @@ namespace DivinityModManager.ViewModels
 		public void Refresh()
 		{
 			Refreshing = true;
+			double taskStepAmount = 1.0 / 6;
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
 			int lastOrderIndex = -1;
@@ -937,9 +942,18 @@ namespace DivinityModManager.ViewModels
 			mods.Clear();
 			Profiles.Clear();
 			LoadMods();
+			MainProgressValue += taskStepAmount;
+
 			LoadProfiles();
+			MainProgressValue += taskStepAmount;
+
+			SavedModOrderList = LoadExternalLoadOrders();
+			MainProgressValue += taskStepAmount;
+
 			BuildModOrderList();
-			if(lastActiveOrder != null)
+			MainProgressValue += taskStepAmount;
+
+			if (lastActiveOrder != null)
 			{
 				// Just in case a mod disappears
 				var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
@@ -947,15 +961,41 @@ namespace DivinityModManager.ViewModels
 				SelectedModOrder.SetOrder(lastActiveOrder);
 			}
 			LoadWorkshopMods();
+			MainProgressValue += taskStepAmount;
+
 			CheckForModUpdates();
+			MainProgressValue += taskStepAmount;
+
 			Refreshing = false;
 
 			OnRefreshed?.Invoke(this, new EventArgs());
+			OnMainProgressComplete(250);
+		}
+
+		private List<DivinityLoadOrder> LoadExternalLoadOrders()
+		{
+			string loadOrderDirectory = Settings.LoadOrderPath;
+			if (String.IsNullOrWhiteSpace(loadOrderDirectory))
+			{
+				//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+				//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+				loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+			}
+			else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
+			{
+				loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
+			}
+
+			Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+			var savedOrderList = DivinityModDataLoader.FindLoadOrderFilesInDirectory(loadOrderDirectory);
+			return savedOrderList;
 		}
 
 		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
 		{
-			double taskStepAmount = 1.0 / 4;
+			Trace.WriteLine($"Refreshing data asynchronously...");
+
+			double taskStepAmount = 1.0 / 8;
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
 			int lastOrderIndex = -1;
@@ -966,7 +1006,6 @@ namespace DivinityModManager.ViewModels
 			}
 
 			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
-
 			var loadedMods = await LoadModsAsync();
 			IncreaseMainProgressValue(taskStepAmount);
 
@@ -978,13 +1017,30 @@ namespace DivinityModManager.ViewModels
 			var loadedProfiles = await LoadProfilesAsync();
 			IncreaseMainProgressValue(taskStepAmount);
 
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading current profile...");
 			var selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);
+			IncreaseMainProgressValue(taskStepAmount);
+
+			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading external load orders...");
+			var savedModOrderList = await LoadExternalLoadOrdersAsync();
+			IncreaseMainProgressValue(taskStepAmount);
+
+			if (savedModOrderList.Count > 0)
+			{
+				Trace.WriteLine($"{savedModOrderList.Count} saved load orders found.");
+			}
+			else
+			{
+				Trace.WriteLine("No saved orders found.");
+			}
 
 			RxApp.MainThreadScheduler.Schedule(_ =>
 			{
 				mods.AddOrUpdate(loadedMods);
 				workshopMods.AddOrUpdate(loadedWorkshopMods);
 				Profiles.AddRange(loadedProfiles);
+
+				SavedModOrderList = savedModOrderList;
 
 				if (!String.IsNullOrWhiteSpace(selectedProfileUUID))
 				{
@@ -1005,7 +1061,9 @@ namespace DivinityModManager.ViewModels
 				}
 
 				MainProgressWorkText = "Building mod order list...";
+				int select = String.IsNullOrWhiteSpace(Settings?.LastOrder) ? 0 : -1;
 				BuildModOrderList();
+				MainProgressValue += taskStepAmount;
 
 				if (lastActiveOrder != null)
 				{
@@ -1015,9 +1073,9 @@ namespace DivinityModManager.ViewModels
 				}
 				
 				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-
 				MainProgressWorkText = "Checking for mod updates...";
 				CheckForModUpdates();
+				MainProgressValue += taskStepAmount;
 			});
 
 			IncreaseMainProgressValue(taskStepAmount);
@@ -1028,16 +1086,15 @@ namespace DivinityModManager.ViewModels
 			{
 				Refreshing = false;
 				OnMainProgressComplete();
-
 				OnRefreshed?.Invoke(this, new EventArgs());
 			});
 
 			return Disposable.Empty;
 		}
 
-		public void RefreshAsync_Start()
+		public void RefreshAsync_Start(string title = "Refreshing...")
 		{
-			MainProgressTitle = "Refreshing...";
+			MainProgressTitle = title;
 			MainProgressValue = 0d;
 			CanCancelProgress = false;
 			MainProgressIsActive = true;
@@ -1046,6 +1103,25 @@ namespace DivinityModManager.ViewModels
 			Profiles.Clear();
 			workshopMods.Clear();
 			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
+		}
+
+		private async Task<List<DivinityLoadOrder>> LoadExternalLoadOrdersAsync()
+		{
+			string loadOrderDirectory = Settings.LoadOrderPath;
+			if (String.IsNullOrWhiteSpace(loadOrderDirectory))
+			{
+				//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+				//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+				loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+			}
+			else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
+			{
+				loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
+			}
+
+			Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+			var savedOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
+			return savedOrderList;
 		}
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
@@ -1239,15 +1315,26 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
-		private void OnMainProgressComplete()
+		private void MainProgressStart()
 		{
+			MainProgressValue = 0d;
+			MainProgressIsActive = true;
+		}
+
+		private void OnMainProgressComplete(double delay = 0)
+		{
+			TimeSpan delaySpan = TimeSpan.Zero;
+			if (delay > 0) delaySpan = TimeSpan.FromMilliseconds(delay);
+
+			MainProgressWorkText = "Finished.";
 			MainProgressValue = 1d;
 			if(MainProgressToken != null)
 			{
 				MainProgressToken.Dispose();
 				MainProgressToken = null;
 			}
-			RxApp.MainThreadScheduler.Schedule(_ => {
+
+			RxApp.MainThreadScheduler.Schedule(delaySpan, _ => {
 				MainProgressIsActive = false;
 				CanCancelProgress = true;
 			});
@@ -1477,54 +1564,14 @@ namespace DivinityModManager.ViewModels
 		{
 			view = parentView;
 
-			Trace.WriteLine("View activated");
-
 			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
 			{
 				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
 			});
 
 			LoadSettings();
-			Refresh();
-
-			RxApp.MainThreadScheduler.Schedule(async () =>
-			{
-				string loadOrderDirectory = Settings.LoadOrderPath;
-				if (String.IsNullOrWhiteSpace(loadOrderDirectory))
-				{
-					//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-					//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
-					loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
-				}
-				else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
-				{
-					loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
-				}
-
-				Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
-				SavedModOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
-				if (SavedModOrderList.Count > 0)
-				{
-					Trace.WriteLine($"{SavedModOrderList.Count} load orders found. Building mod order list.");
-					int select = String.IsNullOrWhiteSpace(Settings.LastOrder) ? 0 : -1;
-					BuildModOrderList(select);
-					if (!String.IsNullOrWhiteSpace(Settings.LastOrder) && Settings.LastOrder != "Current")
-					{
-						var order = ModOrderList.FirstOrDefault(x => x.Name.Equals(Settings.LastOrder, StringComparison.OrdinalIgnoreCase));
-						if (order != null)
-						{
-							int index = ModOrderList.IndexOf(order);
-							if (index > -1) RxApp.MainThreadScheduler.Schedule(() => SelectedModOrderIndex = index);
-							Trace.WriteLine($"Set active load order to last order '{index}' - '{order.Name}'");
-						}
-					}
-				}
-				else
-				{
-					Trace.WriteLine("No saved orders found.");
-				}
-			});
-
+			RefreshAsync_Start("Loading...");
+			//Refresh();
 			SaveSettings(); // New values
 		}
 
@@ -1672,7 +1719,7 @@ namespace DivinityModManager.ViewModels
 			}, canCancelProgress);
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
-			RefreshCommand = ReactiveCommand.Create(RefreshAsync_Start, canRefreshObservable);
+			RefreshCommand = ReactiveCommand.Create(() => RefreshAsync_Start(), canRefreshObservable);
 
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
 			OpenModsFolderCommand = ReactiveCommand.Create(() =>
@@ -1732,8 +1779,8 @@ namespace DivinityModManager.ViewModels
 
 			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
 			//Throttle in case the index changes quickly in a short timespan
-			indexChanged.Throttle(TimeSpan.FromMilliseconds(20)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((selectedOrder) => {
-				if (SelectedModOrderIndex > -1 && !LoadingOrder)
+			indexChanged.Throttle(TimeSpan.FromMilliseconds(10)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((selectedOrder) => {
+				if (selectedOrder > -1 && !LoadingOrder)
 				{
 					LoadModOrder(SelectedModOrder);
 
@@ -1768,10 +1815,17 @@ namespace DivinityModManager.ViewModels
 			ModUpdatesViewData.CloseView = new Action<bool>((bool refresh) =>
 			{
 				ModUpdatesViewData.Clear();
-				if (refresh) Refresh();
+				if (refresh) RefreshAsync_Start();
 				ModUpdatesViewVisible = false;
 				view.Activate();
 			});
+
+#if DEBUG
+			this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
+			{
+				Trace.WriteLine($"Progress: {MainProgressValue} - {MainProgressWorkText}");
+			});
+#endif
 
 			//this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
 			//{

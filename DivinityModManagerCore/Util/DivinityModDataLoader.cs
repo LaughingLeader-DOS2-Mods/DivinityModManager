@@ -791,6 +791,42 @@ namespace DivinityModManager.Util
 			return true;
 		}
 
+		public static List<DivinityLoadOrder> FindLoadOrderFilesInDirectory(string directory)
+		{
+			List<DivinityLoadOrder> loadOrders = new List<DivinityLoadOrder>();
+
+			if (Directory.Exists(directory))
+			{
+				var files = Directory.EnumerateFiles(directory, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive, new DirectoryEnumerationFilters()
+				{
+					InclusionFilter = (f) =>
+					{
+						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase);
+					}
+				});
+
+				foreach (var loadOrderFile in files)
+				{
+					try
+					{
+						var fileText = File.ReadAllText(loadOrderFile);
+						DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+						if (order != null)
+						{
+							order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
+							loadOrders.Add(order);
+						}
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Failed to read '{loadOrderFile}': {ex.ToString()}");
+					}
+				}
+			}
+
+			return loadOrders;
+		}
+
 		public static async Task<List<DivinityLoadOrder>> FindLoadOrderFilesInDirectoryAsync(string directory)
 		{
 			List<DivinityLoadOrder> loadOrders = new List<DivinityLoadOrder>();

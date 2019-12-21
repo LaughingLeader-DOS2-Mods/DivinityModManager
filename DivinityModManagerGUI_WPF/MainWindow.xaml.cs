@@ -112,6 +112,7 @@ namespace DivinityModManager.Views
 			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
+
 			this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
 
 			AlertBar.Show += AlertBar_Show;
@@ -194,6 +195,7 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
 				{
+					Trace.WriteLine($"Main Progress is active: {b}");
 					if (b)
 					{
 						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;

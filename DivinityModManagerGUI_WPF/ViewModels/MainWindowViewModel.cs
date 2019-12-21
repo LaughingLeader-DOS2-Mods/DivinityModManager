@@ -278,6 +278,8 @@ namespace DivinityModManager.ViewModels
 		}
 
 		private MainWindow view;
+		public MainWindow View => view;
+
 		public DivinityModManagerSettings Settings { get; set; }
 
 		public ICommand SaveOrderCommand { get; private set; }

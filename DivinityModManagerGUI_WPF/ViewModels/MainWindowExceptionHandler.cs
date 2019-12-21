@@ -22,7 +22,7 @@ namespace DivinityModManager.ViewModels
         {
             if (Debugger.IsAttached) Debugger.Break();
             Trace.WriteLine($"({value.GetType().ToString()}: {value.Message}");
-            RxApp.MainThreadScheduler.Schedule(() => { throw value; });
+            //RxApp.MainThreadScheduler.Schedule(() => { throw value; });
         }
 
         public void OnError(Exception error)
@@ -36,14 +36,15 @@ namespace DivinityModManager.ViewModels
                 {
                     _viewModel.MainProgressIsActive = false;
                 }
-                throw error; 
+                _viewModel.View.AlertBar.SetDangerAlert(error.Message);
+                //throw error;
             });
         }
 
         public void OnCompleted()
         {
             if (Debugger.IsAttached) Debugger.Break();
-            RxApp.MainThreadScheduler.Schedule(() => { throw new NotImplementedException(); });
+            //RxApp.MainThreadScheduler.Schedule(() => { throw new NotImplementedException(); });
         }
     }
 }

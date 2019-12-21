@@ -159,6 +159,7 @@
       <DependentUpon>AlertBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AutoGrayableImage.cs" />
+    <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
     <Compile Include="Controls\CircleDecorator.cs" />
     <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
     <Compile Include="Controls\HyperlinkText.xaml.cs">
@@ -360,9 +361,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Controls\Behavior\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <Resource Include="DivinityModManager.ico" />
   </ItemGroup>

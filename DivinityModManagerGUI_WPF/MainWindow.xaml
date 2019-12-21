@@ -36,7 +36,7 @@
 				<local:VerticalModLayout />
 			</DataTemplate>
 			<DataTemplate x:Key="HorizontalModLayout">
-				<local:HorizontalModLayout />
+				<local:HorizontalModLayout ViewModel="{Binding}" />
 			</DataTemplate>
 			<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
 				<Setter Property="Background" Value="Transparent" />
@@ -251,14 +251,14 @@
 						</ComboBox>
 					</Grid>
 					<Grid Grid.Column="2" Margin="1,0,0,0">
+						<Grid.Resources>
+							<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
+						</Grid.Resources>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
 						</Grid.ColumnDefinitions>
-						<Grid.Resources>
-							<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
-						</Grid.Resources>
 						<StackPanel Orientation="Horizontal">
 							<Button
 								x:Name="AddNewOrderButton"
@@ -271,7 +271,7 @@
 								Command="{Binding SaveOrderCommand}"
 								ToolTip="Save Load Order to File">
 								<Button.Resources>
-									<Style TargetType="{x:Type Image}">
+									<Style BasedOn="{StaticResource {x:Type controls:AutoGrayableImage}}" TargetType="{x:Type controls:AutoGrayableImage}">
 										<Style.Triggers>
 											<Trigger Property="IsEnabled" Value="True">
 												<Setter Property="Source" Value="{StaticResource SaveImage}" />
@@ -282,10 +282,7 @@
 										</Style.Triggers>
 									</Style>
 								</Button.Resources>
-								<Image
-									Width="16"
-									Height="16"
-									Stretch="Uniform" />
+								<controls:AutoGrayableImage />
 							</Button>
 							<Button
 								x:Name="SaveAsButton"

@@ -288,6 +288,11 @@ namespace DivinityModManager.ViewModels
 		public ICommand CancelMainProgressCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
 
+		public bool Loaded { get; set; } = false;
+		public EventHandler OnLoaded { get; set; }
+		public EventHandler OnRefreshed { get; set; }
+		public EventHandler OnOrderChanged { get; set; }
+
 		private void Debug_TraceMods(List<DivinityModData> mods)
 		{
 			foreach (var mod in mods)
@@ -411,7 +416,13 @@ namespace DivinityModManager.ViewModels
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 
-			Settings.SaveSettingsCommand = ReactiveCommand.Create(SaveSettings, canSaveSettings).DisposeWith(Settings.Disposables);
+			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
+			{
+				if(SaveSettings())
+				{
+					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.");
+				}
+			}, canSaveSettings).DisposeWith(Settings.Disposables);
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
 				Process.Start(DivinityApp.DIR_DATA);
@@ -457,10 +468,8 @@ namespace DivinityModManager.ViewModels
 			try
 			{
 				Directory.CreateDirectory("Data");
-
 				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(settingsFile, contents);
-				view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.");
 				Settings.CanSaveSettings = false;
 				return true;
 			}
@@ -789,6 +798,10 @@ namespace DivinityModManager.ViewModels
 						RxApp.MainThreadScheduler.Schedule(_ => SelectedModOrderIndex = 0);
 					}
 				}
+				else
+				{
+					SelectedModOrderIndex = 0;
+				}
 				//LoadModOrder(SelectedProfile.SavedLoadOrder);
 			}
 		}
@@ -936,6 +949,8 @@ namespace DivinityModManager.ViewModels
 			LoadWorkshopMods();
 			CheckForModUpdates();
 			Refreshing = false;
+
+			OnRefreshed?.Invoke(this, new EventArgs());
 		}
 
 		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
@@ -1013,6 +1028,8 @@ namespace DivinityModManager.ViewModels
 			{
 				Refreshing = false;
 				OnMainProgressComplete();
+
+				OnRefreshed?.Invoke(this, new EventArgs());
 			});
 
 			return Disposable.Empty;
@@ -1714,23 +1731,19 @@ namespace DivinityModManager.ViewModels
 			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
 
 			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
-			indexChanged.Subscribe((selectedOrder) => {
+			//Throttle in case the index changes quickly in a short timespan
+			indexChanged.Throttle(TimeSpan.FromMilliseconds(20)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((selectedOrder) => {
 				if (SelectedModOrderIndex > -1 && !LoadingOrder)
 				{
 					LoadModOrder(SelectedModOrder);
 
-					//if(!AutoChangedOrder)
-					//{
-					//	RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(200), () =>
-					//	{
-					//		if (Settings != null && Settings.LastOrder != SelectedModOrder.Name)
-					//		{
-					//			Settings.LastOrder = SelectedModOrder.Name;
-					//			SaveSettings();
-					//		}
-					//	});
-					//}
-					//AutoChangedOrder = false;
+					if (!Loaded)
+					{
+						Loaded = true;
+						OnLoaded?.Invoke(this, new EventArgs());
+					}
+
+					OnOrderChanged?.Invoke(this, new EventArgs());
 				}
 			}).DisposeWith(Disposables);
 

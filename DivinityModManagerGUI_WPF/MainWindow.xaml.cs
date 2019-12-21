@@ -16,16 +16,16 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Reactive;
 using System.Reactive.Disposables;
+using System.Reactive.Concurrency;
 using DynamicData;
 using DynamicData.Binding;
 using System.Diagnostics;
 using System.Globalization;
 using AutoUpdaterDotNET;
 using System.Windows.Threading;
-using System.Reactive.Concurrency;
 using AdonisUI.Controls;
-using System.Reactive;
 
 namespace DivinityModManager.Views
 {

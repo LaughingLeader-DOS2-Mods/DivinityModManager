@@ -1,7 +1,10 @@
-﻿using System;
+﻿using DivinityModManager.ViewModels;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,17 +17,57 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 
 namespace DivinityModManager.Views
 {
 	/// <summary>
 	/// Interaction logic for HorizonalModLayout.xaml
 	/// </summary>
-	public partial class HorizontalModLayout : UserControl
+	public partial class HorizontalModLayout : UserControl, IViewFor<MainWindowViewModel>
 	{
+		public MainWindowViewModel ViewModel
+		{
+			get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
+			set { SetValue(ViewModelProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for ViewModel.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty ViewModelProperty =
+			DependencyProperty.Register("ViewModel", typeof(MainWindowViewModel), typeof(HorizontalModLayout), new PropertyMetadata(null));
+
+		object IViewFor.ViewModel { get; set; }
+
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
+
+			this.WhenActivated((disposables) =>
+			{
+				//ViewModel.OnLoaded += AutoSizeNameColumn_InactiveMods;
+				//ViewModel.OnRefreshed += AutoSizeNameColumn_InactiveMods;
+
+				ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
+				ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
+
+				//this.WhenAnyValue(x => x.ViewModel.SelectedModOrderIndex).
+				//Throttle(TimeSpan.FromMilliseconds(25)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(_ =>
+				//{
+				//	AutoSizeNameColumn_ActiveMods();
+				//}).DisposeWith(disposables);
+
+				//this.WhenAnyValue(x => x.ViewModel.Refreshing, (r) => r == false).
+				//Throttle(TimeSpan.FromMilliseconds(25)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(_ =>
+				//{
+				//	RxApp.MainThreadScheduler.Schedule(() => AutoSizeNameColumn_InactiveMods());
+				//}).DisposeWith(disposables);
+
+				//ViewModel.ActiveMods.CollectionChanged += AutoSizeNameColumn_ActiveMods;
+				//ViewModel.InactiveMods.CollectionChanged += AutoSizeNameColumn_InactiveMods;
+			});
 		}
 
 		GridViewColumnHeader _lastHeaderClicked = null;
@@ -86,6 +129,95 @@ namespace DivinityModManager.Views
 			SortDescription sd = new SortDescription(sortBy, direction);
 			dataView.SortDescriptions.Add(sd);
 			dataView.Refresh();
+		}
+
+		public void AutoSizeNameColumn_ActiveMods(object sender, EventArgs e)
+		{
+			if (ActiveModsListView.View is GridView gridView)
+			{
+				if (gridView.Columns.Count >= 2)
+				{
+					if (ViewModel.ActiveMods.Count > 0)
+					{
+						RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
+						{
+							var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
+							Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
+							gridView.Columns[1].Width = MeasureText(longestName,
+								ActiveModsListView.FontFamily,
+								ActiveModsListView.FontStyle,
+								ActiveModsListView.FontWeight,
+								ActiveModsListView.FontStretch,
+								ActiveModsListView.FontSize).Width + 12;
+						});
+					}
+				}
+			}
+		}
+
+		public void AutoSizeNameColumn_InactiveMods(object sender, EventArgs e)
+		{
+			if (InactiveModsListView.View is GridView gridView)
+			{
+				if (gridView.Columns.Count >= 2)
+				{
+					if (ViewModel.InactiveMods.Count > 0)
+					{
+						var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
+						Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
+						gridView.Columns[0].Width = MeasureText(longestName,
+							ActiveModsListView.FontFamily,
+							ActiveModsListView.FontStyle,
+							ActiveModsListView.FontWeight,
+							ActiveModsListView.FontStretch,
+							ActiveModsListView.FontSize).Width + 12;
+					}
+				}
+			}
+		}
+
+		private static Size MeasureTextSize(string text, FontFamily fontFamily, FontStyle fontStyle,
+			FontWeight fontWeight, FontStretch fontStretch, double fontSize)
+		{
+			var typeFace = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
+			FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, fontSize, Brushes.Black);
+			return new Size(ft.Width, ft.Height);
+		}
+
+		private static Size MeasureText(string text,
+			FontFamily fontFamily,
+			FontStyle fontStyle,
+			FontWeight fontWeight,
+			FontStretch fontStretch, double fontSize)
+		{
+			Typeface typeface = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
+			GlyphTypeface glyphTypeface;
+
+			if (!typeface.TryGetGlyphTypeface(out glyphTypeface))
+			{
+				return MeasureTextSize(text, fontFamily, fontStyle, fontWeight, fontStretch, fontSize);
+			}
+
+			double totalWidth = 0;
+			double height = 0;
+
+			for (int n = 0; n < text.Length; n++)
+			{
+				ushort glyphIndex = glyphTypeface.CharacterToGlyphMap[text[n]];
+
+				double width = glyphTypeface.AdvanceWidths[glyphIndex] * fontSize;
+
+				double glyphHeight = glyphTypeface.AdvanceHeights[glyphIndex] * fontSize;
+
+				if (glyphHeight > height)
+				{
+					height = glyphHeight;
+				}
+
+				totalWidth += width;
+			}
+
+			return new Size(totalWidth, height);
 		}
 	}
 }

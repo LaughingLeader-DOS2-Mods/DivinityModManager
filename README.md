@@ -22,6 +22,12 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * View pending Steam Workshop mod updates and update with a few clicks.
 * Dark and light theme support.
 
+# Notes
+
+* Divinity Engine 2 (editor) projects are highlighted in green. They can be used in the load order like regular mods, and even exported to zip files.
+* New profiles must be made in-game. This is on the list of planned features.
+* Highlight over mods to see their description and list of dependencies. Red dependencies are missing dependencies.
+
 # Links
 
 * [Latest Release](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases/latest)

@@ -1,7 +1,10 @@
-﻿using System;
+﻿using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,10 +24,14 @@ namespace DivinityModManager.Controls
     /// </summary>
     public partial class AlertBar : UserControl
     {
+        private readonly SynchronizationContext _syncContext;
+
         public AlertBar()
         {
             InitializeComponent();
             // grdWrapper.DataContext = this;
+
+            _syncContext = SynchronizationContext.Current;
         }
 
 
@@ -44,8 +51,6 @@ namespace DivinityModManager.Controls
 
         private void TransformStage(string msg, int secs, string colorhex, BitmapImage iconsrc)
         {
-
-
             SolidColorBrush bg = new SolidColorBrush();
             bg = (SolidColorBrush)(new BrushConverter().ConvertFrom(colorhex));
 
@@ -73,7 +78,6 @@ namespace DivinityModManager.Controls
             List<Image> imgs = FindVisualChildren<Image>(grdParent).ToList();
             Image imgStatusIcon = imgs[0];
             Image imgCloseIcon = imgs[1];
-
 
             if (_IconVisibility == false)
             {
@@ -124,8 +128,11 @@ namespace DivinityModManager.Controls
         /// <param name="timeoutInSeconds">Alert will auto-close in this amount of seconds</param>
         public void SetDangerAlert(string message, int timeoutInSeconds = 0)
         {
-            string color = "#D9534F";
-            TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Danger"]);
+            _syncContext.Post(o =>
+            {
+                string color = "#D9534F";
+                TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Danger"]);
+            }, null);
         }
 
         /// <summary>
@@ -135,8 +142,11 @@ namespace DivinityModManager.Controls
         /// <param name="timeoutInSeconds">Alert will auto-close in this amount of seconds</param>
         public void SetWarningAlert(string message, int timeoutInSeconds = 0)
         {
-            string color = "#F0AD4E";
-            TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Warning"]);
+            _syncContext.Post(o =>
+            {
+                string color = "#F0AD4E";
+                TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Warning"]);
+            }, null);
         }
 
         /// <summary>
@@ -146,8 +156,11 @@ namespace DivinityModManager.Controls
         /// <param name="timeoutInSeconds">Alert will auto-close in this amount of seconds</param>
         public void SetSuccessAlert(string message, int timeoutInSeconds = 0)
         {
-            string color = "#5CB85C";
-            TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Success"]);
+            _syncContext.Post(o =>
+            {
+                string color = "#5CB85C";
+                TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Success"]);
+            }, null);
         }
 
 
@@ -158,8 +171,11 @@ namespace DivinityModManager.Controls
         /// <param name="timeoutInSeconds">Alert will auto-close in this amount of seconds</param>
         public void SetInformationAlert(string message, int timeoutInSeconds = 0)
         {
-            string color = "#5BC0DE";
-            TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Information"]);
+            _syncContext.Post(o =>
+            {
+                string color = "#5BC0DE";
+                TransformStage(message, timeoutInSeconds, color, (BitmapImage)this.Resources["AlertBar_Information"]);
+            }, null);
         }
 
         public enum ThemeType

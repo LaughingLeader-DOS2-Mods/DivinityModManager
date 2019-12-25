@@ -201,10 +201,19 @@ namespace DivinityModManager.ViewModels
 		private void CopyFilesProgress_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
 			Unlocked = true;
-			Trace.WriteLine("Update complete.");
-			if (e.Result is CopyModUpdatesTask args)
+			Trace.WriteLine("Workshop mod copying complete.");
+			try
 			{
-				JustUpdated = args.TotalMoved > 0;
+				if (e.Result is CopyModUpdatesTask args)
+				{
+					JustUpdated = args.TotalMoved > 0;
+				}
+			}
+			catch(Exception ex)
+			{
+				string message = $"Error copying workshop mods: {ex.ToString()}";
+				Trace.WriteLine(message);
+				MainWindow.Self.AlertBar.SetDangerAlert(message);
 			}
 			CloseView?.Invoke(true);
 		}
@@ -224,7 +233,24 @@ namespace DivinityModManager.ViewModels
 						if (e.Cancel) return;
 						var fileName = Path.GetFileName(file);
 						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{fileName}'...", null);
-						File.Copy(file, Path.Combine(args.ModPakFolder, fileName), true);
+						try
+						{
+							File.Copy(file, Path.Combine(args.ModPakFolder, fileName), true);
+						}
+						catch(Alphaleonis.Win32.Filesystem.FileReadOnlyException ex)
+						{
+							string message = $"Error copying '{fileName}' - File is read only!{Environment.NewLine}{ex.ToString()}";
+							Trace.WriteLine(message);
+							MainWindow.Self.AlertBar.SetDangerAlert(message);
+							dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
+						}
+						catch (Exception ex)
+						{
+							string message = $"Error copying '{fileName}':{Environment.NewLine}{ex.ToString()}";
+							Trace.WriteLine(message);
+							MainWindow.Self.AlertBar.SetDangerAlert(message);
+							dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
+						}
 						args.TotalMoved++;
 					}
 				}
@@ -239,16 +265,38 @@ namespace DivinityModManager.ViewModels
 						if (e.Cancel) return;
 						string baseName = Path.GetFileName(file);
 						string existingMod = Path.Combine(args.ModPakFolder, baseName);
+						bool movedFile = false;
 						if (File.Exists(existingMod))
 						{
 							dialog.ReportProgress(args.TotalMoved / totalWork, $"Moving '{baseName}' to backup folder...", null);
 							Trace.WriteLine($"Moved old pak to backup folder: '{existingMod}'.");
 							string nextPath = DivinityFileUtils.GetUniqueFilename(Path.Combine(backupFolder, Path.GetFileName(existingMod)));
-							File.Move(existingMod, nextPath);
+							try
+							{
+								File.Move(existingMod, nextPath);
+								movedFile = true;
+							}
+							catch (Alphaleonis.Win32.Filesystem.FileReadOnlyException ex)
+							{
+								string message = $"Error moving '{existingMod}' - File is read only!{Environment.NewLine}{ex.ToString()}";
+								Trace.WriteLine(message);
+								MainWindow.Self.AlertBar.SetDangerAlert(message);
+								dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
+							}
+							catch (Exception ex)
+							{
+								string message = $"Error moving '{existingMod}':{Environment.NewLine}{ex.ToString()}";
+								Trace.WriteLine(message);
+								MainWindow.Self.AlertBar.SetDangerAlert(message);
+								dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
+							}
 						}
-						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
-						Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
-						File.Move(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)));
+						if (movedFile)
+						{
+							dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
+							Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
+							File.Move(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)));
+						}
 						args.TotalMoved++;
 					}
 				}

@@ -122,6 +122,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref lastOrder, value); }
 		}
 
+		private string lastLoadedOrderFilePath = "";
+
+		[DataMember]
+		public string LastLoadedOrderFilePath
+		{
+			get => lastLoadedOrderFilePath;
+			set { this.RaiseAndSetIfChanged(ref lastLoadedOrderFilePath, value); }
+		}
+
 		private bool darkThemeEnabled = false;
 
 		[DataMember]

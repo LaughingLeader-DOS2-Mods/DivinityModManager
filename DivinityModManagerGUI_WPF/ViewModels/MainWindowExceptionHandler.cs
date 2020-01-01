@@ -20,16 +20,15 @@ namespace DivinityModManager.ViewModels
 
         public void OnNext(Exception value)
         {
-            if (Debugger.IsAttached) Debugger.Break();
-            Trace.WriteLine($"({value.GetType().ToString()}: {value.Message}");
+            Trace.WriteLine($"Error: ({value.GetType().ToString()}: {value.Message}\n{value.StackTrace}");
+            //if (Debugger.IsAttached) Debugger.Break();
             //RxApp.MainThreadScheduler.Schedule(() => { throw value; });
         }
 
         public void OnError(Exception error)
         {
+            Trace.WriteLine($"Error: ({error.GetType().ToString()}: {error.Message}\n{error.StackTrace}");
             if (Debugger.IsAttached) Debugger.Break();
-
-            Trace.WriteLine($"Error ({error.GetType().ToString()}: {error.Message}");
 
             RxApp.MainThreadScheduler.Schedule(() => { 
                 if(_viewModel.MainProgressIsActive)

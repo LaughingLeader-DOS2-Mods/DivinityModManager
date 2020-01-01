@@ -78,6 +78,10 @@ namespace DivinityModManager.ViewModels
 
 	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel
 	{
+		private MainWindow view;
+		public MainWindow View => view;
+		public ModListDropHandler DropHandler { get; set; }
+
 		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
 		protected SourceCache<DivinityModData, string> mods = new SourceCache<DivinityModData, string>(m => m.UUID);
@@ -93,6 +97,8 @@ namespace DivinityModManager.ViewModels
 		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
 
 		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData();
+
+		public DivinityModManagerSettings Settings { get; set; }
 
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
@@ -219,6 +225,7 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref gameDirectoryFound, value); }
 		}
 
+		#region Progress
 		private string mainProgressTitle;
 
 		public string MainProgressTitle
@@ -274,12 +281,7 @@ namespace DivinityModManager.ViewModels
 			get => canCancelProgress;
 			set { this.RaiseAndSetIfChanged(ref canCancelProgress, value); }
 		}
-
-		private MainWindow view;
-		public MainWindow View => view;
-
-		public DivinityModManagerSettings Settings { get; set; }
-
+		#endregion
 		public ICommand SaveOrderCommand { get; private set; }
 		public ICommand SaveOrderAsCommand { get; private set; }
 		public ICommand ExportOrderCommand { get; private set; }
@@ -287,7 +289,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand RefreshCommand { get; private set; }
 		public ICommand ImportOrderFromSaveCommand { get; private set; }
 		public ICommand ImportOrderFromFileCommand { get; private set; }
-		public ICommand ImportZipFileCommand { get; private set; }
+		public ICommand ImportOrderZipFileCommand { get; private set; }
 		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
@@ -834,7 +836,7 @@ namespace DivinityModManager.ViewModels
 			return index > -1 ? index : 99999999;
 		}
 
-		private void AddNewOrderConfig()
+		private void AddNewModOrder(DivinityLoadOrder newOrder = null)
 		{
 			var lastIndex = SelectedModOrderIndex;
 			var lastOrders = ModOrderList.ToList();
@@ -853,12 +855,14 @@ namespace DivinityModManager.ViewModels
 
 			void redo()
 			{
-				DivinityLoadOrder newOrder = new DivinityLoadOrder()
+				if(newOrder == null)
 				{
-					Name = "New" + nextOrders.Count,
-					Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
-				};
-
+					newOrder = new DivinityLoadOrder()
+					{
+						Name = "New" + nextOrders.Count,
+						Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
+					};
+				}
 				SavedModOrderList.Add(newOrder);
 				BuildModOrderList(true);
 			};
@@ -1576,6 +1580,7 @@ namespace DivinityModManager.ViewModels
 			{
 				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
+
 		}
 
 		private void ImportOrderFromSave()
@@ -1610,8 +1615,8 @@ namespace DivinityModManager.ViewModels
 				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName);
 				if(newOrder != null)
 				{
-					Trace.WriteLine($"Settings order to '{String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}'.");
-					LoadModOrder(newOrder);
+					Trace.WriteLine($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
+					AddNewModOrder(newOrder);
 				}
 				else
 				{
@@ -1620,7 +1625,60 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public ModListDropHandler DropHandler { get; set; }
+		private void ImportOrderFromFile()
+		{
+			var dialog = new OpenFileDialog();
+			dialog.CheckFileExists = true;
+			dialog.CheckPathExists = true;
+			dialog.DefaultExt = ".json";
+			dialog.Filter = "JSON file (*.json)|*.json";
+			dialog.Title = "Load Mod Order From File...";
+
+			if (!String.IsNullOrEmpty(Settings.LastLoadedOrderFilePath) && (Directory.Exists(Settings.LastLoadedOrderFilePath) | File.Exists(Settings.LastLoadedOrderFilePath)))
+			{
+				if(Directory.Exists(Settings.LastLoadedOrderFilePath))
+				{
+					dialog.InitialDirectory = Settings.LastLoadedOrderFilePath;
+				}
+				else if(File.Exists(Settings.LastLoadedOrderFilePath))
+				{
+					dialog.InitialDirectory = Path.GetDirectoryName(Settings.LastLoadedOrderFilePath);
+				}
+			}
+			else
+			{
+				if(Directory.Exists(Settings.LoadOrderPath))
+				{
+					dialog.InitialDirectory = Settings.LoadOrderPath;
+				}
+				else
+				{
+					dialog.InitialDirectory = Environment.CurrentDirectory;
+				}
+			}
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				Settings.LastLoadedOrderFilePath = Path.GetDirectoryName(dialog.FileName);
+				SaveSettings();
+				Trace.WriteLine($"Loading order from '{dialog.FileName}'.");
+				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName);
+				if (newOrder != null)
+				{
+					Trace.WriteLine($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
+					AddNewModOrder(newOrder);
+				}
+				else
+				{
+					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+				}
+			}
+		}
+
+		private void ImportOrderZipFile()
+		{
+
+		}
 
 		public void OnViewActivated(MainWindow parentView)
 		{
@@ -1640,6 +1698,7 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenDOS2DEGame;
+		private IObservable<bool> canOpenDialogWindow;
 
 		public bool AutoChangedOrder { get; set; } = false;
 		public ViewModelActivator Activator { get; }
@@ -1767,26 +1826,22 @@ namespace DivinityModManager.ViewModels
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
-			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveCommand);
+
+			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
+			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveAsCommand);
+
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null);
 			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
 			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
 
-			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
+			AddOrderConfigCommand = ReactiveCommand.Create(new Action( () => { AddNewModOrder(); }));
 
-			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSave);
-
-			ImportOrderFromFileCommand = ReactiveCommand.Create(() =>
-			{
-
-			});
-
-			ImportZipFileCommand = ReactiveCommand.Create(() =>
-			{
-
-			});
+			canOpenDialogWindow = this.WhenAnyValue(x => x.MainProgressIsActive, (b) => !b);
+			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSave, canOpenDialogWindow);
+			ImportOrderFromFileCommand = ReactiveCommand.Create(ImportOrderFromFile, canOpenDialogWindow);
+			ImportOrderZipFileCommand = ReactiveCommand.Create(ImportOrderZipFile, canOpenDialogWindow);
 
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 

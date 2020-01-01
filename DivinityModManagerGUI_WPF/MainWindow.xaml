@@ -261,12 +261,6 @@
 						</Grid.ColumnDefinitions>
 						<StackPanel Orientation="Horizontal">
 							<Button
-								x:Name="AddNewOrderButton"
-								Command="{Binding AddOrderConfigCommand}"
-								ToolTip="Add New Load Order">
-								<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
-							</Button>
-							<Button
 								x:Name="SaveButton"
 								Command="{Binding SaveOrderCommand}"
 								ToolTip="Save Load Order to File">
@@ -289,6 +283,12 @@
 								Command="{Binding SaveOrderAsCommand}"
 								ToolTip="Save Order As...">
 								<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
+							</Button>
+							<Button
+								x:Name="AddNewOrderButton"
+								Command="{Binding AddOrderConfigCommand}"
+								ToolTip="Add New Load Order">
+								<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
 							</Button>
 						</StackPanel>
 						<Rectangle
@@ -490,6 +490,16 @@
 								x:Name="FileSaveOrderAsMenuItem"
 								Header="Save Load Order As..."
 								InputGestureText="CTRL+Alt+S" />
+							<Separator />
+							<MenuItem
+								x:Name="FileImportOrderFromSave"
+								Header="Import Mod Order from Save..."
+								InputGestureText="CTRL+O" />
+							<MenuItem
+								x:Name="FileImportOrderFromFile"
+								Header="Import Mod Order from File..."
+								InputGestureText="CTRL+Shift+O" />
+							<MenuItem x:Name="FileImportOrderZip" Header="Import Mod Order Zip..." />
 							<Separator />
 							<MenuItem
 								x:Name="FileExportOrderToGameMenuItem"

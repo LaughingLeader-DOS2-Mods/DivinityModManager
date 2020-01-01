@@ -889,6 +889,23 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
+		public static DivinityLoadOrder LoadOrderFromFile(string loadOrderFile)
+		{
+			if (File.Exists(loadOrderFile))
+			{
+				try
+				{
+					DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(File.ReadAllText(loadOrderFile));
+					return order;
+				}
+				catch(Exception ex)
+				{
+					Trace.WriteLine($"Error reading '{loadOrderFile}': {ex.ToString()}");
+				}
+			}
+			return null;
+		}
+
 		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods)
 		{
 			if(Directory.Exists(folder))
@@ -1042,9 +1059,11 @@ namespace DivinityModManager.Util
 					var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
 					if (modList != null && modList.Count > 0)
 					{
+						var directory = Directory.GetParent(file);
+						string orderName = $"{directory.Parent.Name}_{directory.Name}";
 						DivinityLoadOrder loadOrder = new DivinityLoadOrder()
 						{
-							Name = Directory.GetParent(file).Name,
+							Name = orderName,
 						};
 
 						foreach (var c in modList)

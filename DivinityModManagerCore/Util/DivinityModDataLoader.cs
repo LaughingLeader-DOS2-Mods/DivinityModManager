@@ -941,5 +941,150 @@ namespace DivinityModManager.Util
 		{
 			return Guid.NewGuid().ToString().Replace('-', 'g').Insert(0, "h");
 		}
+
+		private static Node FindNode(Node node, string name)
+		{
+			if (node.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+			{
+				return node;
+			}
+			else
+			{
+				return FindNode(node.Children, name);
+			}
+		}
+
+		private static Node FindNode(Dictionary<string, List<Node>> children, string name)
+		{
+			foreach (var kvp in children)
+			{
+				if(kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
+				{
+					return kvp.Value.FirstOrDefault();
+				}
+
+				foreach (var node in kvp.Value)
+				{
+					var match = FindNode(node, name);
+					if (match != null)
+					{
+						return match;
+					}
+				}
+			}
+			return null;
+		}
+
+		private static Node FindNode(Region region, string name)
+		{
+			foreach(var kvp in region.Children)
+			{
+				if (kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
+				{
+					return kvp.Value.First();
+				}
+			}
+			
+			var match = FindNode(region.Children, name);
+			if (match != null)
+			{
+				return match;
+			}
+
+			return null;
+		}
+
+		private static Node FindNode(Resource resource, string name)
+		{
+			foreach(var region in resource.Regions.Values)
+			{
+				var match = FindNode(region, name);
+				if (match != null)
+				{
+					return match;
+				}
+			}
+			
+			return null;
+		}
+
+		public static DivinityLoadOrder GetLoadOrderFromSave(string file)
+		{
+			var packageReader = new PackageReader(file);
+			Package package = packageReader.Read();
+
+			AbstractFileInfo abstractFileInfo = package.Files.FirstOrDefault(p => p.Name == "meta.lsf");
+			if (abstractFileInfo == null)
+			{
+				return null;
+			}
+
+			Resource resource;
+			System.IO.Stream rsrcStream = abstractFileInfo.MakeStream();
+			try
+			{
+				using (var rsrcReader = new LSFReader(rsrcStream))
+				{
+					resource = rsrcReader.Read();
+				}
+			}
+			finally
+			{
+				abstractFileInfo.ReleaseStream();
+			}
+
+			if(resource != null)
+			{
+				var modListChildrenRoot = FindNode(resource, "Mods");
+
+				if(modListChildrenRoot != null)
+				{
+					var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
+					if (modList != null && modList.Count > 0)
+					{
+						DivinityLoadOrder loadOrder = new DivinityLoadOrder()
+						{
+							Name = Directory.GetParent(file).Name,
+						};
+
+						foreach (var c in modList)
+						{
+							string name = "";
+							string uuid = null;
+							if (c.Attributes.TryGetValue("UUID", out var idAtt))
+							{
+								uuid = (string)idAtt.Value;
+							}
+
+							if (c.Attributes.TryGetValue("Name", out var nameAtt))
+							{
+								name = (string)nameAtt.Value;
+							}
+
+							if (uuid != null && !IgnoreMod(uuid))
+							{
+								Trace.WriteLine($"Found mod in save: '{name}_{uuid}'.");
+								loadOrder.Order.Add(new DivinityLoadOrderEntry()
+								{
+									UUID = uuid,
+									Name = name
+								});
+							}
+						}
+
+						if(loadOrder.Order.Count > 0)
+						{
+							return loadOrder;
+						}
+					}
+				}
+				else
+				{
+					Trace.WriteLine($"Couldn't find Mods node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
+				}
+			}
+
+			return null;
+		}
 	}
 }

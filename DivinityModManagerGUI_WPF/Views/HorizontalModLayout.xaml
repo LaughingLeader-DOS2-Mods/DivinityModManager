@@ -96,6 +96,7 @@
 			<ListView
 				x:Name="ActiveModsListView"
 				Grid.Row="1"
+				dd:DragDrop.DragDirectlySelectedOnly="True"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				dd:DragDrop.IsDragSource="True"
 				dd:DragDrop.IsDropTarget="True"
@@ -160,6 +161,7 @@
 			<ListView
 				x:Name="InactiveModsListView"
 				Grid.Row="2"
+				dd:DragDrop.DragDirectlySelectedOnly="True"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				dd:DragDrop.IsDragSource="True"
 				dd:DragDrop.IsDropTarget="True"

@@ -1059,11 +1059,17 @@ namespace DivinityModManager.Util
 					var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
 					if (modList != null && modList.Count > 0)
 					{
-						var directory = Directory.GetParent(file);
-						string orderName = $"{directory.Parent.Name}_{directory.Name}";
+						var fileName = Path.GetFileNameWithoutExtension(file);
+						string orderName = fileName;
+						var re = new Regex(@".*PlayerProfiles\\(.*?)\\Savegames.*");
+						var match = re.Match(Path.GetFullPath(file));
+						if (match.Success)
+						{
+							orderName = $"{match.Groups[1].Value}_{fileName}";
+						}
 						DivinityLoadOrder loadOrder = new DivinityLoadOrder()
 						{
-							Name = orderName,
+							Name = orderName
 						};
 
 						foreach (var c in modList)

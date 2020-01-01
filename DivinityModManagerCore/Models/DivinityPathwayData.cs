@@ -41,6 +41,14 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref documentsProfilesPath, value); }
 		}
 
+		private string lastSaveFilePath;
+
+		public string LastSaveFilePath
+		{
+			get => lastSaveFilePath;
+			set { this.RaiseAndSetIfChanged(ref lastSaveFilePath, value); }
+		}
+
 		//private string gameDOS2DEPath;
 
 		//public string GameDOS2DEPath

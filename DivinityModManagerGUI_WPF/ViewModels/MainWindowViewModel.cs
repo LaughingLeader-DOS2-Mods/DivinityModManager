@@ -39,8 +39,6 @@ namespace DivinityModManager.ViewModels
 
 	public class ModListDropHandler : DefaultDropHandler
 	{
-		private ObservableAsPropertyHelper<int> nextIndex;
-
 		override public void Drop(IDropInfo dropInfo)
 		{
 			base.Drop(dropInfo);
@@ -287,6 +285,9 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportOrderCommand { get; private set; }
 		public ICommand AddOrderConfigCommand { get; private set; }
 		public ICommand RefreshCommand { get; private set; }
+		public ICommand ImportOrderFromSaveCommand { get; private set; }
+		public ICommand ImportOrderFromFileCommand { get; private set; }
+		public ICommand ImportZipFileCommand { get; private set; }
 		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
@@ -1311,6 +1312,14 @@ namespace DivinityModManager.ViewModels
 				if (result)
 				{
 					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'");
+
+					//Update "Current" order
+					if(SelectedModOrder.Name != "Current")
+					{
+						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
+						currentOrder.SetOrder(SelectedModOrder.Order);
+						Trace.WriteLine("Updated 'Current' load order to exported order.");
+					}
 				}
 				else
 				{
@@ -1569,6 +1578,48 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private void ImportOrderFromSave()
+		{
+			var dialog = new OpenFileDialog();
+			dialog.CheckFileExists = true;
+			dialog.CheckPathExists = true;
+			dialog.DefaultExt = ".lsv";
+			dialog.Filter = "Larian Save file (*.lsv)|*.lsv";
+			dialog.Title = "Load Mod Order From Save...";
+
+			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
+			{
+				dialog.InitialDirectory = PathwayData.LastSaveFilePath;
+			}
+			else
+			{
+				if (SelectedProfile != null)
+				{
+					dialog.InitialDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+				}
+				else
+				{
+					dialog.InitialDirectory = Path.GetFullPath(PathwayData.LarianDocumentsFolder);
+				}
+			}
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
+				Trace.WriteLine($"Loading order from '{dialog.FileName}'.");
+				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName);
+				if(newOrder != null)
+				{
+					Trace.WriteLine($"Settings order to '{String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}'.");
+					LoadModOrder(newOrder);
+				}
+				else
+				{
+					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+				}
+			}
+		}
+
 		public ModListDropHandler DropHandler { get; set; }
 
 		public void OnViewActivated(MainWindow parentView)
@@ -1724,6 +1775,19 @@ namespace DivinityModManager.ViewModels
 			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
 
 			AddOrderConfigCommand = ReactiveCommand.Create(AddNewOrderConfig);
+
+			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSave);
+
+			ImportOrderFromFileCommand = ReactiveCommand.Create(() =>
+			{
+
+			});
+
+			ImportZipFileCommand = ReactiveCommand.Create(() =>
+			{
+
+			});
+
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 
 			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress);

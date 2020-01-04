@@ -664,16 +664,18 @@ namespace DivinityModManager.ViewModels
 			{
 				projects = new List<DivinityModData>();
 			}
-
+#if DEBUG
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
-				Concat(DivinityModDataLoader.Larian_Mods).
-				OrderBy(m => m.Name);
+				Concat(DivinityModDataLoader.Larian_Mods).OrderBy(m => m.Name);
+#else
+			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
+#endif
 
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
 
 			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
-			Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
+			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
 
 			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
 			//{
@@ -1304,7 +1306,7 @@ namespace DivinityModManager.ViewModels
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items);
+				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items, Settings.AutoAddDependenciesWhenExporting);
 				if (result)
 				{
 					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'");

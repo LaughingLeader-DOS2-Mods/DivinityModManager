@@ -665,12 +665,15 @@ namespace DivinityModManager.ViewModels
 				projects = new List<DivinityModData>();
 			}
 
-			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
+			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
+				Concat(DivinityModDataLoader.Larian_Mods).
+				OrderBy(m => m.Name);
 
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
 
 			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
+			Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
 
 			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
 			//{
@@ -709,7 +712,9 @@ namespace DivinityModManager.ViewModels
 			if (modPakData == null) modPakData = new List<DivinityModData>();
 			if (projects == null) projects = new List<DivinityModData>();
 
-			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name).ToList();
+			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
+				Concat(DivinityModDataLoader.Larian_Mods).
+				OrderBy(m => m.Name).ToList();
 			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
 			return finalMods;
 		}
@@ -918,19 +923,6 @@ namespace DivinityModManager.ViewModels
 			}
 
 			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
-			//order.CreateActiveOrderBind(ActiveMods.ToObservableChangeSet());
-
-			//orderedMods.ForEach(m => {
-			//	m.IsActive = true;
-			//	Trace.WriteLine($"Mod {m.Name} is active.");
-			//});
-
-			//unOrderedMods.ForEach(m => {
-			//	m.IsActive = false;
-			//	Trace.WriteLine($"Mod {m.Name} is inactive.");
-			//});
-
-			Trace.WriteLine($"Loaded mod order: {order.Name}");
 
 			LoadingOrder = false;
 		}
@@ -1942,7 +1934,8 @@ namespace DivinityModManager.ViewModels
 			mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(Disposables);
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe().DisposeWith(Disposables);
 
-			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
+			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, 
+				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
 
 			//this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
 			//{

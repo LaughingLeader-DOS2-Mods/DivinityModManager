@@ -19,29 +19,40 @@ namespace DivinityModManager.Util
 {
 	public static class DivinityModDataLoader
 	{
-		public static List<DivinityModData> LarianMods { get; private set; } = new List<DivinityModData>()
+		public static List<DivinityModData> Larian_Base { get; private set; } = new List<DivinityModData>()
 		{
-			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder = "Shared" },
-			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder = "Shared_DOS" },
-			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version = new DivinityModVersion(372251161)},
-			new DivinityModData{ Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder = "DOS2_Arena"},
-			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder = "GameMaster"},
-			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack"},
-			new DivinityModData{ Name = "Nine Lives", UUID = "015de505-6e7f-460c-844c-395de6c2ce34", Folder="AS_BlackCatPlus"},
-			new DivinityModData{ Name = "Herb Gardens", UUID = "38608c30-1658-4f6a-8adf-e826a5295808", Folder="AS_GrowYourHerbs"},
-			new DivinityModData{ Name = "Endless Runner", UUID = "ec27251d-acc0-4ab8-920e-dbc851e79bb4", Folder="AS_ToggleSpeedAddon"},
-			new DivinityModData{ Name = "8 Action Points", UUID = "9b45f7e5-d4e2-4fc2-8ef7-3b8e90a5256c", Folder="CMP_8AP_Kamil"},
-			new DivinityModData{ Name = "Hagglers", UUID = "f33ded5d-23ab-4f0c-b71e-1aff68eee2cd", Folder="CMP_BarterTweaks"},
-			new DivinityModData{ Name = "Crafter's Kit", UUID = "68a99fef-d125-4ed0-893f-bb6751e52c5e", Folder="CMP_CraftingOverhaul"},
-			new DivinityModData{ Name = "Combat Randomiser", UUID = "f30953bb-10d3-4ba4-958c-0f38d4906195", Folder="CMP_EnemyRandomizer_Kamil"},
-			new DivinityModData{ Name = "Animal Empathy", UUID = "423fae51-61e3-469a-9c1f-8ad3fd349f02", Folder="CMP_Free_PetPalTag_Kamil"},
-			new DivinityModData{ Name = "Fort Joy Magic Mirror", UUID = "2d42113c-681a-47b6-96a1-d90b3b1b07d3", Folder="CMP_FTJRespec_Kamil"},
-			new DivinityModData{ Name = "Sourcerous Sundries", UUID = "a945eefa-530c-4bca-a29c-a51450f8e181", Folder="CMP_LevelUpEquipment"},
-			new DivinityModData{ Name = "Improved Organisation", UUID = "f243c84f-9322-43ac-96b7-7504f990a8f0", Folder="CMP_OrganizedContainers_Marek"},
-			new DivinityModData{ Name = "Pet Power", UUID = "d2507d43-efce-48b8-ba5e-5dd136c715a7", Folder="CMP_SummoningImproved_Kamil"}
+			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version=DivinityModVersion.FromInt(372251161), Type="Adventure", Targets="Story", Author="Larian", Description=""},
+			new DivinityModData{ Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder="DOS2_Arena", Version=DivinityModVersion.FromInt(271587865), Type="Adventure", Targets="Story", Author="Larian", Description=""},
+			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder="GameMaster", Version=DivinityModVersion.FromInt(271587865), Type="Adventure", Targets="Story", Author="Larian", Description=""},
+			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder="Shared", Version=DivinityModVersion.FromInt(389028377), Type="Adventure", Targets="Story", Author="Larian", Description=""},
+			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder="Shared_DOS", Version=DivinityModVersion.FromInt(268435456), Type="Adventure", Targets="Story", Author="Larian", Description=""},
+			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description=""},
+		};
+		public static List<DivinityModData> Larian_Mods { get; private set; } = new List<DivinityModData>()
+		{
+			new DivinityModData{ Name = "Nine Lives", UUID = "015de505-6e7f-460c-844c-395de6c2ce34", Folder="AS_BlackCatPlus", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Transforms the Black Cat into a follower. Once rescued, a whistle will appear in your inventory. You can use this if your cat gets lost, or if you want to change who it follows.<br><br>Note that this is a persistent mod that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Herb Gardens", UUID = "38608c30-1658-4f6a-8adf-e826a5295808", Folder="AS_GrowYourHerbs", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Plant your own herb garden! Take any herb and combine it with a bucket to create a seedling. Then, just place your seedling in the ground and watch it grow.<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Endless Runner", UUID = "ec27251d-acc0-4ab8-920e-dbc851e79bb4", Folder="AS_ToggleSpeedAddon", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Find a new icon in your Hotbar which you can use to toggle sprint on and off. Sprint increases your movement speed and the movement speed of your followers."},
+			new DivinityModData{ Name = "8 Action Points", UUID = "9b45f7e5-d4e2-4fc2-8ef7-3b8e90a5256c", Folder="CMP_8AP_Kamil", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Increases the base maximum Action Points of hero characters to 8."},
+			new DivinityModData{ Name = "Hagglers", UUID = "f33ded5d-23ab-4f0c-b71e-1aff68eee2cd", Folder="CMP_BarterTweaks", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Let the reputation and skill of your whole party help when you want to haggle for the best prices!"},
+			new DivinityModData{ Name = "Crafter's Kit", UUID = "68a99fef-d125-4ed0-893f-bb6751e52c5e", Folder="CMP_CraftingOverhaul", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Plenty of new recipes and unique items to craft!<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Combat Randomiser", UUID = "f30953bb-10d3-4ba4-958c-0f38d4906195", Folder="CMP_EnemyRandomizer_Kamil", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="When entering combat, one or more random enemies will receive one of the new special statuses created for this mod. This will change everything you thought you knew about combat!<br><br>Note that this is a persistent mod that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Animal Empathy", UUID = "423fae51-61e3-469a-9c1f-8ad3fd349f02", Folder="CMP_Free_PetPalTag_Kamil", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Allows all player characters to talk to animals without having to spend a talent point. Also changes Pet Pal talent to grant maximum positive attitude in all conversations with animals.<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Fort Joy Magic Mirror", UUID = "2d42113c-681a-47b6-96a1-d90b3b1b07d3", Folder="CMP_FTJRespec_Kamil", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Manifests a Magic Mirror in the Arena of Fort Joy, along with a new Character Creation level. This allows you to respec before moving on to the next act of the game.<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Sourcerous Sundries", UUID = "a945eefa-530c-4bca-a29c-a51450f8e181", Folder="CMP_LevelUpEquipment", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="In each major hub, you can now find a mysterious vendor selling exotic and potent artefacts. These artefacts can upgrade a character's own gear with immense power, bringing them up to the player's current level.<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Improved Organisation", UUID = "f243c84f-9322-43ac-96b7-7504f990a8f0", Folder="CMP_OrganizedContainers_Marek", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Find a collection of special bags that allow you to better (and automatically) organise your inventory.<br><br>Note that this is a persistent mod that cannot be turned off once activated."},
+			new DivinityModData{ Name = "Pet Power", UUID = "d2507d43-efce-48b8-ba5e-5dd136c715a7", Folder="CMP_SummoningImproved_Kamil", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="Pet Power enhances the summoning class and its infusion spells immensely. With this mod, you can cast infusion spells on all available summons, not just your own Incarnate! Each summon receives different skills depending on the base elemental infusion type.<br><br>Note that this is a persistent modification that cannot be turned off once activated."},
 		};
 
-		public static List<DivinityModData> IgnoredMods { get; set; } = new List<DivinityModData>(LarianMods);
+		private static List<DivinityModData> GetIgnoredMods(bool all = false)
+		{
+			var mods = new List<DivinityModData>(Larian_Base);
+			if (all) mods.AddRange(Larian_Mods);
+			return mods;
+		}
+
+		public static List<DivinityModData> IgnoredEditorMods { get; set; } = GetIgnoredMods(true);
+		public static List<DivinityModData> IgnoredMods { get; set; } = GetIgnoredMods();
 
 		public static bool IgnoreMod(string modUUID)
 		{
@@ -50,7 +61,7 @@ namespace DivinityModManager.Util
 
 		public static bool IgnoreModByFolder(string folder)
 		{
-			return IgnoredMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
+			return IgnoredEditorMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
 		}
 
 		public static string MakeSafeFilename(string filename, char replaceChar)
@@ -1094,6 +1105,10 @@ namespace DivinityModManager.Util
 									UUID = uuid,
 									Name = name
 								});
+							}
+							else
+							{
+								Trace.WriteLine($"Ignoring mod in save: '{name}'.");
 							}
 						}
 

@@ -923,13 +923,27 @@ namespace DivinityModManager.Util
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
 				string contents = GenerateModSettingsFile(order.Order, allMods);
+				Trace.WriteLine($"Contents: '{contents}");
 				try
 				{
-					var buffer = Encoding.UTF8.GetBytes(contents);
-					using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.Create, 
-						System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, true))
+					//Lazy indentation!
+					var xml = new XmlDocument();
+					xml.LoadXml(contents);
+					using (var sw = new System.IO.StringWriter())
 					{
-						await fs.WriteAsync(buffer, 0, buffer.Length);
+						using (var xw = new XmlTextWriter(sw))
+						{
+							xw.Formatting = System.Xml.Formatting.Indented;
+							xw.Indentation = 2;
+							xml.WriteTo(xw);
+						}
+
+						var buffer = Encoding.UTF8.GetBytes(sw.ToString());
+						using (var fs = new System.IO.FileStream(outputFilePath, System.IO.FileMode.Create,
+							System.IO.FileAccess.Write, System.IO.FileShare.None, buffer.Length, true))
+						{
+							await fs.WriteAsync(buffer, 0, buffer.Length);
+						}
 					}
 
 					return true;
@@ -948,7 +962,8 @@ namespace DivinityModManager.Util
 			string modulesText = "";
 			foreach(var uuid in order.Select(m => m.UUID))
 			{
-				modulesText += String.Format(Properties.Resources.ModSettingsModOrderModuleNode, uuid) + Environment.NewLine;
+				//modulesText += String.Format(Properties.Resources.ModSettingsModOrderModuleNode, uuid) + Environment.NewLine;
+				modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE.Trim(), uuid) + Environment.NewLine;
 			}
 
 			/* Active mods are contained within the Mods node. Origins is always included at the top, despite it not being in ModOrder. */
@@ -958,9 +973,11 @@ namespace DivinityModManager.Util
 			foreach (var mod in allMods.Where(m => order.Any(o => o.UUID == m.UUID)))
 			{
 				string safeName = System.Security.SecurityElement.Escape(mod.Name);
-				modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+				//modShortDescText += String.Format(Properties.Resources.ModSettingsModuleShortDescNode, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+				modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC.Trim(), mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 			}
-			string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
+			//string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
+			string output = String.Format(DivinityApp.XML_MOD_SETTINGS_TEMPLATE.Trim(), modulesText, modShortDescText);
 			//Trace.WriteLine(output);
 			return output;
 		}

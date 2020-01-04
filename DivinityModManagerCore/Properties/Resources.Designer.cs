@@ -59,58 +59,5 @@ namespace DivinityModManager.Properties {
                 resourceCulture = value;
             }
         }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to                         &lt;node id=&quot;Module&quot;&gt;
-        ///                            &lt;attribute id=&quot;UUID&quot; value=&quot;{0}&quot; type=&quot;22&quot; /&gt;
-        ///                        &lt;/node&gt;.
-        /// </summary>
-        public static string ModSettingsModOrderModuleNode {
-            get {
-                return ResourceManager.GetString("ModSettingsModOrderModuleNode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to 						&lt;node id=&quot;ModuleShortDesc&quot;&gt;
-        ///							&lt;attribute id=&quot;Folder&quot; value=&quot;{0}&quot; type=&quot;30&quot; /&gt;
-        ///							&lt;attribute id=&quot;MD5&quot; value=&quot;{1}&quot; type=&quot;23&quot; /&gt;
-        ///							&lt;attribute id=&quot;Name&quot; value=&quot;{2}&quot; type=&quot;22&quot; /&gt;
-        ///							&lt;attribute id=&quot;UUID&quot; value=&quot;{3}&quot; type=&quot;22&quot; /&gt;
-        ///							&lt;attribute id=&quot;Version&quot; value=&quot;{4}&quot; type=&quot;4&quot; /&gt;
-        ///						&lt;/node&gt;.
-        /// </summary>
-        public static string ModSettingsModuleShortDescNode {
-            get {
-                return ResourceManager.GetString("ModSettingsModuleShortDescNode", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-        ///&lt;save&gt;
-        ///    &lt;header version=&quot;2&quot; /&gt;
-        ///    &lt;version major=&quot;3&quot; minor=&quot;6&quot; revision=&quot;4&quot; build=&quot;0&quot; /&gt;
-        ///    &lt;region id=&quot;ModuleSettings&quot;&gt;
-        ///        &lt;node id=&quot;root&quot;&gt;
-        ///            &lt;children&gt;
-        ///                &lt;node id=&quot;ModOrder&quot;&gt;
-        ///                    &lt;children&gt;
-        ///{0}					&lt;/children&gt;
-        ///                &lt;/node&gt;
-        ///                &lt;node id=&quot;Mods&quot;&gt;
-        ///                    &lt;children&gt;
-        ///{1}					&lt;/children&gt;
-        ///                &lt;/node&gt;
-        ///            &lt;/children&gt;
-        ///        &lt;/node&gt;
-        ///    &lt;/region&gt;
-        ///&lt;/save [rest of string was truncated]&quot;;.
-        /// </summary>
-        public static string ModSettingsTemplate {
-            get {
-                return ResourceManager.GetString("ModSettingsTemplate", resourceCulture);
-            }
-        }
     }
 }

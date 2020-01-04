@@ -117,42 +117,4 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ModSettingsModuleShortDescNode" xml:space="preserve">
-    <value>						&lt;node id="ModuleShortDesc"&gt;
-							&lt;attribute id="Folder" value="{0}" type="30" /&gt;
-							&lt;attribute id="MD5" value="{1}" type="23" /&gt;
-							&lt;attribute id="Name" value="{2}" type="22" /&gt;
-							&lt;attribute id="UUID" value="{3}" type="22" /&gt;
-							&lt;attribute id="Version" value="{4}" type="4" /&gt;
-						&lt;/node&gt;</value>
-    <comment>0 = Folder, 1 = MD5, 2 = Name, 3 = UUID, 4 = Version</comment>
-  </data>
-  <data name="ModSettingsTemplate" xml:space="preserve">
-    <value>&lt;?xml version="1.0" encoding="UTF-8" ?&gt;
-&lt;save&gt;
-    &lt;header version="2" /&gt;
-    &lt;version major="3" minor="6" revision="4" build="0" /&gt;
-    &lt;region id="ModuleSettings"&gt;
-        &lt;node id="root"&gt;
-            &lt;children&gt;
-                &lt;node id="ModOrder"&gt;
-                    &lt;children&gt;
-{0}					&lt;/children&gt;
-                &lt;/node&gt;
-                &lt;node id="Mods"&gt;
-                    &lt;children&gt;
-{1}					&lt;/children&gt;
-                &lt;/node&gt;
-            &lt;/children&gt;
-        &lt;/node&gt;
-    &lt;/region&gt;
-&lt;/save&gt;</value>
-    <comment>0 = ModOrder, 1 = Mods</comment>
-  </data>
-  <data name="ModSettingsModOrderModuleNode" xml:space="preserve">
-    <value>                        &lt;node id="Module"&gt;
-                            &lt;attribute id="UUID" value="{0}" type="22" /&gt;
-                        &lt;/node&gt;</value>
-    <comment>0 = UUID</comment>
-  </data>
 </root>

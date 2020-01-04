@@ -95,6 +95,19 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		private bool autoAddDependenciesWhenExporting = true;
+
+		[DataMember]
+		public bool AutoAddDependenciesWhenExporting
+		{
+			get => autoAddDependenciesWhenExporting;
+			set
+			{
+				if (value != autoAddDependenciesWhenExporting) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref autoAddDependenciesWhenExporting, value);
+			}
+		}
+
 		private bool checkForUpdates = true;
 
 		[DataMember]

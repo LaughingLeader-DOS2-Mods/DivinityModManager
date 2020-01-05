@@ -1,4 +1,5 @@
-﻿using DivinityModManager.Util;
+﻿using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.Util;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -25,7 +26,23 @@ namespace DivinityModManager.Models
 			get => index;
 			set { this.RaiseAndSetIfChanged(ref index, value); }
 		}
-		public string FilePath { get; set; }
+
+		private string filePath;
+
+		public string FilePath
+		{
+			get => filePath;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref filePath, value); 
+				if(!String.IsNullOrWhiteSpace(filePath))
+				{
+					FileName = Path.GetFileName(FilePath);
+				}
+			}
+		}
+
+		public string FileName { get; set; }
 
 		public string UUID { get; set; }
 		public string Name { get; set; }

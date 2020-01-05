@@ -257,6 +257,7 @@
 								FontWeight="Bold"
 								Text="{Binding Targets}" />
 						</StackPanel>
+						<TextBlock Margin="2" Text="{Binding FileName}" />
 					</StackPanel>
 				</ToolTip>
 			</TextBlock.ToolTip>

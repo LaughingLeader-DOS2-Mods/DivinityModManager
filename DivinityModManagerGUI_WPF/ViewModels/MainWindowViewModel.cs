@@ -629,6 +629,16 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 			}
+
+			if(File.Exists(Settings.DOS2DEGameExecutable))
+			{
+				string extenderPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
+				if (File.Exists(extenderPath))
+				{
+					Settings.ExtenderSettings.ExtenderIsAvailable = true;
+					Trace.WriteLine($"Found the OsiExtender at '{extenderPath}'.");
+				}
+			}
 		}
 
 		public void LoadMods()

@@ -153,6 +153,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref darkThemeEnabled, value); }
 		}
 
+		private OsiExtenderSettings extenderSettings;
+
+		[DataMember]
+		public OsiExtenderSettings ExtenderSettings
+		{
+			get => extenderSettings;
+			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
+		}
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
 
@@ -169,6 +178,7 @@ namespace DivinityModManager.Models
 		public DivinityModManagerSettings()
 		{
 			Disposables = new CompositeDisposable();
+			ExtenderSettings = new OsiExtenderSettings();
 		}
 
 		public void Dispose()

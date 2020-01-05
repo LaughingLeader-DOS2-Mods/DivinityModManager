@@ -39,6 +39,7 @@ namespace DivinityModManager.Models
 		public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
+		public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 
 		private string dependenciesText;

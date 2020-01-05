@@ -14,6 +14,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Newtonsoft.Json.Linq;
 
 namespace DivinityModManager.Util
 {
@@ -192,6 +193,7 @@ namespace DivinityModManager.Util
 						var metaFile = Path.Combine(folder, "meta.lsx");
 						if (File.Exists(metaFile))
 						{
+							
 							var str = File.ReadAllText(metaFile);
 							if(!String.IsNullOrEmpty(str))
 							{
@@ -201,18 +203,38 @@ namespace DivinityModManager.Util
 									str = str.Remove(0, _byteOrderMarkUtf8.Length);
 								}
 
-								var modData = ParseMetaFile(str);
-								modData.IsEditorMod = true;
-								modData.FilePath = folder;
-								try
+								DivinityModData modData = ParseMetaFile(str);
+								if (modData != null)
 								{
-									modData.LastModified = File.GetChangeTime(metaFile);
+									modData.IsEditorMod = true;
+									modData.FilePath = folder;
+									try
+									{
+										modData.LastModified = File.GetChangeTime(metaFile);
+									}
+									catch (PlatformNotSupportedException ex)
+									{
+										Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+									}
+
+									projects.Add(modData);
+
+									var osiConfigFile = Path.Combine(folder, "OsiToolsConfig.json");
+									if (File.Exists(osiConfigFile))
+									{
+										var osiToolsConfig = LoadOsiConfig(osiConfigFile);
+										if (osiToolsConfig != null)
+										{
+											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
+											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+										}
+										else
+										{
+											Trace.WriteLine($"Failed to parse OsiToolsConfig.json for '{folder}'.");
+										}
+									}
 								}
-								catch (PlatformNotSupportedException ex)
-								{
-									Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
-								}
-								if (modData != null) projects.Add(modData);
 							}
 						}
 					}
@@ -259,18 +281,37 @@ namespace DivinityModManager.Util
 										str = str.Remove(0, _byteOrderMarkUtf8.Length);
 									}
 
-									var modData = ParseMetaFile(str);
-									modData.IsEditorMod = true;
-									modData.FilePath = folder;
-									try
+									DivinityModData modData = ParseMetaFile(str);
+									if (modData != null)
 									{
-										modData.LastModified = File.GetChangeTime(metaFile);
+										modData.IsEditorMod = true;
+										modData.FilePath = folder;
+										try
+										{
+											modData.LastModified = File.GetChangeTime(metaFile);
+										}
+										catch (PlatformNotSupportedException ex)
+										{
+											Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
+										}
+										projects.Add(modData);
+
+										var osiConfigFile = Path.Combine(folder, "OsiToolsConfig.json");
+										if (File.Exists(osiConfigFile))
+										{
+											var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
+											if (osiToolsConfig != null)
+											{
+												Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
+												Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+												Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+											}
+											else
+											{
+												Trace.WriteLine($"Failed to parse OsiToolsConfig.json for '{folder}'.");
+											}
+										}
 									}
-									catch (PlatformNotSupportedException ex)
-									{
-										Trace.WriteLine($"Error getting last modified date for '{metaFile}': {ex.ToString()}");
-									}
-									if (modData != null) projects.Add(modData);
 								}
 							}
 						}
@@ -322,6 +363,8 @@ namespace DivinityModManager.Util
 					{
 						using (var pr = new LSLib.LS.PackageReader(pakPath))
 						{
+							DivinityModData modData = null;
+
 							var pak = pr.Read();
 							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
 							if (metaFile != null)
@@ -331,20 +374,75 @@ namespace DivinityModManager.Util
 									using (var sr = new System.IO.StreamReader(stream))
 									{
 										string text = sr.ReadToEnd();
-										var modData = ParseMetaFile(text);
-										if (modData != null)
+										modData = ParseMetaFile(text);
+									}
+								}
+							}
+
+							if(modData != null)
+							{
+								modData.FilePath = pakPath;
+								try
+								{
+									modData.LastModified = File.GetChangeTime(pakPath);
+								}
+								catch (PlatformNotSupportedException ex)
+								{
+									Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
+								}
+								mods.Add(modData);
+
+								var osiToolsConfig = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("OsiToolsConfig.json"));
+								if (osiToolsConfig != null)
+								{
+									try
+									{
+										using (var stream = osiToolsConfig.MakeStream())
 										{
-											modData.FilePath = pakPath;
-											try
+											using (var sr = new System.IO.StreamReader(stream))
 											{
-												modData.LastModified = File.GetChangeTime(pakPath);
+												string text = sr.ReadToEnd();
+												if (!String.IsNullOrWhiteSpace(text))
+												{
+													var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+													if (osiConfig != null)
+													{
+														modData.OsiExtenderData = osiConfig;
+														Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+														Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+														Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+													}
+													else
+													{
+														var jsonObj = JObject.Parse(text);
+														if (jsonObj != null)
+														{
+															modData.OsiExtenderData = new DivinityModOsiExtenderConfig();
+															Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+															modData.OsiExtenderData.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+															modData.OsiExtenderData.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+															Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+															if (modData.OsiExtenderData.FeatureFlags != null)
+															{
+																Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+															}
+															else
+															{
+																Trace.WriteLine("\tFeatureFlags: null");
+															}
+														}
+														else
+														{
+															Trace.WriteLine($"Failed to parse OsiToolsConfig.json for '{pakPath}':\n\t{text}");
+														}
+													}
+												}
 											}
-											catch (PlatformNotSupportedException ex)
-											{
-												Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
-											}
-											mods.Add(modData);
 										}
+									}
+									catch(Exception ex)
+									{
+										Trace.WriteLine($"Error reading 'OsiToolsConfig.json' for '{pakPath}': {ex.ToString()}");
 									}
 								}
 							}
@@ -400,6 +498,8 @@ namespace DivinityModManager.Util
 					{
 						using (var pr = new LSLib.LS.PackageReader(pakPath))
 						{
+							DivinityModData modData = null;
+
 							var pak = pr.Read();
 							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
 							if (metaFile != null)
@@ -409,19 +509,36 @@ namespace DivinityModManager.Util
 									using (var sr = new System.IO.StreamReader(stream))
 									{
 										string text = await sr.ReadToEndAsync();
-										var modData = ParseMetaFile(text);
-										if (modData != null)
+										modData = ParseMetaFile(text);
+									}
+								}
+
+								if (modData != null)
+								{
+									modData.FilePath = pakPath;
+									try
+									{
+										modData.LastModified = File.GetChangeTime(pakPath);
+									}
+									catch (PlatformNotSupportedException ex)
+									{
+										Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
+									}
+									mods.Add(modData);
+
+									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains("OsiToolsConfig.json"));
+									if(osiConfigInfo != null)
+									{
+										var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
+										if (osiToolsConfig != null)
 										{
-											modData.FilePath = pakPath;
-											try
-											{
-												modData.LastModified = File.GetChangeTime(pakPath);
-											}
-											catch (PlatformNotSupportedException ex)
-											{
-												Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
-											}
-											mods.Add(modData);
+											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+										}
+										else
+										{
+											Trace.WriteLine($"Failed to parse OsiToolsConfig.json for '{pakPath}'.");
 										}
 									}
 								}
@@ -434,16 +551,6 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-
-			try
-			{
-
-			}
-			catch (Exception ex)
-			{
-				Trace.WriteLine($"Error loading mod paks: {ex.ToString()}");
-			}
-
 			return mods;
 		}
 
@@ -1167,6 +1274,112 @@ namespace DivinityModManager.Util
 				}
 			}
 
+			return null;
+		}
+
+
+		private static DivinityModOsiExtenderConfig LoadOsiConfig(string osiToolsConfig)
+		{
+			try
+			{
+				var text = File.ReadAllText(osiToolsConfig);
+				if (!String.IsNullOrWhiteSpace(text))
+				{
+					var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+					if (osiConfig != null)
+					{
+						return osiConfig;
+					}
+					else
+					{
+						var jsonObj = JObject.Parse(text);
+						if (jsonObj != null)
+						{
+							osiConfig = new DivinityModOsiExtenderConfig();
+							osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+							osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+							return osiConfig;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error reading 'OsiToolsConfig.json': {ex.ToString()}");
+			}
+			return null;
+		}
+
+		private static async Task<DivinityModOsiExtenderConfig> LoadOsiConfigAsync(string osiToolsConfig)
+		{
+			try
+			{
+				using (var reader = File.OpenText(osiToolsConfig))
+				{
+					var text = await reader.ReadToEndAsync();
+					if (!String.IsNullOrWhiteSpace(text))
+					{
+						var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+						if (osiConfig != null)
+						{
+							return osiConfig;
+						}
+						else
+						{
+							var jsonObj = JObject.Parse(text);
+							if (jsonObj != null)
+							{
+								osiConfig = new DivinityModOsiExtenderConfig();
+								osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+								osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+								return osiConfig;
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error reading 'OsiToolsConfig.json': {ex.ToString()}");
+			}
+			return null;
+		}
+
+		private static async Task<DivinityModOsiExtenderConfig> LoadOsiConfigAsync(AbstractFileInfo osiToolsConfig)
+		{
+			try
+			{
+				using (var stream = osiToolsConfig.MakeStream())
+				{
+					using (var sr = new System.IO.StreamReader(stream))
+					{
+						string text = await sr.ReadToEndAsync();
+						if (!String.IsNullOrWhiteSpace(text))
+						{
+							var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+							if (osiConfig != null)
+							{
+								return osiConfig;
+							}
+							else
+							{
+								var jsonObj = JObject.Parse(text);
+								if (jsonObj != null)
+								{
+									osiConfig = new DivinityModOsiExtenderConfig();
+									osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+									osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+									return osiConfig;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error reading 'OsiToolsConfig.json': {ex.ToString()}");
+			}
 			return null;
 		}
 	}

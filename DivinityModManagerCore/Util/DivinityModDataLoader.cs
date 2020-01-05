@@ -225,6 +225,7 @@ namespace DivinityModManager.Util
 										var osiToolsConfig = LoadOsiConfig(osiConfigFile);
 										if (osiToolsConfig != null)
 										{
+											modData.OsiExtenderData = osiToolsConfig;
 											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
 											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
 											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
@@ -302,9 +303,10 @@ namespace DivinityModManager.Util
 											var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
 											if (osiToolsConfig != null)
 											{
+												modData.OsiExtenderData = osiToolsConfig;
 												Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
-												Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-												Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+												Trace.WriteLine($"\tRequiredVersion: {osiToolsConfig.RequiredExtensionVersion}");
+												Trace.WriteLine($"\tFeatureFlags: {String.Join(",", osiToolsConfig.FeatureFlags)}");
 											}
 											else
 											{
@@ -532,9 +534,10 @@ namespace DivinityModManager.Util
 										var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
 										if (osiToolsConfig != null)
 										{
+											modData.OsiExtenderData = osiToolsConfig;
 											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
-											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+											Trace.WriteLine($"\tRequiredVersion: {osiToolsConfig.RequiredExtensionVersion}");
+											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", osiToolsConfig.FeatureFlags)}");
 										}
 										else
 										{

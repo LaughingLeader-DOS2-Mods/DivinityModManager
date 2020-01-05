@@ -33,6 +33,7 @@ using SharpCompress.Common;
 using System.Text.RegularExpressions;
 using AdonisUI;
 using System.Windows.Media;
+using System.Reflection;
 
 namespace DivinityModManager.ViewModels
 {
@@ -633,10 +634,54 @@ namespace DivinityModManager.ViewModels
 			if(File.Exists(Settings.DOS2DEGameExecutable))
 			{
 				string extenderPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
+				Trace.WriteLine($"Looking for OsiExtender at '{extenderPath}'.");
 				if (File.Exists(extenderPath))
 				{
-					Settings.ExtenderSettings.ExtenderIsAvailable = true;
-					Trace.WriteLine($"Found the OsiExtender at '{extenderPath}'.");
+					try
+					{
+						using (var stream = File.Open(extenderPath, FileMode.Open))
+						{
+							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
+							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris Extender")) >= 0)
+							{
+								Settings.ExtenderSettings.ExtenderIsAvailable = true;
+								Trace.WriteLine($"Found the OsiExtender at '{extenderPath}'.");
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Error reading: '{extenderPath}'\n\t{ex.ToString()}");
+					}
+
+					if(Settings.ExtenderSettings.ExtenderIsAvailable)
+					{
+						string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
+						if (File.Exists(extenderAppFile))
+						{
+							try
+							{
+								FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
+								if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+								{
+									var version = extenderInfo.FileVersion.Split('.')[0];
+									if(int.TryParse(version, out int intVersion))
+									{
+										Settings.ExtenderSettings.ExtenderVersion = intVersion;
+										Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+									}
+									else
+									{
+										Settings.ExtenderSettings.ExtenderVersion = -1;
+									}
+								}
+							}
+							catch (Exception ex)
+							{
+								Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
+							}
+						}
+					}
 				}
 			}
 		}

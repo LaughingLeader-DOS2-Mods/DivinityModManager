@@ -10,7 +10,7 @@ namespace DivinityModManager.Models
 	public class DivinityModOsiExtenderConfig
 	{
 		[JsonProperty("RequiredExtensionVersion")]
-		public int RequiredExtensionVersion { get; set; }
+		public int RequiredExtensionVersion { get; set; } = -1;
 
 		[JsonProperty("FeatureFlags")]
 		public List<string> FeatureFlags { get; set; }

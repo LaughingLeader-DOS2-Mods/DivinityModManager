@@ -473,6 +473,7 @@
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*" />
 						<ColumnDefinition Width="1" />
+						<ColumnDefinition Width="Auto" />
 						<ColumnDefinition Width="*" />
 					</Grid.ColumnDefinitions>
 					<Menu x:Name="TopMenuBar" Padding="2">
@@ -538,6 +539,10 @@
 				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
 			</MenuItem>-->
 					</Menu>
+					<StackPanel
+						Grid.Column="3"
+						Margin="2"
+						Orientation="Horizontal" />
 					<StackPanel
 						Grid.Column="2"
 						HorizontalAlignment="Left"

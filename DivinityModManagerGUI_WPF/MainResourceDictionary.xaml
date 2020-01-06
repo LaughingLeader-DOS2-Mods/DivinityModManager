@@ -15,6 +15,7 @@
 	xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
 	x:Name="MainResources">
 	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+	<conv:BoolToVisibilityConverterReversed x:Key="BoolToVisibilityConverterReversed" />
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 	<conv:StringToUriConverter x:Key="StringToUriConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
@@ -130,7 +131,33 @@
 				<GradientStop Offset="1" Color="#FFA3FFAB" />
 			</LinearGradientBrush>
 		</Style.Resources>-->
-
+		<Setter Property="Tag" Value="{Binding}" />
+		<Setter Property="ContextMenu">
+			<Setter.Value>
+				<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+					<MenuItem
+						Command="{Binding OpenInFileExplorerCommand}"
+						CommandParameter="{Binding FilePath}"
+						Header="Open in File Explorer..." />
+					<MenuItem Command="{Binding ToggleNameDisplayCommand}" CommandParameter="{Binding}">
+						<MenuItem.Header>
+							<TextBlock>
+								<TextBlock.Style>
+									<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+										<Setter Property="Text" Value="Display Filename" />
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding DisplayFileForName}" Value="true">
+												<Setter Property="Text" Value="Display Mod Name" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</MenuItem.Header>
+					</MenuItem>
+				</ContextMenu>
+			</Setter.Value>
+		</Setter>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
 		<Setter Property="Visibility" Value="{Binding Visibility, FallbackValue='Visible'}" />
@@ -174,7 +201,10 @@
 		<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
 	</Style>
 	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">
-		<TextBlock HorizontalAlignment="Stretch" Text="{Binding Name}">
+		<TextBlock
+			HorizontalAlignment="Stretch"
+			Tag="{Binding}"
+			Text="{Binding DisplayName}">
 			<TextBlock.ToolTip>
 				<ToolTip>
 					<ToolTip.Style>
@@ -257,7 +287,10 @@
 								FontWeight="Bold"
 								Text="{Binding Targets}" />
 						</StackPanel>
-						<TextBlock Margin="2" Text="{Binding FileName}" />
+						<StackPanel Orientation="Vertical" Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}">
+							<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+							<TextBlock Margin="2" Text="{Binding FileName}" />
+						</StackPanel>
 					</StackPanel>
 				</ToolTip>
 			</TextBlock.ToolTip>

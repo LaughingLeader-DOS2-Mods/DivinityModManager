@@ -77,7 +77,7 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
-	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel
+	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
 	{
 		private MainWindow view;
 		public MainWindow View => view;
@@ -104,6 +104,14 @@ namespace DivinityModManager.ViewModels
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
+
+		private readonly ObservableAsPropertyHelper<int> activeSelected;
+
+		public int ActiveSelected => activeSelected.Value;
+
+		private readonly ObservableAsPropertyHelper<int> inactiveSelected;
+
+		public int InactiveSelected => inactiveSelected.Value;
 
 		private string activeModFilterText = "";
 
@@ -450,7 +458,7 @@ namespace DivinityModManager.ViewModels
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
 				ToggleLogging(logEnabled);
-			}).DisposeWith(Disposables);
+			}).DisposeWith(Settings.Disposables);
 
 			this.WhenAnyValue(x => x.Settings.DarkThemeEnabled).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
 			{
@@ -719,12 +727,9 @@ namespace DivinityModManager.ViewModels
 			{
 				projects = new List<DivinityModData>();
 			}
-#if DEBUG
-			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
-				Concat(DivinityModDataLoader.Larian_Mods).OrderBy(m => m.Name);
-#else
+
+			//var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).Concat(DivinityModDataLoader.Larian_Mods).OrderBy(m => m.Name);
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
-#endif
 
 			mods.Clear();
 			mods.AddOrUpdate(finalMods);
@@ -1733,6 +1738,8 @@ namespace DivinityModManager.ViewModels
 		{
 			view = parentView;
 
+			DivinityApp.GlobalCommands.SetViewModel(this);
+
 			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
 			{
 				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
@@ -1859,6 +1866,25 @@ namespace DivinityModManager.ViewModels
 
 		private MainWindowExceptionHandler exceptionHandler;
 
+		public void ShowAlert(string message, int alertType = 0, int timeout = 0)
+		{
+			switch(alertType)
+			{
+				case -1:
+					view.AlertBar.SetDangerAlert(message, timeout);
+					break;
+				case 0:
+					view.AlertBar.SetInformationAlert(message, timeout);
+					break;
+				case 1:
+					view.AlertBar.SetSuccessAlert(message, timeout);
+					break;
+				case 2:
+					view.AlertBar.SetWarningAlert(message, timeout);
+					break;
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -1978,7 +2004,7 @@ namespace DivinityModManager.ViewModels
 
 					OnOrderChanged?.Invoke(this, new EventArgs());
 				}
-			}).DisposeWith(Disposables);
+			});
 
 			this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
 			{
@@ -1986,10 +2012,10 @@ namespace DivinityModManager.ViewModels
 				{
 					BuildModOrderList();
 				}
-			}).DisposeWith(Disposables);
+			});
 
-			mods.Connect().Bind(out allMods).DisposeMany().Subscribe().DisposeWith(Disposables);
-			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe().DisposeWith(Disposables);
+			mods.Connect().Bind(out allMods).DisposeMany().Subscribe();
+			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, 
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
@@ -2029,14 +2055,29 @@ namespace DivinityModManager.ViewModels
 			//Throttle filters so they only happen when typing stops for 500ms
 
 			this.WhenAnyValue(x => x.ActiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnFilterTextChanged(s, ActiveMods); }).DisposeWith(Disposables);
+				Subscribe((s) => { OnFilterTextChanged(s, ActiveMods); });
 
 			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); }).DisposeWith(Disposables);
+				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
 
 			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
 			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 
+			this.ActiveMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).
+				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, out activeSelected);
+
+			this.InactiveMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).
+				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
+#if DEBUG
+			this.WhenAnyValue(x => x.ActiveSelected).Subscribe((x) =>
+			{
+				Trace.WriteLine($"Total selected active mods: {x}");
+			});
+			this.WhenAnyValue(x => x.InactiveSelected).Subscribe((x) =>
+			{
+				Trace.WriteLine($"Total selected inactive mods: {x}");
+			});
+#endif
 			//ActiveModOrder.ObserveCollectionChanges().Subscribe(e =>
 			//{
 			//	if(e.EventArgs.OldItems != null)

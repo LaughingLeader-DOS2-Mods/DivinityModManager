@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
@@ -45,7 +46,22 @@ namespace DivinityModManager.Models
 		public string FileName { get; set; }
 
 		public string UUID { get; set; }
-		public string Name { get; set; }
+
+		private string name;
+
+		public string Name
+		{
+			get => name;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref name, value); 
+				if(!DisplayFileForName)
+				{
+					DisplayName = Name;
+				}
+			}
+		}
+
 		public string Description { get; set; }
 		public string Author { get; set; }
 		public DivinityModVersion Version { get; set; }
@@ -58,6 +74,40 @@ namespace DivinityModManager.Models
 
 		public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
+
+		private string displayName;
+
+		public string DisplayName
+		{
+			get => displayName;
+			set { this.RaiseAndSetIfChanged(ref displayName, value); }
+		}
+
+		private bool displayFileForName = false;
+
+		public bool DisplayFileForName
+		{
+			get => displayFileForName;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref displayFileForName, value);
+				if(displayFileForName)
+				{
+					if(!IsEditorMod)
+					{
+						DisplayName = Path.GetFileName(FilePath);
+					}
+					else
+					{
+						DisplayName = Folder + " [Editor Project]";
+					}
+				}
+				else
+				{
+					DisplayName = Name;
+				}
+			}
+		}
 
 		private string dependenciesText;
 
@@ -123,6 +173,9 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref visibility, value); }
 		}
 
+		public ICommand OpenInFileExplorerCommand { get; private set; }
+		public ICommand ToggleNameDisplayCommand { get; private set; }
+
 		public void UpdateDependencyText()
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);
@@ -160,6 +213,12 @@ namespace DivinityModManager.Models
 				UUID = this.UUID,
 				Name = this.Name
 			};
+		}
+
+		public DivinityModData()
+		{
+			this.OpenInFileExplorerCommand = DivinityApp.GlobalCommands.OpenInFileExplorerCommand;
+			this.ToggleNameDisplayCommand = DivinityApp.GlobalCommands.ToggleNameDisplayCommand;
 		}
 	}
 }

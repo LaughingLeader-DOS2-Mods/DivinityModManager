@@ -220,7 +220,7 @@ namespace DivinityModManager.Util
 			{
 				InclusionFilter = (f) =>
 				{
-					return !ignoredFiles.Any(x => !IgnoreFile(f.FullPath, x));
+					return !ignoredFiles.Any(x => IgnoreFile(f.FullPath, x));
 				}
 			}).ToDictionary(k => k.Replace(dataRootPath, String.Empty), v => v);
 

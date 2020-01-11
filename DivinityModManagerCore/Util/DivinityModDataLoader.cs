@@ -339,10 +339,14 @@ namespace DivinityModManager.Util
 			return !multiPartPakPattern.IsMatch(f.FileName) && Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
 		}
 
-		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx");
-		private static bool IsModMetaFile(AbstractFileInfo f)
+		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
+		private static bool IsModMetaFile(string pakName, AbstractFileInfo f)
 		{
-			return modMetaPattern.IsMatch(f.Name);
+			if(Path.GetFileName(f.Name).Equals("meta.lsx", StringComparison.OrdinalIgnoreCase))
+			{
+				return modMetaPattern.IsMatch(f.Name);
+			}
+			return false;
 		}
 
 		public static List<DivinityModData> LoadModPackageData(string modsFolderPath)
@@ -378,8 +382,23 @@ namespace DivinityModManager.Util
 						{
 							DivinityModData modData = null;
 
+							string pakName = Path.GetFileNameWithoutExtension(pakPath);
+
 							var pak = pr.Read();
-							var metaFile = pak?.Files?.FirstOrDefault(pf => IsModMetaFile(pf));
+							var metaFiles = pak?.Files?.Where(pf => IsModMetaFile(pakName, pf));
+							AbstractFileInfo metaFile = null;
+							foreach(var f in metaFiles)
+							{
+								var parentDir = Directory.GetParent(f.Name);
+								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
+								if (parentDir.Name == pakName)
+								{
+									metaFile = f;
+									break;
+								}
+							}
+							if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
+
 							if (metaFile != null)
 							{
 								Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
@@ -518,8 +537,22 @@ namespace DivinityModManager.Util
 						{
 							DivinityModData modData = null;
 
+							string pakName = Path.GetFileNameWithoutExtension(pakPath);
+
 							var pak = pr.Read();
-							var metaFile = pak?.Files?.FirstOrDefault(pf => IsModMetaFile(pf));
+							var metaFiles = pak?.Files?.Where(pf => IsModMetaFile(pakName, pf));
+							AbstractFileInfo metaFile = null;
+							foreach (var f in metaFiles)
+							{
+								var parentDir = Directory.GetParent(f.Name);
+								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
+								if (parentDir.Name == pakName)
+								{
+									metaFile = f;
+									break;
+								}
+							}
+							if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
 							if (metaFile != null)
 							{
 								Trace.WriteLine($"Parsing meta.lsx for mod pak '{pakPath}'.");

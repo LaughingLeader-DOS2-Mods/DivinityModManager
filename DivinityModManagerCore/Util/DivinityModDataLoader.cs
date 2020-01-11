@@ -167,6 +167,10 @@ namespace DivinityModManager.Util
 
 					return modData;
 				}
+				else
+				{
+					Trace.WriteLine($"**[ERROR] ModuleInfo node not found for meta.lsx: {metaContents}");
+				}
 			}
 			catch(Exception ex)
 			{
@@ -204,7 +208,6 @@ namespace DivinityModManager.Util
 								{
 									str = str.Remove(0, _byteOrderMarkUtf8.Length);
 								}
-
 								DivinityModData modData = ParseMetaFile(str);
 								if (modData != null)
 								{
@@ -336,6 +339,12 @@ namespace DivinityModManager.Util
 			return !multiPartPakPattern.IsMatch(f.FileName) && Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
 		}
 
+		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx");
+		private static bool IsModMetaFile(AbstractFileInfo f)
+		{
+			return modMetaPattern.IsMatch(f.Name);
+		}
+
 		public static List<DivinityModData> LoadModPackageData(string modsFolderPath)
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
@@ -370,9 +379,10 @@ namespace DivinityModManager.Util
 							DivinityModData modData = null;
 
 							var pak = pr.Read();
-							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+							var metaFile = pak?.Files?.FirstOrDefault(pf => IsModMetaFile(pf));
 							if (metaFile != null)
 							{
+								Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
 								using (var stream = metaFile.MakeStream())
 								{
 									using (var sr = new System.IO.StreamReader(stream))
@@ -381,6 +391,10 @@ namespace DivinityModManager.Util
 										modData = ParseMetaFile(text);
 									}
 								}
+							}
+							else
+							{
+								Trace.WriteLine($"Error: No meta.lsx for mod pak '{pakPath}'.");
 							}
 
 							if(modData != null)
@@ -505,9 +519,10 @@ namespace DivinityModManager.Util
 							DivinityModData modData = null;
 
 							var pak = pr.Read();
-							var metaFile = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("meta.lsx"));
+							var metaFile = pak?.Files?.FirstOrDefault(pf => IsModMetaFile(pf));
 							if (metaFile != null)
 							{
+								Trace.WriteLine($"Parsing meta.lsx for mod pak '{pakPath}'.");
 								using (var stream = metaFile.MakeStream())
 								{
 									using (var sr = new System.IO.StreamReader(stream))
@@ -547,6 +562,10 @@ namespace DivinityModManager.Util
 										}
 									}
 								}
+							}
+							else
+							{
+								Trace.WriteLine($"Error: No meta.lsx for mod pak '{pakPath}'.");
 							}
 						}
 					}

@@ -390,7 +390,7 @@ namespace DivinityModManager.Util
 							foreach(var f in metaFiles)
 							{
 								var parentDir = Directory.GetParent(f.Name);
-								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
+								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match the parent diretory against the pak name in that case.
 								if (parentDir.Name == pakName)
 								{
 									metaFile = f;

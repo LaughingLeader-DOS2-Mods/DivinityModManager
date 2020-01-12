@@ -314,6 +314,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
+		public ICommand CopyPathToClipboardCommand { get; set; }
 
 		public bool Loaded { get; set; } = false;
 		public EventHandler OnLoaded { get; set; }
@@ -1932,6 +1933,19 @@ namespace DivinityModManager.ViewModels
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
 			RefreshCommand = ReactiveCommand.Create(() => RefreshAsync_Start(), canRefreshObservable);
+
+			CopyPathToClipboardCommand = ReactiveCommand.Create((string path) =>
+			{
+				if (!String.IsNullOrWhiteSpace(path))
+				{
+					Clipboard.SetText(path);
+					ShowAlert($"Copied '{path}' to clipboard.", 0, 30);
+				}
+				else
+				{
+					ShowAlert($"Path not found.", -1, 30);
+				}
+			});
 
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
 			OpenModsFolderCommand = ReactiveCommand.Create(() =>

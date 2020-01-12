@@ -43,7 +43,13 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public string FileName { get; set; }
+		private string filename;
+
+		public string FileName
+		{
+			get => filename;
+			set { this.RaiseAndSetIfChanged(ref filename, value); }
+		}
 
 		public string UUID { get; set; }
 

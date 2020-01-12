@@ -304,6 +304,12 @@
 								<Style BasedOn="{StaticResource VerticalSeparator}" TargetType="Rectangle">
 									<Setter Property="Margin" Value="8,0,6,0" />
 								</Style>
+								<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
+									<Setter Property="Tag" Value="{Binding}" />
+								</Style>
+								<Style BasedOn="{StaticResource {x:Type ContextMenu}}" TargetType="{x:Type ContextMenu}">
+									<Setter Property="DataContext" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}" />
+								</Style>
 							</StackPanel.Resources>
 							<TextBlock Text="Export" />
 							<Button
@@ -339,18 +345,42 @@
 								Command="{Binding OpenModsFolderCommand}"
 								ToolTip="Open Mods Folder">
 								<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
+								<Button.ContextMenu>
+									<ContextMenu>
+										<MenuItem
+											Command="{Binding CopyPathToClipboardCommand}"
+											CommandParameter="{Binding PathwayData.DocumentsModsPath}"
+											Header="Copy Path to Clipboard" />
+									</ContextMenu>
+								</Button.ContextMenu>
 							</Button>
 							<Button
 								x:Name="OpenWorkshopFolderButton"
 								Command="{Binding OpenWorkshopFolderCommand}"
 								ToolTip="Open DOS2 Workshop Folder">
 								<controls:AutoGrayableImage Source="{StaticResource OpenSteamWorkshopFolderImage}" />
+								<Button.ContextMenu>
+									<ContextMenu>
+										<MenuItem
+											Command="{Binding CopyPathToClipboardCommand}"
+											CommandParameter="{Binding Settings.DOS2WorkshopPath}"
+											Header="Copy Path to Clipboard" />
+									</ContextMenu>
+								</Button.ContextMenu>
 							</Button>
 							<Button
 								x:Name="OpenDOS2GameButton"
 								Command="{Binding OpenDOS2GameCommand}"
 								ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">
 								<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
+								<Button.ContextMenu>
+									<ContextMenu>
+										<MenuItem
+											Command="{Binding CopyPathToClipboardCommand}"
+											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"
+											Header="Copy Path to Clipboard" />
+									</ContextMenu>
+								</Button.ContextMenu>
 							</Button>
 							<Rectangle />
 							<TextBlock Text="Support" />
@@ -448,8 +478,23 @@
 			Panel.ZIndex="99">
 			<xc:MessageBox
 				x:Name="MainWindowMessageBox"
-				CaptionForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}"
-				Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
+				Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
+				BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
+				ButtonRegionBackground="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
+				CaptionForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
+				WindowBackground="{Binding ElementName=Main, Path=TitleBarBackground}"
+				WindowBorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}">
+				<xc:MessageBox.Resources>
+					<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button" />
+				</xc:MessageBox.Resources>
+				<xc:MessageBox.CloseButtonStyle>
+					<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+						<Setter Property="IsEnabled" Value="False" />
+						<Setter Property="Opacity" Value="0" />
+					</Style>
+				</xc:MessageBox.CloseButtonStyle>
+			</xc:MessageBox>
 		</xc:WindowContainer>
 		<xc:BusyIndicator
 			x:Name="MainBusyIndicator"

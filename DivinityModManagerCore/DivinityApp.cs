@@ -23,6 +23,7 @@ namespace DivinityModManager
 		public const string XML_MODULE_SHORT_DESC = @"<node id=""ModuleShortDesc""><attribute id=""Folder"" value=""{0}"" type=""30""/><attribute id=""MD5"" value=""{1}"" type=""23""/><attribute id=""Name"" value=""{2}"" type=""22""/><attribute id=""UUID"" value=""{3}"" type=""22"" /><attribute id=""Version"" value=""{4}"" type=""4""/></node>";
 		public const string XML_MOD_SETTINGS_TEMPLATE = @"<?xml version=""1.0"" encoding=""UTF-8""?><save><header version=""2""/><version major=""3"" minor=""6"" revision=""4"" build=""0""/><region id=""ModuleSettings""><node id=""root""><children><node id=""ModOrder""><children>{0}</children></node><node id=""Mods""><children>{1}</children></node></children></node></region></save>";
 
-		public static DivinityGlobalCommands GlobalCommands { get; private set; } = new DivinityGlobalCommands();
+		public static DivinityGlobalCommands Commands { get; private set; } = new DivinityGlobalCommands();
+		public static DivinityGlobalEvents Events { get; private set; } = new DivinityGlobalEvents();
 	}
 }

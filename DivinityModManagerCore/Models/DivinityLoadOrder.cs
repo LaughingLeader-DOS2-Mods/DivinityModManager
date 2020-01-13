@@ -30,8 +30,17 @@ namespace DivinityModManager.Models
 		public string Name
 		{
 			get => name;
-			set { this.RaiseAndSetIfChanged(ref name, value); }
+			set 
+			{
+				string lastName = name;
+				this.RaiseAndSetIfChanged(ref name, value);
+				if(!String.IsNullOrEmpty(lastName) && lastName != name)
+				{
+					DivinityApp.Events.OnOrderNameChanged(lastName, name);
+				}
+			}
 		}
+
 
 		/*
 		private string displayName;

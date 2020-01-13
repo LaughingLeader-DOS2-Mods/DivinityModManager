@@ -223,8 +223,8 @@ namespace DivinityModManager.Models
 
 		public DivinityModData()
 		{
-			this.OpenInFileExplorerCommand = DivinityApp.GlobalCommands.OpenInFileExplorerCommand;
-			this.ToggleNameDisplayCommand = DivinityApp.GlobalCommands.ToggleNameDisplayCommand;
+			this.OpenInFileExplorerCommand = DivinityApp.Commands.OpenInFileExplorerCommand;
+			this.ToggleNameDisplayCommand = DivinityApp.Commands.ToggleNameDisplayCommand;
 		}
 	}
 }

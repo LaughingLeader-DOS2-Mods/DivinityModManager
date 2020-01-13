@@ -162,6 +162,17 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
 		}
 
+		//Not saved for now
+
+		private bool displayFileNames = false;
+
+		public bool DisplayFileNames
+		{
+			get => displayFileNames;
+			set { this.RaiseAndSetIfChanged(ref displayFileNames, value); }
+		}
+
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
 

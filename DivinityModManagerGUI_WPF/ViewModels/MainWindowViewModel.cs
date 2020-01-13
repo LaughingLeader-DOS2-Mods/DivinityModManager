@@ -66,7 +66,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			_viewModel.OnOrderChanged?.Invoke(_viewModel, null);
+			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
 		}
 
 		private MainWindowViewModel _viewModel;
@@ -1232,7 +1232,11 @@ namespace DivinityModManager.ViewModels
 					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Removing {e.OldItems.Count} old items from order.");
 					foreach (DivinityModData m in e.OldItems)
 					{
-						SelectedModOrder.Order.Remove(SelectedModOrder.Order.FirstOrDefault(x => x.UUID == m.UUID));
+						if(SelectedModOrder.Order.Any(x => x.UUID == m.UUID))
+						{
+							SelectedModOrder.Order.RemoveAll(x => x.UUID == m.UUID);
+						}
+						
 						m.IsActive = false;
 					}
 				}

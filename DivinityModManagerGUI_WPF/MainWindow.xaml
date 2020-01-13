@@ -378,7 +378,7 @@
 								<Button.ContextMenu>
 									<ContextMenu>
 										<MenuItem
-											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.GlobalCommands}}"
+											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"
 											Header="Open Game Folder..." />
 										<MenuItem

@@ -240,7 +240,7 @@
 							VerticalAlignment="Center"
 							DisplayMemberPath="Name"
 							IsEditable="True"
-							IsTextSearchEnabled="True"
+							IsTextSearchEnabled="False"
 							ItemsSource="{Binding ModOrderList}"
 							KeyDown="ComboBox_KeyDown_LoseFocus"
 							SelectedIndex="{Binding SelectedModOrderIndex}"

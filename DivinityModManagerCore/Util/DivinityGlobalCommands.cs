@@ -21,11 +21,11 @@ namespace DivinityModManager.Util
 		{
 			if(File.Exists(path))
 			{
-				Process.Start("explorer.exe", $"/select, \"{path}\"");
+				Process.Start("explorer.exe", $"/select, \"{Path.GetFullPath(path)}\"");
 			}
 			else if(Directory.Exists(path))
 			{
-				Process.Start("explorer.exe", $"\"{path}\"");
+				Process.Start("explorer.exe", $"\"{Path.GetFullPath(path)}\"");
 			}
 			else
 			{

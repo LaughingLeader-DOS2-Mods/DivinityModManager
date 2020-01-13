@@ -449,7 +449,7 @@ namespace DivinityModManager.ViewModels
 			{
 				if(SaveSettings())
 				{
-					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.");
+					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.", 10);
 				}
 			}, canSaveSettings).DisposeWith(Settings.Disposables);
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
@@ -1951,7 +1951,7 @@ namespace DivinityModManager.ViewModels
 				if (!String.IsNullOrWhiteSpace(path))
 				{
 					Clipboard.SetText(path);
-					ShowAlert($"Copied '{path}' to clipboard.", 0, 30);
+					ShowAlert($"Copied '{path}' to clipboard.", 0, 10);
 				}
 				else
 				{

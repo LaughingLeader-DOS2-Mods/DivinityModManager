@@ -482,7 +482,7 @@
 				BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
 				ButtonRegionBackground="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
 				CaptionForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
-				Foreground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
 				WindowBackground="{Binding ElementName=Main, Path=TitleBarBackground}"
 				WindowBorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}">
 				<xc:MessageBox.Resources>
@@ -559,6 +559,9 @@
 								x:Name="FileRefreshMenuItem"
 								Header="Reload All"
 								InputGestureText="F5" />
+						</MenuItem>
+						<MenuItem Header="Edit">
+							<MenuItem x:Name="EditToggleFileNameDisplayMenuItem" Header="Toggle Display Names / File Names" />
 						</MenuItem>
 						<MenuItem Header="Settings">
 							<MenuItem

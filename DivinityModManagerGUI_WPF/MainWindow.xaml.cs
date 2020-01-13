@@ -225,6 +225,8 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
 
+				this.WhenAnyValue(x => x.ViewModel.ToggleDisplayNameCommand).BindTo(this, view => view.EditToggleFileNameDisplayMenuItem.Command);
+
 				this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
 

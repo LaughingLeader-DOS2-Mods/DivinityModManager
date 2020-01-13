@@ -1060,11 +1060,18 @@ namespace DivinityModManager.Util
 		{
 			if(File.Exists(loadOrderFile))
 			{
-				using (var reader = File.OpenText(loadOrderFile))
+				try
 				{
-					var fileText = await reader.ReadToEndAsync();
-					DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
-					return order;
+					using (var reader = File.OpenText(loadOrderFile))
+					{
+						var fileText = await reader.ReadToEndAsync();
+						DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+						return order;
+					}
+				}
+				catch(Exception ex)
+				{
+					Trace.WriteLine($"Error loading '{loadOrderFile}': {ex.ToString()}");
 				}
 			}
 			return null;

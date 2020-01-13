@@ -144,10 +144,10 @@
 							<TextBlock>
 								<TextBlock.Style>
 									<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-										<Setter Property="Text" Value="Display Filename" />
+										<Setter Property="Text" Value="Show File Name" />
 										<Style.Triggers>
 											<DataTrigger Binding="{Binding DisplayFileForName}" Value="true">
-												<Setter Property="Text" Value="Display Mod Name" />
+												<Setter Property="Text" Value="Show Mod Display Name" />
 											</DataTrigger>
 										</Style.Triggers>
 									</Style>

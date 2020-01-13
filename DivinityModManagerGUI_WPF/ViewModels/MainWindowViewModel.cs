@@ -496,6 +496,15 @@ namespace DivinityModManager.ViewModels
 			return loaded;
 		}
 
+		private void OnOrderNameChanged(object sender, OrderNameChangedArgs e)
+		{
+			if (Settings.LastOrder == e.LastName)
+			{
+				Settings.LastOrder = e.NewName;
+				SaveSettings();
+			}
+		}
+
 		public bool SaveSettings()
 		{
 			string settingsFile = @"Data\settings.json";
@@ -901,6 +910,7 @@ namespace DivinityModManager.ViewModels
 					SelectedModOrderIndex = nextOrderIndex;
 					LoadModOrder(SelectedModOrder);
 					LoadingOrder = false;
+					Settings.LastOrder = SelectedModOrder.Name;
 				});
 			}
 		}
@@ -1751,7 +1761,7 @@ namespace DivinityModManager.ViewModels
 		{
 			view = parentView;
 
-			DivinityApp.GlobalCommands.SetViewModel(this);
+			DivinityApp.Commands.SetViewModel(this);
 
 			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
 			{
@@ -2114,6 +2124,9 @@ namespace DivinityModManager.ViewModels
 
 			this.InactiveMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
+
+			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
+
 #if DEBUG
 			this.WhenAnyValue(x => x.ActiveSelected).Subscribe((x) =>
 			{

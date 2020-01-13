@@ -490,7 +490,7 @@ namespace DivinityModManager.ViewModels
 			if (loaded)
 			{
 				Settings.CanSaveSettings = false;
-				view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.");
+				view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.", 5);
 			}
 
 			return loaded;
@@ -1321,7 +1321,7 @@ namespace DivinityModManager.ViewModels
 
 				if (result)
 				{
-					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{outputPath}'");
+					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{outputPath}'", 10);
 				}
 			}
 
@@ -1375,7 +1375,7 @@ namespace DivinityModManager.ViewModels
 
 				if (result)
 				{
-					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'");
+					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'", 10);
 				}
 				else
 				{
@@ -1392,7 +1392,7 @@ namespace DivinityModManager.ViewModels
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items, Settings.AutoAddDependenciesWhenExporting);
 				if (result)
 				{
-					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'");
+					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'", 15);
 
 					//Update "Current" order
 					if(SelectedModOrder.Name != "Current")
@@ -1548,7 +1548,7 @@ namespace DivinityModManager.ViewModels
 					{
 						var dir = Path.GetDirectoryName(outputPath);
 						Process.Start(dir);
-						view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.");
+						view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.", 15);
 					});
 
 					success = true;

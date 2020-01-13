@@ -313,6 +313,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
+		public ICommand ToggleDisplayNameCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
 
@@ -465,6 +466,18 @@ namespace DivinityModManager.ViewModels
 			{
 				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 				SaveSettings();
+			}).DisposeWith(Settings.Disposables);
+
+			this.WhenAnyValue(x => x.Settings.DisplayFileNames).Subscribe((b) =>
+			{
+				if (b)
+				{
+					view.EditToggleFileNameDisplayMenuItem.Header = "Show Display Names for Mods";
+				}
+				else
+				{
+					view.EditToggleFileNameDisplayMenuItem.Header = "Show File Names for Mods";
+				}
 			}).DisposeWith(Settings.Disposables);
 
 			if (Settings.LogEnabled)
@@ -776,7 +789,6 @@ namespace DivinityModManager.ViewModels
 			if (projects == null) projects = new List<DivinityModData>();
 
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
-				Concat(DivinityModDataLoader.Larian_Mods).
 				OrderBy(m => m.Name).ToList();
 			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
 			return finalMods;
@@ -1991,6 +2003,26 @@ namespace DivinityModManager.ViewModels
 				if (Settings != null)
 				{
 					Settings.DarkThemeEnabled = !Settings.DarkThemeEnabled;
+				}
+			});
+
+			ToggleDisplayNameCommand = ReactiveCommand.Create(() =>
+			{
+				if (Settings != null)
+				{
+					Settings.DisplayFileNames = !Settings.DisplayFileNames;
+
+					foreach(var m in Mods)
+					{
+						m.DisplayFileForName = Settings.DisplayFileNames;
+					}
+				}
+				else
+				{
+					foreach (var m in Mods)
+					{
+						m.DisplayFileForName = !m.DisplayFileForName;
+					}
 				}
 			});
 

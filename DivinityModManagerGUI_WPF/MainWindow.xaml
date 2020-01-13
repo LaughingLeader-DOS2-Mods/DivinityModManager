@@ -9,8 +9,10 @@
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
+	xmlns:dutil="clr-namespace:DivinityModManager.Util;assembly=DivinityModManagerCore"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
@@ -375,6 +377,10 @@
 								<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
 								<Button.ContextMenu>
 									<ContextMenu>
+										<MenuItem
+											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.GlobalCommands}}"
+											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"
+											Header="Open Game Folder..." />
 										<MenuItem
 											Command="{Binding CopyPathToClipboardCommand}"
 											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"

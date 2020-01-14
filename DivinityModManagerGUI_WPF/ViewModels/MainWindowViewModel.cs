@@ -365,27 +365,32 @@ namespace DivinityModManager.ViewModels
 		}
 #endif
 
+		public bool DebugMode { get; set; } = false;
+
 		private TextWriterTraceListener debugLogListener;
-		private void ToggleLogging(bool enabled)
+		public void ToggleLogging(bool enabled)
 		{
-			if(enabled)
+			if (enabled || DebugMode)
 			{
-				string exePath = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
-
-				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
-				string logsDirectory = exePath + "/_Logs/";
-				if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
+				if(debugLogListener == null)
 				{
-					Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
-					Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
-				}
+					string exePath = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
 
-				string logFileName = Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
-				debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
-				Trace.Listeners.Add(debugLogListener);
-				Trace.AutoFlush = true;
+					string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+					string logsDirectory = exePath + "/_Logs/";
+					if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
+					{
+						Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
+						Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
+					}
+
+					string logFileName = Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
+					debugLogListener = new TextWriterTraceListener(logFileName, "DebugLogListener");
+					Trace.Listeners.Add(debugLogListener);
+					Trace.AutoFlush = true;
+				}
 			}
-			else if(debugLogListener != null)
+			else if(debugLogListener != null && !DebugMode)
 			{
 				Trace.Listeners.Remove(debugLogListener);
 				debugLogListener.Dispose();
@@ -410,7 +415,7 @@ namespace DivinityModManager.ViewModels
 					using (var reader = File.OpenText(settingsFile))
 					{
 						var fileText = reader.ReadToEnd();
-						Settings = JsonConvert.DeserializeObject<DivinityModManagerSettings>(fileText);
+						Settings = DivinityJsonUtils.SafeDeserialize<DivinityModManagerSettings>(fileText);
 						loaded = Settings != null;
 					}
 				}
@@ -907,10 +912,18 @@ namespace DivinityModManager.ViewModels
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{
-					SelectedModOrderIndex = nextOrderIndex;
-					LoadModOrder(SelectedModOrder);
+					Trace.WriteLine($"Setting next order index to '{nextOrderIndex}'.");
+					try
+					{
+						SelectedModOrderIndex = nextOrderIndex;
+						LoadModOrder(SelectedModOrder);
+						Settings.LastOrder = SelectedModOrder.Name;
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Error setting next load order: {ex.ToString()}");
+					}
 					LoadingOrder = false;
-					Settings.LastOrder = SelectedModOrder.Name;
 				});
 			}
 		}
@@ -1098,80 +1111,94 @@ namespace DivinityModManager.ViewModels
 				lastOrderIndex = SelectedModOrderIndex;
 			}
 
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
-			var loadedMods = await LoadModsAsync();
-			IncreaseMainProgressValue(taskStepAmount);
-
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
-			var loadedWorkshopMods = await LoadWorkshopModsAsync();
-			IncreaseMainProgressValue(taskStepAmount);
-
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading profiles...");
-			var loadedProfiles = await LoadProfilesAsync();
-			IncreaseMainProgressValue(taskStepAmount);
-
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading current profile...");
-			var selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);
-			IncreaseMainProgressValue(taskStepAmount);
-
-			RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading external load orders...");
-			var savedModOrderList = await LoadExternalLoadOrdersAsync();
-			IncreaseMainProgressValue(taskStepAmount);
-
-			if (savedModOrderList.Count > 0)
+			if(Directory.Exists(PathwayData.LarianDocumentsFolder))
 			{
-				Trace.WriteLine($"{savedModOrderList.Count} saved load orders found.");
-			}
-			else
-			{
-				Trace.WriteLine("No saved orders found.");
-			}
+				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
+				var loadedMods = await LoadModsAsync();
+				IncreaseMainProgressValue(taskStepAmount);
 
-			RxApp.MainThreadScheduler.Schedule(_ =>
-			{
-				mods.AddOrUpdate(loadedMods);
-				workshopMods.AddOrUpdate(loadedWorkshopMods);
-				Profiles.AddRange(loadedProfiles);
+				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
+				var loadedWorkshopMods = await LoadWorkshopModsAsync();
+				IncreaseMainProgressValue(taskStepAmount);
 
-				SavedModOrderList = savedModOrderList;
+				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading profiles...");
+				var loadedProfiles = await LoadProfilesAsync();
+				IncreaseMainProgressValue(taskStepAmount);
 
-				if (!String.IsNullOrWhiteSpace(selectedProfileUUID))
+				string selectedProfileUUID = "";
+
+				if (loadedProfiles != null && loadedProfiles.Count > 0)
 				{
-					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedProfileUUID));
-					if (index > -1)
+					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading current profile...");
+					selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);
+					IncreaseMainProgressValue(taskStepAmount);
+				}
+				else
+				{
+					IncreaseMainProgressValue(taskStepAmount);
+				}
+
+				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading external load orders...");
+				var savedModOrderList = await LoadExternalLoadOrdersAsync();
+				IncreaseMainProgressValue(taskStepAmount);
+
+				if (savedModOrderList.Count > 0)
+				{
+					Trace.WriteLine($"{savedModOrderList.Count} saved load orders found.");
+				}
+				else
+				{
+					Trace.WriteLine("No saved orders found.");
+				}
+
+				RxApp.MainThreadScheduler.Schedule(_ =>
+				{
+					mods.AddOrUpdate(loadedMods);
+					workshopMods.AddOrUpdate(loadedWorkshopMods);
+					Profiles.AddRange(loadedProfiles);
+
+					SavedModOrderList = savedModOrderList;
+
+					if (!String.IsNullOrWhiteSpace(selectedProfileUUID))
 					{
-						SelectedProfileIndex = index;
+						var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedProfileUUID));
+						if (index > -1)
+						{
+							SelectedProfileIndex = index;
+						}
+						else
+						{
+							SelectedProfileIndex = 0;
+							Trace.WriteLine($"Profile '{selectedProfileUUID}' not found {Profiles.Count}/{loadedProfiles.Count}.");
+						}
 					}
 					else
 					{
 						SelectedProfileIndex = 0;
-						Trace.WriteLine($"Profile '{selectedProfileUUID}' not found {Profiles.Count}/{loadedProfiles.Count}.");
 					}
-				}
-				else
-				{
-					SelectedProfileIndex = 0;
-				}
 
-				MainProgressWorkText = "Building mod order list...";
-				int select = String.IsNullOrWhiteSpace(Settings?.LastOrder) ? 0 : -1;
-				BuildModOrderList();
-				MainProgressValue += taskStepAmount;
+					MainProgressWorkText = "Building mod order list...";
+					BuildModOrderList();
+					MainProgressValue += taskStepAmount;
 
-				if (lastActiveOrder != null)
-				{
-					var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
-					SelectedModOrderIndex = lastOrderIndex;
-					SelectedModOrder.SetOrder(lastActiveOrder);
-				}
-				
-				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-				MainProgressWorkText = "Checking for mod updates...";
-				CheckForModUpdates();
-				MainProgressValue += taskStepAmount;
-			});
+					if (lastActiveOrder != null && lastActiveOrder.Count > 0)
+					{
+						SelectedModOrderIndex = lastOrderIndex;
+						SelectedModOrder.SetOrder(lastActiveOrder);
+					}
 
-			IncreaseMainProgressValue(taskStepAmount);
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					MainProgressWorkText = "Checking for mod updates...";
+					CheckForModUpdates();
+					MainProgressValue += taskStepAmount;
+				});
+
+				IncreaseMainProgressValue(taskStepAmount);
+			}
+			else
+			{
+				Trace.WriteLine($"[*ERROR*] Larian documents folder not found!");
+			}
 
 			await ctrl.Yield();
 
@@ -1772,6 +1799,14 @@ namespace DivinityModManager.ViewModels
 				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
 			});
 
+			if (DebugMode)
+			{
+				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
+				{
+					Trace.WriteLine($"Progress: {MainProgressValue} - {MainProgressWorkText}");
+				});
+			}
+
 			LoadSettings();
 			RefreshAsync_Start("Loading...");
 			//Refresh();
@@ -2092,13 +2127,6 @@ namespace DivinityModManager.ViewModels
 				ModUpdatesViewVisible = false;
 				view.Activate();
 			});
-
-#if DEBUG
-			this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
-			{
-				Trace.WriteLine($"Progress: {MainProgressValue} - {MainProgressWorkText}");
-			});
-#endif
 
 			//this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
 			//{

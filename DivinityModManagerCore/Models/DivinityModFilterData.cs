@@ -77,6 +77,11 @@ namespace DivinityModManager.Models
 				if (ValueContains(mod.Name)) return true;
 			}
 
+			if (PropertyContains("File"))
+			{
+				if (ValueContains(mod.FileName)) return true;
+			}
+
 			if (PropertyContains("Desc"))
 			{
 				if (ValueContains(mod.Description)) return true;

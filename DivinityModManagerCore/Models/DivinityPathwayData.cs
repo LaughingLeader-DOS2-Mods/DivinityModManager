@@ -9,7 +9,7 @@ namespace DivinityModManager.Models
 {
 	public class DivinityPathwayData : ReactiveObject
 	{
-		private string installPath;
+		private string installPath = "";
 
 		public string InstallPath
 		{
@@ -17,7 +17,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref installPath, value); }
 		}
 
-		private string larianDocumentsFolder;
+		private string larianDocumentsFolder = "";
 
 		public string LarianDocumentsFolder
 		{
@@ -25,7 +25,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref larianDocumentsFolder, value); }
 		}
 
-		private string documentsModsPath;
+		private string documentsModsPath = "";
 
 		public string DocumentsModsPath
 		{
@@ -33,7 +33,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref documentsModsPath, value); }
 		}
 
-		private string documentsProfilesPath;
+		private string documentsProfilesPath = "";
 
 		public string DocumentsProfilesPath
 		{
@@ -41,7 +41,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref documentsProfilesPath, value); }
 		}
 
-		private string lastSaveFilePath;
+		private string lastSaveFilePath = "";
 
 		public string LastSaveFilePath
 		{

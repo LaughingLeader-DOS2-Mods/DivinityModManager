@@ -1018,7 +1018,7 @@ namespace DivinityModManager.Util
 				{
 					InclusionFilter = (f) =>
 					{
-						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase);
+						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase) && !f.FileName.Equals("settings.json", StringComparison.OrdinalIgnoreCase);
 					}
 				});
 

@@ -991,7 +991,7 @@ namespace DivinityModManager.Util
 					try
 					{
 						var fileText = File.ReadAllText(loadOrderFile);
-						DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+						DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 						if (order != null)
 						{
 							order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
@@ -1029,7 +1029,8 @@ namespace DivinityModManager.Util
 						using (var reader = File.OpenText(loadOrderFile))
 						{
 							var fileText = await reader.ReadToEndAsync();
-							DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+				
+							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 							if (order != null)
 							{
 								order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
@@ -1065,7 +1066,7 @@ namespace DivinityModManager.Util
 					using (var reader = File.OpenText(loadOrderFile))
 					{
 						var fileText = await reader.ReadToEndAsync();
-						DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(fileText);
+						DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 						return order;
 					}
 				}
@@ -1083,7 +1084,7 @@ namespace DivinityModManager.Util
 			{
 				try
 				{
-					DivinityLoadOrder order = JsonConvert.DeserializeObject<DivinityLoadOrder>(File.ReadAllText(loadOrderFile));
+					DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(File.ReadAllText(loadOrderFile));
 					return order;
 				}
 				catch(Exception ex)

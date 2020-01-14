@@ -62,13 +62,21 @@ namespace DivinityModManager.Util
 		{
 			try
 			{
-				if (JunctionPoint.Exists(path))
+				var driveType = DivinityFileUtils.GetPathDriveType(path);
+				if (driveType == System.IO.DriveType.Fixed)
 				{
-					string realPath = JunctionPoint.GetTarget(path);
-					if (!String.IsNullOrEmpty(realPath))
+					if (JunctionPoint.Exists(path))
 					{
-						return realPath;
+						string realPath = JunctionPoint.GetTarget(path);
+						if (!String.IsNullOrEmpty(realPath))
+						{
+							return realPath;
+						}
 					}
+				}
+				else
+				{
+					Trace.WriteLine($"Skipping junction check for path '{path}'. Drive type is '{driveType}'.");
 				}
 			}
 			catch (Exception ex) 

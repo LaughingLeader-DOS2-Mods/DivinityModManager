@@ -19,6 +19,20 @@ namespace DivinityModManager.Util
 	/// </summary>
 	public static class DivinityFileUtils
 	{
+		/// <summary>
+		/// Gets the drive type of the given path.
+		/// </summary>
+		/// <param name="path">The path.</param>
+		/// <returns>DriveType of path</returns>
+		public static System.IO.DriveType GetPathDriveType(string path)
+		{
+			//OK, so UNC paths aren't 'drives', but this is still handy
+			if (path.StartsWith(@"\\")) return System.IO.DriveType.Network;
+			var info = DriveInfo.GetDrives().Where(i => path.StartsWith(i.Name, StringComparison.OrdinalIgnoreCase)).FirstOrDefault();
+			if (info == null) return System.IO.DriveType.Unknown;
+			return info.DriveType;
+		}
+
 		public static string GetUniqueFilename(string fullPath)
 		{
 			if (!Path.IsPathRooted(fullPath))

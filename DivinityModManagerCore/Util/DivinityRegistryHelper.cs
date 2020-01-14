@@ -105,7 +105,7 @@ namespace DivinityModManager.Util
 		{
 			if(LastSteamInstallPath != "")
 			{
-				string workshopFolder = GetTruePath(Path.Combine(LastSteamInstallPath, PATH_Steam_WorkshopFolder));
+				string workshopFolder = Path.Combine(LastSteamInstallPath, PATH_Steam_WorkshopFolder);
 				Trace.WriteLine($"Looking for workshop folder at '{workshopFolder}'.");
 				if(Directory.Exists(workshopFolder))
 				{
@@ -119,11 +119,15 @@ namespace DivinityModManager.Util
 		{
 			if (LastSteamInstallPath != "")
 			{
-				string workshopFolder = GetTruePath(Path.Combine(GetSteamWorkshopPath(), PATH_Steam_DivinityOriginalSin2_WorkshopFolder));
-				Trace.WriteLine($"Looking for Divinity Original Sin 2 workshop folder at '{workshopFolder}'.");
-				if (Directory.Exists(workshopFolder))
+				string steamWorkshopPath = GetSteamWorkshopPath();
+				if(!String.IsNullOrEmpty(steamWorkshopPath))
 				{
-					return workshopFolder;
+					string workshopFolder = Path.Combine(steamWorkshopPath, PATH_Steam_DivinityOriginalSin2_WorkshopFolder);
+					Trace.WriteLine($"Looking for Divinity Original Sin 2 workshop folder at '{workshopFolder}'.");
+					if (Directory.Exists(workshopFolder))
+					{
+						return workshopFolder;
+					}
 				}
 			}
 			return "";
@@ -194,7 +198,7 @@ namespace DivinityModManager.Util
 
 							foreach (var folderPath in libraryFolders)
 							{
-								string checkFolder = GetTruePath(Path.Combine(folderPath, PATH_Steam_DivinityOriginalSin2));
+								string checkFolder = Path.Combine(folderPath, PATH_Steam_DivinityOriginalSin2);
 								if (!String.IsNullOrEmpty(checkFolder) && Directory.Exists(checkFolder))
 								{
 									Trace.WriteLine($"Found Divinity Original Sin 2 at '{checkFolder}'.");

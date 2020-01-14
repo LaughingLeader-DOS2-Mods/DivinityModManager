@@ -60,13 +60,20 @@ namespace DivinityModManager.Util
 
 		public static string GetTruePath(string path)
 		{
-			if (JunctionPoint.Exists(path))
+			try
 			{
-				string realPath = JunctionPoint.GetTarget(path);
-				if(!String.IsNullOrEmpty(realPath))
+				if (JunctionPoint.Exists(path))
 				{
-					return realPath;
+					string realPath = JunctionPoint.GetTarget(path);
+					if (!String.IsNullOrEmpty(realPath))
+					{
+						return realPath;
+					}
 				}
+			}
+			catch (Exception ex) 
+			{
+				Trace.WriteLine($"Error checking junction point '{path}': {ex.ToString()}");
 			}
 			return path;
 		}
@@ -131,70 +138,77 @@ namespace DivinityModManager.Util
 
 		public static string GetDOS2Path()
 		{
-			if (LastSteamInstallPath != "")
+			try
 			{
-				if(!String.IsNullOrEmpty(lastDivinityOriginalSin2Path) && Directory.Exists(lastDivinityOriginalSin2Path))
+				if (LastSteamInstallPath != "")
 				{
-					return lastDivinityOriginalSin2Path;
-				}
-				string folder = Path.Combine(LastSteamInstallPath, PATH_Steam_DivinityOriginalSin2);
-				if (Directory.Exists(folder))
-				{
-					Trace.WriteLine($"Found Divinity Original Sin 2 at '{folder}'.");
-					lastDivinityOriginalSin2Path = folder;
-					return lastDivinityOriginalSin2Path;
-				}
-				else
-				{
-					Trace.WriteLine($"Divinity Original Sin 2 not found. Looking for Steam libraries.");
-					string libraryFile = Path.Combine(LastSteamInstallPath, PATH_Steam_LibraryFile);
-					if(File.Exists(libraryFile))
+					if (!String.IsNullOrEmpty(lastDivinityOriginalSin2Path) && Directory.Exists(lastDivinityOriginalSin2Path))
 					{
-						List<string> libraryFolders = new List<string>();
-						try
+						return lastDivinityOriginalSin2Path;
+					}
+					string folder = Path.Combine(LastSteamInstallPath, PATH_Steam_DivinityOriginalSin2);
+					if (Directory.Exists(folder))
+					{
+						Trace.WriteLine($"Found Divinity Original Sin 2 at '{folder}'.");
+						lastDivinityOriginalSin2Path = folder;
+						return lastDivinityOriginalSin2Path;
+					}
+					else
+					{
+						Trace.WriteLine($"Divinity Original Sin 2 not found. Looking for Steam libraries.");
+						string libraryFile = Path.Combine(LastSteamInstallPath, PATH_Steam_LibraryFile);
+						if (File.Exists(libraryFile))
 						{
-							var libraryData = VdfConvert.Deserialize(File.ReadAllText(libraryFile));
-							foreach (VProperty token in libraryData.Value.Children())
+							List<string> libraryFolders = new List<string>();
+							try
 							{
-								if (token.Key != "TimeNextStatsReport" && token.Key != "ContentStatsID")
+								var libraryData = VdfConvert.Deserialize(File.ReadAllText(libraryFile));
+								foreach (VProperty token in libraryData.Value.Children())
 								{
-									if (token.Value is VValue innerValue)
+									if (token.Key != "TimeNextStatsReport" && token.Key != "ContentStatsID")
 									{
-										var p = innerValue.Value<string>();
-										if (Directory.Exists(p))
+										if (token.Value is VValue innerValue)
 										{
-											Trace.WriteLine($"Found steam library folder at '{p}'.");
-											libraryFolders.Add(p);
+											var p = innerValue.Value<string>();
+											if (Directory.Exists(p))
+											{
+												Trace.WriteLine($"Found steam library folder at '{p}'.");
+												libraryFolders.Add(p);
+											}
 										}
 									}
 								}
 							}
-						}
-						catch(Exception ex)
-						{
-							Trace.WriteLine($"Error parsing steam library file at '{libraryFile}': {ex.ToString()}");
-						}
-						
-						foreach(var folderPath in libraryFolders)
-						{
-							string checkFolder = GetTruePath(Path.Combine(folderPath, PATH_Steam_DivinityOriginalSin2));
-							if (Directory.Exists(checkFolder))
+							catch (Exception ex)
 							{
-								Trace.WriteLine($"Found Divinity Original Sin 2 at '{checkFolder}'.");
-								lastDivinityOriginalSin2Path = checkFolder;
-								return lastDivinityOriginalSin2Path;
+								Trace.WriteLine($"Error parsing steam library file at '{libraryFile}': {ex.ToString()}");
+							}
+
+							foreach (var folderPath in libraryFolders)
+							{
+								string checkFolder = GetTruePath(Path.Combine(folderPath, PATH_Steam_DivinityOriginalSin2));
+								if (!String.IsNullOrEmpty(checkFolder) && Directory.Exists(checkFolder))
+								{
+									Trace.WriteLine($"Found Divinity Original Sin 2 at '{checkFolder}'.");
+									lastDivinityOriginalSin2Path = checkFolder;
+									return lastDivinityOriginalSin2Path;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			string gogGamePath = GetGOGDOS2InstallPath();
-			if(!String.IsNullOrEmpty(gogGamePath) && Directory.Exists(gogGamePath))
+				string gogGamePath = GetGOGDOS2InstallPath();
+				if (!String.IsNullOrEmpty(gogGamePath) && Directory.Exists(gogGamePath))
+				{
+					lastDivinityOriginalSin2Path = gogGamePath;
+					Trace.WriteLine($"Found Divinity Original Sin 2 (GoG) install at '{lastDivinityOriginalSin2Path}'.");
+					return lastDivinityOriginalSin2Path;
+				}
+			}
+			catch(Exception ex)
 			{
-				lastDivinityOriginalSin2Path = gogGamePath;
-				Trace.WriteLine($"Found Divinity Original Sin 2 (GoG) install at '{lastDivinityOriginalSin2Path}'.");
-				return lastDivinityOriginalSin2Path;
+				Trace.WriteLine($"[*ERROR*] Error finding DOS2 path: {ex.ToString()}");
 			}
 
 			return "";

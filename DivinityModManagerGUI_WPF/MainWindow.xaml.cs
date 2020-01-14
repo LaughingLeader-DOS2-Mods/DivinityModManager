@@ -26,6 +26,7 @@ using System.Globalization;
 using AutoUpdaterDotNET;
 using System.Windows.Threading;
 using AdonisUI.Controls;
+using Alphaleonis.Win32.Filesystem;
 
 namespace DivinityModManager.Views
 {
@@ -84,8 +85,6 @@ namespace DivinityModManager.Views
 		private static MainWindow self;
 		public static MainWindow Self => self;
 
-		private TextWriterTraceListener debugLogListener;
-
 		private ConflictCheckerWindow conflictCheckerWindow;
 		public ConflictCheckerWindow ConflictCheckerWindow => conflictCheckerWindow;
 
@@ -112,6 +111,13 @@ namespace DivinityModManager.Views
 			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
+
+			if (File.Exists(Alphaleonis.Win32.Filesystem.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "debug")))
+			{
+				ViewModel.DebugMode = true;
+				ViewModel.ToggleLogging(true);
+				Trace.WriteLine("Enable logging due to the debug file next to the exe.");
+			}
 
 			this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
 

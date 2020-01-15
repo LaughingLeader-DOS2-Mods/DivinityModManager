@@ -994,13 +994,24 @@ namespace DivinityModManager.ViewModels
 			//	loadFrom = order.SavedOrder;
 			//}
 
-			foreach(var entry in loadFrom)
+			List<string> missingMods = new List<string>();
+
+			foreach (var entry in loadFrom)
 			{
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null)
 				{
 					ActiveMods.Add(mod);
 				}
+				else
+				{
+					missingMods.Add(entry.Name);
+				}
+			}
+
+			if (missingMods.Count > 0)
+			{
+				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods), "Missing Mods in Load Order", MessageBoxButton.OK);
 			}
 
 			List<DivinityModData> inactive = new List<DivinityModData>();
@@ -1437,7 +1448,7 @@ namespace DivinityModManager.ViewModels
 
 						if (missingMods.Count > 0)
 						{
-							MessageBox.Show(view, String.Join("\n", missingMods), "Missing Mods in Load Order");
+							view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods), "Missing Mods in Load Order", MessageBoxButton.OK);
 						}
 
 						return true;

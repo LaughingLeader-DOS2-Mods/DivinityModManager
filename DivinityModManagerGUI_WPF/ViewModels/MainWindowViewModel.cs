@@ -1420,7 +1420,10 @@ namespace DivinityModManager.ViewModels
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, mods.Items, Settings.AutoAddDependenciesWhenExporting);
+				List<string> missingMods = new List<string>();
+				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, 
+					mods.Items, Settings.AutoAddDependenciesWhenExporting, missingMods);
+
 				if (result)
 				{
 					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'", 15);
@@ -1431,6 +1434,13 @@ namespace DivinityModManager.ViewModels
 						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
 						currentOrder.SetOrder(SelectedModOrder.Order);
 						Trace.WriteLine("Updated 'Current' load order to exported order.");
+
+						if (missingMods.Count > 0)
+						{
+							MessageBox.Show(view, String.Join("\n", missingMods), "Missing Mods in Load Order");
+						}
+
+						return true;
 					}
 				}
 				else

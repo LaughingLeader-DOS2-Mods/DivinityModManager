@@ -1095,12 +1095,12 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods, bool addDependencies)
+		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods, bool addDependencies, List<string> missingMods)
 		{
 			if(Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
-				string contents = GenerateModSettingsFile(order.Order, allMods, addDependencies);
+				string contents = GenerateModSettingsFile(order.Order, allMods, addDependencies, missingMods);
 				try
 				{
 					//Lazy indentation!
@@ -1133,26 +1133,33 @@ namespace DivinityModManager.Util
 			return false;
 		}
 
-		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies)
+		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies, List<string> missingMods)
 		{
 			List<string> orderList = new List<string>();
 			foreach (var m in order)
 			{
-				var mData = allMods.First(x => x.UUID == m.UUID);
-				if (addDependencies && mData.HasDependencies)
+				var mData = allMods.FirstOrDefault(x => x.UUID == m.UUID);
+				if(mData != null)
 				{
-					var dependencies = mData.Dependencies.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
-					foreach (var d in dependencies)
+					if (addDependencies && mData.HasDependencies)
 					{
-						if(!orderList.Any(x => x == d.UUID))
+						var dependencies = mData.Dependencies.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
+						foreach (var d in dependencies)
 						{
-							orderList.Add(d.UUID);
-							Trace.WriteLine($"Added missing dependency '{d.Name}' above mod '{mData.Name}'");
+							if (!orderList.Any(x => x == d.UUID))
+							{
+								orderList.Add(d.UUID);
+								Trace.WriteLine($"Added missing dependency '{d.Name}' above mod '{mData.Name}'");
+							}
 						}
 					}
-				}
 
-				orderList.Add(mData.UUID);
+					orderList.Add(mData.UUID);
+				}
+				else
+				{
+					missingMods.Add(m.Name);
+				}
 			}
 
 			/* The ModOrder node contains the load order. DOS2 by default stores all UUIDs, even if the mod no longer exists. */
@@ -1176,6 +1183,7 @@ namespace DivinityModManager.Util
 			}
 			//string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
 			string output = String.Format(DivinityApp.XML_MOD_SETTINGS_TEMPLATE, modulesText, modShortDescText);
+
 			//Trace.WriteLine(output);
 			return output;
 		}

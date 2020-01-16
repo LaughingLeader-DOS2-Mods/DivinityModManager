@@ -987,14 +987,14 @@ namespace DivinityModManager.ViewModels
 			ActiveMods.Clear();
 			InactiveMods.Clear();
 
-			IEnumerable<DivinityLoadOrderEntry> loadFrom = order.Order;
+			var loadFrom = order.Order;
 
 			//if(order.SavedOrder != null)
 			//{
 			//	loadFrom = order.SavedOrder;
 			//}
 
-			List<string> missingMods = new List<string>();
+			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
 			foreach (var entry in loadFrom)
 			{
@@ -1005,13 +1005,19 @@ namespace DivinityModManager.ViewModels
 				}
 				else
 				{
-					missingMods.Add(entry.Name);
+					var x = new DivinityMissingModData
+					{
+						Name = entry.Name,
+						Index = loadFrom.IndexOf(entry),
+						UUID = entry.UUID
+					};
+					missingMods.Add(x);
 				}
 			}
 
 			if (missingMods.Count > 0)
 			{
-				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods), "Missing Mods in Load Order", MessageBoxButton.OK);
+				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index).Select(x => x.ToString()), "Missing Mods in Load Order", MessageBoxButton.OK);
 			}
 
 			List<DivinityModData> inactive = new List<DivinityModData>();
@@ -1431,9 +1437,8 @@ namespace DivinityModManager.ViewModels
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-				List<string> missingMods = new List<string>();
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder, 
-					mods.Items, Settings.AutoAddDependenciesWhenExporting, missingMods);
+					mods.Items, Settings.AutoAddDependenciesWhenExporting);
 
 				if (result)
 				{
@@ -1445,12 +1450,6 @@ namespace DivinityModManager.ViewModels
 						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
 						currentOrder.SetOrder(SelectedModOrder.Order);
 						Trace.WriteLine("Updated 'Current' load order to exported order.");
-
-						if (missingMods.Count > 0)
-						{
-							view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods), "Missing Mods in Load Order", MessageBoxButton.OK);
-						}
-
 						return true;
 					}
 				}

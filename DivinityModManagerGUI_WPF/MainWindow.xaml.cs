@@ -124,9 +124,6 @@ namespace DivinityModManager.Views
 			AlertBar.Show += AlertBar_Show;
 
 			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
-#if DEBUG
-			AutoUpdater.ReportErrors = true;
-#endif
 			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
 
 			var res = this.TryFindResource("ModUpdaterPanel");

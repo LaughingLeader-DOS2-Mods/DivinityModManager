@@ -484,6 +484,7 @@
 			Panel.ZIndex="99">
 			<xc:MessageBox
 				x:Name="MainWindowMessageBox"
+				Width="600"
 				Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
 				BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
 				ButtonRegionBackground="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"

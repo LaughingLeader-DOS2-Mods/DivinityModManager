@@ -1261,90 +1261,98 @@ namespace DivinityModManager.Util
 
 		public static DivinityLoadOrder GetLoadOrderFromSave(string file)
 		{
-			var packageReader = new PackageReader(file);
-			Package package = packageReader.Read();
-
-			AbstractFileInfo abstractFileInfo = package.Files.FirstOrDefault(p => p.Name == "meta.lsf");
-			if (abstractFileInfo == null)
-			{
-				return null;
-			}
-
-			Resource resource;
-			System.IO.Stream rsrcStream = abstractFileInfo.MakeStream();
 			try
 			{
-				using (var rsrcReader = new LSFReader(rsrcStream))
+				using (var reader = new PackageReader(file))
 				{
-					resource = rsrcReader.Read();
-				}
-			}
-			finally
-			{
-				abstractFileInfo.ReleaseStream();
-			}
-
-			if(resource != null)
-			{
-				var modListChildrenRoot = FindNode(resource, "Mods");
-
-				if(modListChildrenRoot != null)
-				{
-					var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
-					if (modList != null && modList.Count > 0)
+					Package package = reader.Read();
+					AbstractFileInfo abstractFileInfo = package.Files.FirstOrDefault(p => p.Name == "meta.lsf");
+					if (abstractFileInfo == null)
 					{
-						var fileName = Path.GetFileNameWithoutExtension(file);
-						string orderName = fileName;
-						var re = new Regex(@".*PlayerProfiles\\(.*?)\\Savegames.*");
-						var match = re.Match(Path.GetFullPath(file));
-						if (match.Success)
+						return null;
+					}
+
+					Resource resource;
+					System.IO.Stream rsrcStream = abstractFileInfo.MakeStream();
+					try
+					{
+						using (var rsrcReader = new LSFReader(rsrcStream))
 						{
-							orderName = $"{match.Groups[1].Value}_{fileName}";
+							resource = rsrcReader.Read();
 						}
-						DivinityLoadOrder loadOrder = new DivinityLoadOrder()
+					}
+					finally
+					{
+						abstractFileInfo.ReleaseStream();
+					}
+
+					if (resource != null)
+					{
+						var modListChildrenRoot = FindNode(resource, "Mods");
+
+						if (modListChildrenRoot != null)
 						{
-							Name = orderName
-						};
-
-						foreach (var c in modList)
-						{
-							string name = "";
-							string uuid = null;
-							if (c.Attributes.TryGetValue("UUID", out var idAtt))
+							var modList = modListChildrenRoot.Children.Values.FirstOrDefault();
+							if (modList != null && modList.Count > 0)
 							{
-								uuid = (string)idAtt.Value;
-							}
-
-							if (c.Attributes.TryGetValue("Name", out var nameAtt))
-							{
-								name = (string)nameAtt.Value;
-							}
-
-							if (uuid != null && !IgnoreMod(uuid))
-							{
-								Trace.WriteLine($"Found mod in save: '{name}_{uuid}'.");
-								loadOrder.Order.Add(new DivinityLoadOrderEntry()
+								var fileName = Path.GetFileNameWithoutExtension(file);
+								string orderName = fileName;
+								var re = new Regex(@".*PlayerProfiles\\(.*?)\\Savegames.*");
+								var match = re.Match(Path.GetFullPath(file));
+								if (match.Success)
 								{
-									UUID = uuid,
-									Name = name
-								});
-							}
-							else
-							{
-								Trace.WriteLine($"Ignoring mod in save: '{name}'.");
+									orderName = $"{match.Groups[1].Value}_{fileName}";
+								}
+								DivinityLoadOrder loadOrder = new DivinityLoadOrder()
+								{
+									Name = orderName
+								};
+
+								foreach (var c in modList)
+								{
+									string name = "";
+									string uuid = null;
+									if (c.Attributes.TryGetValue("UUID", out var idAtt))
+									{
+										uuid = (string)idAtt.Value;
+									}
+
+									if (c.Attributes.TryGetValue("Name", out var nameAtt))
+									{
+										name = (string)nameAtt.Value;
+									}
+
+									if (uuid != null && !IgnoreMod(uuid))
+									{
+										Trace.WriteLine($"Found mod in save: '{name}_{uuid}'.");
+										loadOrder.Order.Add(new DivinityLoadOrderEntry()
+										{
+											UUID = uuid,
+											Name = name
+										});
+									}
+									else
+									{
+										Trace.WriteLine($"Ignoring mod in save: '{name}'.");
+									}
+								}
+
+								if (loadOrder.Order.Count > 0)
+								{
+									return loadOrder;
+								}
 							}
 						}
-
-						if(loadOrder.Order.Count > 0)
+						else
 						{
-							return loadOrder;
+							Trace.WriteLine($"Couldn't find Mods node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
 						}
 					}
 				}
-				else
-				{
-					Trace.WriteLine($"Couldn't find Mods node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
-				}
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error parsing save '{file}':\n{ex.ToString()}");
 			}
 
 			return null;

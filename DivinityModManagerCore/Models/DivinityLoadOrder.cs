@@ -80,6 +80,12 @@ namespace DivinityModManager.Models
 			Order.AddRange(nextOrder);
 		}
 
+		public void SetOrder(DivinityLoadOrder nextOrder)
+		{
+			Order.Clear();
+			Order.AddRange(nextOrder.Order);
+		}
+
 		public DivinityLoadOrder Clone()
 		{
 			return new DivinityLoadOrder()

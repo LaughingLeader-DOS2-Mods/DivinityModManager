@@ -298,6 +298,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand AddOrderConfigCommand { get; private set; }
 		public ICommand RefreshCommand { get; private set; }
 		public ICommand ImportOrderFromSaveCommand { get; private set; }
+		public ICommand ImportOrderFromSaveAsNewCommand { get; private set; }
 		public ICommand ImportOrderFromFileCommand { get; private set; }
 		public ICommand ImportOrderZipFileCommand { get; private set; }
 		public ICommand OpenPreferencesCommand { get; set; }
@@ -1044,6 +1045,14 @@ namespace DivinityModManager.ViewModels
 			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
 
 			LoadingOrder = false;
+
+			if (!Loaded)
+			{
+				Loaded = true;
+				OnLoaded?.Invoke(this, new EventArgs());
+			}
+
+			OnOrderChanged?.Invoke(this, new EventArgs());
 		}
 
 		private bool refreshing = false;
@@ -1723,7 +1732,7 @@ namespace DivinityModManager.ViewModels
 
 		}
 
-		private void ImportOrderFromSave()
+		private DivinityLoadOrder ImportOrderFromSave()
 		{
 			var dialog = new OpenFileDialog();
 			dialog.CheckFileExists = true;
@@ -1753,14 +1762,41 @@ namespace DivinityModManager.ViewModels
 				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
 				Trace.WriteLine($"Loading order from '{dialog.FileName}'.");
 				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName);
-				if(newOrder != null)
+				if (newOrder != null)
 				{
 					Trace.WriteLine($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
-					AddNewModOrder(newOrder);
+					return newOrder;
 				}
 				else
 				{
 					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+				}
+			}
+			return null;
+		}
+
+		private void ImportOrderFromSaveAsNew()
+		{
+			var order = ImportOrderFromSave();
+			if(order != null)
+			{
+				AddNewModOrder(order);
+			}
+		}
+
+		private void ImportOrderFromSaveToCurrent()
+		{
+			var order = ImportOrderFromSave();
+			if (order != null)
+			{
+				if(SelectedModOrder != null)
+				{
+					SelectedModOrder.SetOrder(order);
+					LoadModOrder(SelectedModOrder);
+				}
+				else
+				{
+					AddNewModOrder(order);
 				}
 			}
 		}
@@ -2008,7 +2044,8 @@ namespace DivinityModManager.ViewModels
 			AddOrderConfigCommand = ReactiveCommand.Create(new Action( () => { AddNewModOrder(); }));
 
 			canOpenDialogWindow = this.WhenAnyValue(x => x.MainProgressIsActive, (b) => !b);
-			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSave, canOpenDialogWindow);
+			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSaveToCurrent, canOpenDialogWindow);
+			ImportOrderFromSaveAsNewCommand = ReactiveCommand.Create(ImportOrderFromSaveAsNew, canOpenDialogWindow);
 			ImportOrderFromFileCommand = ReactiveCommand.Create(ImportOrderFromFile, canOpenDialogWindow);
 			ImportOrderZipFileCommand = ReactiveCommand.Create(ImportOrderZipFile, canOpenDialogWindow);
 
@@ -2122,14 +2159,6 @@ namespace DivinityModManager.ViewModels
 				if (selectedOrder > -1 && !LoadingOrder)
 				{
 					LoadModOrder(SelectedModOrder);
-
-					if (!Loaded)
-					{
-						Loaded = true;
-						OnLoaded?.Invoke(this, new EventArgs());
-					}
-
-					OnOrderChanged?.Invoke(this, new EventArgs());
 				}
 			});
 

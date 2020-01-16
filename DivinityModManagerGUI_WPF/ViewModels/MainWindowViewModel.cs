@@ -34,6 +34,7 @@ using System.Text.RegularExpressions;
 using AdonisUI;
 using System.Windows.Media;
 using System.Reflection;
+using AutoUpdaterDotNET;
 
 namespace DivinityModManager.ViewModels
 {
@@ -996,6 +997,7 @@ namespace DivinityModManager.ViewModels
 
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
+			int i = 0;
 			foreach (var entry in loadFrom)
 			{
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
@@ -1008,16 +1010,18 @@ namespace DivinityModManager.ViewModels
 					var x = new DivinityMissingModData
 					{
 						Name = entry.Name,
-						Index = loadFrom.IndexOf(entry),
+						Index = i,
 						UUID = entry.UUID
 					};
 					missingMods.Add(x);
 				}
+				i++;
 			}
 
 			if (missingMods.Count > 0)
 			{
-				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index).Select(x => x.ToString()), "Missing Mods in Load Order", MessageBoxButton.OK);
+				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)), 
+					"Missing Mods in Load Order", MessageBoxButton.OK);
 			}
 
 			List<DivinityModData> inactive = new List<DivinityModData>();
@@ -1489,6 +1493,14 @@ namespace DivinityModManager.ViewModels
 			RxApp.MainThreadScheduler.Schedule(delaySpan, _ => {
 				MainProgressIsActive = false;
 				CanCancelProgress = true;
+
+				if (Settings.CheckForUpdates)
+				{
+					if (Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - Settings.LastUpdateCheck >= 43200))
+					{
+						AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					}
+				}
 			});
 		}
 

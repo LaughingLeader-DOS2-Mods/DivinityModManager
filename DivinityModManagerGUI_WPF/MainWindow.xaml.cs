@@ -145,6 +145,7 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
+				var canCheckForUpdates = this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive, b => b == false);
 				ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
 				{
 #if !DEBUG
@@ -159,7 +160,7 @@ namespace DivinityModManager.Views
 					AutoUpdater.ReportErrors = false;
 				});
 #endif
-				});
+				}, canCheckForUpdates);
 
 				var c = ReactiveCommand.Create(() =>
 				{
@@ -240,14 +241,6 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
-
-				if (ViewModel.Settings.CheckForUpdates)
-				{
-					if (ViewModel.Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - ViewModel.Settings.LastUpdateCheck >= 43200))
-					{
-						AutoUpdater.Start(DivinityApp.URL_UPDATE);
-					}
-				}
 			});
 		}
 

@@ -537,20 +537,21 @@
 							<Separator />
 							<MenuItem
 								x:Name="FileSaveOrderMenuItem"
-								Header="Save Load Order"
+								Header="Save Order"
 								InputGestureText="CTRL+S" />
 							<MenuItem
 								x:Name="FileSaveOrderAsMenuItem"
-								Header="Save Load Order As..."
+								Header="Save Order As..."
 								InputGestureText="CTRL+Alt+S" />
 							<Separator />
 							<MenuItem
 								x:Name="FileImportOrderFromSave"
-								Header="Import Mod Order from Save..."
+								Header="Import Order from Save..."
 								InputGestureText="CTRL+O" />
+							<MenuItem x:Name="FileImportOrderFromSaveAsNew" Header="Import Save as New Order..." />
 							<MenuItem
 								x:Name="FileImportOrderFromFile"
-								Header="Import Mod Order from File..."
+								Header="Import Order from File..."
 								InputGestureText="CTRL+Shift+O" />
 							<MenuItem x:Name="FileImportOrderZip" Header="Import Mod Order Zip..." />
 							<Separator />

@@ -1095,12 +1095,12 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods, bool addDependencies, List<string> missingMods)
+		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods, bool addDependencies)
 		{
 			if(Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
-				string contents = GenerateModSettingsFile(order.Order, allMods, addDependencies, missingMods);
+				string contents = GenerateModSettingsFile(order.Order, allMods, addDependencies);
 				try
 				{
 					//Lazy indentation!
@@ -1133,7 +1133,7 @@ namespace DivinityModManager.Util
 			return false;
 		}
 
-		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies, List<string> missingMods)
+		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies)
 		{
 			List<string> orderList = new List<string>();
 			foreach (var m in order)
@@ -1158,7 +1158,7 @@ namespace DivinityModManager.Util
 				}
 				else
 				{
-					missingMods.Add(m.Name);
+					Trace.WriteLine($"[*ERROR*] Missing mod pak for mod in order: '{m.Name}'.");
 				}
 			}
 

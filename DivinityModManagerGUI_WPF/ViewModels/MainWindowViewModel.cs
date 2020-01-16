@@ -318,6 +318,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ToggleDisplayNameCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
+		public ICommand RenameSaveCommand { get; private set; }
 
 		public bool Loaded { get; set; } = false;
 		public EventHandler OnLoaded { get; set; }
@@ -1856,6 +1857,60 @@ namespace DivinityModManager.ViewModels
 
 		}
 
+		private void RenameSave_Start()
+		{
+			var dialog = new OpenFileDialog();
+			dialog.CheckFileExists = true;
+			dialog.CheckPathExists = true;
+			dialog.DefaultExt = ".lsv";
+			dialog.Filter = "Larian Save file (*.lsv)|*.lsv";
+			dialog.Title = "Pick Save to Rename...";
+
+			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
+			{
+				dialog.InitialDirectory = PathwayData.LastSaveFilePath;
+			}
+			else
+			{
+				if (SelectedProfile != null)
+				{
+					dialog.InitialDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+				}
+				else
+				{
+					dialog.InitialDirectory = Path.GetFullPath(PathwayData.LarianDocumentsFolder);
+				}
+			}
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
+
+				var renameDialog = new SaveFileDialog();
+				renameDialog.CheckFileExists = false;
+				renameDialog.CheckPathExists = false;
+				renameDialog.DefaultExt = ".lsv";
+				renameDialog.Filter = "Larian Save file (*.lsv)|*.lsv";
+				renameDialog.Title = "Rename Save As...";
+				renameDialog.InitialDirectory = Path.GetDirectoryName(dialog.FileName);
+
+				if (renameDialog.ShowDialog(view) == true)
+				{
+					PathwayData.LastSaveFilePath = Path.GetDirectoryName(renameDialog.FileName);
+					Trace.WriteLine($"Renaming '{dialog.FileName}' to '{renameDialog.FileName}'.");
+
+					if(DivinitySaveTools.RenameSave(dialog.FileName, renameDialog.FileName))
+					{
+						Trace.WriteLine($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
+					}
+					else
+					{
+						Trace.WriteLine($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}'.");
+					}
+				}
+			}
+		}
+
 		public void OnViewActivated(MainWindow parentView)
 		{
 			view = parentView;
@@ -2143,6 +2198,8 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 			});
+
+			RenameSaveCommand = ReactiveCommand.Create(RenameSave_Start, canOpenDialogWindow);
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);

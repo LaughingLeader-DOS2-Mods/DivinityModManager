@@ -581,6 +581,9 @@
 								Command="{Binding ToggleDarkModeCommand}"
 								Header="Toggle Dark/Light Mode" />
 						</MenuItem>
+						<MenuItem Header="Tools">
+							<MenuItem x:Name="ToolsRenameSaveMenuItem" Header="Rename Save..." />
+						</MenuItem>
 						<MenuItem Header="Help">
 							<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
 							<Separator />
@@ -591,9 +594,6 @@
 								Header="About Divinity Mod Manager"
 								InputGestureText="F1" />
 						</MenuItem>
-						<!--<MenuItem Header="Tools">
-				<MenuItem x:Name="ConflictCheckerMenuItem" Header="Conflict Checker" />
-			</MenuItem>-->
 					</Menu>
 					<StackPanel
 						Grid.Column="3"

@@ -1910,7 +1910,7 @@ namespace DivinityModManager.ViewModels
 
 					if(DivinitySaveTools.RenameSave(dialog.FileName, renameDialog.FileName))
 					{
-						Trace.WriteLine($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
+						//Trace.WriteLine($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
 
 						try
 						{
@@ -1922,6 +1922,7 @@ namespace DivinityModManager.ViewModels
 								Trace.WriteLine($"Renamed save screenshot '{previewImage}' to '{renamedImage}'.");
 							}
 
+							/*
 							string originalDirectory = Path.GetDirectoryName(dialog.FileName);
 							string desiredDirectory = Path.GetDirectoryName(renameDialog.FileName);
 
@@ -1939,6 +1940,9 @@ namespace DivinityModManager.ViewModels
 									}
 								}
 							}
+							*/
+
+							view.AlertBar.SetSuccessAlert($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.", 15);
 						}
 						catch(Exception ex) 
 						{

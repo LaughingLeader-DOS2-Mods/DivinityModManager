@@ -16,7 +16,8 @@ namespace DivinityModManager.Util
 		{
 			try
 			{
-				string baseName = Path.GetFileNameWithoutExtension(pathToSave);
+				string baseOldName = Path.GetFileNameWithoutExtension(pathToSave);
+				string baseNewName = Path.GetFileNameWithoutExtension(newName);
 				string output = Path.ChangeExtension(Path.Combine(Path.GetDirectoryName(pathToSave), newName), ".lsv");
 				using (var reader = new PackageReader(pathToSave))
 				{
@@ -24,18 +25,20 @@ namespace DivinityModManager.Util
 					AbstractFileInfo saveScreenshotImage = package.Files.FirstOrDefault(p => p.Name.EndsWith(".png"));
 					if (saveScreenshotImage != null)
 					{
-						saveScreenshotImage.Name = saveScreenshotImage.Name.Replace(baseName, newName);
+						saveScreenshotImage.Name = saveScreenshotImage.Name.Replace(Path.GetFileNameWithoutExtension(saveScreenshotImage.Name), baseNewName);
 
-						using (var writer = new PackageWriter(package, output))
-						{
-							writer.Version = Package.CurrentVersion;
-							writer.Compression = LSLib.LS.Enums.CompressionMethod.None;
-							writer.CompressionLevel = CompressionLevel.FastCompression;
-							writer.Write();
-						}
-
-						return true;
+						Trace.WriteLine($"Renamed screenshot '{saveScreenshotImage.Name}'.");
 					}
+
+					using (var writer = new PackageWriter(package, output))
+					{
+						writer.Version = Package.CurrentVersion;
+						writer.Compression = LSLib.LS.Enums.CompressionMethod.LZ4;
+						writer.CompressionLevel = CompressionLevel.MaxCompression;
+						writer.Write();
+					}
+
+					return true;
 				}
 			}
 			catch(Exception ex)

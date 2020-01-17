@@ -27,7 +27,7 @@ namespace DivinityModManager.Util
 					{
 						saveScreenshotImage.Name = saveScreenshotImage.Name.Replace(Path.GetFileNameWithoutExtension(saveScreenshotImage.Name), baseNewName);
 
-						Trace.WriteLine($"Renamed screenshot '{saveScreenshotImage.Name}'.");
+						Trace.WriteLine($"Renamed internal screenshot '{saveScreenshotImage.Name}' in '{output}'.");
 					}
 
 					using (var writer = new PackageWriter(package, output))

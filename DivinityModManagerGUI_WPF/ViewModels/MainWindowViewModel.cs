@@ -1859,6 +1859,11 @@ namespace DivinityModManager.ViewModels
 
 		private void RenameSave_Start()
 		{
+			string profileSavesDirectory = "";
+			if (SelectedProfile != null)
+			{
+				profileSavesDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+			}
 			var dialog = new OpenFileDialog();
 			dialog.CheckFileExists = true;
 			dialog.CheckPathExists = true;
@@ -1874,7 +1879,7 @@ namespace DivinityModManager.ViewModels
 			{
 				if (SelectedProfile != null)
 				{
-					dialog.InitialDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+					dialog.InitialDirectory = profileSavesDirectory;
 				}
 				else
 				{
@@ -1884,7 +1889,9 @@ namespace DivinityModManager.ViewModels
 
 			if (dialog.ShowDialog(view) == true)
 			{
-				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
+				string rootFolder = Path.GetDirectoryName(dialog.FileName);
+				string rootFileName = Path.GetFileNameWithoutExtension(dialog.FileName);
+				PathwayData.LastSaveFilePath = rootFolder;
 
 				var renameDialog = new SaveFileDialog();
 				renameDialog.CheckFileExists = false;
@@ -1892,16 +1899,51 @@ namespace DivinityModManager.ViewModels
 				renameDialog.DefaultExt = ".lsv";
 				renameDialog.Filter = "Larian Save file (*.lsv)|*.lsv";
 				renameDialog.Title = "Rename Save As...";
-				renameDialog.InitialDirectory = Path.GetDirectoryName(dialog.FileName);
+				renameDialog.InitialDirectory = rootFolder;
+				renameDialog.FileName = rootFileName + "_1.lsv"; 
 
 				if (renameDialog.ShowDialog(view) == true)
 				{
-					PathwayData.LastSaveFilePath = Path.GetDirectoryName(renameDialog.FileName);
+					rootFolder = Path.GetDirectoryName(renameDialog.FileName);
+					PathwayData.LastSaveFilePath = rootFolder;
 					Trace.WriteLine($"Renaming '{dialog.FileName}' to '{renameDialog.FileName}'.");
 
 					if(DivinitySaveTools.RenameSave(dialog.FileName, renameDialog.FileName))
 					{
 						Trace.WriteLine($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
+
+						try
+						{
+							string previewImage = Path.Combine(rootFolder, rootFileName + ".png");
+							string renamedImage = Path.Combine(rootFolder, Path.GetFileNameWithoutExtension(renameDialog.FileName) + ".png");
+							if(File.Exists(previewImage))
+							{
+								File.Move(previewImage, renamedImage);
+								Trace.WriteLine($"Renamed save screenshot '{previewImage}' to '{renamedImage}'.");
+							}
+
+							string originalDirectory = Path.GetDirectoryName(dialog.FileName);
+							string desiredDirectory = Path.GetDirectoryName(renameDialog.FileName);
+
+							if (!String.IsNullOrEmpty(profileSavesDirectory) && DivinityFileUtils.IsSubdirectoryOf(profileSavesDirectory, desiredDirectory))
+							{
+								if (originalDirectory == desiredDirectory)
+								{
+									var dirInfo = new DirectoryInfo(originalDirectory);
+									if (dirInfo.Name.Equals(Path.GetFileNameWithoutExtension(dialog.FileName)))
+									{
+										desiredDirectory = Path.Combine(dirInfo.Parent.FullName, Path.GetFileNameWithoutExtension(renameDialog.FileName));
+										RecycleBinHelper.DeleteFile(dialog.FileName, false, false);
+										Directory.Move(originalDirectory, desiredDirectory);
+										Trace.WriteLine($"Renamed save folder '{originalDirectory}' to '{desiredDirectory}'.");
+									}
+								}
+							}
+						}
+						catch(Exception ex) 
+						{
+							Trace.WriteLine($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}':\n" + ex.ToString());
+						}
 					}
 					else
 					{

@@ -33,6 +33,33 @@ namespace DivinityModManager.Util
 			return info.DriveType;
 		}
 
+		/// <summary>
+		/// Check if a directory is the base of another
+		/// </summary>
+		/// <param name="root">Candidate root</param>
+		/// <param name="child">Child folder</param>
+		public static bool IsSubdirectoryOf(DirectoryInfo root, DirectoryInfo child)
+		{
+			var directoryPath = EndsWithSeparator(new Uri(child.FullName).AbsolutePath);
+			var rootPath = EndsWithSeparator(new Uri(root.FullName).AbsolutePath);
+			return directoryPath.StartsWith(rootPath, StringComparison.OrdinalIgnoreCase);
+		}
+
+		/// <summary>
+		/// Check if a directory is the base of another
+		/// </summary>
+		/// <param name="root">Candidate root</param>
+		/// <param name="child">Child folder</param>
+		public static bool IsSubdirectoryOf(string root, string child)
+		{
+			return IsSubdirectoryOf(new DirectoryInfo(root), new DirectoryInfo(child));
+		}
+
+		private static string EndsWithSeparator(string absolutePath)
+		{
+			return absolutePath?.TrimEnd('/', '\\') + "/";
+		}
+
 		public static string GetUniqueFilename(string fullPath)
 		{
 			if (!Path.IsPathRooted(fullPath))

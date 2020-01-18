@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DivinityModManager.Extensions;
+using System.Runtime.Serialization.Formatters.Binary;
 
 namespace DivinityModManager.Util
 {
@@ -20,6 +21,7 @@ namespace DivinityModManager.Util
 				string baseOldName = Path.GetFileNameWithoutExtension(pathToSave);
 				string baseNewName = Path.GetFileNameWithoutExtension(newName);
 				string output = Path.ChangeExtension(Path.Combine(Path.GetDirectoryName(pathToSave), newName), ".lsv");
+
 				using (var reader = new PackageReader(pathToSave))
 				{
 					Package package = reader.Read();
@@ -32,13 +34,16 @@ namespace DivinityModManager.Util
 					}
 
 					// Edit the saved date in the meta.lsf to avoid "corruption" messages
-					AbstractFileInfo abstractFileInfo = package.Files.FirstOrDefault(p => p.Name == "meta.lsf");
-					if (abstractFileInfo != null)
+					/*
+					AbstractFileInfo metaFile = package.Files.FirstOrDefault(p => p.Name == "meta.lsf");
+					if (metaFile != null)
 					{
 						Resource resource;
+						System.IO.MemoryStream ms = null;
+						System.IO.Stream rsrcStream = null;
 						try
 						{
-							System.IO.Stream rsrcStream = abstractFileInfo.MakeStream();
+							rsrcStream = metaFile.MakeStream();
 							using (var rsrcReader = new LSFReader(rsrcStream))
 							{
 								resource = rsrcReader.Read();
@@ -67,46 +72,67 @@ namespace DivinityModManager.Util
 
 										var time = DateTime.Now;
 
-										yearAtt.Value = time.Year;
-										monthAtt.Value = time.Month;
-										dayAtt.Value = time.Day;
-										hoursAtt.Value = time.Hour;
-										minutesAtt.Value = time.Minute;
-										secondsAtt.Value = time.Second;
-										millisecondsAtt.Value = time.Millisecond;
+										Trace.WriteLine($"Year: {yearAtt.Type}");
+										Trace.WriteLine($"Month: {monthAtt.Type}");
+										Trace.WriteLine($"Day: {dayAtt.Type}");
+										Trace.WriteLine($"Hours: {hoursAtt.Type}");
+										Trace.WriteLine($"Minutes: {minutesAtt.Type}");
+										Trace.WriteLine($"Seconds: {secondsAtt.Type}");
+										Trace.WriteLine($"Milliseconds: {millisecondsAtt.Type}");
+
+										yearAtt.Value = (Byte)time.Year;
+										monthAtt.Value = (Byte)time.Month;
+										dayAtt.Value = (Byte)time.Day;
+										hoursAtt.Value = (Byte)time.Hour;
+										minutesAtt.Value = (Byte)time.Minute;
+										secondsAtt.Value = (Byte)time.Second;
+										millisecondsAtt.Value = (UInt16)time.Millisecond;
 
 										Trace.WriteLine($"Updated SaveTime in save's meta.lsf.");
-
-										var rscrWriter = new LSFWriter(rsrcStream, FileVersion.CurrentVersion);
-										rscrWriter.Write(resource);
 									}
 									else
 									{
 										Trace.WriteLine($"Couldn't find SaveTime node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
 									}
+
+									ms = new System.IO.MemoryStream(new byte[4096], true);
+									var rscrWriter = new LSFWriter(ms, FileVersion.CurrentVersion);
+									rscrWriter.Write(resource);
+									ms.Position = 0;
+									var data = ms.ToArray();
+
+									if (!ms.CanRead) Trace.WriteLine("MemoryStream is not readable!");
+									if(!ms.CanWrite) Trace.WriteLine("MemoryStream is not writable!");
+									if(!rsrcStream.CanRead) Trace.WriteLine("rsrcStream is not readable!");
+									if(!rsrcStream.CanWrite) Trace.WriteLine("rsrcStream is not writable!");
+
+									rsrcStream.Write(data, 0, data.Length);
+									ms.Close();
 								}
 							}
 						}
 						finally
 						{
-							abstractFileInfo.ReleaseStream();
+							if (metaFile != null) metaFile.ReleaseStream();
+							if (ms != null) ms.Dispose();
+							if (rsrcStream != null) rsrcStream.Dispose();
 						}
 					}
-
+					*/
 					using (var writer = new PackageWriter(package, output))
 					{
 						writer.Version = Package.CurrentVersion;
-						writer.Compression = LSLib.LS.Enums.CompressionMethod.LZ4;
-						writer.CompressionLevel = CompressionLevel.MaxCompression;
+						writer.Compression = LSLib.LS.Enums.CompressionMethod.Zlib;
+						writer.CompressionLevel = CompressionLevel.DefaultCompression;
 						writer.Write();
 					}
 
-					// Copy dates so the inner meta.lsf doesn't complain
 					File.SetLastWriteTime(output, File.GetLastWriteTime(pathToSave));
 					File.SetLastAccessTime(output, File.GetLastAccessTime(pathToSave));
 
 					return true;
 				}
+				
 			}
 			catch(Exception ex)
 			{

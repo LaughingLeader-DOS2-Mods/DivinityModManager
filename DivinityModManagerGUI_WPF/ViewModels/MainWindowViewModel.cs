@@ -1922,7 +1922,6 @@ namespace DivinityModManager.ViewModels
 								Trace.WriteLine($"Renamed save screenshot '{previewImage}' to '{renamedImage}'.");
 							}
 
-							/*
 							string originalDirectory = Path.GetDirectoryName(dialog.FileName);
 							string desiredDirectory = Path.GetDirectoryName(renameDialog.FileName);
 
@@ -1940,7 +1939,6 @@ namespace DivinityModManager.ViewModels
 									}
 								}
 							}
-							*/
 
 							view.AlertBar.SetSuccessAlert($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.", 15);
 						}

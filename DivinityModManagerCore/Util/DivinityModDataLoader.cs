@@ -28,7 +28,7 @@ namespace DivinityModManager.Util
 			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="", MD5=""},
 		};
 
-		public static List<DivinityModData> Larian_Modes { get; private set; } = new List<DivinityModData>()
+		public static List<DivinityModData> Larian_ModeMods { get; private set; } = new List<DivinityModData>()
 		{
 			new DivinityModData{ Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder="DOS2_Arena", Version=DivinityModVersion.FromInt(271587865), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5="ba12b04eb34b2bcac60bb3edcceb7c5e"},
 			new DivinityModData{ Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder="GameMaster", Version=DivinityModVersion.FromInt(271587865), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5="a81ffa30bfb55ccddbdc37256bc6f7f4"},
@@ -53,7 +53,7 @@ namespace DivinityModManager.Util
 		private static List<DivinityModData> GetIgnoredMods(bool all = false)
 		{
 			var mods = new List<DivinityModData>(Larian_Base);
-			mods.AddRange(Larian_Modes);
+			mods.AddRange(Larian_ModeMods);
 			if (all) mods.AddRange(Larian_Mods);
 			return mods;
 		}
@@ -61,7 +61,7 @@ namespace DivinityModManager.Util
 		public static List<DivinityModData> IgnoredEditorMods { get; set; } = GetIgnoredMods(true);
 
 		// Hide Larian mods for now, since we can't add them to the active order without the game automatically removing them
-		public static List<DivinityModData> IgnoredMods { get; set; } = GetIgnoredMods(true);
+		public static List<DivinityModData> IgnoredMods { get; set; } = GetIgnoredMods(false);
 
 		public static bool IgnoreMod(string modUUID)
 		{
@@ -116,11 +116,19 @@ namespace DivinityModManager.Util
 				var moduleInfoNode = xDoc.Descendants("node").FirstOrDefault(n => n.Attribute("id")?.Value == "ModuleInfo");
 				if (moduleInfoNode != null)
 				{
+					var uuid = GetAttribute(moduleInfoNode, "UUID", "");
+					var name = GetAttribute(moduleInfoNode, "Name", "");
+					var author = GetAttribute(moduleInfoNode, "Author", "");
+					if (Larian_Mods.Any(x => x.UUID == uuid))
+					{
+						name = GetAttribute(moduleInfoNode, "DisplayName", "");
+						author = "Larian Studios";
+					}
 					DivinityModData modData = new DivinityModData()
 					{
-						UUID = GetAttribute(moduleInfoNode, "UUID", ""),
-						Name = GetAttribute(moduleInfoNode, "Name", ""),
-						Author = GetAttribute(moduleInfoNode, "Author", ""),
+						UUID = uuid,
+						Name = name,
+						Author = author,
 						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
 						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
 						Description = GetAttribute(moduleInfoNode, "Description", ""),
@@ -401,7 +409,7 @@ namespace DivinityModManager.Util
 
 							if (metaFile != null)
 							{
-								Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
+								//Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
 								using (var stream = metaFile.MakeStream())
 								{
 									using (var sr = new System.IO.StreamReader(stream))

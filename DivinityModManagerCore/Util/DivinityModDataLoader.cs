@@ -108,20 +108,49 @@ namespace DivinityModManager.Util
 			return -1;
 		}
 
+		public static string EscapeXml(string s)
+		{
+			string toxml = s;
+			if (!string.IsNullOrEmpty(toxml))
+			{
+				// replace literal values with entities
+				toxml = toxml.Replace("&", "&amp;");
+				toxml = toxml.Replace("'", "&apos;");
+				toxml = toxml.Replace("\"", "&quot;");
+				toxml = toxml.Replace(">", "&gt;");
+				toxml = toxml.Replace("<", "&lt;");
+			}
+			return toxml;
+		}
+
+		public static string EscapeXmlAttributes(string xmlstring)
+		{
+			if (!string.IsNullOrEmpty(xmlstring))
+			{
+				xmlstring = Regex.Replace(s, "value=\"(.*?)\"", new MatchEvaluator((m) =>
+				{
+					return $"value=\"{EscapeXml(m.Groups[1].Value)}\"";
+				}));
+			}
+			return xmlstring;
+		}
+
 		private static DivinityModData ParseMetaFile(string metaContents)
 		{
 			try
 			{
-				XElement xDoc = XElement.Parse(metaContents);
+				XElement xDoc = XElement.Parse(EscapeXmlAttributes(metaContents));
 				var moduleInfoNode = xDoc.Descendants("node").FirstOrDefault(n => n.Attribute("id")?.Value == "ModuleInfo");
 				if (moduleInfoNode != null)
 				{
 					var uuid = GetAttribute(moduleInfoNode, "UUID", "");
 					var name = GetAttribute(moduleInfoNode, "Name", "");
+					var description = GetAttribute(moduleInfoNode, "Description", "");
 					var author = GetAttribute(moduleInfoNode, "Author", "");
 					if (Larian_Mods.Any(x => x.UUID == uuid))
 					{
-						name = GetAttribute(moduleInfoNode, "DisplayName", "");
+						name = GetAttribute(moduleInfoNode, "DisplayName", name);
+						description = GetAttribute(moduleInfoNode, "DescriptionName", description);
 						author = "Larian Studios";
 					}
 					DivinityModData modData = new DivinityModData()
@@ -131,7 +160,7 @@ namespace DivinityModManager.Util
 						Author = author,
 						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
 						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
-						Description = GetAttribute(moduleInfoNode, "Description", ""),
+						Description = description,
 						MD5 = GetAttribute(moduleInfoNode, "MD5", ""),
 						Type = GetAttribute(moduleInfoNode, "Type", "")
 					};
@@ -409,7 +438,7 @@ namespace DivinityModManager.Util
 
 							if (metaFile != null)
 							{
-								//Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
+								Trace.WriteLine($"Parsing meta.lsx for '{pakPath}'.");
 								using (var stream = metaFile.MakeStream())
 								{
 									using (var sr = new System.IO.StreamReader(stream))

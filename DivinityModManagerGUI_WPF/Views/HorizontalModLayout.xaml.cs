@@ -122,6 +122,7 @@ namespace DivinityModManager.Views
 		{
 			if (sortBy == "Version") sortBy = "Version.Version";
 			if (sortBy == "#") sortBy = "Index";
+			if (sortBy == "Name") sortBy = "DisplayName";
 			ListView lv = sender as ListView;
 			ICollectionView dataView =
 			  CollectionViewSource.GetDefaultView(lv.ItemsSource);
@@ -143,7 +144,7 @@ namespace DivinityModManager.Views
 						RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
 						{
 							var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
-							Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
+							//Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
 							gridView.Columns[1].Width = MeasureText(longestName,
 								ActiveModsListView.FontFamily,
 								ActiveModsListView.FontStyle,
@@ -165,7 +166,7 @@ namespace DivinityModManager.Views
 					if (ViewModel.InactiveMods.Count > 0)
 					{
 						var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
-						Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
+						//Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
 						gridView.Columns[0].Width = MeasureText(longestName,
 							ActiveModsListView.FontFamily,
 							ActiveModsListView.FontStyle,

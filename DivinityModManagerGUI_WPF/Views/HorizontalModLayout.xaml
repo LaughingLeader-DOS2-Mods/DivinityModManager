@@ -16,13 +16,24 @@
 	d:DesignWidth="800"
 	mc:Ignorable="d">
 	<UserControl.Resources>
-		<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+
+			<Style BasedOn="{StaticResource ModOrderListView}" TargetType="ListView">
+				<Setter Property="dd:DragDrop.DragDirectlySelectedOnly" Value="True" />
+				<Setter Property="dd:DragDrop.DragHandler" Value="{Binding DragHandler}" />
+				<Setter Property="dd:DragDrop.DropHandler" Value="{Binding DropHandler}" />
+				<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
+				<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
+			</Style>
+		</ResourceDictionary>
 	</UserControl.Resources>
 	<UserControl.Style>
 		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
 	</UserControl.Style>
 	<Grid>
-		<Grid.Resources />
 		<Grid.ColumnDefinitions>
 			<ColumnDefinition Width="*" />
 			<ColumnDefinition Width="4" />
@@ -96,10 +107,6 @@
 			<ListView
 				x:Name="ActiveModsListView"
 				Grid.Row="1"
-				dd:DragDrop.DragDirectlySelectedOnly="True"
-				dd:DragDrop.DropHandler="{Binding DropHandler}"
-				dd:DragDrop.IsDragSource="True"
-				dd:DragDrop.IsDropTarget="True"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding ActiveMods}"
 				Style="{StaticResource ModOrderListView}"
@@ -161,13 +168,8 @@
 			<ListView
 				x:Name="InactiveModsListView"
 				Grid.Row="2"
-				dd:DragDrop.DragDirectlySelectedOnly="True"
-				dd:DragDrop.DropHandler="{Binding DropHandler}"
-				dd:DragDrop.IsDragSource="True"
-				dd:DragDrop.IsDropTarget="True"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding InactiveMods}"
-				Style="{StaticResource ModOrderListView}"
 				View="{DynamicResource InactiveModGridView}" />
 		</Grid>
 	</Grid>

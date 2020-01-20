@@ -578,7 +578,8 @@ namespace DivinityModManager.ViewModels
 			int count = 0;
 			foreach(var workshopMod in WorkshopMods)
 			{
-				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID);
+				workshopMod.UpdateDisplayName();
+				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
 				if(pakMod != null)
 				{
 					if(!pakMod.IsEditorMod)
@@ -620,14 +621,15 @@ namespace DivinityModManager.ViewModels
 			if(Directory.Exists(Settings.DOS2WorkshopPath))
 			{
 				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath);
-				modPakData.ForEach(x => x.UpdateDisplayName());
+				if(modPakData.Count > 0)
+				{
+					//Ignore Classic mods since they share the same workshop folder
+					var sortedWorkshopMods = modPakData.Where(x => !x.IsClassicMod).OrderBy(m => m.Name);
+					workshopMods.Clear();
+					workshopMods.AddRange(sortedWorkshopMods);
 
-				var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
-
-				workshopMods.Clear();
-				workshopMods.AddRange(sortedWorkshopMods);
-
-				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+				}
 			} 
 		}
 
@@ -2273,6 +2275,7 @@ namespace DivinityModManager.ViewModels
 					foreach(var m in Mods)
 					{
 						m.DisplayFileForName = Settings.DisplayFileNames;
+						m.UpdateDisplayName();
 					}
 				}
 				else
@@ -2280,6 +2283,7 @@ namespace DivinityModManager.ViewModels
 					foreach (var m in Mods)
 					{
 						m.DisplayFileForName = !m.DisplayFileForName;
+						m.UpdateDisplayName();
 					}
 				}
 			});
@@ -2316,7 +2320,7 @@ namespace DivinityModManager.ViewModels
 			modsConnecton.Bind(out allMods).DisposeMany().Subscribe();
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 
-			modsConnecton.WhenAnyPropertyChanged("DisplayFileForName", "Name", "IsClassicMod").Subscribe((b) =>
+			modsConnecton.WhenAnyPropertyChanged("Name", "IsClassicMod").Subscribe((b) =>
 			{
 				b.UpdateDisplayName();
 			});

@@ -191,6 +191,44 @@
 					</Setter>
 				</MultiDataTrigger.Setters>
 			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsClassicMod}" Value="True" />
+					<Condition Binding="{Binding IsSelected}" Value="False" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background">
+						<Setter.Value>
+							<SolidColorBrush Opacity="0.15" Color="Red" />
+						</Setter.Value>
+					</Setter>
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsClassicMod}" Value="True" />
+					<Condition Binding="{Binding IsSelected}" Value="True" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background">
+						<Setter.Value>
+							<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+								<GradientStop Offset="0" Color="#FFBF0808" />
+								<GradientStop Offset="1" Color="#FF990000" />
+							</LinearGradientBrush>
+						</Setter.Value>
+					</Setter>
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding IsClassicMod}" Value="True" />
+					<Condition Binding="{Binding IsActive}" Value="False" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="IsEnabled" Value="False" />
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
 		</Style.Triggers>
 	</Style>
 	<Style
@@ -359,7 +397,7 @@
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn
-				Width="60"
+				Width="70"
 				Header="Type"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
@@ -412,7 +450,7 @@
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn
-				Width="60"
+				Width="70"
 				Header="Type"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>

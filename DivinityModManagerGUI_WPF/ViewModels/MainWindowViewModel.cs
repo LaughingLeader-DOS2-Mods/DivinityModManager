@@ -358,6 +358,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand ToggleDarkModeCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
 		public ICommand RenameSaveCommand { get; private set; }
+		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 
 		public bool Loaded { get; set; } = false;
 		public EventHandler OnLoaded { get; set; }
@@ -913,7 +914,7 @@ namespace DivinityModManager.ViewModels
 
 				if (SelectedProfile.SavedLoadOrder == null)
 				{
-					DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current" };
+					DivinityLoadOrder currentOrder = new DivinityLoadOrder() { Name = "Current", FilePath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx") };
 
 					foreach (var uuid in SelectedProfile.ModOrder)
 					{
@@ -1398,19 +1399,29 @@ namespace DivinityModManager.ViewModels
 					Directory.CreateDirectory(outputDirectory);
 				}
 
-				string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
-				string outputPath = Path.Combine(outputDirectory, outputName);
+				string outputPath = SelectedModOrder.FilePath;
+
+				if (String.IsNullOrWhiteSpace(outputPath))
+				{
+					string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
+					outputPath = Path.Combine(outputDirectory, outputName);
+				}
 
 				try
 				{
-					if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+					if (SelectedModOrder.Name.Equals("Current"))
 					{
+						//When saving the "Current" order, write this to modsettings.lsx instead of a json file.
+						result = await ExportLoadOrderAsync();
+						outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
+						/*
 						outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine($"{SelectedProfile.Name}_{SelectedModOrder.Name}.json"), '_');
 						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 						tempOrder.Name = $"Current ({SelectedProfile.Name})";
 
 						outputPath = Path.Combine(outputDirectory, outputName);
 						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, tempOrder);
+						*/
 					}
 					else
 					{
@@ -1488,7 +1499,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private async Task<bool> ExportLoadOrder()
+		private async Task<bool> ExportLoadOrderAsync()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
 			{
@@ -1513,7 +1524,7 @@ namespace DivinityModManager.ViewModels
 				{
 					string msg = $"Problem exporting load order to '{outputPath}'";
 					view.AlertBar.SetDangerAlert(msg);
-					MessageBox.Show(view, msg, "Mod Order Export Failed");
+					view.MainWindowMessageBox.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
 				}
 			}
 			else
@@ -2156,6 +2167,44 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private DivinityLoadOrder deleteOrder;
+
+		private Unit DeleteOrder(DivinityLoadOrder order)
+		{
+			//deleteOrder = order;
+			//view.MainWindowMessageBox.Closed += MainWindowMessageBox_Closed_DeleteOrder;
+			//view.MainWindowMessageBox.ShowMessageBox($"Delete load order '{order.Name}'? This cannot be undone.", "Confirm Order Deletion", MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No);
+			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Delete load order '{order.Name}'? This cannot be undone.", "Confirm Order Deletion", 
+				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
+			if(result == MessageBoxResult.Yes)
+			{
+				SelectedModOrderIndex = 0;
+				this.ModOrderList.Remove(order);
+				if (!String.IsNullOrEmpty(order.FilePath) && File.Exists(order.FilePath))
+				{
+					RecycleBinHelper.DeleteFile(order.FilePath, false, false);
+					view.AlertBar.SetWarningAlert($"Sent load order '{order.FilePath}' to the recycle bin.", 25);
+				}
+			}
+			return Unit.Default;
+		}
+
+		private void MainWindowMessageBox_Closed_DeleteOrder(object sender, EventArgs e)
+		{
+			view.MainWindowMessageBox.Closed -= MainWindowMessageBox_Closed_DeleteOrder;
+			if (view.MainWindowMessageBox.MessageBoxResult == MessageBoxResult.Yes)
+			{
+				SelectedModOrderIndex = 0;
+				this.ModOrderList.Remove(deleteOrder);
+				if (!String.IsNullOrEmpty(deleteOrder.FilePath) && File.Exists(deleteOrder.FilePath))
+				{
+					RecycleBinHelper.DeleteFile(deleteOrder.FilePath, false, false);
+					view.AlertBar.SetWarningAlert($"Sent load order '{deleteOrder.FilePath}' to the recycle bin.", 25);
+				}
+				deleteOrder = null;
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -2177,7 +2226,7 @@ namespace DivinityModManager.ViewModels
 			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
 			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveAsCommand);
 
-			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrder);
+			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderAsync);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null);
 			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
@@ -2190,6 +2239,8 @@ namespace DivinityModManager.ViewModels
 			ImportOrderFromSaveAsNewCommand = ReactiveCommand.Create(ImportOrderFromSaveAsNew, canOpenDialogWindow);
 			ImportOrderFromFileCommand = ReactiveCommand.Create(ImportOrderFromFile, canOpenDialogWindow);
 			ImportOrderZipFileCommand = ReactiveCommand.Create(ImportOrderZipFile, canOpenDialogWindow);
+
+			DeleteOrderCommand = ReactiveCommand.Create<DivinityLoadOrder, Unit>(DeleteOrder, canOpenDialogWindow);
 
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 

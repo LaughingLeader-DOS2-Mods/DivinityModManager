@@ -1035,6 +1035,8 @@ namespace DivinityModManager.Util
 				fs.Write(buffer, 0, buffer.Length);
 			}
 
+			order.FilePath = outputFilePath;
+
 			return true;
 		}
 
@@ -1051,6 +1053,8 @@ namespace DivinityModManager.Util
 			{
 				await fs.WriteAsync(buffer, 0, buffer.Length);
 			}
+
+			order.FilePath = outputFilePath;
 
 			return true;
 		}
@@ -1077,6 +1081,7 @@ namespace DivinityModManager.Util
 						DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 						if (order != null)
 						{
+							order.FilePath = loadOrderFile;
 							order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
 							loadOrders.Add(order);
 						}
@@ -1116,16 +1121,8 @@ namespace DivinityModManager.Util
 							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 							if (order != null)
 							{
+								order.FilePath = loadOrderFile;
 								order.LastModifiedDate = File.GetLastWriteTime(loadOrderFile);
-
-								/*
-								if (loadOrderFile.IndexOf("_Current.json", StringComparison.OrdinalIgnoreCase) > -1)
-								{
-									var fileName = Path.GetFileNameWithoutExtension(loadOrderFile);
-									var profile = fileName.Split('_').First();
-									order.Name = $"Current ({profile})";
-								}
-								*/
 
 								loadOrders.Add(order);
 							}
@@ -1150,6 +1147,10 @@ namespace DivinityModManager.Util
 					{
 						var fileText = await reader.ReadToEndAsync();
 						DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
+						if(order != null)
+						{
+							order.FilePath = loadOrderFile;
+						}
 						return order;
 					}
 				}

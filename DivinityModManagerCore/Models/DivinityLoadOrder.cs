@@ -7,6 +7,8 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
@@ -21,12 +23,12 @@ namespace DivinityModManager.Models
 		}
 	}
 
-	[JsonObject(MemberSerialization.OptIn)]
+	[DataContract]
 	public class DivinityLoadOrder : ReactiveObject
 	{
 		private string name;
 
-		[JsonProperty]
+		[DataMember]
 		public string Name
 		{
 			get => name;
@@ -42,14 +44,12 @@ namespace DivinityModManager.Models
 		}
 
 
-		/*
-		private string displayName;
-		public string DisplayName
+		private string filePath = "";
+		public string FilePath
 		{
-			get => String.IsNullOrEmpty(displayName) ? name : displayName;
-			set { this.RaiseAndSetIfChanged(ref displayName, value); }
+			get => filePath;
+			set { this.RaiseAndSetIfChanged(ref filePath, value); }
 		}
-		*/
 
 		private DateTime lastModifiedDate;
 
@@ -71,7 +71,7 @@ namespace DivinityModManager.Models
 		}
 
 
-		[JsonProperty]
+		[DataMember]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
 		public void SetOrder(IEnumerable<DivinityLoadOrderEntry> nextOrder)
@@ -122,6 +122,11 @@ namespace DivinityModManager.Models
 				//savedList = new List<DivinityLoadOrderEntry>(Order);
 				ActiveModBinding.Dispose();
 			}
+		}
+
+		public DivinityLoadOrder()
+		{
+			
 		}
 	}
 }

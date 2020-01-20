@@ -46,6 +46,7 @@ namespace DivinityModManager.Util
 			ToggleNameDisplayCommand = ReactiveCommand.Create<DivinityModData>((mod) =>
 			{
 				mod.DisplayFileForName = !mod.DisplayFileForName;
+				mod.UpdateDisplayName();
 				if (_viewModel != null)
 				{
 					if (_viewModel.ActiveSelected > 1 && _viewModel.ActiveMods.Contains(mod))
@@ -53,6 +54,7 @@ namespace DivinityModManager.Util
 						foreach(var m in _viewModel.ActiveMods.Where(x => x.IsSelected))
 						{
 							m.DisplayFileForName = mod.DisplayFileForName;
+							mod.UpdateDisplayName();
 						}
 					}
 					else if (_viewModel.InactiveSelected > 1 && _viewModel.InactiveMods.Contains(mod))
@@ -60,10 +62,10 @@ namespace DivinityModManager.Util
 						foreach (var m in _viewModel.InactiveMods.Where(x => x.IsSelected))
 						{
 							m.DisplayFileForName = mod.DisplayFileForName;
+							mod.UpdateDisplayName();
 						}
 					}
 				}
-				
 			});
 		}
 	}

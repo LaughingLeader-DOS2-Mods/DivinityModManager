@@ -89,7 +89,7 @@ namespace DivinityModManager.Util
 		/// <param name="attribute"></param>
 		/// <param name="fallbackValue"></param>
 		/// <returns></returns>
-		private static string GetAttribute(XElement node, string id, string fallbackValue = "")
+		private static string GetAttributeWithId(XElement node, string id, string fallbackValue = "")
 		{
 			var att = node.Descendants("attribute").FirstOrDefault(a => a.Attribute("id")?.Value == id)?.Attribute("value")?.Value;
 			if (att != null)
@@ -97,6 +97,18 @@ namespace DivinityModManager.Util
 				return att;
 			}
 			return fallbackValue;
+		}
+
+		private static bool TryGetAttribute(XElement node, string id, out string value, string fallbackValue = "")
+		{
+			var att = node.Attributes().FirstOrDefault(a => a.Name == id);
+			if (att != null)
+			{
+				value = att.Value;
+				return true;
+			}
+			value = fallbackValue;
+			return false;
 		}
 
 		private static int SafeConvertString(string str)
@@ -127,7 +139,7 @@ namespace DivinityModManager.Util
 		{
 			if (!string.IsNullOrEmpty(xmlstring))
 			{
-				xmlstring = Regex.Replace(s, "value=\"(.*?)\"", new MatchEvaluator((m) =>
+				xmlstring = Regex.Replace(xmlstring, "value=\"(.*?)\"", new MatchEvaluator((m) =>
 				{
 					return $"value=\"{EscapeXml(m.Groups[1].Value)}\"";
 				}));
@@ -140,17 +152,49 @@ namespace DivinityModManager.Util
 			try
 			{
 				XElement xDoc = XElement.Parse(EscapeXmlAttributes(metaContents));
+				var versionNode = xDoc.Descendants("version").FirstOrDefault();
+
+				int headerMajor = 3;
+				int headerMinor = 6;
+				int headerRevision = 1;
+				int headerBuild = 5;
+
+				if (versionNode != null)
+				{
+					//Trace.WriteLine($"Version node: {versionNode.ToString()}");
+					//DE Mods <version major="3" minor="6" revision="2" build="0" />
+					//Classic Mods <version major="3" minor="1" revision="3" build="5" />
+					if(TryGetAttribute(versionNode, "major", out var headerMajorStr))
+					{
+						int.TryParse(headerMajorStr, out headerMajor);
+					}
+					if(TryGetAttribute(versionNode, "minor", out var headerMinorStr))
+					{
+						int.TryParse(headerMinorStr, out headerMinor);
+					}
+					if(TryGetAttribute(versionNode, "revision", out var headerRevisionStr))
+					{
+						int.TryParse(headerRevisionStr, out headerRevision);
+					}
+					if(TryGetAttribute(versionNode, "build", out var headerBuildStr))
+					{
+						int.TryParse(headerBuildStr, out headerBuild);
+					}
+
+					//Trace.WriteLine($"Version: {headerMajor}.{headerMinor}.{headerRevision}.{headerBuild}");
+				}
+
 				var moduleInfoNode = xDoc.Descendants("node").FirstOrDefault(n => n.Attribute("id")?.Value == "ModuleInfo");
 				if (moduleInfoNode != null)
 				{
-					var uuid = GetAttribute(moduleInfoNode, "UUID", "");
-					var name = GetAttribute(moduleInfoNode, "Name", "");
-					var description = GetAttribute(moduleInfoNode, "Description", "");
-					var author = GetAttribute(moduleInfoNode, "Author", "");
+					var uuid = GetAttributeWithId(moduleInfoNode, "UUID", "");
+					var name = GetAttributeWithId(moduleInfoNode, "Name", "");
+					var description = GetAttributeWithId(moduleInfoNode, "Description", "");
+					var author = GetAttributeWithId(moduleInfoNode, "Author", "");
 					if (Larian_Mods.Any(x => x.UUID == uuid))
 					{
-						name = GetAttribute(moduleInfoNode, "DisplayName", name);
-						description = GetAttribute(moduleInfoNode, "DescriptionName", description);
+						name = GetAttributeWithId(moduleInfoNode, "DisplayName", name);
+						description = GetAttributeWithId(moduleInfoNode, "DescriptionName", description);
 						author = "Larian Studios";
 					}
 					DivinityModData modData = new DivinityModData()
@@ -158,11 +202,12 @@ namespace DivinityModManager.Util
 						UUID = uuid,
 						Name = name,
 						Author = author,
-						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(moduleInfoNode, "Version", ""))),
-						Folder = GetAttribute(moduleInfoNode, "Folder", ""),
+						Version = DivinityModVersion.FromInt(SafeConvertString(GetAttributeWithId(moduleInfoNode, "Version", ""))),
+						Folder = GetAttributeWithId(moduleInfoNode, "Folder", ""),
 						Description = description,
-						MD5 = GetAttribute(moduleInfoNode, "MD5", ""),
-						Type = GetAttribute(moduleInfoNode, "Type", "")
+						MD5 = GetAttributeWithId(moduleInfoNode, "MD5", ""),
+						Type = GetAttributeWithId(moduleInfoNode, "Type", ""),
+						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
@@ -173,11 +218,11 @@ namespace DivinityModManager.Util
 						{
 							DivinityModDependencyData dependencyMod = new DivinityModDependencyData()
 							{
-								UUID = GetAttribute(node, "UUID", ""),
-								Name = GetAttribute(node, "Name", ""),
-								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttribute(node, "Version", ""))),
-								Folder = GetAttribute(node, "Folder", ""),
-								MD5 = GetAttribute(node, "MD5", "")
+								UUID = GetAttributeWithId(node, "UUID", ""),
+								Name = GetAttributeWithId(node, "Name", ""),
+								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttributeWithId(node, "Version", ""))),
+								Folder = GetAttributeWithId(node, "Folder", ""),
+								MD5 = GetAttributeWithId(node, "MD5", "")
 							};
 							//Trace.WriteLine($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
 							if (dependencyMod.UUID != "")
@@ -193,7 +238,7 @@ namespace DivinityModManager.Util
 					{
 						foreach (var node in targets)
 						{
-							var target = GetAttribute(node, "Object", "");
+							var target = GetAttributeWithId(node, "Object", "");
 							if(!String.IsNullOrEmpty(target))
 							{
 								modData.Modes.Add(target);

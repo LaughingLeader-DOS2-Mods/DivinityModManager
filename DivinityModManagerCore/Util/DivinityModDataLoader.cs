@@ -209,6 +209,7 @@ namespace DivinityModManager.Util
 						Type = GetAttributeWithId(moduleInfoNode, "Type", ""),
 						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
+					modData.UpdateDisplayName();
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
 

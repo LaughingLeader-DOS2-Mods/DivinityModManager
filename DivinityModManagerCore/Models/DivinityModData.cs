@@ -273,11 +273,11 @@ namespace DivinityModManager.Models
 			this.OpenInFileExplorerCommand = DivinityApp.Commands.OpenInFileExplorerCommand;
 			this.ToggleNameDisplayCommand = DivinityApp.Commands.ToggleNameDisplayCommand;
 
-			this.WhenAnyValue(x => x.DisplayFileForName, x => x.Name, x => x.IsClassicMod).
-				Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
-			{
-				UpdateDisplayName();
-			});
+			//this.WhenAnyValue(x => x.DisplayFileForName, x => x.Name, x => x.IsClassicMod).
+			//	Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+			//{
+			//	UpdateDisplayName();
+			//});
 		}
 	}
 }

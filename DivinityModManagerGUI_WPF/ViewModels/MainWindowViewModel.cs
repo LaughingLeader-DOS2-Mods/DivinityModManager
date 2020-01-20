@@ -2316,7 +2316,7 @@ namespace DivinityModManager.ViewModels
 			modsConnecton.Bind(out allMods).DisposeMany().Subscribe();
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 
-			modsConnecton.Publish().WhenAnyPropertyChanged("DisplayFileForName", "Name", "IsClassicMod").Subscribe((b) =>
+			modsConnecton.WhenAnyPropertyChanged("DisplayFileForName", "Name", "IsClassicMod").Subscribe((b) =>
 			{
 				b.UpdateDisplayName();
 			});

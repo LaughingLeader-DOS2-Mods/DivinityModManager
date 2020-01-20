@@ -243,13 +243,31 @@
 							IsTextSearchEnabled="False"
 							ItemsSource="{Binding ModOrderList}"
 							KeyDown="ComboBox_KeyDown_LoseFocus"
+							Loaded="OrdersComboBox_Loaded"
 							SelectedIndex="{Binding SelectedModOrderIndex}"
+							Tag="{Binding}"
 							Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
 							<ComboBox.ItemContainerStyle>
-								<Style>
+								<Style TargetType="ComboBoxItem">
 									<EventSetter Event="ComboBoxItem.PreviewMouseDown" Handler="ProfileComboBox_OnUserClick" />
 								</Style>
 							</ComboBox.ItemContainerStyle>
+							<ComboBox.ContextMenu>
+								<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+									<MenuItem
+										Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+										CommandParameter="{Binding SelectedModOrder.FilePath}"
+										Header="Open in File Explorer..." />
+									<MenuItem
+										Command="{Binding CopyPathToClipboardCommand}"
+										CommandParameter="{Binding SelectedModOrder.FilePath}"
+										Header="Copy Path to Clipboard" />
+									<MenuItem
+										Command="{Binding DeleteOrderCommand}"
+										CommandParameter="{Binding SelectedModOrder}"
+										Header="Delete Order" />
+								</ContextMenu>
+							</ComboBox.ContextMenu>
 						</ComboBox>
 					</Grid>
 					<Grid Grid.Column="2" Margin="1,0,0,0">
@@ -427,6 +445,25 @@
 					</ContentControl.Style>
 				</ContentControl>
 			</Grid>
+			<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}" />
+			<Style TargetType="{x:Type xc:MessageBox}">
+				<Setter Property="Width" Value="600" />
+				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}" />
+				<Setter Property="ButtonRegionBackground" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}" />
+				<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
+				<Setter Property="CaptionForeground" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}" />
+				<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
+				<Setter Property="WindowBackground" Value="#4e38c9" />
+				<Setter Property="WindowBorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}" />
+				<Setter Property="CloseButtonStyle">
+					<Setter.Value>
+						<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
+							<Setter Property="IsEnabled" Value="False" />
+							<Setter Property="Opacity" Value="0" />
+						</Style>
+					</Setter.Value>
+				</Setter>
+			</Style>
 		</ResourceDictionary>
 	</Window.Resources>
 	<Window.InputBindings>
@@ -482,26 +519,7 @@
 			HorizontalAlignment="Stretch"
 			VerticalAlignment="Stretch"
 			Panel.ZIndex="99">
-			<xc:MessageBox
-				x:Name="MainWindowMessageBox"
-				Width="600"
-				Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
-				BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
-				ButtonRegionBackground="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
-				CaptionForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
-				Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
-				WindowBackground="{Binding ElementName=Main, Path=TitleBarBackground}"
-				WindowBorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}">
-				<xc:MessageBox.Resources>
-					<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button" />
-				</xc:MessageBox.Resources>
-				<xc:MessageBox.CloseButtonStyle>
-					<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
-						<Setter Property="IsEnabled" Value="False" />
-						<Setter Property="Opacity" Value="0" />
-					</Style>
-				</xc:MessageBox.CloseButtonStyle>
-			</xc:MessageBox>
+			<xc:MessageBox x:Name="MainWindowMessageBox" />
 		</xc:WindowContainer>
 		<xc:BusyIndicator
 			x:Name="MainBusyIndicator"

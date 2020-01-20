@@ -352,5 +352,18 @@ namespace DivinityModManager.Views
 				}
 			});
 		}
+
+		private void OrdersComboBox_Loaded(object sender, RoutedEventArgs e)
+		{
+			if(sender is ComboBox ordersComboBox)
+			{
+				var tb = FindVisualChildren<TextBox>(ordersComboBox).FirstOrDefault();
+				if(tb != null)
+				{
+					tb.ContextMenu = ordersComboBox.ContextMenu;
+					tb.ContextMenu.DataContext = ViewModel;
+				}
+			}
+		}
 	}
 }

@@ -78,11 +78,50 @@ namespace DivinityModManager.ViewModels
 		}
 	}
 
+	public class ModListDragHandler : DefaultDragHandler
+	{
+		public override void StartDrag(IDragInfo dragInfo)
+		{
+			var items = dragInfo.SourceItems.Cast<ISelectable>().Where(x => x.CanDrag).ToList();
+			if (items.Count > 1)
+			{
+				dragInfo.Data = items;
+			}
+			else
+			{
+				// special case: if the single item is an enumerable then we can not drop it as single item
+				var singleItem = items.FirstOrDefault();
+				if (singleItem is System.Collections.IEnumerable)
+				{
+					dragInfo.Data = items.Cast<ISelectable>().Where(x => x.CanDrag);
+				}
+				else if(singleItem is ISelectable d && d.CanDrag)
+				{
+					dragInfo.Data = singleItem;
+					Trace.WriteLine("Can drag item");
+				}
+			}
+
+			dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
+		}
+
+		public override bool CanStartDrag(IDragInfo dragInfo)
+		{
+			if(dragInfo.SourceItem is ISelectable d && !d.CanDrag)
+			{
+				return false;
+			}
+			return true;
+		}
+	}
+
 	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
 	{
 		private MainWindow view;
 		public MainWindow View => view;
 		public ModListDropHandler DropHandler { get; set; }
+		public ModListDragHandler DragHandler { get; set; }
+		
 
 		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
@@ -581,6 +620,7 @@ namespace DivinityModManager.ViewModels
 			if(Directory.Exists(Settings.DOS2WorkshopPath))
 			{
 				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath);
+				modPakData.ForEach(x => x.UpdateDisplayName());
 
 				var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
 
@@ -2120,6 +2160,7 @@ namespace DivinityModManager.ViewModels
 			RxApp.DefaultExceptionHandler = exceptionHandler;
 
 			this.DropHandler = new ModListDropHandler(this);
+			this.DragHandler = new ModListDragHandler();
 
 			Activator = new ViewModelActivator();
 
@@ -2328,14 +2369,14 @@ namespace DivinityModManager.ViewModels
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
 
 #if DEBUG
-			this.WhenAnyValue(x => x.ActiveSelected).Subscribe((x) =>
-			{
-				Trace.WriteLine($"Total selected active mods: {x}");
-			});
-			this.WhenAnyValue(x => x.InactiveSelected).Subscribe((x) =>
-			{
-				Trace.WriteLine($"Total selected inactive mods: {x}");
-			});
+			//this.WhenAnyValue(x => x.ActiveSelected).Subscribe((x) =>
+			//{
+			//	Trace.WriteLine($"Total selected active mods: {x}");
+			//});
+			//this.WhenAnyValue(x => x.InactiveSelected).Subscribe((x) =>
+			//{
+			//	Trace.WriteLine($"Total selected inactive mods: {x}");
+			//});
 #endif
 			//ActiveModOrder.ObserveCollectionChanges().Subscribe(e =>
 			//{

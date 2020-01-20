@@ -21,5 +21,6 @@ namespace DivinityModManager.Models
 		}
 
 		public bool IsEditorMod { get; set; } = false;
+		public bool CanDrag { get; set; } = true;
 	}
 }

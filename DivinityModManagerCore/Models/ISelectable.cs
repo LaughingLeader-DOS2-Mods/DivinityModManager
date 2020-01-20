@@ -9,5 +9,6 @@ namespace DivinityModManager.Models
 	public interface ISelectable
 	{
 		bool IsSelected { get; set; }
+		bool CanDrag { get; }
 	}
 }

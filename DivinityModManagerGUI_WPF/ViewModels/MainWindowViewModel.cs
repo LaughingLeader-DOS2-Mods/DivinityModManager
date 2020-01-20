@@ -86,12 +86,12 @@ namespace DivinityModManager.ViewModels
 
 		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
 
-		protected SourceCache<DivinityModData, string> mods = new SourceCache<DivinityModData, string>(m => m.UUID);
+		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
 
 		protected ReadOnlyObservableCollection<DivinityModData> allMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
 
-		protected SourceCache<DivinityModData, string> workshopMods = new SourceCache<DivinityModData, string>(m => m.UUID);
+		protected SourceList<DivinityModData> workshopMods = new SourceList<DivinityModData>();
 
 		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
 		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
@@ -359,12 +359,12 @@ namespace DivinityModManager.ViewModels
 #if DEBUG
 		public void AddMods(DivinityModData newMod)
 		{
-			mods.AddOrUpdate(newMod);
+			mods.Add(newMod);
 		}
 
 		public void AddMods(IEnumerable<DivinityModData> newMods)
 		{
-			mods.AddOrUpdate(newMods);
+			mods.AddRange(newMods);
 		}
 #endif
 
@@ -585,7 +585,7 @@ namespace DivinityModManager.ViewModels
 				var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
 
 				workshopMods.Clear();
-				workshopMods.AddOrUpdate(sortedWorkshopMods);
+				workshopMods.AddRange(sortedWorkshopMods);
 
 				Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
 			} 
@@ -763,7 +763,7 @@ namespace DivinityModManager.ViewModels
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
 
 			mods.Clear();
-			mods.AddOrUpdate(finalMods);
+			mods.AddRange(finalMods);
 
 			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
 			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
@@ -813,7 +813,7 @@ namespace DivinityModManager.ViewModels
 
 		public bool ModIsAvailable(IDivinityModData divinityModData)
 		{
-			return mods.Keys.Any(k => k == divinityModData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
+			return mods.Items.Any(k => k.UUID == divinityModData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
 		}
 
 		public void LoadProfiles()
@@ -1184,8 +1184,8 @@ namespace DivinityModManager.ViewModels
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{
-					mods.AddOrUpdate(loadedMods);
-					workshopMods.AddOrUpdate(loadedWorkshopMods);
+					mods.AddRange(loadedMods);
+					workshopMods.AddRange(loadedWorkshopMods);
 					Profiles.AddRange(loadedProfiles);
 
 					SavedModOrderList = savedModOrderList;
@@ -2271,8 +2271,14 @@ namespace DivinityModManager.ViewModels
 				}
 			});
 
-			mods.Connect().Bind(out allMods).DisposeMany().Subscribe();
+			var modsConnecton = mods.Connect();
+			modsConnecton.Bind(out allMods).DisposeMany().Subscribe();
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
+
+			modsConnecton.Publish().WhenAnyPropertyChanged("DisplayFileForName", "Name", "IsClassicMod").Subscribe((b) =>
+			{
+				b.UpdateDisplayName();
+			});
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, 
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);

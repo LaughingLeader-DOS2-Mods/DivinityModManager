@@ -220,15 +220,6 @@
 					</Setter>
 				</MultiDataTrigger.Setters>
 			</MultiDataTrigger>
-			<MultiDataTrigger>
-				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsClassicMod}" Value="True" />
-					<Condition Binding="{Binding IsActive}" Value="False" />
-				</MultiDataTrigger.Conditions>
-				<MultiDataTrigger.Setters>
-					<Setter Property="IsEnabled" Value="False" />
-				</MultiDataTrigger.Setters>
-			</MultiDataTrigger>
 		</Style.Triggers>
 	</Style>
 	<Style
@@ -275,21 +266,33 @@
 							</Style>
 							<Style BasedOn="{StaticResource {x:Type ListBox}}" TargetType="ListBox" />
 						</StackPanel.Resources>
-						<TextBlock
-							Margin="2"
-							FontSize="16"
-							FontWeight="Bold"
-							Foreground="{DynamicResource {x:Static adonisUI:Brushes.AlertBrush}}"
-							Text="{Binding Name}">
-							<TextBlock.Effect>
-								<DropShadowEffect
-									BlurRadius="4"
-									Direction="330"
-									Opacity="0.5"
-									ShadowDepth="4"
-									Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
-							</TextBlock.Effect>
-						</TextBlock>
+						<StackPanel Orientation="Horizontal">
+							<TextBlock
+								Margin="2"
+								FontSize="16"
+								FontWeight="Bold"
+								Foreground="{DynamicResource {x:Static adonisUI:Brushes.AlertBrush}}"
+								Text="{Binding Name}">
+								<TextBlock.Effect>
+									<DropShadowEffect
+										BlurRadius="4"
+										Direction="330"
+										Opacity="0.5"
+										ShadowDepth="4"
+										Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+								</TextBlock.Effect>
+							</TextBlock>
+							<TextBlock
+								Margin="2"
+								Foreground="Red"
+								Text=" (Classic)"
+								Visibility="{Binding IsClassicMod, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								Margin="2"
+								Foreground="Lime"
+								Text=" (Definitive Edition)"
+								Visibility="{Binding IsClassicMod, Converter={StaticResource BoolToVisibilityConverterReversed}}" />
+						</StackPanel>
 						<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
 						<!--<html:HtmlPanel
 							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"

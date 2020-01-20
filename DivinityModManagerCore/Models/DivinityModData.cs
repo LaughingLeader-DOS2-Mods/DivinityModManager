@@ -4,6 +4,8 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Input;
 
@@ -60,11 +62,7 @@ namespace DivinityModManager.Models
 			get => name;
 			set 
 			{ 
-				this.RaiseAndSetIfChanged(ref name, value); 
-				if(!DisplayFileForName)
-				{
-					DisplayName = Name;
-				}
+				this.RaiseAndSetIfChanged(ref name, value);
 			}
 		}
 
@@ -78,6 +76,36 @@ namespace DivinityModManager.Models
 		public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
+		private DivinityModVersion headerVersion;
+		public DivinityModVersion HeaderVersion
+		{
+			get => headerVersion;
+			set
+			{
+				headerVersion = value;
+				IsClassicMod = headerVersion.Minor == 1;
+				if(IsClassicMod)
+				{
+					System.Diagnostics.Trace.WriteLine($"Found a Classic mod: {Name}");
+				}
+			}
+		}
+
+		private bool isClassicMod = false;
+
+		public bool IsClassicMod
+		{
+			get => isClassicMod;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref isClassicMod, value); 
+				if(IsClassicMod)
+				{
+					CanDrag = !IsActive;
+				}
+			}
+		}
+
 		public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 
@@ -89,6 +117,25 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref displayName, value); }
 		}
 
+		public void UpdateDisplayName()
+		{
+			if (DisplayFileForName)
+			{
+				if (!IsEditorMod)
+				{
+					DisplayName = Path.GetFileName(FilePath);
+				}
+				else
+				{
+					DisplayName = Folder + " [Editor Project]";
+				}
+			}
+			else
+			{
+				DisplayName = !IsClassicMod ? Name : Name + " [Classic]";
+			}
+		}
+
 		private bool displayFileForName = false;
 
 		public bool DisplayFileForName
@@ -97,21 +144,6 @@ namespace DivinityModManager.Models
 			set 
 			{ 
 				this.RaiseAndSetIfChanged(ref displayFileForName, value);
-				if(displayFileForName)
-				{
-					if(!IsEditorMod)
-					{
-						DisplayName = Path.GetFileName(FilePath);
-					}
-					else
-					{
-						DisplayName = Folder + " [Editor Project]";
-					}
-				}
-				else
-				{
-					DisplayName = Name;
-				}
 			}
 		}
 
@@ -160,7 +192,14 @@ namespace DivinityModManager.Models
 		public bool IsActive
 		{
 			get => isActive;
-			set { this.RaiseAndSetIfChanged(ref isActive, value); }
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref isActive, value);
+				if(!IsActive && IsClassicMod)
+				{
+					CanDrag = false;
+				}
+			}
 		}
 
 		private bool isSelected = false;
@@ -169,6 +208,14 @@ namespace DivinityModManager.Models
 		{
 			get => isSelected;
 			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
+		}
+
+		private bool canDrag = true;
+
+		public bool CanDrag
+		{
+			get => canDrag;
+			private set { this.RaiseAndSetIfChanged(ref canDrag, value); }
 		}
 
 		private Visibility visibility = Visibility.Visible;
@@ -225,6 +272,12 @@ namespace DivinityModManager.Models
 		{
 			this.OpenInFileExplorerCommand = DivinityApp.Commands.OpenInFileExplorerCommand;
 			this.ToggleNameDisplayCommand = DivinityApp.Commands.ToggleNameDisplayCommand;
+
+			this.WhenAnyValue(x => x.DisplayFileForName, x => x.Name, x => x.IsClassicMod).
+				Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+			{
+				UpdateDisplayName();
+			});
 		}
 	}
 }

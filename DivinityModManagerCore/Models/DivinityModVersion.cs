@@ -115,5 +115,13 @@ namespace DivinityModManager.Models
 		{
 			ParseInt(vInt);
 		}
+
+		public DivinityModVersion(int headerMajor, int headerMinor, int headerRevision, int headerBuild)
+		{
+			Major = headerMajor;
+			Minor = headerMinor;
+			Revision = headerRevision;
+			Build = headerBuild;
+		}
 	}
 }

@@ -582,7 +582,11 @@
 								Header="Toggle Dark/Light Mode" />
 						</MenuItem>
 						<MenuItem Header="Tools">
-							<MenuItem x:Name="ToolsRenameSaveMenuItem" Header="Rename Save..." />
+							<!--  Disabled for now  -->
+							<MenuItem
+								x:Name="ToolsRenameSaveMenuItem"
+								Header="Rename Save..."
+								Visibility="Collapsed" />
 						</MenuItem>
 						<MenuItem Header="Help">
 							<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />

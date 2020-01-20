@@ -124,7 +124,10 @@
 			</StackPanel>
 		</Grid>
 	</DataTemplate>
-	<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="{x:Type ListViewItem}">
+	<Style
+		x:Key="DivinityModDataListItem"
+		BasedOn="{StaticResource {x:Type ListViewItem}}"
+		TargetType="{x:Type ListViewItem}">
 		<!--<Style.Resources>
 			<LinearGradientBrush x:Key="ListItemHoverFill_Selected" StartPoint="0,0" EndPoint="0,1">
 				<GradientStop Offset="0" Color="#FFD1FFD1" />
@@ -223,11 +226,46 @@
 		</Style.Triggers>
 	</Style>
 	<Style
+		x:Key="DivinityModUpdateListItem"
+		BasedOn="{StaticResource {x:Type ListViewItem}}"
+		TargetType="{x:Type ListViewItem}">
+		<Setter Property="Tag" Value="{Binding WorkshopMod}" />
+		<Setter Property="ContextMenu">
+			<Setter.Value>
+				<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+					<MenuItem
+						Command="{Binding OpenInFileExplorerCommand}"
+						CommandParameter="{Binding FilePath}"
+						Header="Open in File Explorer..." />
+					<MenuItem Command="{Binding ToggleNameDisplayCommand}" CommandParameter="{Binding}">
+						<MenuItem.Header>
+							<TextBlock>
+								<TextBlock.Style>
+									<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+										<Setter Property="Text" Value="Show File Name" />
+										<Style.Triggers>
+											<DataTrigger Binding="{Binding DisplayFileForName}" Value="true">
+												<Setter Property="Text" Value="Show Mod Display Name" />
+											</DataTrigger>
+										</Style.Triggers>
+									</Style>
+								</TextBlock.Style>
+							</TextBlock>
+						</MenuItem.Header>
+					</MenuItem>
+				</ContextMenu>
+			</Setter.Value>
+		</Setter>
+		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+	</Style>
+	<Style
 		x:Key="ModOrderListView"
 		BasedOn="{StaticResource {x:Type ListView}}"
 		TargetType="ListView">
 		<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
 		<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
+		<Setter Property="ItemContainerStyle" Value="{StaticResource DivinityModDataListItem}" />
 	</Style>
 	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">
 		<TextBlock
@@ -546,36 +584,7 @@
 		</GridView.Columns>
 	</GridView>
 	<DataTemplate x:Key="ModUpdateNameTemplate" DataType="{x:Type data:DivinityModUpdateData}">
-		<TextBlock HorizontalAlignment="Stretch" Text="{Binding LocalMod.Name}">
-			<TextBlock.ToolTip>
-				<StackPanel MaxWidth="700" Orientation="Vertical">
-					<TextBlock FontWeight="Bold" Text="{Binding LocalMod.Name}" />
-					<TextBlock
-						Text="{Binding LocalMod.Description}"
-						TextWrapping="Wrap"
-						Visibility="{Binding LocalMod.HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
-					<StackPanel
-						Margin="2"
-						Orientation="Vertical"
-						Visibility="{Binding LocalMod.HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
-						<TextBlock FontWeight="Bold" Text="Dependencies:" />
-						<ListBox
-							Margin="0"
-							Padding="0"
-							BorderThickness="0"
-							ItemsSource="{Binding LocalMod.Dependencies}" />
-					</StackPanel>
-					<StackPanel Orientation="Horizontal">
-						<TextBlock Padding="0,0,2,0" Text="Mod Type: " />
-						<TextBlock Text="{Binding LocalMod.Type}" />
-					</StackPanel>
-					<StackPanel Orientation="Horizontal">
-						<TextBlock Padding="0,0,4,0" Text="Modes" />
-						<TextBlock Text="{Binding LocalMod.Targets}" />
-					</StackPanel>
-				</StackPanel>
-			</TextBlock.ToolTip>
-		</TextBlock>
+		<ContentControl Content="{Binding WorkshopMod}" ContentTemplate="{StaticResource ModNameTemplate}" />
 	</DataTemplate>
 	<GridView
 		x:Key="ModUpdatesGridView"

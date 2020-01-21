@@ -2255,7 +2255,6 @@ namespace DivinityModManager.ViewModels
 					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
 					return Disposable.Empty;
 				});
-				*/
 				/*
 				if (DivinityFileUtils.ExtractPackages(SelectedPakMods.Select(x => x.FilePath), dialog.SelectedPath))
 				{

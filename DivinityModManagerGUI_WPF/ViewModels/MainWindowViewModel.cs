@@ -2217,16 +2217,16 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Extracting selected mods to '{outputDirectory}'.");
 
 				int totalWork = SelectedPakMods.Count;
-				int successes = 0;
 				double taskStepAmount = 1.0 / totalWork;
 				MainProgressTitle = $"Extracting {totalWork} mods...";
 				MainProgressValue = 0d;
+				MainProgressToken = new CancellationTokenSource();
 				CanCancelProgress = true;
 				MainProgressIsActive = true;
 
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 				{
-					MainProgressToken = new CancellationTokenSource();
+					int successes = 0;
 					foreach (var path in SelectedPakMods.Select(x => x.FilePath))
 					{
 						if (MainProgressToken.IsCancellationRequested) break;
@@ -2253,18 +2253,21 @@ namespace DivinityModManager.ViewModels
 					}
 					await ctrl.Yield();
 					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
+
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						if (successes >= totalWork)
+						{
+							view.AlertBar.SetSuccessAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", 20);
+						}
+						else
+						{
+							view.AlertBar.SetDangerAlert($"Error occurred when extracting selected mods to '{dialog.SelectedPath}'.", 30);
+						}
+					});
+
 					return Disposable.Empty;
 				});
-				/*
-				if (DivinityFileUtils.ExtractPackages(SelectedPakMods.Select(x => x.FilePath), dialog.SelectedPath))
-				{
-					view.AlertBar.SetSuccessAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", 20);
-				}
-				else
-				{
-					view.AlertBar.SetDangerAlert($"Error occurred when extracting selected mods to '{dialog.SelectedPath}'.", 30);
-				}
-				*/
 			}
 		}
 
@@ -2278,7 +2281,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Extract the following mods?\n'{String.Join("\n", SelectedPakMods.Select(x => $"{x.Name} {x.FileName}"))}", "Extract Mods?",
+				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Extract the following mods?\n'{String.Join("\n", SelectedPakMods.Select(x => $"{x.DisplayName}"))}", "Extract Mods?",
 				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
 				if (result == MessageBoxResult.Yes)
 				{

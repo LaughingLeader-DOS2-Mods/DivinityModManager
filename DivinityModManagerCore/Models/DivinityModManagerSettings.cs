@@ -144,6 +144,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref lastLoadedOrderFilePath, value); }
 		}
 
+		private string lastExtractOutputPath = "";
+
+		[DataMember]
+		public string LastExtractOutputPath
+		{
+			get => lastExtractOutputPath;
+			set { this.RaiseAndSetIfChanged(ref lastExtractOutputPath, value); }
+		}
+
 		private bool darkThemeEnabled = false;
 
 		[DataMember]
@@ -171,7 +180,6 @@ namespace DivinityModManager.Models
 			get => displayFileNames;
 			set { this.RaiseAndSetIfChanged(ref displayFileNames, value); }
 		}
-
 
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }

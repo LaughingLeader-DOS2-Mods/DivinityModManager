@@ -290,5 +290,75 @@ namespace DivinityModManager.Util
 			}
 		}
 		#endregion
+
+		public static bool ExtractPackages(IEnumerable<string> pakPaths, string outputDirectory)
+		{
+			int success = 0;
+			int count = pakPaths.Count();
+			foreach(var path in pakPaths)
+			{
+				try
+				{
+					//Put each pak into its own folder
+					string destination = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(path));
+
+					//Unless the foldername == the pak name and we're only extracting one pak
+					if(count == 1 && Path.GetDirectoryName(outputDirectory).Equals(Path.GetFileNameWithoutExtension(path)))
+					{
+						destination = outputDirectory;
+					}
+					var packager = new Packager();
+					packager.UncompressPackage(path, destination, null);
+					success++;
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+				}
+			}
+			return success >= count;
+		}
+
+		public static bool ExtractPackage(string pakPath, string outputDirectory)
+		{
+			try
+			{
+				var packager = new Packager();
+				packager.UncompressPackage(pakPath, outputDirectory, null);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+				return false;
+			}
+		}
+
+		public static async Task<bool> ExtractPackageAsync(string pakPath, string outputDirectory, CancellationToken token)
+		{
+			var task = await Task.Run(async () =>
+			{
+				// execute actual operation in child task
+				var childTask = Task.Factory.StartNew(() =>
+				{
+					try
+					{
+						var packager = new Packager();
+						packager.UncompressPackage(pakPath, outputDirectory, null);
+						return true;
+					}
+					catch (Exception) { return false; }
+				}, TaskCreationOptions.AttachedToParent);
+
+				var awaiter = childTask.GetAwaiter();
+				while (!awaiter.IsCompleted)
+				{
+					await Task.Delay(0, token);
+				}
+				return childTask.Result;
+			}, token);
+
+			return task;
+		}
 	}
 }

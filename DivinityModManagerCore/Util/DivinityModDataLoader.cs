@@ -127,7 +127,7 @@ namespace DivinityModManager.Util
 			{
 				// replace literal values with entities
 				toxml = toxml.Replace("&", "&amp;");
-				//toxml = toxml.Replace("'", "&apos;");
+				toxml = toxml.Replace("'", "&apos;");
 				toxml = toxml.Replace("\"", "&quot;");
 				toxml = toxml.Replace(">", "&gt;");
 				toxml = toxml.Replace("<", "&lt;");
@@ -145,6 +145,20 @@ namespace DivinityModManager.Util
 				}));
 			}
 			return xmlstring;
+		}
+
+		public static string UnescapeXml(string str)
+		{
+			if (!string.IsNullOrEmpty(str))
+			{
+				str = str.Replace("&amp;", "&");
+				str = str.Replace("&apos;", "'");
+				str = str.Replace("&quot;", "\"");
+				str = str.Replace("&gt;", ">");
+				str = str.Replace("&lt;", "<");
+				str = str.Replace("<br>", Environment.NewLine);
+			}
+			return str;
 		}
 
 		private static DivinityModData ParseMetaFile(string metaContents)
@@ -188,13 +202,13 @@ namespace DivinityModManager.Util
 				if (moduleInfoNode != null)
 				{
 					var uuid = GetAttributeWithId(moduleInfoNode, "UUID", "");
-					var name = GetAttributeWithId(moduleInfoNode, "Name", "");
-					var description = GetAttributeWithId(moduleInfoNode, "Description", "");
-					var author = GetAttributeWithId(moduleInfoNode, "Author", "");
+					var name = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Name", ""));
+					var description = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Description", ""));
+					var author = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Author", ""));
 					if (Larian_Mods.Any(x => x.UUID == uuid))
 					{
-						name = GetAttributeWithId(moduleInfoNode, "DisplayName", name);
-						description = GetAttributeWithId(moduleInfoNode, "DescriptionName", description);
+						name = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DisplayName", name));
+						description = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DescriptionName", description));
 						author = "Larian Studios";
 					}
 					DivinityModData modData = new DivinityModData()
@@ -220,7 +234,7 @@ namespace DivinityModManager.Util
 							DivinityModDependencyData dependencyMod = new DivinityModDependencyData()
 							{
 								UUID = GetAttributeWithId(node, "UUID", ""),
-								Name = GetAttributeWithId(node, "Name", ""),
+								Name = UnescapeXml(GetAttributeWithId(node, "Name", "")),
 								Version = DivinityModVersion.FromInt(SafeConvertString(GetAttributeWithId(node, "Version", ""))),
 								Folder = GetAttributeWithId(node, "Folder", ""),
 								MD5 = GetAttributeWithId(node, "MD5", "")

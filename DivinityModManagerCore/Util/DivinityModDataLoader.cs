@@ -127,7 +127,7 @@ namespace DivinityModManager.Util
 			{
 				// replace literal values with entities
 				toxml = toxml.Replace("&", "&amp;");
-				toxml = toxml.Replace("'", "&apos;");
+				//toxml = toxml.Replace("'", "&apos;");
 				toxml = toxml.Replace("\"", "&quot;");
 				toxml = toxml.Replace(">", "&gt;");
 				toxml = toxml.Replace("<", "&lt;");

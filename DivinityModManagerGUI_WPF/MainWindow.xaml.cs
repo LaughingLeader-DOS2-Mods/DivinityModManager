@@ -27,6 +27,7 @@ using AutoUpdaterDotNET;
 using System.Windows.Threading;
 using AdonisUI.Controls;
 using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.WinForms;
 
 namespace DivinityModManager.Views
 {
@@ -97,11 +98,15 @@ namespace DivinityModManager.Views
 		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
+		//public WindowWrapper Wrapper { get; private set; }
+
 		public MainWindow()
 		{
 			InitializeComponent();
 
 			self = this;
+
+			//Wrapper = new WindowWrapper(this);
 
 			settingsWindow = new SettingsWindow();
 			SettingsWindow.OnWorkshopPathChanged += delegate
@@ -235,6 +240,7 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
 
+				this.WhenAnyValue(x => x.ViewModel.ExtractSelectedModsCommands).BindTo(this, view => view.ToolsExtractSelectedModsMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.RenameSaveCommand).BindTo(this, view => view.ToolsRenameSaveMenuItem.Command);
 
 				this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);

@@ -602,6 +602,10 @@
 						<MenuItem Header="Tools">
 							<!--  Disabled for now  -->
 							<MenuItem
+								x:Name="ToolsExtractSelectedModsMenuItem"
+								Command="{Binding ExtractSelectedModsCommands}"
+								Header="Extract Selected Mods To..." />
+							<MenuItem
 								x:Name="ToolsRenameSaveMenuItem"
 								Header="Rename Save..."
 								Visibility="Collapsed" />

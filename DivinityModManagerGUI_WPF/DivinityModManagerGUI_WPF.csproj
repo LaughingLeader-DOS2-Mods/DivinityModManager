@@ -191,6 +191,7 @@
     <Compile Include="Views\VerticalModLayout.xaml.cs">
       <DependentUpon>VerticalModLayout.xaml</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\WindowWrapper.cs" />
     <Page Include="Controls\AlertBar.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

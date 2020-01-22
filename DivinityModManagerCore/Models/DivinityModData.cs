@@ -204,6 +204,14 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref hasDependencies, value); }
 		}
 
+		private bool hasOsirisExtenderSettings = false;
+
+		public bool HasOsirisExtenderSettings
+		{
+			get => hasOsirisExtenderSettings;
+			set { this.RaiseAndSetIfChanged(ref hasOsirisExtenderSettings, value); }
+		}
+
 		private bool isEditorMod = false;
 
 		public bool IsEditorMod

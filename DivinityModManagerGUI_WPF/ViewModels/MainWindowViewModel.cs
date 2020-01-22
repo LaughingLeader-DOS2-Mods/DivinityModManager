@@ -35,6 +35,7 @@ using AdonisUI;
 using System.Windows.Media;
 using System.Reflection;
 using AutoUpdaterDotNET;
+using DivinityModManager.Extensions;
 
 namespace DivinityModManager.ViewModels
 {
@@ -2195,11 +2196,11 @@ namespace DivinityModManager.ViewModels
 			dialog.UseDescriptionForTitle = true;
 			dialog.Description = "Select folder to extract mod to...";
 
-			if (!String.IsNullOrEmpty(Settings.LastExtractOutputPath) && Directory.Exists(Settings.LastExtractOutputPath))
+			if (Settings.LastExtractOutputPath.IsExistingDirectory())
 			{
 				dialog.SelectedPath = Settings.LastExtractOutputPath;
 			}
-			else if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
+			else if (PathwayData.LastSaveFilePath.IsExistingDirectory())
 			{
 				dialog.SelectedPath = PathwayData.LastSaveFilePath;
 			}

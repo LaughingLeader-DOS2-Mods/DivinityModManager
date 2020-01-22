@@ -328,6 +328,7 @@ namespace DivinityModManager.Util
 										if (osiToolsConfig != null)
 										{
 											modData.OsiExtenderData = osiToolsConfig;
+											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
 											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
 											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
@@ -408,9 +409,12 @@ namespace DivinityModManager.Util
 											if (osiToolsConfig != null)
 											{
 												modData.OsiExtenderData = osiToolsConfig;
+												if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+#if DEBUG
 												Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
-												Trace.WriteLine($"\tRequiredVersion: {osiToolsConfig.RequiredExtensionVersion}");
-												Trace.WriteLine($"\tFeatureFlags: {String.Join(",", osiToolsConfig.FeatureFlags)}");
+												Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+												if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+#endif
 											}
 											else
 											{
@@ -544,9 +548,12 @@ namespace DivinityModManager.Util
 													if (osiConfig != null)
 													{
 														modData.OsiExtenderData = osiConfig;
+														if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+#if DEBUG
 														Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
 														Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-														Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+														if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+#endif
 													}
 													else
 													{
@@ -554,9 +561,12 @@ namespace DivinityModManager.Util
 														if (jsonObj != null)
 														{
 															modData.OsiExtenderData = new DivinityModOsiExtenderConfig();
-															Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
 															modData.OsiExtenderData.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
 															modData.OsiExtenderData.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+
+															if(modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+#if DEBUG
+															Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
 															Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
 															if (modData.OsiExtenderData.FeatureFlags != null)
 															{
@@ -566,6 +576,7 @@ namespace DivinityModManager.Util
 															{
 																Trace.WriteLine("\tFeatureFlags: null");
 															}
+#endif
 														}
 														else
 														{
@@ -684,9 +695,12 @@ namespace DivinityModManager.Util
 										if (osiToolsConfig != null)
 										{
 											modData.OsiExtenderData = osiToolsConfig;
+											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+#if DEBUG
 											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
-											Trace.WriteLine($"\tRequiredVersion: {osiToolsConfig.RequiredExtensionVersion}");
-											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", osiToolsConfig.FeatureFlags)}");
+											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+											if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+#endif
 										}
 										else
 										{

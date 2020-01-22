@@ -402,9 +402,15 @@
 									FontWeight="Bold"
 									Text="{Binding Targets}" />
 							</StackPanel>
-							<StackPanel Orientation="Vertical" Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}">
+							<StackPanel Orientation="Vertical">
 								<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
-								<TextBlock Margin="2" Text="{Binding FileName}" />
+								<TextBlock
+									Margin="2"
+									Text="{Binding FileName}"
+									Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
+								<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
+									<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" />
+								</TextBlock>
 							</StackPanel>
 						</StackPanel>
 					</ToolTip>

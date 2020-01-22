@@ -219,6 +219,17 @@ namespace DivinityModManager.Models
 			{
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 			}).DisposeWith(Disposables);
+
+			var extender_properties = typeof(OsiExtenderSettings)
+			.GetRuntimeProperties()
+			.Where(prop => Attribute.IsDefined(prop, typeof(DataMemberAttribute)))
+			.Select(prop => prop.Name)
+			.ToArray();
+
+			ExtenderSettings.WhenAnyPropertyChanged(extender_properties).Subscribe((c) =>
+			{
+				if (SettingsWindowIsOpen) CanSaveSettings = true;
+			}).DisposeWith(Disposables);
 		}
 	}
 }

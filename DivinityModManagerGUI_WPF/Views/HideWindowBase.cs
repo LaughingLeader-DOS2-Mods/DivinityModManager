@@ -1,6 +1,8 @@
-﻿using System;
+﻿using AdonisUI.Controls;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -10,7 +12,7 @@ using System.Windows.Interop;
 
 namespace DivinityModManager.Views
 {
-	public class HideWindowBase : Window
+	public class HideWindowBase : AdonisWindow
 	{
 		[DllImport("user32.dll")]
 		static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);

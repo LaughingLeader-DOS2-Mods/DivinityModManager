@@ -109,11 +109,18 @@ namespace DivinityModManager.Views
 			//Wrapper = new WindowWrapper(this);
 
 			settingsWindow = new SettingsWindow();
-			SettingsWindow.OnWorkshopPathChanged += delegate
+			settingsWindow.OnWorkshopPathChanged += delegate
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ => ViewModel.LoadWorkshopMods());
 			};
-			SettingsWindow.Hide();
+			settingsWindow.Closed += delegate
+			{
+				if(ViewModel?.Settings != null)
+				{
+					ViewModel.Settings.SettingsWindowIsOpen = false;
+				}
+			};
+			settingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
 
@@ -171,10 +178,12 @@ namespace DivinityModManager.Views
 						SettingsWindow.Init(this.ViewModel.Settings);
 						SettingsWindow.Show();
 						settingsWindow.Owner = this;
+						ViewModel.Settings.SettingsWindowIsOpen = true;
 					}
 					else
 					{
 						SettingsWindow.Hide();
+						ViewModel.Settings.SettingsWindowIsOpen = false;
 					}
 				});
 				c.ThrownExceptions.Subscribe((ex) =>

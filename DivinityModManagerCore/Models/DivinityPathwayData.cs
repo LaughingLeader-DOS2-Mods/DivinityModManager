@@ -68,6 +68,8 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref osirisExtenderLatestReleaseUrl, value); }
 		}
 
+		public string OsirisExtenderLatestReleaseVersion { get; set; } = "";
+
 		//private string gameDOS2DEPath;
 
 		//public string GameDOS2DEPath

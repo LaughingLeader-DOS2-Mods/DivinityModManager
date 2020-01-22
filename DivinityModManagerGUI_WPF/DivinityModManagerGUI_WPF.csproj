@@ -78,19 +78,19 @@
       <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI, Version=11.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.11.1.1\lib\net461\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.11.1.12\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
     <Reference Include="ReactiveUI.WPF, Version=11.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.11.1.1\lib\net461\ReactiveUI.WPF.dll</HintPath>
+      <HintPath>..\packages\ReactiveUI.WPF.11.1.12\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
     <Reference Include="SharpCompress, Version=0.24.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.24.0\lib\net45\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=9.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.9.3.4\lib\net461\Splat.dll</HintPath>
+      <HintPath>..\packages\Splat.9.3.11\lib\net461\Splat.dll</HintPath>
     </Reference>
     <Reference Include="Splat.Drawing, Version=9.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.Drawing.9.3.4\lib\net461\Splat.Drawing.dll</HintPath>
+      <HintPath>..\packages\Splat.Drawing.9.3.11\lib\net461\Splat.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />

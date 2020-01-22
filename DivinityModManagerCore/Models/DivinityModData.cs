@@ -105,6 +105,31 @@ namespace DivinityModManager.Models
 				}
 			}
 		}
+		
+		private bool isMissingOsirisExtender = false;
+
+		public bool IsMissingOsirisExtender
+		{
+			get => isMissingOsirisExtender;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref isMissingOsirisExtender, value);
+				if(value)
+				{
+					if (OsiExtenderData != null && OsiExtenderData.RequiredExtensionVersion > 0)
+					{
+						MissingOsirisExtenderText = $"Missing Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
+					}
+					else
+					{
+						MissingOsirisExtenderText = "Missing the Osiris Extender";
+					}
+					this.RaisePropertyChanged("MissingOsirisExtenderText");
+				}
+			}
+		}
+
+		public string MissingOsirisExtenderText { get; private set; }
 
 		public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
 		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();

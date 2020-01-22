@@ -507,6 +507,12 @@ namespace DivinityModManager.ViewModels
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 
+			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
+			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
+				(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
+
+			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start, canInstallOsiExtender).DisposeWith(Settings.Disposables);
+
 			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
 			{
 				if (SaveSettings())
@@ -1226,6 +1232,30 @@ namespace DivinityModManager.ViewModels
 			return savedOrderList;
 		}
 
+		private void CheckExtenderData()
+		{
+			if (Settings.ExtenderSettings.ExtenderIsAvailable)
+			{
+				if (Settings.ExtenderSettings.ExtenderVersion > -1)
+				{
+					foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
+					{
+						if (Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion)
+						{
+							mod.IsMissingOsirisExtender = true;
+						}
+					}
+				}
+			}
+			else
+			{
+				foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
+				{
+					mod.IsMissingOsirisExtender = true;
+				}
+			}
+		}
+
 		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
 		{
 			Trace.WriteLine($"Refreshing data asynchronously...");
@@ -1336,6 +1366,7 @@ namespace DivinityModManager.ViewModels
 				Refreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
+				CheckExtenderData();
 			});
 
 			return Disposable.Empty;
@@ -2443,13 +2474,6 @@ Directory the zip will be extracted to:
 			{
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
-
-			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
-			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
-			//	(url, exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url));
-			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, (url) => !String.IsNullOrWhiteSpace(url));
-
-			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start, canInstallOsiExtender);
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);

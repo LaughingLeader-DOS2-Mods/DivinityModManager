@@ -112,10 +112,7 @@
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
 			</TabItem>
-			<TabItem
-				DataContext="{Binding ExtenderSettings}"
-				Header="OsiExtender"
-				Visibility="{Binding ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
+			<TabItem Header="OsiExtender" Visibility="{Binding ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="*" />
@@ -130,17 +127,17 @@
 						RowHeight="*"
 						Rows="auto,auto,auto,auto,auto,auto">
 						<TextBlock Text="Enable Extensions" ToolTip="Enable script extensions. Default: Enabled" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableExtensions, UpdateSourceTrigger=PropertyChanged}" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="Enable Console Window:" ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding CreateConsole, UpdateSourceTrigger=PropertyChanged}" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="Enable Logging" ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableLogging, UpdateSourceTrigger=PropertyChanged}" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="Log Story Merges" ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogCompile, UpdateSourceTrigger=PropertyChanged}" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="Log Directory" ToolTip="The directory to write logs to." />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
-							Text="{Binding LogDirectory, UpdateSourceTrigger=PropertyChanged}"
+							Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
 							TextAlignment="Left" />
 					</autogrid:AutoGrid>
 					<StackPanel Grid.Row="1">

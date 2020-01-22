@@ -341,6 +341,7 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenDOS2DEGame;
 		private IObservable<bool> canOpenDialogWindow;
 		private IObservable<bool> gameExeFoundObservable;
+		private IObservable<bool> canInstallOsiExtender;
 
 		public ICommand SaveOrderCommand { get; private set; }
 		public ICommand SaveOrderAsCommand { get; private set; }
@@ -743,13 +744,27 @@ namespace DivinityModManager.ViewModels
 
 			if (File.Exists(Settings.DOS2DEGameExecutable))
 			{
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
+				{
+					var latestReleaseZipUrl = await GithubHelper.GetLatestReleaseLinkAsync("Norbyte/ositools");
+					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
+					{
+						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
+						Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+					}
+					else
+					{
+						Trace.WriteLine($"OsiTools latest release not found.");
+					}
+				});
+
 				string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
 				if(extenderSettingsJson.IsExistingFile())
 				{
 					var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
 					if(osirisExtenderSettings != null)
 					{
-						Trace.WriteLine($"Loaded '{extenderSettingsJson}'.");
+						Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
 						Settings.ExtenderSettings.Set(osirisExtenderSettings);
 					}
 				}
@@ -2336,6 +2351,8 @@ namespace DivinityModManager.ViewModels
 			});
 
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
+			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable, 
+				(url,exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url))
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);

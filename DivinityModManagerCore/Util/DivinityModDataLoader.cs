@@ -328,9 +328,11 @@ namespace DivinityModManager.Util
 										if (osiToolsConfig != null)
 										{
 											modData.OsiExtenderData = osiToolsConfig;
+#if DEBUG
 											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
 											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+											if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+#endif
 										}
 										else
 										{

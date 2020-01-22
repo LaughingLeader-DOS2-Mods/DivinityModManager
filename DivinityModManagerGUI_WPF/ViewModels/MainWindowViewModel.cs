@@ -2350,16 +2350,17 @@ namespace DivinityModManager.ViewModels
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 			{
 				int successes = 0;
+				Stream webStream = null;
+				Stream unzippedEntryStream = null;
 				try
 				{
 					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Downloading {PathwayData.OsirisExtenderLatestReleaseUrl}...");
-					var webStream = await WebHelper.DownloadFileAsStreamAsync(PathwayData.OsirisExtenderLatestReleaseUrl, MainProgressToken.Token);
+					webStream = await WebHelper.DownloadFileAsStreamAsync(PathwayData.OsirisExtenderLatestReleaseUrl, MainProgressToken.Token);
 					if (webStream != null)
 					{
 						successes += 1;
 						IncreaseMainProgressValue(taskStepAmount);
 						RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Extracting zip to {exeDir}...");
-						Stream unzippedEntryStream; // Unzipped data from a file in the archive
 						ZipArchive archive = new ZipArchive(webStream);
 						foreach (ZipArchiveEntry entry in archive.Entries)
 						{
@@ -2376,15 +2377,19 @@ namespace DivinityModManager.ViewModels
 							}
 						}
 						IncreaseMainProgressValue(taskStepAmount);
-						RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Cleaning up...");
-						successes += 1;
-						IncreaseMainProgressValue(taskStepAmount);
 					}
-
 				}
 				catch (Exception ex)
 				{
 					Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+				}
+				finally
+				{
+					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Cleaning up...");
+					if (webStream != null) webStream.Close();
+					if (unzippedEntryStream != null) unzippedEntryStream.Close();
+					successes += 1;
+					IncreaseMainProgressValue(taskStepAmount);
 				}
 				await ctrl.Yield();
 				RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
@@ -2440,8 +2445,9 @@ Directory the zip will be extracted to:
 			});
 
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
-			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
-				(url, exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url));
+			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
+			//	(url, exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url));
+			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, (url) => !String.IsNullOrWhiteSpace(url));
 
 			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start, canInstallOsiExtender);
 

@@ -11,6 +11,7 @@ using System.Runtime.Serialization;
 using System.Windows.Input;
 using DivinityModManager.Util;
 using System.Reactive.Disposables;
+using System.Reflection;
 
 namespace DivinityModManager.Models
 {
@@ -195,16 +196,29 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref canSaveSettings, value); }
 		}
 
-		public DivinityModManagerSettings()
-		{
-			Disposables = new CompositeDisposable();
-			ExtenderSettings = new OsiExtenderSettings();
-		}
+		public bool SettingsWindowIsOpen { get; set; } = false;
 
 		public void Dispose()
 		{
 			Disposables?.Dispose();
 			Disposables = null;
+		}
+
+		public DivinityModManagerSettings()
+		{
+			Disposables = new CompositeDisposable();
+			ExtenderSettings = new OsiExtenderSettings();
+
+			var properties = typeof(DivinityModManagerSettings)
+			.GetRuntimeProperties()
+			.Where(prop => Attribute.IsDefined(prop, typeof(DataMemberAttribute)))
+			.Select(prop => prop.Name)
+			.ToArray();
+
+			this.WhenAnyPropertyChanged(properties).Subscribe((c) =>
+			{
+				if (SettingsWindowIsOpen) CanSaveSettings = true;
+			}).DisposeWith(Disposables);
 		}
 	}
 }

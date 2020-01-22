@@ -36,6 +36,7 @@ using System.Windows.Media;
 using System.Reflection;
 using AutoUpdaterDotNET;
 using DivinityModManager.Extensions;
+using Newtonsoft.Json.Linq;
 
 namespace DivinityModManager.ViewModels
 {
@@ -753,7 +754,31 @@ namespace DivinityModManager.ViewModels
 			{
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
 				{
-					var latestReleaseZipUrl = await GithubHelper.GetLatestReleaseLinkAsync("Norbyte/ositools");
+					string latestReleaseZipUrl = "";
+					var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
+					var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
+					if (jsonData != null)
+					{
+						if (jsonData.TryGetValue("assets", out var assetsArray))
+						{
+							JArray assets = (JArray)assetsArray;
+							foreach (var obj in assets.Children<JObject>())
+							{
+								if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+								{
+									latestReleaseZipUrl = browserUrl.ToString();
+								}
+							}
+						}
+						if (jsonData.TryGetValue("tag_name", out var tagName))
+						{
+							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
+						}
+#if DEBUG
+						var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
+						Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+#endif
+					}
 					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
 					{
 						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
@@ -780,15 +805,20 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
 				if (File.Exists(extenderUpdaterPath))
 				{
+					Trace.WriteLine($"Checking DXGI.dll for Osiris ASCII bytes.");
 					try
 					{
 						using (var stream = File.Open(extenderUpdaterPath, FileMode.Open))
 						{
 							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
-							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris Extender")) >= 0)
+							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
 							{
 								Settings.ExtenderSettings.ExtenderIsAvailable = true;
 								Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
+							}
+							else
+							{
+								Trace.WriteLine($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
 							}
 						}
 					}
@@ -1240,10 +1270,14 @@ namespace DivinityModManager.ViewModels
 				{
 					foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
 					{
-						if (Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion)
-						{
-							mod.IsMissingOsirisExtender = true;
-						}
+						mod.IsMissingOsirisExtender = Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion;
+					}
+				}
+				else
+				{
+					foreach(var mod in Mods)
+					{
+						mod.IsMissingOsirisExtender = false;
 					}
 				}
 			}
@@ -2430,6 +2464,34 @@ namespace DivinityModManager.ViewModels
 					if (successes >= 3)
 					{
 						view.AlertBar.SetSuccessAlert($"Successfully installed the Osiris Extender DXGI.dll to '{exeDir}'.", 20);
+						Settings.ExtenderSettings.ExtenderIsAvailable = true;
+						if(!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
+						{
+							var re = new Regex("v([0-9]+)");
+							var m = re.Match(PathwayData.OsirisExtenderLatestReleaseVersion);
+							if (m.Success)
+							{
+								if (int.TryParse(m.Groups[1].Value, out int version))
+								{
+									Settings.ExtenderSettings.ExtenderVersion = version;
+									Trace.WriteLine($"Set extender version to v{version},");
+								}
+							}
+						}
+						else if(PathwayData.OsirisExtenderLatestReleaseUrl.Contains("v"))
+						{
+							var re = new Regex("v([0-9]+).*.zip");
+							var m = re.Match(PathwayData.OsirisExtenderLatestReleaseUrl);
+							if(m.Success)
+							{
+								if(int.TryParse(m.Groups[1].Value, out int version))
+								{
+									Settings.ExtenderSettings.ExtenderVersion = version;
+									Trace.WriteLine($"Set extender version to v{version},");
+								}
+							}
+						}
+						CheckExtenderData();
 					}
 					else
 					{

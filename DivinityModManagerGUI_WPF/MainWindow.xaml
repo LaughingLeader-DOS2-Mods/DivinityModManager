@@ -603,7 +603,7 @@
 							<MenuItem
 								x:Name="ToolsInstallOsiExtenderMenuItem"
 								Command="{Binding DownloadAndInstallOsiExtenderCommand}"
-								Header="Download &amp; Install the Osiris Extender" />
+								Header="Download &amp; Install the Osiris Extender..." />
 							<MenuItem
 								x:Name="ToolsExtractSelectedModsMenuItem"
 								Command="{Binding ExtractSelectedModsCommand}"

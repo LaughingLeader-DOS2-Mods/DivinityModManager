@@ -8,14 +8,33 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.Util
 {
+    public struct WebRequestHeaderValue
+    {
+        public HttpRequestHeader HttpRequestHeader { get; set; }
+        public string Value { get; set; }
+    }
 	public static class WebHelper
 	{
         // Get/Post sources from here: https://stackoverflow.com/a/27108442
 
 
-        public static string Get(string uri)
+        public static string Get(string uri, params WebRequestHeaderValue[] webRequestHeaders)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            if (webRequestHeaders != null)
+            {
+                foreach(var x in webRequestHeaders)
+                {
+                    if(x.HttpRequestHeader == HttpRequestHeader.UserAgent)
+                    {
+                        request.UserAgent = x.Value;
+                    }
+                    else
+                    {
+                        request.Headers.Add(x.HttpRequestHeader, x.Value);
+                    }
+                }
+            }
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
@@ -26,9 +45,23 @@ namespace DivinityModManager.Util
             }
         }
 
-        public static async Task<string> GetAsync(string uri)
+        public static async Task<string> GetAsync(string uri, params WebRequestHeaderValue[] webRequestHeaders)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            if (webRequestHeaders != null)
+            {
+                foreach (var x in webRequestHeaders)
+                {
+                    if (x.HttpRequestHeader == HttpRequestHeader.UserAgent)
+                    {
+                        request.UserAgent = x.Value;
+                    }
+                    else
+                    {
+                        request.Headers.Add(x.HttpRequestHeader, x.Value);
+                    }
+                }
+            }
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
 
             using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
@@ -62,7 +95,7 @@ namespace DivinityModManager.Util
             }
         }
 
-        public async Task<string> PostAsync(string uri, string data, string contentType, string method = "POST")
+        public static async Task<string> PostAsync(string uri, string data, string contentType, string method = "POST")
         {
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 

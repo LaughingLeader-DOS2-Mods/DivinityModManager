@@ -754,39 +754,46 @@ namespace DivinityModManager.ViewModels
 			{
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
 				{
-					string latestReleaseZipUrl = "";
-					var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
-					var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
-					if (jsonData != null)
+					try
 					{
-						if (jsonData.TryGetValue("assets", out var assetsArray))
+						string latestReleaseZipUrl = "";
+						var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
+						var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
+						if (jsonData != null)
 						{
-							JArray assets = (JArray)assetsArray;
-							foreach (var obj in assets.Children<JObject>())
+							if (jsonData.TryGetValue("assets", out var assetsArray))
 							{
-								if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+								JArray assets = (JArray)assetsArray;
+								foreach (var obj in assets.Children<JObject>())
 								{
-									latestReleaseZipUrl = browserUrl.ToString();
+									if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+									{
+										latestReleaseZipUrl = browserUrl.ToString();
+									}
 								}
 							}
-						}
-						if (jsonData.TryGetValue("tag_name", out var tagName))
-						{
-							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
-						}
+							if (jsonData.TryGetValue("tag_name", out var tagName))
+							{
+								PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
+							}
 #if DEBUG
-						var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-						Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+							var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
+							Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
 #endif
+						}
+						if (!String.IsNullOrEmpty(latestReleaseZipUrl))
+						{
+							PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
+							Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+						}
+						else
+						{
+							Trace.WriteLine($"OsiTools latest release not found.");
+						}
 					}
-					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
+					catch(Exception ex)
 					{
-						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
-						Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
-					}
-					else
-					{
-						Trace.WriteLine($"OsiTools latest release not found.");
+						Trace.WriteLine($"Error checking for latest OsiExtender release: {ex.ToString()}");
 					}
 				});
 

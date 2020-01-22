@@ -335,6 +335,13 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref canCancelProgress, value); }
 		}
 		#endregion
+
+		private IObservable<bool> canSaveSettings;
+		private IObservable<bool> canOpenWorkshopFolder;
+		private IObservable<bool> canOpenDOS2DEGame;
+		private IObservable<bool> canOpenDialogWindow;
+		private IObservable<bool> gameExeFoundObservable;
+
 		public ICommand SaveOrderCommand { get; private set; }
 		public ICommand SaveOrderAsCommand { get; private set; }
 		public ICommand ExportOrderCommand { get; private set; }
@@ -505,9 +512,25 @@ namespace DivinityModManager.ViewModels
 					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.", 10);
 				}
 			}, canSaveSettings).DisposeWith(Settings.Disposables);
+
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
 				Process.Start(DivinityApp.DIR_DATA);
+			}).DisposeWith(Settings.Disposables);
+
+			Settings.ExportExtenderSettingsCommand = ReactiveCommand.Create(() =>
+			{
+				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "OsirisExtenderSettings.json");
+				try
+				{
+					string contents = JsonConvert.SerializeObject(Settings.ExtenderSettings, Newtonsoft.Json.Formatting.Indented);
+					File.WriteAllText(outputFile, contents);
+					view.AlertBar.SetSuccessAlert($"Saved Osiris Extender settings to '{outputFile}'.", 20);
+				}
+				catch (Exception ex)
+				{
+					view.AlertBar.SetDangerAlert($"Error saving Osiris Extender settings to '{outputFile}':\n{ex.ToString()}");
+				}
 			}).DisposeWith(Settings.Disposables);
 
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
@@ -720,25 +743,36 @@ namespace DivinityModManager.ViewModels
 
 			if (File.Exists(Settings.DOS2DEGameExecutable))
 			{
-				string extenderPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
-				Trace.WriteLine($"Looking for OsiExtender at '{extenderPath}'.");
-				if (File.Exists(extenderPath))
+				string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
+				if(extenderSettingsJson.IsExistingFile())
+				{
+					var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
+					if(osirisExtenderSettings != null)
+					{
+						Trace.WriteLine($"Loaded '{extenderSettingsJson}'.");
+						Settings.ExtenderSettings.Set(osirisExtenderSettings);
+					}
+				}
+
+				string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
+				Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
+				if (File.Exists(extenderUpdaterPath))
 				{
 					try
 					{
-						using (var stream = File.Open(extenderPath, FileMode.Open))
+						using (var stream = File.Open(extenderUpdaterPath, FileMode.Open))
 						{
 							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
 							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris Extender")) >= 0)
 							{
 								Settings.ExtenderSettings.ExtenderIsAvailable = true;
-								Trace.WriteLine($"Found the OsiExtender at '{extenderPath}'.");
+								Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
 							}
 						}
 					}
 					catch (Exception ex)
 					{
-						Trace.WriteLine($"Error reading: '{extenderPath}'\n\t{ex.ToString()}");
+						Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
 					}
 
 					if (Settings.ExtenderSettings.ExtenderIsAvailable)
@@ -2038,11 +2072,6 @@ namespace DivinityModManager.ViewModels
 			SaveSettings(); // New values
 		}
 
-		private IObservable<bool> canSaveSettings;
-		private IObservable<bool> canOpenWorkshopFolder;
-		private IObservable<bool> canOpenDOS2DEGame;
-		private IObservable<bool> canOpenDialogWindow;
-
 		public bool AutoChangedOrder { get; set; } = false;
 		public ViewModelActivator Activator { get; }
 
@@ -2305,6 +2334,8 @@ namespace DivinityModManager.ViewModels
 			{
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
+
+			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);

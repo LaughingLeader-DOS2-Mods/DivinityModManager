@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using DivinityModManager.Extensions;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -70,6 +71,15 @@ namespace DivinityModManager.Models
 		{
 			get => logDirectory;
 			set { this.RaiseAndSetIfChanged(ref logDirectory, value); }
+		}
+
+		public void Set(OsiExtenderSettings osirisExtenderSettings)
+		{
+			EnableExtensions = osirisExtenderSettings.EnableExtensions;
+			CreateConsole = osirisExtenderSettings.CreateConsole;
+			EnableLogging = osirisExtenderSettings.EnableLogging;
+			LogCompile = osirisExtenderSettings.LogCompile;
+			if (osirisExtenderSettings.LogDirectory.IsExistingDirectory()) LogDirectory = osirisExtenderSettings.LogDirectory;
 		}
 	}
 }

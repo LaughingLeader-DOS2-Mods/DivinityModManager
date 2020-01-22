@@ -183,6 +183,7 @@ namespace DivinityModManager.Models
 
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
+		public ICommand ExportExtenderSettingsCommand { get; set; }
 
 		public CompositeDisposable Disposables { get; internal set; }
 

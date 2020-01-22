@@ -116,28 +116,40 @@
 				DataContext="{Binding ExtenderSettings}"
 				Header="OsiExtender"
 				Visibility="{Binding ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
-				<autogrid:AutoGrid
-					Margin="20"
-					ChildMargin="4"
-					ColumnCount="2"
-					Columns="auto,*"
-					RowCount="5"
-					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto,auto">
-					<TextBlock Text="Enable Extensions" ToolTip="Enable script extensions. Default: Enabled" />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableExtensions, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Enable Console Window:" ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CreateConsole, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Enable Logging" ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableLogging, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Log Story Merges" ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogCompile, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Log Directory" ToolTip="The directory to write logs to." />
-					<controls:UnfocusableTextBox
-						VerticalAlignment="Center"
-						Text="{Binding LogDirectory, UpdateSourceTrigger=PropertyChanged}"
-						TextAlignment="Left" />
-				</autogrid:AutoGrid>
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="*" />
+						<RowDefinition Height="auto" />
+					</Grid.RowDefinitions>
+					<autogrid:AutoGrid
+						Margin="20"
+						ChildMargin="4"
+						ColumnCount="2"
+						Columns="auto,*"
+						RowCount="5"
+						RowHeight="*"
+						Rows="auto,auto,auto,auto,auto,auto">
+						<TextBlock Text="Enable Extensions" ToolTip="Enable script extensions. Default: Enabled" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableExtensions, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Enable Console Window:" ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding CreateConsole, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Enable Logging" ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding EnableLogging, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Log Story Merges" ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogCompile, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Log Directory" ToolTip="The directory to write logs to." />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding LogDirectory, UpdateSourceTrigger=PropertyChanged}"
+							TextAlignment="Left" />
+					</autogrid:AutoGrid>
+					<StackPanel Grid.Row="1">
+						<Button
+							Command="{Binding ExportExtenderSettingsCommand}"
+							Content="Export Settings"
+							ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json" />
+					</StackPanel>
+				</Grid>
 			</TabItem>
 			<TabItem Header="Debug">
 				<autogrid:AutoGrid

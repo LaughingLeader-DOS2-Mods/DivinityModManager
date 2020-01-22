@@ -1,4 +1,6 @@
-﻿using ReactiveUI;
+﻿using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.Extensions;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -47,6 +49,15 @@ namespace DivinityModManager.Models
 		{
 			get => lastSaveFilePath;
 			set { this.RaiseAndSetIfChanged(ref lastSaveFilePath, value); }
+		}
+
+		public string OsirisExtenderSettingsFile(DivinityModManagerSettings settings)
+		{
+			if(settings.DOS2DEGameExecutable.IsExistingFile())
+			{
+				return Path.Combine(Path.GetDirectoryName(settings.DOS2DEGameExecutable), "OsirisExtenderSettings.json");
+			}
+			return "";
 		}
 
 		//private string gameDOS2DEPath;

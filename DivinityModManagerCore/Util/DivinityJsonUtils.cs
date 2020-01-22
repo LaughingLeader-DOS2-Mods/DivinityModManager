@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Alphaleonis.Win32.Filesystem;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
 using System;
@@ -41,6 +42,27 @@ namespace DivinityModManager.Util
 				Trace.WriteLine("Error deserializing json:\n\t" + String.Join("\n\t", errors));
 				return default(T);
 			}
+		}
+
+		public static T SafeDeserializeFromPath<T>(string path)
+		{
+			try
+			{
+				if (File.Exists(path))
+				{
+					string contents = File.ReadAllText(path);
+					return SafeDeserialize<T>(contents);
+				}
+				else
+				{
+					Trace.WriteLine($"Error deserializing json: File '{path}' does not exist.");
+				}
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine("Error deserializing json:\n" + ex.ToString());
+			}
+			return default(T);
 		}
 	}
 }

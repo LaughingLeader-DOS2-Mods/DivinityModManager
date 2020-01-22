@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DivinityModManager.Util
@@ -115,6 +116,29 @@ namespace DivinityModManager.Util
             using (StreamReader reader = new StreamReader(stream))
             {
                 return await reader.ReadToEndAsync();
+            }
+        }
+
+        public static async Task<MemoryStream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
+        {
+            using (System.Net.WebClient webClient = new System.Net.WebClient())
+            {
+                int receivedBytes = 0;
+
+                using (Stream stream = await webClient.OpenReadTaskAsync(downloadUrl))
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    var buffer = new byte[4096];
+                    int read = 0;
+                    var totalBytes = Int32.Parse(webClient.ResponseHeaders[HttpResponseHeader.ContentLength]);
+
+                    while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                    {
+                        ms.Write(buffer, 0, read);
+                        receivedBytes += read;
+                    }
+                    return ms;
+                }
             }
         }
     }

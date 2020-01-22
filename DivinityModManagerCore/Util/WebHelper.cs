@@ -119,26 +119,25 @@ namespace DivinityModManager.Util
             }
         }
 
-        public static async Task<MemoryStream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
+        public static async Task<Stream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
         {
             using (System.Net.WebClient webClient = new System.Net.WebClient())
             {
                 int receivedBytes = 0;
 
-                using (Stream stream = await webClient.OpenReadTaskAsync(downloadUrl))
-                using (MemoryStream ms = new MemoryStream())
-                {
-                    var buffer = new byte[4096];
-                    int read = 0;
-                    var totalBytes = Int32.Parse(webClient.ResponseHeaders[HttpResponseHeader.ContentLength]);
+                Stream stream = await webClient.OpenReadTaskAsync(downloadUrl);
+                MemoryStream ms = new MemoryStream();
+                var buffer = new byte[4096];
+                int read = 0;
+                var totalBytes = Int32.Parse(webClient.ResponseHeaders[HttpResponseHeader.ContentLength]);
 
-                    while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
-                    {
-                        ms.Write(buffer, 0, read);
-                        receivedBytes += read;
-                    }
-                    return ms;
+                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                    receivedBytes += read;
                 }
+                stream.Close();
+                return ms;
             }
         }
     }

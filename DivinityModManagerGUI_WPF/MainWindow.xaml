@@ -600,11 +600,15 @@
 								Header="Toggle Dark/Light Mode" />
 						</MenuItem>
 						<MenuItem Header="Tools">
-							<!--  Disabled for now  -->
+							<MenuItem
+								x:Name="ToolsInstallOsiExtenderMenuItem"
+								Command="{Binding DownloadAndInstallOsiExtenderCommand}"
+								Header="Download &amp; Install the Osiris Extender" />
 							<MenuItem
 								x:Name="ToolsExtractSelectedModsMenuItem"
-								Command="{Binding ExtractSelectedModsCommands}"
+								Command="{Binding ExtractSelectedModsCommand}"
 								Header="Extract Selected Mods To..." />
+							<!--  Disabled for now  -->
 							<MenuItem
 								x:Name="ToolsRenameSaveMenuItem"
 								Header="Rename Save..."

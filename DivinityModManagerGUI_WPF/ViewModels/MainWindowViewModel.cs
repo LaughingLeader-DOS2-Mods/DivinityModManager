@@ -369,7 +369,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand ToggleDisplayNameCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
-		public ICommand ExtractSelectedModsCommands { get; private set; }
+		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
+		public ICommand ExtractSelectedModsCommand { get; private set; }
 		public ICommand RenameSaveCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 
@@ -2335,6 +2336,94 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private void InstallOsiExtender_DownloadStart(string exeDir)
+		{
+			double taskStepAmount = 1.0 / 3;
+			MainProgressTitle = $"Setting up the Osiris Extender...";
+			MainProgressValue = 0d;
+			MainProgressToken = new CancellationTokenSource();
+			CanCancelProgress = true;
+			MainProgressIsActive = true;
+
+			string dllDestination = Path.Combine(exeDir, "DXGI.dll");
+
+			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+			{
+				int successes = 0;
+				try
+				{
+					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Downloading {PathwayData.OsirisExtenderLatestReleaseUrl}...");
+					var webStream = await WebHelper.DownloadFileAsStreamAsync(PathwayData.OsirisExtenderLatestReleaseUrl, MainProgressToken.Token);
+					if (webStream != null)
+					{
+						successes += 1;
+						IncreaseMainProgressValue(taskStepAmount);
+						RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Extracting zip to {exeDir}...");
+						Stream unzippedEntryStream; // Unzipped data from a file in the archive
+						ZipArchive archive = new ZipArchive(webStream);
+						foreach (ZipArchiveEntry entry in archive.Entries)
+						{
+							if (MainProgressToken.IsCancellationRequested) break;
+							if (entry.Name.Equals("DXGI.dll", StringComparison.OrdinalIgnoreCase))
+							{
+								unzippedEntryStream = entry.Open(); // .Open will return a stream
+								using (var fs = File.Create(dllDestination, 4096, FileOptions.Asynchronous))
+								{
+									await unzippedEntryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
+									successes += 1;
+								}
+								break;
+							}
+						}
+						IncreaseMainProgressValue(taskStepAmount);
+						RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Cleaning up...");
+						successes += 1;
+						IncreaseMainProgressValue(taskStepAmount);
+					}
+
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+				}
+				await ctrl.Yield();
+				RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
+
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					if (successes >= 3)
+					{
+						view.AlertBar.SetSuccessAlert($"Successfully installed the Osiris Extender DXGI.dll to '{exeDir}'.", 20);
+					}
+					else
+					{
+						view.AlertBar.SetDangerAlert($"Error occurred when installing the Osiris Extender DXGI.dll. Check the log.", 30);
+					}
+				});
+
+				return Disposable.Empty;
+			});
+		}
+
+		private void InstallOsiExtender_Start()
+		{
+			string exeDir = Path.GetDirectoryName(Settings.DOS2DEGameExecutable);
+			string messageText = String.Format(@"Download and install the Osiris Extender?
+The Osiris Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
+The extenders needs to only be installed once, as it can auto-update itself automatically when you launch the game.
+Download url: 
+{0}
+Directory the zip will be extracted to:
+{1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
+
+			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Osiris Extender?",
+				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
+			if (result == MessageBoxResult.Yes)
+			{
+				InstallOsiExtender_DownloadStart(exeDir);
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -2351,8 +2440,10 @@ namespace DivinityModManager.ViewModels
 			});
 
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
-			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable, 
-				(url,exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url))
+			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
+				(url, exe) => exe.IsExistingFile() && !String.IsNullOrWhiteSpace(url));
+
+			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start, canInstallOsiExtender);
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
@@ -2513,7 +2604,7 @@ namespace DivinityModManager.ViewModels
 			modsConnecton.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 
 			var anyPakModSelectedObservable = this.WhenAnyValue(x => x.SelectedPakMods.Count, (count) => count > 0);
-			ExtractSelectedModsCommands = ReactiveCommand.Create(ExtractSelectedMods_Start, anyPakModSelectedObservable);
+			ExtractSelectedModsCommand = ReactiveCommand.Create(ExtractSelectedMods_Start, anyPakModSelectedObservable);
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, 
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);

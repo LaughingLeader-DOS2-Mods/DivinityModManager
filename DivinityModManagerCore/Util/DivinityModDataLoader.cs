@@ -1013,20 +1013,52 @@ namespace DivinityModManager.Util
 			string activeProfileUUID = "";
 			if (File.Exists(playerprofilesFile))
 			{
-				Trace.WriteLine($"Loading playerprofiles.lsb at '{playerprofilesFile}'");
-				var res = ResourceUtils.LoadResource(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
-				if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
+				try
 				{
-					Trace.WriteLine($"ActiveProfile | Getting root node '{String.Join(";", region.Attributes.Keys)}'");
-
-					if (region.Attributes.TryGetValue("ActiveProfile", out var att))
+					Trace.WriteLine($"Loading playerprofiles.lsb at '{playerprofilesFile}'");
+					var res = ResourceUtils.LoadResource(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+					if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
 					{
-						Trace.WriteLine($"ActiveProfile | '{att.Type} {att.Value}'");
-						activeProfileUUID = (string)att.Value;
+						Trace.WriteLine($"ActiveProfile | Getting root node '{String.Join(";", region.Attributes.Keys)}'");
+
+						if (region.Attributes.TryGetValue("ActiveProfile", out var att))
+						{
+							Trace.WriteLine($"ActiveProfile | '{att.Type} {att.Value}'");
+							activeProfileUUID = (string)att.Value;
+						}
 					}
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error loading {playerprofilesFile}: {ex.ToString()}");
 				}
 			}
 			return activeProfileUUID;
+		}
+
+		public static bool ExportedSelectedProfile(string profilePath, string profileUUID)
+		{
+			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
+			if (File.Exists(playerprofilesFile))
+			{
+				try
+				{
+					var res = ResourceUtils.LoadResource(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+					if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
+					{
+						if (region.Attributes.TryGetValue("ActiveProfile", out var att))
+						{
+							att.Value = profileUUID;
+							ResourceUtils.SaveResource(res, playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+						}
+					}
+				}
+				catch(Exception ex)
+				{
+					Trace.WriteLine($"Error saving {playerprofilesFile}: {ex.ToString()}");
+				}
+			}
+			return false;
 		}
 
 		public static async Task<string> GetSelectedProfileUUIDAsync(string profilePath)

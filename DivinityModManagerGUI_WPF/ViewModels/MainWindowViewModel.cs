@@ -1653,6 +1653,11 @@ namespace DivinityModManager.ViewModels
 					view.AlertBar.SetDangerAlert(msg);
 					view.MainWindowMessageBox.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
 				}
+
+				if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+				{
+					Trace.WriteLine($"Set active profile to '{SelectedProfile.Name}'.");
+				}
 			}
 			else
 			{

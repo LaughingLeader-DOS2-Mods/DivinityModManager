@@ -66,7 +66,7 @@ namespace DivinityModManager.Util
 		public static List<DivinityModData> IgnoredEditorMods { get; set; } = GetIgnoredMods(true);
 
 		// Hide Larian mods for now, since we can't add them to the active order without the game automatically removing them
-		public static List<DivinityModData> IgnoredMods { get; set; } = GetIgnoredMods(false);
+		public static List<DivinityModData> IgnoredMods { get; set; } = GetIgnoredMods(true);
 
 		public static bool IgnoreMod(string modUUID)
 		{

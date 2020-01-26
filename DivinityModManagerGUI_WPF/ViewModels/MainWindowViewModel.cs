@@ -1148,7 +1148,7 @@ namespace DivinityModManager.ViewModels
 				{
 					ActiveMods.Add(mod);
 				}
-				else
+				else if(!DivinityModDataLoader.IgnoreMod(entry.UUID))
 				{
 					var x = new DivinityMissingModData
 					{
@@ -1311,6 +1311,12 @@ namespace DivinityModManager.ViewModels
 				lastOrderIndex = SelectedModOrderIndex;
 			}
 
+			string selectedProfileUUID = "";
+			if(SelectedProfile != null)
+			{
+				selectedProfileUUID = SelectedProfile.UUID;
+			}
+
 			if (Directory.Exists(PathwayData.LarianDocumentsFolder))
 			{
 				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
@@ -1325,9 +1331,7 @@ namespace DivinityModManager.ViewModels
 				var loadedProfiles = await LoadProfilesAsync();
 				IncreaseMainProgressValue(taskStepAmount);
 
-				string selectedProfileUUID = "";
-
-				if (loadedProfiles != null && loadedProfiles.Count > 0)
+				if (String.IsNullOrEmpty(selectedProfileUUID) && (loadedProfiles != null && loadedProfiles.Count > 0))
 				{
 					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading current profile...");
 					selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);

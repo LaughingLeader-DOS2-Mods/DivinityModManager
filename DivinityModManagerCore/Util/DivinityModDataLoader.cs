@@ -22,9 +22,9 @@ namespace DivinityModManager.Util
 	{
 		public static List<DivinityModData> Larian_Base { get; private set; } = new List<DivinityModData>()
 		{
-			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version=DivinityModVersion.FromInt(372645092), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5="8c08a78e11b3c02215cdf0982d8c0981"},
-			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder="Shared", Version=DivinityModVersion.FromInt(389028377), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5="71665c6be461b243d01243f39c632be9"},
-			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder="Shared_DOS", Version=DivinityModVersion.FromInt(268435456), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5="51f45a5233f4b8a45b8a8ab71eccbc30"},
+			new DivinityModData{ Name = "Divinity: Original Sin 2", UUID = "1301db3d-1f54-4e98-9be5-5094030916e4", Folder="DivinityOrigins_1301db3d-1f54-4e98-9be5-5094030916e4", Version=DivinityModVersion.FromInt(372645092), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5=""},
+			new DivinityModData{ Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder="Shared", Version=DivinityModVersion.FromInt(389028377), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5=""},
+			new DivinityModData{ Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder="Shared_DOS", Version=DivinityModVersion.FromInt(268435456), Type="Adventure", Targets="Story", Author="Larian", Description="", MD5=""},
 			new DivinityModData{ Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder="Character_Creation_Pack", Version=DivinityModVersion.FromInt(268435456), Type="Add-on", Targets="Story", Author="Larian", Description="", MD5=""},
 		};
 
@@ -1484,7 +1484,7 @@ namespace DivinityModManager.Util
 									}
 									else
 									{
-										Trace.WriteLine($"Ignoring mod in save: '{name}'.");
+										Trace.WriteLine($"Ignoring mod in save: '{name}_{uuid}'.");
 									}
 								}
 

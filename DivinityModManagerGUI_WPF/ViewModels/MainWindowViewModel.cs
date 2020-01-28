@@ -1642,12 +1642,21 @@ namespace DivinityModManager.ViewModels
 				{
 					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'", 15);
 
+					if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+					{
+						Trace.WriteLine($"Set active profile to '{SelectedProfile.Name}'.");
+					}
+					else
+					{
+						Trace.WriteLine($"Could not set active profile to '{SelectedProfile.Name}'.");
+					}
+
 					//Update "Current" order
 					if (SelectedModOrder.Name != "Current")
 					{
 						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
 						currentOrder.SetOrder(SelectedModOrder.Order);
-						Trace.WriteLine("Updated 'Current' load order to exported order.");
+						//Trace.WriteLine("Updated 'Current' load order to exported order.");
 						return true;
 					}
 				}
@@ -1656,11 +1665,6 @@ namespace DivinityModManager.ViewModels
 					string msg = $"Problem exporting load order to '{outputPath}'";
 					view.AlertBar.SetDangerAlert(msg);
 					view.MainWindowMessageBox.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
-				}
-
-				if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
-				{
-					Trace.WriteLine($"Set active profile to '{SelectedProfile.Name}'.");
 				}
 			}
 			else

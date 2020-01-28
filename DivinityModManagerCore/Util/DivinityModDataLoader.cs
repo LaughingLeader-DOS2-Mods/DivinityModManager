@@ -1055,6 +1055,7 @@ namespace DivinityModManager.Util
 						{
 							att.Value = profileUUID;
 							ResourceUtils.SaveResource(res, playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+							return true;
 						}
 					}
 				}
@@ -1062,6 +1063,10 @@ namespace DivinityModManager.Util
 				{
 					Trace.WriteLine($"Error saving {playerprofilesFile}: {ex.ToString()}");
 				}
+			}
+			else
+			{
+				Trace.WriteLine($"[*WARNING*] '{playerprofilesFile}' does not exist. Skipping selected profile saving.");
 			}
 			return false;
 		}

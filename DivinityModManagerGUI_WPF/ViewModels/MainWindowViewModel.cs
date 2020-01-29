@@ -1591,18 +1591,17 @@ namespace DivinityModManager.ViewModels
 						//When saving the "Current" order, write this to modsettings.lsx instead of a json file.
 						result = await ExportLoadOrderAsync();
 						outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-						/*
-						outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine($"{SelectedProfile.Name}_{SelectedModOrder.Name}.json"), '_');
-						DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
-						tempOrder.Name = $"Current ({SelectedProfile.Name})";
-
-						outputPath = Path.Combine(outputDirectory, outputName);
-						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, tempOrder);
-						*/
 					}
 					else
 					{
-						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, SelectedModOrder);
+						// Save mods that aren't missing
+						var tempOrder = new DivinityLoadOrder
+						{
+							Name = SelectedModOrder.Name,
+						};
+						tempOrder.Order.AddRange(SelectedModOrder.Order.Where(x => Mods.Any(y => y.UUID == x.UUID)));
+
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, tempOrder);
 					}
 				}
 				catch (Exception ex)
@@ -1652,17 +1651,21 @@ namespace DivinityModManager.ViewModels
 
 			if (dialog.ShowDialog(view) == true)
 			{
+				// Save mods that aren't missing
+				var tempOrder = new DivinityLoadOrder
+				{
+					Name = SelectedModOrder.Name,
+				};
+				tempOrder.Order.AddRange(SelectedModOrder.Order.Where(x => Mods.Any(y => y.UUID == x.UUID)));
 				bool result = false;
 				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
 				{
-					DivinityLoadOrder tempOrder = SelectedModOrder.Clone();
 					tempOrder.Name = $"Current ({SelectedProfile.Name})";
-
 					result = DivinityModDataLoader.ExportLoadOrderToFile(dialog.FileName, tempOrder);
 				}
 				else
 				{
-					result = DivinityModDataLoader.ExportLoadOrderToFile(dialog.FileName, SelectedModOrder);
+					result = DivinityModDataLoader.ExportLoadOrderToFile(dialog.FileName, tempOrder);
 				}
 
 				if (result)

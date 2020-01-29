@@ -12,15 +12,19 @@ using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
+	[DataContract]
 	public class DivinityLoadOrderEntry
 	{
+		[DataMember]
 		public string UUID { get; set; }
+
+		[DataMember]
 		public string Name { get; set; }
 		public bool Missing { get; set; } = false;
 
 		public DivinityLoadOrderEntry Clone()
 		{
-			return new DivinityLoadOrderEntry() { Name = this.Name, UUID = this.UUID };
+			return new DivinityLoadOrderEntry() { Name = this.Name, UUID = this.UUID, Missing = this.Missing };
 		}
 	}
 

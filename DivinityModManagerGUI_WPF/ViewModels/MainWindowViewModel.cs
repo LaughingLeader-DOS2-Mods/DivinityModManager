@@ -1679,9 +1679,10 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private void DisplayMissingMods()
+		private void DisplayMissingMods(DivinityLoadOrder order = null)
 		{
-			if (SelectedModOrder != null && Settings?.DisableMissingModWarnings != true)
+			if (order == null) order = SelectedModOrder;
+			if (order != null && Settings?.DisableMissingModWarnings != true)
 			{
 				List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
@@ -1763,7 +1764,7 @@ namespace DivinityModManager.ViewModels
 						currentOrder.SetOrder(SelectedModOrder.Order);
 					}
 
-					RxApp.MainThreadScheduler.Schedule(DisplayMissingMods);
+					RxApp.MainThreadScheduler.Schedule(_ => DisplayMissingMods(SelectedModOrder));
 					return true;
 				}
 				else

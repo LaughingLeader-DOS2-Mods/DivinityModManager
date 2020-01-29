@@ -1168,13 +1168,13 @@ namespace DivinityModManager.ViewModels
 						foreach(var dependency in mod.Dependencies)
 						{
 							if(!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) && 
-								!missingMods.Any(x => entry.UUID == dependency.UUID))
+								!missingMods.Any(x => x.UUID == dependency.UUID))
 							{
 								var x = new DivinityMissingModData
 								{
 									Index = -1,
-									Name = entry.Name,
-									UUID = entry.UUID,
+									Name = dependency.Name,
+									UUID = dependency.UUID,
 									Dependency = true
 								};
 								missingMods.Add(x);
@@ -1198,7 +1198,9 @@ namespace DivinityModManager.ViewModels
 
 			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
 			{
-				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
+				view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+				view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
 					"Missing Mods in Load Order", MessageBoxButton.OK);
 			}
 
@@ -1230,6 +1232,15 @@ namespace DivinityModManager.ViewModels
 			}
 
 			OnOrderChanged?.Invoke(this, new EventArgs());
+		}
+
+		private void MainWindowMessageBox_Closed_ResetColor(object sender, EventArgs e)
+		{
+			if(sender is Xceed.Wpf.Toolkit.MessageBox messageBox)
+			{
+				messageBox.WindowBackground = new SolidColorBrush(Color.FromRgb(78, 56, 201));
+				messageBox.Closed -= MainWindowMessageBox_Closed_ResetColor;
+			}
 		}
 
 		private bool refreshing = false;
@@ -1699,7 +1710,9 @@ namespace DivinityModManager.ViewModels
 				{
 					string msg = $"Problem exporting load order to '{outputPath}'";
 					view.AlertBar.SetDangerAlert(msg);
-					view.MainWindowMessageBox.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+					view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
 				}
 			}
 			else
@@ -1746,14 +1759,9 @@ namespace DivinityModManager.ViewModels
 		{
 			//view.MainWindowMessageBox.Text = "Add active mods to a zip file?";
 			//view.MainWindowMessageBox.Caption = "Depending on the number of mods, this may take some time.";
-			view.MainWindowMessageBox.Closed += MainWindowMessageBox_Closed_ExportLoadOrderToArchive;
-			view.MainWindowMessageBox.ShowMessageBox($"Save active mods to a zip file?{Environment.NewLine}Depending on the number of mods, this may take some time.", "Confirm Archive Creation", MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel);
-		}
-
-		private void MainWindowMessageBox_Closed_ExportLoadOrderToArchive(object sender, EventArgs e)
-		{
-			view.MainWindowMessageBox.Closed -= MainWindowMessageBox_Closed_ExportLoadOrderToArchive;
-			if (view.MainWindowMessageBox.MessageBoxResult == MessageBoxResult.OK)
+			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Save active mods to a zip file?{Environment.NewLine}Depending on the number of mods, this may take some time.", "Confirm Archive Creation",
+				MessageBoxButton.OKCancel, MessageBoxImage.Question, MessageBoxResult.Cancel, view.MainWindowMessageBox_OK.Style);
+			if (result == MessageBoxResult.OK)
 			{
 				MainProgressTitle = "Adding active mods to zip...";
 				MainProgressWorkText = "";
@@ -2340,7 +2348,7 @@ namespace DivinityModManager.ViewModels
 		private Unit DeleteOrder(DivinityLoadOrder order)
 		{
 			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Delete load order '{order.Name}'? This cannot be undone.", "Confirm Order Deletion",
-				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
+				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
 			if (result == MessageBoxResult.Yes)
 			{
 				SelectedModOrderIndex = 0;
@@ -2448,7 +2456,7 @@ namespace DivinityModManager.ViewModels
 			else
 			{
 				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Extract the following mods?\n'{String.Join("\n", SelectedPakMods.Select(x => $"{x.DisplayName}"))}", "Extract Mods?",
-				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
+				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
 				if (result == MessageBoxResult.Yes)
 				{
 					ExtractSelectedMods_ChooseFolder();
@@ -2570,7 +2578,7 @@ Directory the zip will be extracted to:
 {1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
 
 			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Osiris Extender?",
-				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox.Style);
+				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
 			if (result == MessageBoxResult.Yes)
 			{
 				InstallOsiExtender_DownloadStart(exeDir);

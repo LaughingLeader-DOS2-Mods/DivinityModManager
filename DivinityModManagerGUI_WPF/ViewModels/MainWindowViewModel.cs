@@ -1692,7 +1692,6 @@ namespace DivinityModManager.ViewModels
 					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 					if (mod != null)
 					{
-						ActiveMods.Add(mod);
 						if (mod.Dependencies.Count > 0)
 						{
 							foreach (var dependency in mod.Dependencies)

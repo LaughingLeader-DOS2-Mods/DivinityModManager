@@ -1292,7 +1292,7 @@ namespace DivinityModManager.Util
 		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies)
 		{
 			List<string> orderList = new List<string>();
-			foreach (var m in order)
+			foreach (var m in order.Where(x => !x.Missing))
 			{
 				var mData = allMods.FirstOrDefault(x => x.UUID == m.UUID);
 				if(mData != null)

@@ -12,10 +12,11 @@ using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
-	public struct DivinityLoadOrderEntry
+	public class DivinityLoadOrderEntry
 	{
 		public string UUID { get; set; }
 		public string Name { get; set; }
+		public bool Missing { get; set; } = false;
 
 		public DivinityLoadOrderEntry Clone()
 		{
@@ -69,7 +70,6 @@ namespace DivinityModManager.Models
 			get => lastModified;
 			set { this.RaiseAndSetIfChanged(ref lastModified, value); }
 		}
-
 
 		[DataMember]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();

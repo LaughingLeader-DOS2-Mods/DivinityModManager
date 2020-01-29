@@ -6,12 +6,13 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.Models
 {
-	public struct DivinityMissingModData
+	public class DivinityMissingModData
 	{
 		public string Name { get; set; }
 		public int Index { get; set; }
 		public string UUID { get; set; }
 		public string Author { get; set; }
+		public bool Dependency { get; set; } = false;
 
 		public override string ToString()
 		{
@@ -25,6 +26,7 @@ namespace DivinityModManager.Models
 			{
 				str += " by " + Author;
 			}
+			if (Dependency) str += (" (Dependency)");
 			return str;
 		}
 

@@ -1163,21 +1163,40 @@ namespace DivinityModManager.ViewModels
 				if (mod != null)
 				{
 					ActiveMods.Add(mod);
+					if(mod.Dependencies.Count > 0)
+					{
+						foreach(var dependency in mod.Dependencies)
+						{
+							if(!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) && 
+								!missingMods.Any(x => entry.UUID == dependency.UUID))
+							{
+								var x = new DivinityMissingModData
+								{
+									Index = -1,
+									Name = entry.Name,
+									UUID = entry.UUID,
+									Dependency = true
+								};
+								missingMods.Add(x);
+							}
+						}
+					}
 				}
 				else if(!DivinityModDataLoader.IgnoreMod(entry.UUID))
 				{
 					var x = new DivinityMissingModData
 					{
-						Name = entry.Name,
 						Index = i,
+						Name = entry.Name,
 						UUID = entry.UUID
 					};
 					missingMods.Add(x);
+					entry.Missing = true;
 				}
 				i++;
 			}
 
-			if (missingMods.Count > 0)
+			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
 			{
 				view.MainWindowMessageBox.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
 					"Missing Mods in Load Order", MessageBoxButton.OK);

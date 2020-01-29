@@ -1679,6 +1679,62 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private void DisplayMissingMods()
+		{
+			if (SelectedModOrder != null && Settings?.DisableMissingModWarnings != true)
+			{
+				List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
+
+				for (int i = 0; i < SelectedModOrder.Order.Count;i++)
+				{
+					var entry = SelectedModOrder.Order[i];
+					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
+					if (mod != null)
+					{
+						ActiveMods.Add(mod);
+						if (mod.Dependencies.Count > 0)
+						{
+							foreach (var dependency in mod.Dependencies)
+							{
+								if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
+									!missingMods.Any(x => x.UUID == dependency.UUID))
+								{
+									var x = new DivinityMissingModData
+									{
+										Index = -1,
+										Name = dependency.Name,
+										UUID = dependency.UUID,
+										Dependency = true
+									};
+									missingMods.Add(x);
+								}
+							}
+						}
+					}
+					else if (!DivinityModDataLoader.IgnoreMod(entry.UUID))
+					{
+						var x = new DivinityMissingModData
+						{
+							Index = i,
+							Name = entry.Name,
+							UUID = entry.UUID
+						};
+						missingMods.Add(x);
+						entry.Missing = true;
+					}
+					i++;
+				}
+
+				if (missingMods.Count > 0)
+				{
+					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
+						"Missing Mods in Load Order", MessageBoxButton.OK);
+				}
+			}
+		}
+
 		private async Task<bool> ExportLoadOrderAsync()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
@@ -1705,9 +1761,10 @@ namespace DivinityModManager.ViewModels
 					{
 						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
 						currentOrder.SetOrder(SelectedModOrder.Order);
-						//Trace.WriteLine("Updated 'Current' load order to exported order.");
-						return true;
 					}
+
+					RxApp.MainThreadScheduler.Schedule(DisplayMissingMods);
+					return true;
 				}
 				else
 				{

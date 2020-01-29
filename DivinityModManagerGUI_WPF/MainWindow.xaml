@@ -338,6 +338,22 @@
 								Command="{Binding ExportOrderCommand}"
 								ToolTip="Export Order to Game">
 								<controls:AutoGrayableImage Source="{StaticResource ExportScriptImage}" />
+								<Button.ContextMenu>
+									<ContextMenu>
+										<MenuItem
+											Command="{Binding Path=OpenFileCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+											CommandParameter="{Binding SelectedProfile.ModSettingsFile}"
+											Header="Open Exported Mod Order File..." />
+										<MenuItem
+											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+											CommandParameter="{Binding SelectedProfile.ModSettingsFile}"
+											Header="Open Profile Folder..." />
+										<MenuItem
+											Command="{Binding CopyPathToClipboardCommand}"
+											CommandParameter="{Binding SelectedProfile.ModSettingsFile}"
+											Header="Copy Path to Clipboard" />
+									</ContextMenu>
+								</Button.ContextMenu>
 							</Button>
 							<Button
 								x:Name="ExportOrderToArchiveButton"

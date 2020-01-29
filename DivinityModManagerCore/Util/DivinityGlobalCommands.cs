@@ -14,8 +14,32 @@ namespace DivinityModManager.Util
 {
 	public class DivinityGlobalCommands
 	{
+		public ReactiveCommand<string, Unit> OpenFileCommand { get; private set; }
 		public ReactiveCommand<string, Unit> OpenInFileExplorerCommand { get; private set; }
 		public ReactiveCommand<DivinityModData, Unit> ToggleNameDisplayCommand { get; private set; }
+
+		public void OpenFile(string path)
+		{
+			if (File.Exists(path))
+			{
+				try
+				{
+					Process.Start(Path.GetFullPath(path));
+				}
+				catch(System.ComponentModel.Win32Exception ex) // No File Association
+				{
+					Process.Start("explorer.exe", $"\"{Path.GetFullPath(path)}\"");
+				}
+			}
+			else if (Directory.Exists(path))
+			{
+				Process.Start("explorer.exe", $"\"{Path.GetFullPath(path)}\"");
+			}
+			else
+			{
+				_viewModel.ShowAlert($"Error opening '{path}': File does not exist!", -1, 10);
+			}
+		}
 
 		public void OpenInFileExplorer(string path)
 		{
@@ -42,6 +66,7 @@ namespace DivinityModManager.Util
 
 		public DivinityGlobalCommands()
 		{
+			OpenFileCommand = ReactiveCommand.Create<string>(OpenFile);
 			OpenInFileExplorerCommand = ReactiveCommand.Create<string>(OpenInFileExplorer);
 			ToggleNameDisplayCommand = ReactiveCommand.Create<DivinityModData>((mod) =>
 			{

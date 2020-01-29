@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Alphaleonis.Win32.Filesystem;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -14,7 +15,29 @@ namespace DivinityModManager.Models
 		/// </summary>
 		public string ProfileName { get; set; }
 		public string UUID { get; set; }
-		public string Folder { get; set; }
+
+		private string folder;
+
+		public string Folder
+		{
+			get => folder;
+			set 
+			{
+				if(value != folder)
+				{
+					ModSettingsFile = Path.Combine(value, "modsettings.lsx");
+				}
+				this.RaiseAndSetIfChanged(ref folder, value);
+			}
+		}
+
+		private string modSettingsFile;
+
+		public string ModSettingsFile
+		{
+			get => modSettingsFile;
+			set { this.RaiseAndSetIfChanged(ref modSettingsFile, value); }
+		}
 
 		/// <summary>
 		/// The saved load order from modsettings.lsx

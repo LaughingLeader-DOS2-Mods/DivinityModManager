@@ -76,6 +76,7 @@ namespace DivinityModManager.Controls
 			// Create Opacity Mask for grayscale image as FormatConvertedBitmap does not keep transparency info
 			_opacityMaskGray = new ImageBrush(_sourceColor);
 			_opacityMaskGray.Opacity = 0.6;
+			Uri uri = null;
 
 			try
 			{
@@ -83,7 +84,7 @@ namespace DivinityModManager.Controls
 				string stringUri = TypeDescriptor.GetConverter(Source).ConvertTo(Source, typeof(string)) as string;
 
 				// Try to resolve it as an absolute Uri 
-				if (!Uri.TryCreate(stringUri, UriKind.Absolute, out Uri uri))
+				if (!Uri.TryCreate(stringUri, UriKind.Absolute, out uri))
 				{
 					// Uri is relative => requested image is in the same assembly as this object
 					stringUri = "pack://application:,,,/" + stringUri.TrimStart(new char[2] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar });
@@ -95,7 +96,8 @@ namespace DivinityModManager.Controls
 			}
 			catch (Exception e)
 			{
-				Debug.Fail("The Image used cannot be grayed out.", "Use BitmapImage or URI as a Source in order to allow gray scaling. Make sure the absolute Uri is used as relative Uri may sometimes resolve incorrectly.\n\nException: " + e.Message);
+				//Debug.Fail("The Image used cannot be grayed out.", "Use BitmapImage or URI as a Source in order to allow gray scaling. Make sure the absolute Uri is used as relative Uri may sometimes resolve incorrectly.\n\nException: " + e.Message);
+				Trace.WriteLine($"Error greying out image '{uri}'({Source}).\n\nException: {e.Message}");
 			}
 		}
 	}

@@ -181,6 +181,14 @@ namespace DivinityModManager.Models
 			set { Trace.WriteLine(value); this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
 		}
 
+		private bool disableMissingModWarnings = false;
+
+		public bool DisableMissingModWarnings
+		{
+			get => disableMissingModWarnings;
+			set { this.RaiseAndSetIfChanged(ref disableMissingModWarnings, value); }
+		}
+
 		//Not saved for now
 
 		private bool displayFileNames = false;

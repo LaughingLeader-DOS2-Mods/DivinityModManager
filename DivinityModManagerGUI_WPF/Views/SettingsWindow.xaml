@@ -81,9 +81,9 @@
 					ChildMargin="4"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="8"
+					RowCount="9"
 					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto,auto,auto,auto">
+					Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto">
 					<TextBlock Text="Game Data Path" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
@@ -113,6 +113,8 @@
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoAddDependenciesWhenExporting, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
+					<TextBlock Text="Disable Missing Mod Warnings" ToolTip="If a load order is missing mods, no warnings will be displayed." />
+					<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableMissingModWarnings, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="On Game Launch" />
 					<ComboBox
 						DisplayMemberPath="Description"

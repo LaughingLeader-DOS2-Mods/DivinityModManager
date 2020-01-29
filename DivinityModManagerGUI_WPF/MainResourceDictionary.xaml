@@ -8,6 +8,7 @@
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
+	xmlns:dmcore="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
@@ -18,6 +19,7 @@
 	<conv:BoolToVisibilityConverterReversed x:Key="BoolToVisibilityConverterReversed" />
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 	<conv:StringToUriConverter x:Key="StringToUriConverter" />
+	<conv:DivinityGameLaunchWindowActionToStringConverter x:Key="GameLaunchActionToStringConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Icons/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/Icons/SaveAs_16x.png" />

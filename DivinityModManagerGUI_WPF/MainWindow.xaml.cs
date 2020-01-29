@@ -106,6 +106,8 @@ namespace DivinityModManager.Views
 
 			self = this;
 
+			App.Current.Exit += OnAppClosing;
+
 			//Wrapper = new WindowWrapper(this);
 
 			settingsWindow = new SettingsWindow();
@@ -258,7 +260,13 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 
+				//this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 			});
+		}
+
+		private void OnAppClosing(object sender, ExitEventArgs e)
+		{
+			ViewModel.SaveSettings();
 		}
 
 		private void AutoUpdater_ApplicationExitEvent()

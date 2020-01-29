@@ -7,8 +7,10 @@
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
+	xmlns:ext="clr-namespace:DivinityModManager.Controls.Extensions"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
@@ -79,22 +81,20 @@
 					ChildMargin="4"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="7"
+					RowCount="8"
 					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto,auto,auto">
-					<TextBlock Text="Game Data Path:" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
+					Rows="auto,auto,auto,auto,auto,auto,auto,auto">
+					<TextBlock Text="Game Data Path" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<TextBlock Text="Game Executable Path:" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
+					<TextBlock Text="Game Executable Path" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<TextBlock Text="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="DOS2 Workshop Path:" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
+					<TextBlock Text="DOS2 Workshop Path" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 					<controls:UnfocusableTextBox
 						x:Name="WorkshopPathTextbox"
 						VerticalAlignment="Center"
@@ -102,15 +102,24 @@
 						LostFocus="WorkshopPathTextbox_LostFocus"
 						Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 						TextAlignment="Left" />
-					<TextBlock Text="Saved Load Orders Path:" ToolTip="The folder to save and load load orders to." />
+					<TextBlock Text="Saved Load Orders Path" ToolTip="The folder to save and load load orders to." />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
 						Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
 						TextAlignment="Left" />
+					<TextBlock Text="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
+					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="Auto Add Missing Dependencies When Exporting" ToolTip="Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoAddDependenciesWhenExporting, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
+					<TextBlock Text="On Game Launch" />
+					<ComboBox
+						DisplayMemberPath="Description"
+						ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
+						SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+						SelectedValuePath="Value"
+						ToolTip="When the game launches through the mod manager, this action will be performed" />
 				</autogrid:AutoGrid>
 			</TabItem>
 			<TabItem Header="OsiExtender" Visibility="{Binding ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">

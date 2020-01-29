@@ -375,6 +375,13 @@ namespace DivinityModManager.ViewModels
 		public ICommand RenameSaveCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 
+		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
+		public DivinityGameLaunchWindowAction ActionOnGameLaunch
+		{
+			get => actionOnGameLaunch;
+			set { this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
+		}
+
 		public bool Loaded { get; set; } = false;
 		public EventHandler OnLoaded { get; set; }
 		public EventHandler OnRefreshed { get; set; }
@@ -552,6 +559,15 @@ namespace DivinityModManager.ViewModels
 				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
 				SaveSettings();
 			}).DisposeWith(Settings.Disposables);
+
+			ActionOnGameLaunch = Settings.ActionOnGameLaunch;
+
+			var actionLaunchChanged = this.WhenAnyValue(x => x.ActionOnGameLaunch).ObserveOn(RxApp.MainThreadScheduler);
+			actionLaunchChanged.Subscribe((action) =>
+			{
+				SaveSettings();
+			}).DisposeWith(Settings.Disposables);
+			actionLaunchChanged.BindTo(this, x => x.Settings.ActionOnGameLaunch).DisposeWith(Settings.Disposables);
 
 			this.WhenAnyValue(x => x.Settings.DisplayFileNames).Subscribe((b) =>
 			{
@@ -2632,6 +2648,19 @@ Directory the zip will be extracted to:
 				else
 				{
 					Process.Start(Settings.DOS2DEGameExecutable, "-storylog 1");
+				}
+
+				if (Settings.ActionOnGameLaunch != DivinityGameLaunchWindowAction.None)
+				{
+					switch(Settings.ActionOnGameLaunch)
+					{
+						case DivinityGameLaunchWindowAction.Minimize:
+							view.WindowState = WindowState.Minimized;
+							break;
+						case DivinityGameLaunchWindowAction.Close:
+							App.Current.Shutdown();
+							break;
+					}
 				}
 				
 			}, canOpenDOS2DEGame);

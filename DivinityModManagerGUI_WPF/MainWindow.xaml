@@ -13,6 +13,7 @@
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
 	xmlns:dutil="clr-namespace:DivinityModManager.Util;assembly=DivinityModManagerCore"
+	xmlns:ext="clr-namespace:DivinityModManager.Controls.Extensions"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
@@ -406,6 +407,13 @@
 									</ContextMenu>
 								</Button.ContextMenu>
 							</Button>
+							<ComboBox
+								x:Name="GameLaunchActionComboBox"
+								DisplayMemberPath="Description"
+								ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
+								SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+								SelectedValuePath="Value"
+								ToolTip="When the game launches through the mod manager, this action will be performed" />
 							<Rectangle />
 							<TextBlock Text="Support" />
 							<Button

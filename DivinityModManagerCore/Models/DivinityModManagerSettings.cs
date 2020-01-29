@@ -172,6 +172,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
 		}
 
+		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
+
+		[DataMember]
+		public DivinityGameLaunchWindowAction ActionOnGameLaunch
+		{
+			get => actionOnGameLaunch;
+			set { Trace.WriteLine(value); this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
+		}
+
 		//Not saved for now
 
 		private bool displayFileNames = false;

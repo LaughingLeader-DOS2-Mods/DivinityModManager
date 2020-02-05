@@ -142,6 +142,24 @@ namespace DivinityModManager.ViewModels
 		protected ReadOnlyObservableCollection<DivinityModData> allMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
 
+		protected ReadOnlyObservableCollection<DivinityModData> adventureMods;
+		public ReadOnlyObservableCollection<DivinityModData> AdventureMods => adventureMods;
+
+		private int selectedAdventureModIndex = 0;
+
+		public int SelectedAdventureModIndex
+		{
+			get => selectedAdventureModIndex;
+			set
+			{
+				this.RaiseAndSetIfChanged(ref selectedAdventureModIndex, value);
+				this.RaisePropertyChanged("SelectedAdventureMod");
+			}
+		}
+
+		private readonly ObservableAsPropertyHelper<DivinityModData> selectedAdventureMod;
+		public DivinityModData SelectedAdventureMod => selectedAdventureMod.Value;
+
 		protected ReadOnlyObservableCollection<DivinityModData> selectedPakMods;
 		public ReadOnlyObservableCollection<DivinityModData> SelectedPakMods => selectedPakMods;
 
@@ -2928,6 +2946,12 @@ Directory the zip will be extracted to:
 
 			var modsConnecton = mods.Connect();
 			modsConnecton.Bind(out allMods).DisposeMany().Subscribe();
+
+			modsConnecton.Filter(x => x.Type == "Adventure").Bind(out adventureMods).DisposeMany().Subscribe();
+			this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
+				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
+				ToProperty(this, x => x.SelectedAdventureMod, out selectedAdventureMod).DisposeWith(this.Disposables);
+
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 
 			modsConnecton.WhenAnyPropertyChanged("Name", "IsClassicMod").Subscribe((mod) =>

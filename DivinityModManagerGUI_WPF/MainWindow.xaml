@@ -201,7 +201,23 @@
 						<ColumnDefinition Width="Auto" />
 						<ColumnDefinition Width="Auto" />
 						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
 					</Grid.ColumnDefinitions>
+					<Grid.Resources>
+						<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+							<Setter Property="VerticalAlignment" Value="Center" />
+							<Setter Property="Margin" Value="2,0,2,0" />
+						</Style>
+						<Style BasedOn="{StaticResource VerticalSeparator}" TargetType="Rectangle">
+							<Setter Property="Margin" Value="8,0,6,0" />
+						</Style>
+						<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="{x:Type Button}">
+							<Setter Property="Tag" Value="{Binding}" />
+						</Style>
+						<Style BasedOn="{StaticResource {x:Type ContextMenu}}" TargetType="{x:Type ContextMenu}">
+							<Setter Property="DataContext" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}" />
+						</Style>
+					</Grid.Resources>
 					<Grid>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
@@ -286,9 +302,6 @@
 						</ComboBox>
 					</Grid>
 					<Grid Grid.Column="2" Margin="1,0,0,0">
-						<Grid.Resources>
-							<Style BasedOn="{StaticResource IconButtonStyle}" TargetType="Button" />
-						</Grid.Resources>
 						<Grid.ColumnDefinitions>
 							<ColumnDefinition Width="Auto" />
 							<ColumnDefinition Width="Auto" />
@@ -331,21 +344,7 @@
 							Margin="8,0,6,0"
 							Style="{StaticResource VerticalSeparator}" />
 						<StackPanel Grid.Column="2" Orientation="Horizontal">
-							<StackPanel.Resources>
-								<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
-									<Setter Property="VerticalAlignment" Value="Center" />
-									<Setter Property="Margin" Value="2,0,2,0" />
-								</Style>
-								<Style BasedOn="{StaticResource VerticalSeparator}" TargetType="Rectangle">
-									<Setter Property="Margin" Value="8,0,6,0" />
-								</Style>
-								<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}">
-									<Setter Property="Tag" Value="{Binding}" />
-								</Style>
-								<Style BasedOn="{StaticResource {x:Type ContextMenu}}" TargetType="{x:Type ContextMenu}">
-									<Setter Property="DataContext" Value="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}" />
-								</Style>
-							</StackPanel.Resources>
+							<StackPanel.Resources />
 							<TextBlock Text="Export" />
 							<Button
 								x:Name="ExportToModSettingsButton"
@@ -383,6 +382,35 @@
 								ToolTip="Export Active Mods As...">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
+							<Rectangle />
+							<StackPanel Orientation="Horizontal">
+								<TextBlock Text="Campaign" />
+								<ComboBox
+									x:Name="AdventureModComboBox"
+									Grid.Column="1"
+									MinWidth="100"
+									MinHeight="16"
+									HorizontalAlignment="Center"
+									VerticalAlignment="Center"
+									DisplayMemberPath="DisplayName"
+									IsTextSearchEnabled="False"
+									ItemsSource="{Binding AdventureMods}"
+									SelectedIndex="{Binding SelectedAdventureModIndex}"
+									Tag="{Binding}">
+									<ComboBox.ContextMenu>
+										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+											<MenuItem
+												Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+												CommandParameter="{Binding SelectedProfile.Folder}"
+												Header="Open Profile Folder in File Explorer..." />
+											<MenuItem
+												Command="{Binding CopyPathToClipboardCommand}"
+												CommandParameter="{Binding SelectedProfile.Folder}"
+												Header="Copy Profile Path to Clipboard" />
+										</ContextMenu>
+									</ComboBox.ContextMenu>
+								</ComboBox>
+							</StackPanel>
 							<Rectangle />
 							<TextBlock Text="Refresh" />
 							<Button
@@ -462,6 +490,7 @@
 							</Button>
 						</StackPanel>
 					</Grid>
+					<Grid Grid.Column="3" />
 				</Grid>
 				<Separator
 					Grid.Row="1"

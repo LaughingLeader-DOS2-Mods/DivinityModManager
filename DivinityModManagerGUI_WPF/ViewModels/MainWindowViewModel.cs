@@ -2984,6 +2984,18 @@ Directory the zip will be extracted to:
 			var adventureModCanOpenObservable = this.WhenAnyValue(x => x.SelectedAdventureMod, (mod) => mod != null && !mod.IsLarianMod);
 			adventureModCanOpenObservable.Subscribe();
 
+			this.WhenAnyValue(x => x.SelectedAdventureModIndex).Throttle(TimeSpan.FromMilliseconds(50)).Subscribe((i) =>
+			{
+				if (AdventureMods != null && SelectedAdventureMod != null && SelectedProfile != null && SelectedProfile.ActiveMods != null)
+				{
+					if (!SelectedProfile.ActiveMods.Contains(SelectedAdventureMod.UUID))
+					{
+						SelectedProfile.ActiveMods.RemoveAll(x => AdventureMods.Any(y => y.UUID == x));
+						SelectedProfile.ActiveMods.Insert(0, SelectedAdventureMod.UUID);
+					}
+				}
+			});
+
 			OpenAdventureModInFileExplorerCommand = ReactiveCommand.Create<string>((path) =>
 			{
 				DivinityApp.Commands.OpenInFileExplorer(path);

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace DivinityModManager.Util
 {
@@ -17,6 +18,7 @@ namespace DivinityModManager.Util
 		public ReactiveCommand<string, Unit> OpenFileCommand { get; private set; }
 		public ReactiveCommand<string, Unit> OpenInFileExplorerCommand { get; private set; }
 		public ReactiveCommand<DivinityModData, Unit> ToggleNameDisplayCommand { get; private set; }
+		public ReactiveCommand<string, Unit> CopyToClipboardCommand { get; private set; }
 
 		public void OpenFile(string path)
 		{
@@ -57,6 +59,19 @@ namespace DivinityModManager.Util
 			}
 		}
 
+		public void CopyToClipboard(string text)
+		{
+			try
+			{
+				Clipboard.SetText(text);
+				_viewModel.ShowAlert("Copied text to clipboard.", 0, 10);
+			}
+			catch (Exception ex)
+			{
+				_viewModel.ShowAlert($"Error copying text to clipboard: {ex.ToString()}", -1, 10);
+			}
+		}
+
 		private IDivinityAppViewModel _viewModel;
 
 		public void SetViewModel(IDivinityAppViewModel vm)
@@ -92,6 +107,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			});
+			CopyToClipboardCommand = ReactiveCommand.Create<string>(CopyToClipboard);
 		}
 	}
 }

@@ -6,6 +6,7 @@
 	xmlns:behavior="clr-namespace:DivinityModManager.Controls.Behavior"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
+	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
 	xmlns:dmcore="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
@@ -1022,47 +1023,64 @@
 						</Grid>
 						<!--  Buttons  -->
 						<Border Grid.Row="1" Background="{TemplateBinding ButtonRegionBackground}">
-							<Grid Margin="12" HorizontalAlignment="Right">
+							<Grid Margin="12">
 								<Grid.ColumnDefinitions>
-									<ColumnDefinition Width="Auto" />
-									<ColumnDefinition Width="Auto" />
-									<ColumnDefinition Width="Auto" />
-									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="*" />
+									<ColumnDefinition Width="*" />
 								</Grid.ColumnDefinitions>
-								<Button
-									x:Name="PART_YesButton"
-									Grid.Column="0"
-									MinWidth="65"
-									Margin="6,0,0,0"
-									Content="{TemplateBinding YesButtonContent}"
-									Style="{TemplateBinding YesButtonStyle}"
-									Visibility="Collapsed" />
-								<Button
-									x:Name="PART_NoButton"
-									Grid.Column="1"
-									MinWidth="65"
-									Margin="6,0,0,0"
-									Content="{TemplateBinding NoButtonContent}"
-									Style="{TemplateBinding NoButtonStyle}"
-									Visibility="Collapsed" />
-								<Button
-									x:Name="PART_OkButton"
-									Grid.Column="2"
-									MinWidth="65"
-									Margin="6,0,0,0"
-									Content="{TemplateBinding OkButtonContent}"
-									Style="{TemplateBinding OkButtonStyle}"
-									Visibility="Collapsed" />
-								<Button
-									x:Name="PART_CancelButton"
-									Grid.Column="3"
-									MinWidth="65"
-									Margin="6,0,0,0"
-									Content="{TemplateBinding CancelButtonContent}"
-									IsCancel="True"
-									Style="{TemplateBinding CancelButtonStyle}"
-									Visibility="Collapsed" />
+								<Grid Grid.Column="0" HorizontalAlignment="Left">
+									<Button
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+										CommandParameter="{Binding ElementName=MessageText, Path=Text}"
+										Content="Copy"
+										Style="{TemplateBinding OkButtonStyle}"
+										ToolTip="Copy to Clipboard" />
+								</Grid>
+								<Grid Grid.Column="1" HorizontalAlignment="Right">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+										<ColumnDefinition Width="Auto" />
+									</Grid.ColumnDefinitions>
+									<Button
+										x:Name="PART_YesButton"
+										Grid.Column="0"
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Content="{TemplateBinding YesButtonContent}"
+										Style="{TemplateBinding YesButtonStyle}"
+										Visibility="Collapsed" />
+									<Button
+										x:Name="PART_NoButton"
+										Grid.Column="1"
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Content="{TemplateBinding NoButtonContent}"
+										Style="{TemplateBinding NoButtonStyle}"
+										Visibility="Collapsed" />
+									<Button
+										x:Name="PART_OkButton"
+										Grid.Column="2"
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Content="{TemplateBinding OkButtonContent}"
+										Style="{TemplateBinding OkButtonStyle}"
+										Visibility="Collapsed" />
+									<Button
+										x:Name="PART_CancelButton"
+										Grid.Column="3"
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Content="{TemplateBinding CancelButtonContent}"
+										IsCancel="True"
+										Style="{TemplateBinding CancelButtonStyle}"
+										Visibility="Collapsed" />
+								</Grid>
 							</Grid>
+
 						</Border>
 					</Grid>
 				</xc:WindowControl.Content>

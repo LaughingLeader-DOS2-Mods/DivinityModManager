@@ -221,7 +221,21 @@
 							DisplayMemberPath="Name"
 							IsTextSearchEnabled="False"
 							ItemsSource="{Binding Profiles}"
-							SelectedIndex="{Binding SelectedProfileIndex}" />
+							SelectedIndex="{Binding SelectedProfileIndex}"
+							Tag="{Binding}">
+							<ComboBox.ContextMenu>
+								<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+									<MenuItem
+										Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+										CommandParameter="{Binding SelectedProfile.Folder}"
+										Header="Open Profile Folder in File Explorer..." />
+									<MenuItem
+										Command="{Binding CopyPathToClipboardCommand}"
+										CommandParameter="{Binding SelectedProfile.Folder}"
+										Header="Copy Profile Path to Clipboard" />
+								</ContextMenu>
+							</ComboBox.ContextMenu>
+						</ComboBox>
 					</Grid>
 					<Grid Grid.Column="1" Margin="4,0">
 						<Grid.ColumnDefinitions>
@@ -250,7 +264,7 @@
 							Text="{Binding SelectedModOrder.Name, Mode=TwoWay, UpdateSourceTrigger=LostFocus}">
 							<ComboBox.ItemContainerStyle>
 								<Style TargetType="ComboBoxItem">
-									<EventSetter Event="ComboBoxItem.PreviewMouseDown" Handler="ProfileComboBox_OnUserClick" />
+									<EventSetter Event="ComboBoxItem.PreviewMouseDown" Handler="OrderComboBox_OnUserClick" />
 								</Style>
 							</ComboBox.ItemContainerStyle>
 							<ComboBox.ContextMenu>
@@ -347,11 +361,13 @@
 										<MenuItem
 											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 											CommandParameter="{Binding SelectedProfile.ModSettingsFile}"
-											Header="Open Profile Folder..." />
+											Header="Open in File Explorer..." />
 										<MenuItem
 											Command="{Binding CopyPathToClipboardCommand}"
 											CommandParameter="{Binding SelectedProfile.ModSettingsFile}"
 											Header="Copy Path to Clipboard" />
+										<MenuItem Command="{Binding CopyOrderToClipboardCommand}" Header="Copy Order to Clipboard" />
+										<MenuItem Command="{Binding ExportOrderAsListCommand}" Header="Export Order As List..." />
 									</ContextMenu>
 								</Button.ContextMenu>
 							</Button>

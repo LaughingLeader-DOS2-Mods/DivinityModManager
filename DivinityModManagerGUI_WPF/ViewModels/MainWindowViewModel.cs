@@ -383,6 +383,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
 		public ICommand ExtractSelectedModsCommand { get; private set; }
 		public ICommand RenameSaveCommand { get; private set; }
+		public ICommand ExportOrderAsListCommand { get; private set; }
+		public ICommand CopyOrderToClipboardCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
@@ -1643,8 +1645,6 @@ namespace DivinityModManager.ViewModels
 		{
 			var startDirectory = Path.GetFullPath(!String.IsNullOrEmpty(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory());
 
-			Trace.WriteLine(startDirectory);
-
 			if (!Directory.Exists(startDirectory))
 			{
 				Directory.CreateDirectory(startDirectory);
@@ -2544,6 +2544,63 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private void ExportOrderToListAs()
+		{
+			if (ActiveMods.Count > 0)
+			{
+				var startDirectory = Path.GetFullPath(!String.IsNullOrEmpty(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory());
+
+				if (!Directory.Exists(startDirectory))
+				{
+					Directory.CreateDirectory(startDirectory);
+				}
+
+				var dialog = new SaveFileDialog();
+				dialog.AddExtension = true;
+				dialog.DefaultExt = ".txt";
+				dialog.Filter = "Text file (*.txt)|*.txt";
+				dialog.InitialDirectory = startDirectory;
+
+				string outputName = Path.Combine(SelectedModOrder.Name + ".txt");
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+				{
+					outputName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}.txt";
+				}
+
+				//dialog.RestoreDirectory = true;
+				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
+				dialog.CheckFileExists = false;
+				dialog.CheckPathExists = false;
+				dialog.OverwritePrompt = true;
+				dialog.Title = "Export Load Order List As...";
+
+				if (dialog.ShowDialog(view) == true)
+				{
+					try
+					{
+						string text = "";
+						for (int i = 0; i < ActiveMods.Count; i++)
+						{
+							var mod = ActiveMods[i];
+							text += $"{mod.Index+1}. {mod.DisplayName}";
+							if (i < ActiveMods.Count - 1) text += Environment.NewLine;
+						}
+						File.WriteAllText(dialog.FileName, text);
+						DivinityApp.Commands.OpenInFileExplorer(dialog.FileName);
+						view.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'", 10);
+					}
+					catch (Exception ex)
+					{
+						view.AlertBar.SetDangerAlert($"Failed to save mod load order to '{dialog.FileName}'", 20);
+					}
+				}
+			}
+			else
+			{
+				view.AlertBar.SetWarningAlert("Current order is empty.", 10);
+			}
+		}
+
 		private void InstallOsiExtender_DownloadStart(string exeDir)
 		{
 			double taskStepAmount = 1.0 / 3;
@@ -2813,6 +2870,35 @@ Directory the zip will be extracted to:
 			});
 
 			RenameSaveCommand = ReactiveCommand.Create(RenameSave_Start, canOpenDialogWindow);
+
+			CopyOrderToClipboardCommand = ReactiveCommand.Create(() =>
+			{
+				try
+				{
+					if(ActiveMods.Count > 0)
+					{
+						string text = "";
+						for (int i = 0; i < ActiveMods.Count; i++)
+						{
+							var mod = ActiveMods[i];
+							text += $"{mod.Index}. {mod.DisplayName}";
+							if (i < ActiveMods.Count - 1) text += Environment.NewLine;
+						}
+						Clipboard.SetText(text);
+						view.AlertBar.SetInformationAlert("Copied mod order to clipboard.", 10);
+					}
+					else
+					{
+						view.AlertBar.SetWarningAlert("Current order is empty.", 10);
+					}
+				}
+				catch (Exception ex)
+				{
+					view.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex.ToString()}", 15);
+				}
+			});
+
+			ExportOrderAsListCommand = ReactiveCommand.Create(ExportOrderToListAs, canExecuteSaveAsCommand);
 
 			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);

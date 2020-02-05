@@ -365,7 +365,7 @@ namespace DivinityModManager.Views
 
 		}
 
-		private void ProfileComboBox_OnUserClick(object sender, MouseButtonEventArgs e)
+		private void OrderComboBox_OnUserClick(object sender, MouseButtonEventArgs e)
 		{
 			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(200), () =>
 			{

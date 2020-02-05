@@ -70,7 +70,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private string loadOrderPath = "";
+		private string loadOrderPath = "Orders";
 
 		[DataMember]
 		public string LoadOrderPath

@@ -1514,21 +1514,29 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<List<DivinityLoadOrder>> LoadExternalLoadOrdersAsync()
 		{
-			string loadOrderDirectory = Settings.LoadOrderPath;
-			if (String.IsNullOrWhiteSpace(loadOrderDirectory))
+			try
 			{
-				//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-				//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
-				loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
-			}
-			else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
-			{
-				loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
-			}
+				string loadOrderDirectory = Settings.LoadOrderPath;
+				if (String.IsNullOrWhiteSpace(loadOrderDirectory))
+				{
+					//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
+					//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
+					loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
+				}
+				else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
+				{
+					loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
+				}
 
-			Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
-			var savedOrderList = await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
-			return savedOrderList;
+				Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+				return await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error loading external load orders: {ex.ToString()}.");
+				return null;
+			}
+			
 		}
 
 		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)

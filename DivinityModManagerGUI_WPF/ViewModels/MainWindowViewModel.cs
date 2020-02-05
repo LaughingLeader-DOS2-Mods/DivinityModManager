@@ -712,38 +712,60 @@ namespace DivinityModManager.ViewModels
 
 		private void SetDOS2Pathways(string currentGameDataPath)
 		{
-			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+			try
+			{
+				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
-			string larianDocumentsFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition");
-			if (Directory.Exists(larianDocumentsFolder))
-			{
-				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
-				Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
-			}
-
-			string modPakFolder = Path.Combine(larianDocumentsFolder, "Mods");
-			if (Directory.Exists(modPakFolder))
-			{
-				PathwayData.DocumentsModsPath = modPakFolder;
-				Trace.WriteLine($"Mods folder set to '{modPakFolder}'.");
-			}
-			else
-			{
-				Trace.WriteLine($"No mods folder found at '{modPakFolder}'.");
-			}
-
-			string profileFolder = (Path.Combine(larianDocumentsFolder, "PlayerProfiles"));
-			if (Directory.Exists(profileFolder))
-			{
-				PathwayData.DocumentsProfilesPath = profileFolder;
-				Trace.WriteLine($"Larian profile folder set to '{profileFolder}'.");
-			}
-
-			if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
-			{
-				string installPath = DivinityRegistryHelper.GetDOS2Path();
-				if (Directory.Exists(installPath))
+				string larianDocumentsFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition");
+				if (Directory.Exists(larianDocumentsFolder))
 				{
+					PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
+					Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
+				}
+
+				string modPakFolder = Path.Combine(larianDocumentsFolder, "Mods");
+				if (Directory.Exists(modPakFolder))
+				{
+					PathwayData.DocumentsModsPath = modPakFolder;
+					Trace.WriteLine($"Mods folder set to '{modPakFolder}'.");
+				}
+				else
+				{
+					Trace.WriteLine($"No mods folder found at '{modPakFolder}'.");
+				}
+
+				string profileFolder = (Path.Combine(larianDocumentsFolder, "PlayerProfiles"));
+				if (Directory.Exists(profileFolder))
+				{
+					PathwayData.DocumentsProfilesPath = profileFolder;
+					Trace.WriteLine($"Larian profile folder set to '{profileFolder}'.");
+				}
+
+				if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
+				{
+					string installPath = DivinityRegistryHelper.GetDOS2Path();
+					if (Directory.Exists(installPath))
+					{
+						PathwayData.InstallPath = installPath;
+						if (!File.Exists(Settings.DOS2DEGameExecutable))
+						{
+							string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+							if (File.Exists(exePath))
+							{
+								Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
+								Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+							}
+						}
+
+						string gameDataPath = Path.Combine(installPath, "DefEd/Data").Replace("\\", "/");
+						Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
+						Settings.GameDataPath = gameDataPath;
+						SaveSettings();
+					}
+				}
+				else
+				{
+					string installPath = Path.GetFullPath(Path.Combine(Settings.GameDataPath, @"..\..\"));
 					PathwayData.InstallPath = installPath;
 					if (!File.Exists(Settings.DOS2DEGameExecutable))
 					{
@@ -754,26 +776,11 @@ namespace DivinityModManager.ViewModels
 							Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
 						}
 					}
-
-					string gameDataPath = Path.Combine(installPath, "DefEd/Data").Replace("\\", "/");
-					Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
-					Settings.GameDataPath = gameDataPath;
-					SaveSettings();
 				}
 			}
-			else
+			catch(Exception ex)
 			{
-				string installPath = Path.GetFullPath(Path.Combine(Settings.GameDataPath, @"..\..\"));
-				PathwayData.InstallPath = installPath;
-				if (!File.Exists(Settings.DOS2DEGameExecutable))
-				{
-					string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
-					if (File.Exists(exePath))
-					{
-						Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
-						Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
-					}
-				}
+				Trace.WriteLine($"Error setting up game pathways: {ex.ToString()}");
 			}
 
 			if (File.Exists(Settings.DOS2DEGameExecutable))
@@ -823,15 +830,22 @@ namespace DivinityModManager.ViewModels
 					}
 				});
 
-				string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
-				if(extenderSettingsJson.IsExistingFile())
+				try
 				{
-					var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
-					if(osirisExtenderSettings != null)
+					string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
+					if (extenderSettingsJson.IsExistingFile())
 					{
-						Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
-						Settings.ExtenderSettings.Set(osirisExtenderSettings);
+						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
+						if (osirisExtenderSettings != null)
+						{
+							Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
+							Settings.ExtenderSettings.Set(osirisExtenderSettings);
+						}
 					}
+				}
+				catch(Exception ex)
+				{
+					Trace.WriteLine($"Error loading extender settings: {ex.ToString()}");
 				}
 
 				string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");

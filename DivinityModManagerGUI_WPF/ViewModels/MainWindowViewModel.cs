@@ -448,18 +448,6 @@ namespace DivinityModManager.ViewModels
 			Trace.WriteLine("========================================");
 		}
 
-#if DEBUG
-		public void AddMods(DivinityModData newMod)
-		{
-			mods.Add(newMod);
-		}
-
-		public void AddMods(IEnumerable<DivinityModData> newMods)
-		{
-			mods.AddRange(newMods);
-		}
-#endif
-
 		public bool DebugMode { get; set; } = false;
 
 		private TextWriterTraceListener debugLogListener;
@@ -964,9 +952,10 @@ namespace DivinityModManager.ViewModels
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
 
 			mods.Clear();
+			mods.AddRange(DivinityApp.MODS_Larian_All);
 			mods.AddRange(finalMods);
 
-			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
+			Trace.WriteLine($"Loaded '{finalMods.Count()}' mods.");
 			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
 
 			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
@@ -1014,7 +1003,7 @@ namespace DivinityModManager.ViewModels
 
 		public bool ModIsAvailable(IDivinityModData divinityModData)
 		{
-			return mods.Items.Any(k => k.UUID == divinityModData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
+			return mods.Items.Any(k => k.UUID == divinityModData.UUID) || DivinityApp.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
 		}
 
 		public void LoadProfiles()
@@ -1241,7 +1230,7 @@ namespace DivinityModManager.ViewModels
 
 			List<DivinityModData> inactive = new List<DivinityModData>();
 
-			for (int i = 0; i < mods.Count; i++)
+			for (int i = 0; i < Mods.Count; i++)
 			{
 				var mod = Mods[i];
 				if (ActiveMods.Any(m => m.UUID == mod.UUID))
@@ -1447,6 +1436,7 @@ namespace DivinityModManager.ViewModels
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{
+					mods.AddRange(DivinityApp.MODS_Larian_All);
 					mods.AddRange(loadedMods);
 					workshopMods.AddRange(loadedWorkshopMods);
 					Profiles.AddRange(loadedProfiles);
@@ -1779,7 +1769,7 @@ namespace DivinityModManager.ViewModels
 			{
 				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
 				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder,
-					mods.Items, Settings.AutoAddDependenciesWhenExporting);
+					mods.Items, Settings.AutoAddDependenciesWhenExporting, SelectedAdventureMod);
 
 				if (result)
 				{
@@ -2945,9 +2935,9 @@ Directory the zip will be extracted to:
 			});
 
 			var modsConnecton = mods.Connect();
-			modsConnecton.Bind(out allMods).DisposeMany().Subscribe();
+			modsConnecton.Filter(x => !x.IsLarianMod && x.Type != "Adventure").Bind(out allMods).DisposeMany().Subscribe();
 
-			modsConnecton.Filter(x => x.Type == "Adventure").Bind(out adventureMods).DisposeMany().Subscribe();
+			modsConnecton.Filter(x => x.Type == "Adventure" && !x.IsHidden).Bind(out adventureMods).DisposeMany().Subscribe();
 			this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod, out selectedAdventureMod).DisposeWith(this.Disposables);

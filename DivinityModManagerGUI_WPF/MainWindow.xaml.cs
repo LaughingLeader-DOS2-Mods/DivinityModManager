@@ -31,53 +31,6 @@ using DivinityModManager.WinForms;
 
 namespace DivinityModManager.Views
 {
-#if debug
-	public class MainWindowDebugData : MainWindowViewModel
-	{
-		public MainWindowDebugData () : base()
-		{
-			Random rnd = new Random();
-			for(var i = 0; i < 60; i++)
-			{
-				var d = new DivinityModData()
-				{
-					Name = "Test" + i,
-					Author = "LaughingLeader",
-					Version = new DivinityModVersion(370871668),
-					Description = "Test",
-					UUID = DivinityModDataLoader.CreateHandle()
-				};
-				d.IsEditorMod = i%2 == 0;
-				d.IsActive = rnd.Next(4) <= 2;
-				this.AddMods(d);
-			}
-
-			for (var i = 0; i < 4; i++)
-			{
-				var p = new DivinityProfileData()
-				{
-					Name = "Profile" + i
-				};
-				p.ModOrder.AddRange(Mods.Select(m => m.UUID));
-				Profiles.Add(p);
-			}
-			SelectedProfileIndex = 0;
-
-			for (var i = 0; i < 4; i++)
-			{
-				var lo = new DivinityLoadOrder()
-				{
-					Name = "SavedOrder" + i
-				};
-				var orderList = this.mods.Items.Where(m => m.IsActive).Select(m => m.ToOrderEntry()).OrderBy(e => rnd.Next(10));
-				lo.SetOrder(orderList);
-				ModOrderList.Add(lo);
-			}
-			SelectedModOrderIndex = 2;
-		}
-	}
-#endif
-
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
@@ -159,18 +112,14 @@ namespace DivinityModManager.Views
 				var canCheckForUpdates = this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive, b => b == false);
 				ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
 				{
-#if !DEBUG
-				AutoUpdater.ReportErrors = true;
-#endif
+					AutoUpdater.ReportErrors = true;
 					AutoUpdater.Start(DivinityApp.URL_UPDATE);
 					ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
 					ViewModel.SaveSettings();
-#if !DEBUG
-				Task.Delay(1000).ContinueWith(_ =>
-				{
-					AutoUpdater.ReportErrors = false;
-				});
-#endif
+					Task.Delay(1000).ContinueWith(_ =>
+					{
+						AutoUpdater.ReportErrors = false;
+					});
 				}, canCheckForUpdates);
 
 				var c = ReactiveCommand.Create(() =>

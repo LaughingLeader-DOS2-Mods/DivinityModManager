@@ -403,6 +403,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand RenameSaveCommand { get; private set; }
 		public ICommand ExportOrderAsListCommand { get; private set; }
 		public ICommand CopyOrderToClipboardCommand { get; private set; }
+		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
+		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
@@ -651,7 +653,7 @@ namespace DivinityModManager.ViewModels
 			foreach (var workshopMod in WorkshopMods)
 			{
 				workshopMod.UpdateDisplayName();
-				DivinityModData pakMod = Mods.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
+				DivinityModData pakMod = mods.Items.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
 				if (pakMod != null)
 				{
 					if (!pakMod.IsEditorMod)
@@ -2941,6 +2943,27 @@ Directory the zip will be extracted to:
 			this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod, out selectedAdventureMod).DisposeWith(this.Disposables);
+
+			var adventureModCanOpenObservable = this.WhenAnyValue(x => x.SelectedAdventureMod, (mod) => mod != null && !mod.IsLarianMod);
+			adventureModCanOpenObservable.Subscribe();
+
+			OpenAdventureModInFileExplorerCommand = ReactiveCommand.Create<string>((path) =>
+			{
+				DivinityApp.Commands.OpenInFileExplorer(path);
+			}, adventureModCanOpenObservable);
+
+			CopyAdventureModPathToClipboardCommand = ReactiveCommand.Create<string>((path) =>
+			{
+				if (!String.IsNullOrWhiteSpace(path))
+				{
+					Clipboard.SetText(path);
+					ShowAlert($"Copied '{path}' to clipboard.", 0, 10);
+				}
+				else
+				{
+					ShowAlert($"Path not found.", -1, 30);
+				}
+			}, adventureModCanOpenObservable);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 

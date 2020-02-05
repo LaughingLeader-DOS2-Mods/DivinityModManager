@@ -94,6 +94,9 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		public bool IsHidden { get; set; } = false;
+		public bool IsLarianMod { get; set; } = false;
+
 		private bool isClassicMod = false;
 
 		public bool IsClassicMod
@@ -262,9 +265,6 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref visibility, value); }
 		}
 
-		public ICommand OpenInFileExplorerCommand { get; private set; }
-		public ICommand ToggleNameDisplayCommand { get; private set; }
-
 		public void UpdateDependencyText()
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);
@@ -302,18 +302,6 @@ namespace DivinityModManager.Models
 				UUID = this.UUID,
 				Name = this.Name
 			};
-		}
-
-		public DivinityModData()
-		{
-			this.OpenInFileExplorerCommand = DivinityApp.Commands.OpenInFileExplorerCommand;
-			this.ToggleNameDisplayCommand = DivinityApp.Commands.ToggleNameDisplayCommand;
-
-			//this.WhenAnyValue(x => x.DisplayFileForName, x => x.Name, x => x.IsClassicMod).
-			//	Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
-			//{
-			//	UpdateDisplayName();
-			//});
 		}
 	}
 }

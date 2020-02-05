@@ -173,10 +173,10 @@
 			<Setter.Value>
 				<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 					<MenuItem
-						Command="{Binding OpenInFileExplorerCommand}"
+						Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 						CommandParameter="{Binding FilePath}"
 						Header="Open in File Explorer..." />
-					<MenuItem Command="{Binding ToggleNameDisplayCommand}" CommandParameter="{Binding}">
+					<MenuItem Command="{Binding Path=ToggleNameDisplayCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding}">
 						<MenuItem.Header>
 							<TextBlock>
 								<TextBlock.Style>

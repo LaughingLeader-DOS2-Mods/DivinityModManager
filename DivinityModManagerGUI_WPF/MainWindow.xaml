@@ -392,7 +392,7 @@
 									MinHeight="16"
 									HorizontalAlignment="Center"
 									VerticalAlignment="Center"
-									DisplayMemberPath="DisplayName"
+									DisplayMemberPath="Name"
 									IsTextSearchEnabled="False"
 									ItemsSource="{Binding AdventureMods}"
 									SelectedIndex="{Binding SelectedAdventureModIndex}"

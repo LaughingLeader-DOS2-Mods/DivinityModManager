@@ -69,7 +69,7 @@
 					BorderThickness="0"
 					GridViewColumnHeader.Click="SortNewModsGridView"
 					IsEnabled="{Binding NewAvailable, Mode=OneWay}"
-					ItemContainerStyle="{StaticResource DivinityModUpdateListItem}"
+					ItemContainerStyle="{StaticResource DivinityModUpdateNewListItem}"
 					ItemsSource="{Binding NewMods}"
 					View="{DynamicResource NewModsGridView}" />
 			</ag:AutoGrid>

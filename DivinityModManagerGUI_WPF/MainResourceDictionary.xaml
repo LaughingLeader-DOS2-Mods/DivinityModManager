@@ -260,7 +260,7 @@
 		</Style.Triggers>
 	</Style>
 	<Style
-		x:Key="DivinityModUpdateListItem"
+		x:Key="DivinityModUpdateNewListItem"
 		BasedOn="{StaticResource {x:Type ListViewItem}}"
 		TargetType="{x:Type ListViewItem}">
 		<Setter Property="Tag" Value="{Binding}" />
@@ -292,6 +292,12 @@
 		</Setter>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+	</Style>
+	<Style
+		x:Key="DivinityModUpdateListItem"
+		BasedOn="{StaticResource DivinityModUpdateNewListItem}"
+		TargetType="{x:Type ListViewItem}">
+		<Setter Property="Tag" Value="{Binding WorkshopMod}" />
 	</Style>
 	<Style
 		x:Key="ModOrderListView"

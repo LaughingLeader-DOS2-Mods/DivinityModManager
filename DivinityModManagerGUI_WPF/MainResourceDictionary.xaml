@@ -964,4 +964,185 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
+	<ControlTemplate x:Key="MessageBoxSelectableText" TargetType="{x:Type xc:MessageBox}">
+		<Grid>
+			<xc:WindowControl
+				x:Name="PART_WindowControl"
+				Background="{TemplateBinding Background}"
+				BorderBrush="{TemplateBinding BorderBrush}"
+				BorderThickness="{TemplateBinding BorderThickness}"
+				Caption="{TemplateBinding Caption}"
+				CaptionFontSize="{TemplateBinding CaptionFontSize}"
+				CaptionForeground="{TemplateBinding CaptionForeground}"
+				CaptionIcon="{TemplateBinding CaptionIcon}"
+				CaptionShadowBrush="{TemplateBinding CaptionShadowBrush}"
+				CloseButtonStyle="{TemplateBinding CloseButtonStyle}"
+				IsActive="{TemplateBinding IsActive}"
+				WindowBackground="{TemplateBinding WindowBackground}"
+				WindowBorderBrush="{TemplateBinding WindowBorderBrush}"
+				WindowBorderThickness="{TemplateBinding WindowBorderThickness}"
+				WindowInactiveBackground="{TemplateBinding WindowInactiveBackground}"
+				WindowOpacity="{TemplateBinding WindowOpacity}">
+				<xc:WindowControl.Content>
+					<Grid MinWidth="350">
+						<Grid.RowDefinitions>
+							<RowDefinition />
+							<RowDefinition Height="Auto" />
+						</Grid.RowDefinitions>
+						<Grid>
+							<Grid.ColumnDefinitions>
+								<ColumnDefinition Width="Auto" />
+								<ColumnDefinition Width="*" />
+							</Grid.ColumnDefinitions>
+							<!--  Message Image  -->
+							<Image
+								x:Name="MessageBoxImage"
+								VerticalAlignment="Top"
+								SnapsToDevicePixels="True"
+								Source="{TemplateBinding ImageSource}"
+								Stretch="None" />
+							<!--  Message Text  -->
+							<ScrollViewer
+								Grid.Column="1"
+								Margin="2"
+								VerticalScrollBarVisibility="Auto">
+								<TextBox
+									x:Name="MessageText"
+									HorizontalAlignment="Stretch"
+									VerticalAlignment="Stretch"
+									FontFamily="{TemplateBinding FontFamily}"
+									FontSize="{TemplateBinding FontSize}"
+									FontStyle="{TemplateBinding FontStyle}"
+									FontWeight="{TemplateBinding FontWeight}"
+									Foreground="{TemplateBinding Foreground}"
+									IsReadOnly="True"
+									Text="{TemplateBinding Text}"
+									TextWrapping="Wrap" />
+							</ScrollViewer>
+						</Grid>
+						<!--  Buttons  -->
+						<Border Grid.Row="1" Background="{TemplateBinding ButtonRegionBackground}">
+							<Grid Margin="12" HorizontalAlignment="Right">
+								<Grid.ColumnDefinitions>
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+									<ColumnDefinition Width="Auto" />
+								</Grid.ColumnDefinitions>
+								<Button
+									x:Name="PART_YesButton"
+									Grid.Column="0"
+									MinWidth="65"
+									Margin="6,0,0,0"
+									Content="{TemplateBinding YesButtonContent}"
+									Style="{TemplateBinding YesButtonStyle}"
+									Visibility="Collapsed" />
+								<Button
+									x:Name="PART_NoButton"
+									Grid.Column="1"
+									MinWidth="65"
+									Margin="6,0,0,0"
+									Content="{TemplateBinding NoButtonContent}"
+									Style="{TemplateBinding NoButtonStyle}"
+									Visibility="Collapsed" />
+								<Button
+									x:Name="PART_OkButton"
+									Grid.Column="2"
+									MinWidth="65"
+									Margin="6,0,0,0"
+									Content="{TemplateBinding OkButtonContent}"
+									Style="{TemplateBinding OkButtonStyle}"
+									Visibility="Collapsed" />
+								<Button
+									x:Name="PART_CancelButton"
+									Grid.Column="3"
+									MinWidth="65"
+									Margin="6,0,0,0"
+									Content="{TemplateBinding CancelButtonContent}"
+									IsCancel="True"
+									Style="{TemplateBinding CancelButtonStyle}"
+									Visibility="Collapsed" />
+							</Grid>
+						</Border>
+					</Grid>
+				</xc:WindowControl.Content>
+			</xc:WindowControl>
+			<VisualStateManager.VisualStateGroups>
+				<VisualStateGroup x:Name="group1">
+					<VisualState x:Name="OK">
+						<Storyboard>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_OkButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+					<VisualState x:Name="OKCancel">
+						<Storyboard>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_OkButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CancelButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+					<VisualState x:Name="YesNo">
+						<Storyboard>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_YesButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_NoButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+					<VisualState x:Name="YesNoCancel">
+						<Storyboard>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_YesButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_NoButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+							<ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CancelButton" Storyboard.TargetProperty="Visibility">
+								<DiscreteObjectKeyFrame KeyTime="0">
+									<DiscreteObjectKeyFrame.Value>
+										<Visibility>Visible</Visibility>
+									</DiscreteObjectKeyFrame.Value>
+								</DiscreteObjectKeyFrame>
+							</ObjectAnimationUsingKeyFrames>
+						</Storyboard>
+					</VisualState>
+				</VisualStateGroup>
+			</VisualStateManager.VisualStateGroups>
+		</Grid>
+	</ControlTemplate>
 </ResourceDictionary>

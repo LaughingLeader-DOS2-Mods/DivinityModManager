@@ -84,36 +84,46 @@ namespace DivinityModManager.ViewModels
 	{
 		public override void StartDrag(IDragInfo dragInfo)
 		{
-			var items = dragInfo.SourceItems.Cast<ISelectable>().Where(x => x.CanDrag).ToList();
-			if (items.Count > 1)
+			base.StartDrag(dragInfo);
+			if(dragInfo != null)
 			{
-				dragInfo.Data = items;
-			}
-			else
-			{
-				// special case: if the single item is an enumerable then we can not drop it as single item
-				var singleItem = items.FirstOrDefault();
-				if (singleItem is System.Collections.IEnumerable)
+				var items = dragInfo.SourceItems.Cast<ISelectable>().Where(x => x.CanDrag).ToList();
+				if (items.Count > 1)
 				{
-					dragInfo.Data = items.Cast<ISelectable>().Where(x => x.CanDrag);
+					dragInfo.Data = items;
 				}
-				else if(singleItem is ISelectable d && d.CanDrag)
+				else
 				{
-					dragInfo.Data = singleItem;
-					Trace.WriteLine("Can drag item");
+					// special case: if the single item is an enumerable then we can not drop it as single item
+					var singleItem = items.FirstOrDefault();
+					if (singleItem is System.Collections.IEnumerable)
+					{
+						dragInfo.Data = new List<ISelectable>(items.Cast<ISelectable>().Where(x => x.CanDrag));
+					}
+					else if (singleItem is ISelectable d && d.CanDrag)
+					{
+						dragInfo.Data = singleItem;
+						//Trace.WriteLine("Can drag item");
+					}
 				}
-			}
 
-			dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
+				dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
+			}
 		}
 
 		public override bool CanStartDrag(IDragInfo dragInfo)
 		{
+			base.CanStartDrag(dragInfo);
 			if(dragInfo.SourceItem is ISelectable d && !d.CanDrag)
 			{
 				return false;
 			}
 			return true;
+		}
+
+		public ModListDragHandler() : base()
+		{
+			
 		}
 	}
 
@@ -1037,7 +1047,7 @@ namespace DivinityModManager.ViewModels
 							var mod = mods.Items.FirstOrDefault(m => m.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase));
 							if (mod != null)
 							{
-								currentOrder.Order.Add(mod.ToOrderEntry());
+								currentOrder.Add(mod);
 							}
 						}
 					}
@@ -1156,9 +1166,9 @@ namespace DivinityModManager.ViewModels
 
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
-			int i = 0;
-			foreach (var entry in loadFrom)
+			for(int i = 0; i < loadFrom.Count; i++)
 			{
+				var entry = loadFrom[i];
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null)
 				{
@@ -1193,21 +1203,13 @@ namespace DivinityModManager.ViewModels
 					missingMods.Add(x);
 					entry.Missing = true;
 				}
-				i++;
-			}
-
-			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
-			{
-				view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-				view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
-					"Missing Mods in Load Order", MessageBoxButton.OK);
 			}
 
 			List<DivinityModData> inactive = new List<DivinityModData>();
 
-			foreach (var mod in mods.Items)
+			for (int i = 0; i < mods.Count; i++)
 			{
+				var mod = Mods[i];
 				if (ActiveMods.Any(m => m.UUID == mod.UUID))
 				{
 					mod.IsActive = true;
@@ -1232,6 +1234,14 @@ namespace DivinityModManager.ViewModels
 			}
 
 			OnOrderChanged?.Invoke(this, new EventArgs());
+
+			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
+			{
+				view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+				view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
+					"Missing Mods in Load Order", MessageBoxButton.OK);
+			}
 		}
 
 		private void MainWindowMessageBox_Closed_ResetColor(object sender, EventArgs e)
@@ -1510,11 +1520,7 @@ namespace DivinityModManager.ViewModels
 					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Removing {e.OldItems.Count} old items from order.");
 					foreach (DivinityModData m in e.OldItems)
 					{
-						if (SelectedModOrder.Order.Any(x => x.UUID == m.UUID))
-						{
-							SelectedModOrder.Order.RemoveAll(x => x.UUID == m.UUID);
-						}
-
+						SelectedModOrder.Remove(m);
 						m.IsActive = false;
 					}
 				}
@@ -1523,7 +1529,7 @@ namespace DivinityModManager.ViewModels
 					foreach (DivinityModData m in e.NewItems)
 					{
 						m.IsActive = true;
-						SelectedModOrder.Order.Add(m.ToOrderEntry());
+						SelectedModOrder.Add(m);
 
 						//Trace.WriteLine($"[ActiveMods_SetItemIndex] Mod {m.Name} became inactive.");
 					}
@@ -2870,13 +2876,50 @@ Directory the zip will be extracted to:
 			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
 				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
 
-			ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
-			InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
+			//ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
+			//InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 
-			this.ActiveMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).
+			var activeModsConnection = this.ActiveMods.ToObservableChangeSet();
+			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet();
+
+			activeModsConnection.ObserveOn(RxApp.MainThreadScheduler).Subscribe((x) =>
+			{
+				for(int i = 0; i < ActiveMods.Count; i++)
+				{
+					var mod = ActiveMods[i];
+					mod.Index = i;
+				}
+			});
+			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)
+			activeModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
+			{
+				x.Current.IsActive = true;
+				if (SelectedModOrder != null)
+				{
+					SelectedModOrder.Add(x.Current);
+				}
+				//x.Current.Index = x.CurrentIndex;
+			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
+			{
+				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
+			});
+
+			inactiveModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).Buffer(TimeSpan.FromMilliseconds(50)).SelectMany(x => x).ForEachItemChange((x) =>
+			{
+				x.Current.IsActive = false;
+				if (SelectedModOrder != null)
+				{
+					SelectedModOrder.Remove(x.Current);
+				}
+			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
+			{
+				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
+			});
+
+			activeModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, out activeSelected);
 
-			this.InactiveMods.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).
+			activeModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;

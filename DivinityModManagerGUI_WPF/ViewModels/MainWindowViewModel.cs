@@ -1198,11 +1198,11 @@ namespace DivinityModManager.ViewModels
 				if (mod != null)
 				{
 					ActiveMods.Add(mod);
-					if(mod.Dependencies.Count > 0)
+					if (mod.Dependencies.Count > 0)
 					{
-						foreach(var dependency in mod.Dependencies)
+						foreach (var dependency in mod.Dependencies)
 						{
-							if(!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) && 
+							if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
 								!missingMods.Any(x => x.UUID == dependency.UUID))
 							{
 								var x = new DivinityMissingModData
@@ -1217,7 +1217,7 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 				}
-				else if(!DivinityModDataLoader.IgnoreMod(entry.UUID))
+				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID))
 				{
 					var x = new DivinityMissingModData
 					{
@@ -2910,8 +2910,28 @@ Directory the zip will be extracted to:
 
 			ExportOrderAsListCommand = ReactiveCommand.Create(ExportOrderToListAs, canExecuteSaveAsCommand);
 
-			this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
-				Select(x => Profiles[SelectedProfileIndex]).ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
+			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
+				Select(x => Profiles[SelectedProfileIndex]);
+			profileChanged.ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
+
+			this.WhenAnyValue(x => x.SelectedProfile.ActiveMods).Subscribe((order) =>
+			{
+				if (order != null)
+				{
+					foreach (var uuid in order)
+					{
+						var modData = AdventureMods.FirstOrDefault(x => x.UUID == uuid);
+						if (modData != null)
+						{
+							var nextAdventure = AdventureMods.IndexOf(modData);
+							if (nextAdventure > -1)
+							{
+								SelectedAdventureModIndex = nextAdventure;
+							}
+						}
+					}
+				}
+			});
 
 			var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
 				(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);

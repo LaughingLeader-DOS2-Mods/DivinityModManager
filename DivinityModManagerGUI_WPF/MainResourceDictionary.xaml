@@ -263,7 +263,7 @@
 		x:Key="DivinityModUpdateListItem"
 		BasedOn="{StaticResource {x:Type ListViewItem}}"
 		TargetType="{x:Type ListViewItem}">
-		<Setter Property="Tag" Value="{Binding WorkshopMod}" />
+		<Setter Property="Tag" Value="{Binding}" />
 		<Setter Property="ContextMenu">
 			<Setter.Value>
 				<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">

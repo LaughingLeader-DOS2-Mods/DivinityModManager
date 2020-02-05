@@ -397,16 +397,135 @@
 									ItemsSource="{Binding AdventureMods}"
 									SelectedIndex="{Binding SelectedAdventureModIndex}"
 									Tag="{Binding}">
+									<ComboBox.ToolTip>
+										<ToolTip DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag.SelectedAdventureMod}">
+											<ToolTip.Style>
+												<Style BasedOn="{StaticResource {x:Type ToolTip}}" TargetType="ToolTip">
+													<Setter Property="Template">
+														<Setter.Value>
+															<ControlTemplate TargetType="ToolTip">
+																<Border
+																	Padding="8"
+																	Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}"
+																	BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}"
+																	BorderThickness="2">
+																	<ContentPresenter />
+																</Border>
+															</ControlTemplate>
+														</Setter.Value>
+													</Setter>
+												</Style>
+											</ToolTip.Style>
+											<StackPanel
+												x:Name="DescTooltipStackPanel"
+												MaxWidth="700"
+												Background="Transparent"
+												Orientation="Vertical">
+												<StackPanel.Resources>
+													<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+														<Setter Property="TextWrapping" Value="Wrap" />
+														<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
+														<!--<Setter Property="FontFamily" Value="Arial" />-->
+													</Style>
+													<Style BasedOn="{StaticResource {x:Type ListBox}}" TargetType="ListBox" />
+												</StackPanel.Resources>
+												<StackPanel Orientation="Horizontal">
+													<TextBlock
+														Margin="2"
+														FontSize="16"
+														FontWeight="Bold"
+														Foreground="{DynamicResource {x:Static adonisUI:Brushes.AlertBrush}}"
+														Text="{Binding Name}">
+														<TextBlock.Effect>
+															<DropShadowEffect
+																BlurRadius="4"
+																Direction="330"
+																Opacity="0.5"
+																ShadowDepth="4"
+																Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+														</TextBlock.Effect>
+													</TextBlock>
+													<TextBlock
+														Margin="2"
+														Foreground="Red"
+														Text=" (Classic)"
+														Visibility="{Binding IsClassicMod, Converter={StaticResource BoolToVisibilityConverter}}" />
+													<TextBlock
+														Margin="2"
+														Foreground="Lime"
+														Text=" (Definitive Edition)"
+														Visibility="{Binding IsClassicMod, Converter={StaticResource BoolToVisibilityConverterReversed}}" />
+												</StackPanel>
+												<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+												<!--<html:HtmlPanel
+							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
+							Text="{Binding Description}"
+							Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />-->
+												<TextBlock Margin="2" TextWrapping="Wrap"><Run Text="Created by " /><Run
+														FontWeight="Bold"
+														Foreground="#3da2fa"
+														Text="{Binding Author}" />
+													<TextBlock.Effect>
+														<DropShadowEffect
+															BlurRadius="4"
+															Direction="330"
+															Opacity="0.5"
+															ShadowDepth="4"
+															Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+													</TextBlock.Effect>
+												</TextBlock>
+												<TextBlock
+													Margin="2"
+													Text="{Binding Description}"
+													TextWrapping="Wrap"
+													Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+												<StackPanel
+													Margin="2"
+													Orientation="Vertical"
+													Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+													<TextBlock FontWeight="Bold" Text="Dependencies:" />
+													<ListBox
+														Margin="2"
+														Padding="0"
+														BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}"
+														BorderThickness="1"
+														ItemsSource="{Binding Dependencies}" />
+												</StackPanel>
+												<StackPanel Margin="2" Orientation="Horizontal">
+													<TextBlock
+														Margin="2,2,0,2"
+														FontSize="12"
+														FontWeight="Bold"
+														Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
+														Text="{Binding Type}" />
+													<Rectangle Fill="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}" Style="{StaticResource VerticalSeparator}" />
+													<TextBlock
+														Margin="0,2,2,2"
+														FontWeight="Bold"
+														Text="{Binding Targets}" />
+												</StackPanel>
+												<StackPanel Orientation="Vertical">
+													<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+													<TextBlock
+														Margin="2"
+														Text="{Binding FileName}"
+														Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
+													<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
+														<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
+												</StackPanel>
+											</StackPanel>
+										</ToolTip>
+									</ComboBox.ToolTip>
 									<ComboBox.ContextMenu>
 										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 											<MenuItem
-												Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
-												CommandParameter="{Binding SelectedProfile.Folder}"
-												Header="Open Profile Folder in File Explorer..." />
+												Command="{Binding OpenAdventureModInFileExplorerCommand}"
+												CommandParameter="{Binding SelectedAdventureMod.FilePath}"
+												Header="Open Mod in File Explorer..." />
 											<MenuItem
-												Command="{Binding CopyPathToClipboardCommand}"
-												CommandParameter="{Binding SelectedProfile.Folder}"
-												Header="Copy Profile Path to Clipboard" />
+												Command="{Binding CopyAdventureModPathToClipboardCommand}"
+												CommandParameter="{Binding SelectedAdventureMod.FilePath}"
+												Header="Copy Mod Path to Clipboard" />
 										</ContextMenu>
 									</ComboBox.ContextMenu>
 								</ComboBox>

@@ -684,11 +684,11 @@ namespace DivinityModManager.ViewModels
 		{
 			if (Directory.Exists(Settings.DOS2WorkshopPath))
 			{
-				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath);
+				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath, true);
 				if (modPakData.Count > 0)
 				{
 					//Ignore Classic mods since they share the same workshop folder
-					var sortedWorkshopMods = modPakData.Where(x => !x.IsClassicMod).OrderBy(m => m.Name);
+					var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
 					workshopMods.Clear();
 					workshopMods.AddRange(sortedWorkshopMods);
 
@@ -699,15 +699,15 @@ namespace DivinityModManager.ViewModels
 
 		public async Task<List<DivinityModData>> LoadWorkshopModsAsync()
 		{
-			List<DivinityModData> workshopMods = new List<DivinityModData>();
+			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
 
 			if (Directory.Exists(Settings.DOS2WorkshopPath))
 			{
-				workshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath);
-				return workshopMods.OrderBy(m => m.Name).ToList();
+				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true);
+				return newWorkshopMods.OrderBy(m => m.Name).ToList();
 			}
 
-			return workshopMods;
+			return newWorkshopMods;
 		}
 
 		private void SetDOS2Pathways(string currentGameDataPath)

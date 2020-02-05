@@ -83,10 +83,13 @@ namespace DivinityModManager.Models
 			set
 			{
 				headerVersion = value;
-				IsClassicMod = headerVersion.Minor == 1;
-				if(IsClassicMod)
+				if(headerVersion != null)
 				{
-					System.Diagnostics.Trace.WriteLine($"Found a Classic mod: {Name}");
+					IsClassicMod = headerVersion.Minor == 1;
+					if (IsClassicMod)
+					{
+						System.Diagnostics.Trace.WriteLine($"Found a Classic mod: {Name}");
+					}
 				}
 			}
 		}

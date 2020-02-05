@@ -457,7 +457,7 @@ namespace DivinityModManager.Util
 			return false;
 		}
 
-		public static List<DivinityModData> LoadModPackageData(string modsFolderPath)
+		public static List<DivinityModData> LoadModPackageData(string modsFolderPath, bool ignoreClassic = false)
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
@@ -524,7 +524,7 @@ namespace DivinityModManager.Util
 								Trace.WriteLine($"Error: No meta.lsx for mod pak '{pakPath}'.");
 							}
 
-							if(modData != null)
+							if(modData != null && (!ignoreClassic || !modData.IsClassicMod))
 							{
 								modData.FilePath = pakPath;
 								try
@@ -619,7 +619,7 @@ namespace DivinityModManager.Util
 			return mods;
 		}
 
-		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath)
+		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false)
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
@@ -680,7 +680,7 @@ namespace DivinityModManager.Util
 									}
 								}
 
-								if (modData != null)
+								if (modData != null && (!ignoreClassic || !modData.IsClassicMod))
 								{
 									modData.FilePath = pakPath;
 									try

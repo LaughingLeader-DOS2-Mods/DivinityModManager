@@ -78,6 +78,38 @@ namespace DivinityModManager.Models
 		[DataMember]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
+		public void Add(DivinityModData mod)
+		{
+			if(!Order.Any(x => x.UUID == mod.UUID))
+			{
+				Order.Add(mod.ToOrderEntry());
+			}
+		}
+
+		public void AddRange(IEnumerable<DivinityModData> mods)
+		{
+			foreach(var mod in mods)
+			{
+				if (!Order.Any(x => x.UUID == mod.UUID))
+				{
+					Order.Add(mod.ToOrderEntry());
+				}
+			}
+		}
+
+		public void Remove(DivinityModData mod)
+		{
+			Order.RemoveAll(x => x.UUID == mod.UUID);
+		}
+
+		public void RemoveRange(IEnumerable<DivinityModData> mods)
+		{
+			foreach (var mod in mods)
+			{
+				Order.RemoveAll(x => x.UUID == mod.UUID);
+			}
+		}
+
 		public void SetOrder(IEnumerable<DivinityLoadOrderEntry> nextOrder)
 		{
 			Order.Clear();

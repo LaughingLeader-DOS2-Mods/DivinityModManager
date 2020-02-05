@@ -166,6 +166,7 @@
     <Compile Include="Controls\HyperlinkText.xaml.cs">
       <DependentUpon>HyperlinkText.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\SelectableTextBlock.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\EnumToStringConverter.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />

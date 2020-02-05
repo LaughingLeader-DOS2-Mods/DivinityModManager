@@ -1801,6 +1801,15 @@ namespace DivinityModManager.ViewModels
 						currentOrder.SetOrder(SelectedModOrder.Order);
 					}
 
+					List<string> orderList = new List<string>();
+					if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
+					orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
+
+					SelectedProfile.ModOrder.Clear();
+					SelectedProfile.ModOrder.AddRange(orderList);
+					SelectedProfile.ActiveMods.Clear();
+					SelectedProfile.ActiveMods.AddRange(orderList);
+
 					RxApp.MainThreadScheduler.Schedule(_ => DisplayMissingMods(SelectedModOrder));
 					return true;
 				}

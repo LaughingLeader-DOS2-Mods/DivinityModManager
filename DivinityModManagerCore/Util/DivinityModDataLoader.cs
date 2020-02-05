@@ -1298,7 +1298,6 @@ namespace DivinityModManager.Util
 					modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 				}
 			}
-
 			
 			foreach (var mod in allMods.Where(m => orderList.Any(o => o == m.UUID)))
 			{

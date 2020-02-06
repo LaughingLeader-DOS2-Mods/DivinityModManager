@@ -2749,6 +2749,13 @@ Directory the zip will be extracted to:
 			}
 		}
 
+		private int SortModOrder(DivinityLoadOrderEntry a, DivinityLoadOrderEntry b)
+		{
+			int index1 = ActiveMods.First(x => x.UUID == a.UUID).Index;
+			int index2 = ActiveMods.First(x => x.UUID == b.UUID).Index;
+			return index1.CompareTo(index2);
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -3074,6 +3081,11 @@ Directory the zip will be extracted to:
 				{
 					var mod = ActiveMods[i];
 					mod.Index = i;
+				}
+
+				if(SelectedModOrder != null)
+				{
+					SelectedModOrder.Sort(SortModOrder);
 				}
 			});
 			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)

@@ -110,6 +110,11 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		public void Sort(Comparison<DivinityLoadOrderEntry> comparison)
+		{
+			Order.Sort(comparison);
+		}
+
 		public void SetOrder(IEnumerable<DivinityLoadOrderEntry> nextOrder)
 		{
 			Order.Clear();

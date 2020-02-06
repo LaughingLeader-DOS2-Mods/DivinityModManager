@@ -865,7 +865,7 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Checking DXGI.dll for Osiris ASCII bytes.");
 					try
 					{
-						using (var stream = File.Open(extenderUpdaterPath, FileMode.Open))
+						using (var stream = new FileStream(extenderUpdaterPath, FileMode.Open, FileAccess.Read, FileShare.Read))
 						{
 							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
 							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)

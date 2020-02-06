@@ -870,7 +870,7 @@ namespace DivinityModManager.ViewModels
 							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
 							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
 							{
-								Settings.ExtenderSettings.ExtenderIsAvailable = true;
+								Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
 								Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
 							}
 							else
@@ -879,37 +879,42 @@ namespace DivinityModManager.ViewModels
 							}
 						}
 					}
+					catch(System.IO.IOException ex)
+					{
+						// This can happen if the game locks up the dll.
+						// Assume it's the extender for now.
+						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+						Trace.WriteLine($"WARNING: {extenderUpdaterPath} is locked by a process.");
+					}
 					catch (Exception ex)
 					{
 						Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
 					}
 
-					if (Settings.ExtenderSettings.ExtenderIsAvailable)
+					string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
+					if (File.Exists(extenderAppFile))
 					{
-						string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
-						if (File.Exists(extenderAppFile))
+						Settings.ExtenderSettings.ExtenderIsAvailable = true;
+						try
 						{
-							try
+							FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
+							if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
 							{
-								FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
-								if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+								var version = extenderInfo.FileVersion.Split('.')[0];
+								if (int.TryParse(version, out int intVersion))
 								{
-									var version = extenderInfo.FileVersion.Split('.')[0];
-									if (int.TryParse(version, out int intVersion))
-									{
-										Settings.ExtenderSettings.ExtenderVersion = intVersion;
-										Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
-									}
-									else
-									{
-										Settings.ExtenderSettings.ExtenderVersion = -1;
-									}
+									Settings.ExtenderSettings.ExtenderVersion = intVersion;
+									Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+								}
+								else
+								{
+									Settings.ExtenderSettings.ExtenderVersion = -1;
 								}
 							}
-							catch (Exception ex)
-							{
-								Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
-							}
+						}
+						catch (Exception ex)
+						{
+							Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
 						}
 					}
 				}

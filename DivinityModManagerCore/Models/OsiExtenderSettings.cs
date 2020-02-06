@@ -20,6 +20,14 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref extenderIsAvailable, value); }
 		}
 
+		private bool extenderUpdaterIsAvailable = false;
+
+		public bool ExtenderUpdaterIsAvailable
+		{
+			get => extenderUpdaterIsAvailable;
+			set { this.RaiseAndSetIfChanged(ref extenderUpdaterIsAvailable, value); }
+		}
+
 		private int extenderVersion = -1;
 
 		public int ExtenderVersion

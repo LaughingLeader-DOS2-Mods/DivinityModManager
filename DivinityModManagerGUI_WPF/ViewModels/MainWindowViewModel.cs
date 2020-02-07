@@ -2756,9 +2756,21 @@ Directory the zip will be extracted to:
 
 		private int SortModOrder(DivinityLoadOrderEntry a, DivinityLoadOrderEntry b)
 		{
-			int index1 = ActiveMods.First(x => x.UUID == a.UUID).Index;
-			int index2 = ActiveMods.First(x => x.UUID == b.UUID).Index;
-			return index1.CompareTo(index2);
+			var moda = mods.Items.FirstOrDefault(x => x.UUID == a.UUID);
+			var modb = mods.Items.FirstOrDefault(x => x.UUID == b.UUID);
+			if(moda != null && modb != null)
+			{
+				return moda.Index.CompareTo(modb.Index);
+			}
+			else if(moda != null)
+			{
+				return 1;
+			}
+			else if(modb != null)
+			{
+				return -1;
+			}
+			return 0;
 		}
 
 		public MainWindowViewModel() : base()

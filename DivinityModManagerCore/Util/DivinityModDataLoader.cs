@@ -487,7 +487,23 @@ namespace DivinityModManager.Util
 								{
 									Trace.WriteLine($"Error getting pak last modified date for '{pakPath}': {ex.ToString()}");
 								}
-								mods.Add(modData);
+								if(!mods.Any(x => x.UUID == modData.UUID))
+								{
+									mods.Add(modData);
+								}
+								else
+								{
+									var duplicateMods = mods.Where(x => x.UUID == modData.UUID).ToList();
+									for(int i = 0; i < duplicateMods.Count; i++)
+									{
+										var duplicateMod = duplicateMods[i];
+										if (duplicateMod.Version.VersionInt < modData.Version.VersionInt)
+										{
+											mods.Remove(duplicateMod);
+											Trace.WriteLine($"Ignoring older duplicate mod: {modData.Name} {duplicateMod.Version.Version} < {modData.Version.Version}");
+										}
+									}
+								}
 
 								var osiToolsConfig = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("OsiToolsConfig.json"));
 								if (osiToolsConfig != null)

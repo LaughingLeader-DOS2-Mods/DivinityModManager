@@ -497,7 +497,8 @@ namespace DivinityModManager.Util
 									for(int i = 0; i < duplicateMods.Count; i++)
 									{
 										var duplicateMod = duplicateMods[i];
-										if (duplicateMod.Version.VersionInt < modData.Version.VersionInt)
+										if (modData.Version.VersionInt > duplicateMod.Version.VersionInt || 
+											(modData.Version.VersionInt == duplicateMod.Version.VersionInt && modData.LastModified > duplicateMod.LastModified))
 										{
 											mods.Remove(duplicateMod);
 											Trace.WriteLine($"Ignoring older duplicate mod: {modData.Name} {duplicateMod.Version.Version} < {modData.Version.Version}");

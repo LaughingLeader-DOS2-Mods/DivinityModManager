@@ -80,6 +80,24 @@ namespace DivinityModManager.Models
 			get => logDirectory;
 			set { this.RaiseAndSetIfChanged(ref logDirectory, value); }
 		}
+/*
+		private bool sendCrashReports = true;
+
+		[DataMember]
+		public bool SendCrashReports
+		{
+			get => sendCrashReports;
+			set { this.RaiseAndSetIfChanged(ref sendCrashReports, value); }
+		}
+*/
+		private bool disableModValidation = true;
+
+		[DataMember]
+		public bool DisableModValidation
+		{
+			get => disableModValidation;
+			set { this.RaiseAndSetIfChanged(ref disableModValidation, value); }
+		}
 
 		public void Set(OsiExtenderSettings osirisExtenderSettings)
 		{

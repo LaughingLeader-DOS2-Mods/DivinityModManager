@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Newtonsoft.Json;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.Models
 {
+	[JsonObject(MemberSerialization.OptIn)]
 	public struct DivinityModDependencyData : IDivinityModData
 	{
-		public string UUID { get; set; }
-		public string Name { get; set; }
+		[JsonProperty] public string UUID { get; set; }
+		[JsonProperty] public string Name { get; set; }
 		public string Folder { get; set; }
 		public string MD5 { get; set; }
-		public DivinityModVersion Version { get; set; }
+		[JsonProperty] public DivinityModVersion Version { get; set; }
 
 		public override string ToString()
 		{

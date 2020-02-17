@@ -792,11 +792,10 @@ namespace DivinityModManager.Util
 									{
 										foreach (var c in modOrder)
 										{
-											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
 											if (c.Attributes.TryGetValue("UUID", out var attribute))
 											{
 												var uuid = (string)attribute.Value;
-												if(!string.IsNullOrEmpty(uuid))
+												if (!string.IsNullOrEmpty(uuid))
 												{
 													profileData.ModOrder.Add(uuid);
 												}
@@ -816,14 +815,11 @@ namespace DivinityModManager.Util
 									{
 										foreach (var c in modList)
 										{
-											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
-											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											var activeModData = new DivinityProfileActiveModData();
+											activeModData.LoadFromAttributes(c.Attributes);
+											if(!DivinityModDataLoader.IgnoreMod(activeModData.UUID))
 											{
-												var uuid = (string)attribute.Value;
-												if (!string.IsNullOrEmpty(uuid))
-												{
-													profileData.ActiveMods.Add(uuid);
-												}
+												profileData.ActiveMods.Add(activeModData);
 											}
 										}
 									}
@@ -901,7 +897,6 @@ namespace DivinityModManager.Util
 									{
 										foreach (var c in modOrder)
 										{
-											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
 											if (c.Attributes.TryGetValue("UUID", out var attribute))
 											{
 												var uuid = (string)attribute.Value;
@@ -925,14 +920,11 @@ namespace DivinityModManager.Util
 									{
 										foreach (var c in modList)
 										{
-											//Trace.WriteLine($"ModuleNode: {c.Name} Attributes: {String.Join(";", c.Attributes.Keys)}");
-											if (c.Attributes.TryGetValue("UUID", out var attribute))
+											var activeModData = new DivinityProfileActiveModData();
+											activeModData.LoadFromAttributes(c.Attributes);
+											if (!DivinityModDataLoader.IgnoreMod(activeModData.UUID))
 											{
-												var uuid = (string)attribute.Value;
-												if (!string.IsNullOrEmpty(uuid))
-												{
-													profileData.ActiveMods.Add(uuid);
-												}
+												profileData.ActiveMods.Add(activeModData);
 											}
 										}
 									}

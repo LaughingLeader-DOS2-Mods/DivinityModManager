@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using Newtonsoft.Json;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.Models
 {
+	[JsonObject(MemberSerialization.OptIn)]
 	public class DivinityModVersion : ReactiveObject
 	{
 		private int major = 0;
@@ -59,6 +61,7 @@ namespace DivinityModManager.Models
 
 		private string version;
 
+		[JsonProperty]
 		public string Version
 		{
 			get { return version; }
@@ -70,6 +73,7 @@ namespace DivinityModManager.Models
 
 		private int versionInt;
 
+		[JsonProperty]
 		public int VersionInt
 		{
 			get { return versionInt; }

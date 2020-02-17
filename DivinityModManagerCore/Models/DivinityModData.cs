@@ -1,5 +1,6 @@
 ﻿using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Util;
+using Newtonsoft.Json;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -20,10 +21,12 @@ namespace DivinityModManager.Models
 		DivinityModVersion Version { get; set; }
 	}
 
+	[JsonObject(MemberSerialization.OptIn)]
 	public class DivinityModData : ReactiveObject, IDivinityModData, ISelectable
 	{
 		private int index = -1;
 
+		[JsonProperty]
 		public int Index
 		{
 			get => index;
@@ -53,10 +56,12 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref filename, value); }
 		}
 
+		[JsonProperty]
 		public string UUID { get; set; }
 
 		private string name;
 
+		[JsonProperty]
 		public string Name
 		{
 			get => name;
@@ -66,13 +71,30 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public string Description { get; set; }
-		public string Author { get; set; }
-		public DivinityModVersion Version { get; set; }
+		[JsonProperty(PropertyName="FileName")]
+		public string OutputPakName
+		{
+			get
+			{
+				if (!Folder.Contains(UUID))
+				{
+					return Path.ChangeExtension($"{Folder}_{UUID}", "pak");
+				}
+				else
+				{
+					return Path.ChangeExtension($"{FileName}", "pak");
+				}
+			}
+		}
+
+
+		[JsonProperty] public string Description { get; set; }
+		[JsonProperty] public string Author { get; set; }
+		[JsonProperty] public DivinityModVersion Version { get; set; }
 		public string Folder { get; set; }
 		public string MD5 { get; set; }
-		public string Type { get; set; }
-		public List<string> Modes { get; set; } = new List<string>();
+		[JsonProperty] public string Type { get; set; }
+		[JsonProperty] public List<string> Modes { get; set; } = new List<string>();
 		public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
@@ -137,8 +159,8 @@ namespace DivinityModManager.Models
 
 		public string MissingOsirisExtenderText { get; private set; }
 
-		public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
-		public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
+		[JsonProperty] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
+		[JsonProperty] public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
 
 		private string displayName;
 
@@ -301,6 +323,18 @@ namespace DivinityModManager.Models
 			{
 				UUID = this.UUID,
 				Name = this.Name
+			};
+		}
+
+		public DivinityProfileActiveModData ToProfileModData()
+		{
+			return new DivinityProfileActiveModData()
+			{
+				Folder = Folder,
+				MD5 = MD5,
+				Name = Name,
+				UUID = UUID,
+				Version = Version.VersionInt
 			};
 		}
 	}

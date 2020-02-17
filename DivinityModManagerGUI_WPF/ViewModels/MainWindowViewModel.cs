@@ -1173,9 +1173,9 @@ namespace DivinityModManager.ViewModels
 			redo();
 		}
 
-		public void LoadModOrder(DivinityLoadOrder order, List<DivinityMissingModData> missingModsFromProfileOrder = null)
+		public bool LoadModOrder(DivinityLoadOrder order, List<DivinityMissingModData> missingModsFromProfileOrder = null)
 		{
-			if (order == null) return;
+			if (order == null) return false;
 
 			LoadingOrder = true;
 
@@ -1263,6 +1263,7 @@ namespace DivinityModManager.ViewModels
 			}
 			
 			LoadingOrder = false;
+			return true;
 		}
 
 		private void MainWindowMessageBox_Closed_ResetColor(object sender, EventArgs e)
@@ -2166,7 +2167,14 @@ namespace DivinityModManager.ViewModels
 				if (SelectedModOrder != null)
 				{
 					SelectedModOrder.SetOrder(order);
-					LoadModOrder(SelectedModOrder);
+					if (LoadModOrder(SelectedModOrder))
+					{
+						Trace.WriteLine($"Successfully re-loaded order {SelectedModOrder.Name} with save order.");
+					}
+					else
+					{
+						Trace.WriteLine($"Failed to load order {SelectedModOrder.Name}.");
+					}
 				}
 				else
 				{
@@ -3012,9 +3020,23 @@ Directory the zip will be extracted to:
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
 				if (SelectedModOrderIndex > -1)
 				{
-					if (SelectedModOrder != null && !LoadingOrder && !SelectedModOrder.OrderEquals(ActiveMods.Select(x => x.UUID)))
+					if (SelectedModOrder != null && !LoadingOrder)
 					{
-						LoadModOrder(SelectedModOrder);
+						if (!SelectedModOrder.OrderEquals(ActiveMods.Select(x => x.UUID)))
+						{
+							if(LoadModOrder(SelectedModOrder))
+							{
+								Trace.WriteLine($"Successfully loaded order {SelectedModOrder.Name}.");
+							}
+							else
+							{
+								Trace.WriteLine($"Failed to load order {SelectedModOrder.Name}.");
+							}
+						}
+						else
+						{
+							Trace.WriteLine($"Order changed to {SelectedModOrder.Name}. Skipping list loading since the orders match.");
+						}
 					}
 				}
 			});

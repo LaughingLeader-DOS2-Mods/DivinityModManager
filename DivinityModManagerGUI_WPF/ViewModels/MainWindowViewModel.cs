@@ -1119,7 +1119,7 @@ namespace DivinityModManager.ViewModels
 						try
 						{
 							selectedModOrderIndex = selectIndex;
-							LoadModOrder(ModOrderList[selectedModOrderIndex], missingMods);
+							LoadModOrder(ModOrderList.ElementAtOrDefault(selectedModOrderIndex), missingMods);
 							Settings.LastOrder = SelectedModOrder.Name;
 						}
 						catch (Exception ex)
@@ -1183,19 +1183,11 @@ namespace DivinityModManager.ViewModels
 			if (order == null) return;
 
 			LoadingOrder = true;
-			//var orderedMods = mods.Items.Where(m => order.Order.Any(o => o.UUID == m.UUID)).ToList();
-			//var unOrderedMods = mods.Items.Where(m => !orderedMods.Contains(m)).ToList();
-			//var sorted = orderedMods.OrderBy(m => GetModOrder(m, order)).ToList();
 
 			ActiveMods.Clear();
 			InactiveMods.Clear();
 
 			var loadFrom = order.Order;
-
-			//if(order.SavedOrder != null)
-			//{
-			//	loadFrom = order.SavedOrder;
-			//}
 
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 			if(missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
@@ -1204,12 +1196,9 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Missing mods (from profile): {String.Join(";", missingModsFromProfileOrder)}");
 			}
 
-			Trace.WriteLine($"Loading mods: {String.Join(";", loadFrom.Select(x => x.Name))}");
-
 			for (int i = 0; i < loadFrom.Count; i++)
 			{
 				var entry = loadFrom[i];
-				Trace.WriteLine($"Looking for {entry.Name}");
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null)
 				{
@@ -1235,7 +1224,6 @@ namespace DivinityModManager.ViewModels
 				}
 				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !!missingMods.Any(x => x.UUID == entry.UUID))
 				{
-					Trace.WriteLine($"*****MISSING***** {entry.Name}");
 					var x = new DivinityMissingModData
 					{
 						Index = i,
@@ -1255,7 +1243,6 @@ namespace DivinityModManager.ViewModels
 				if (ActiveMods.Any(m => m.UUID == mod.UUID))
 				{
 					mod.IsActive = true;
-					//Trace.WriteLine("Added mod " + mod.Name + " to active order");
 				}
 				else
 				{

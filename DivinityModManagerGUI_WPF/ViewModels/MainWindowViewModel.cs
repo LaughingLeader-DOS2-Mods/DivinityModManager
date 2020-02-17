@@ -413,9 +413,6 @@ namespace DivinityModManager.ViewModels
 			get => actionOnGameLaunch;
 			set { this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
 		}
-
-		public bool Loaded { get; set; } = false;
-		public EventHandler OnLoaded { get; set; }
 		public EventHandler OnRefreshed { get; set; }
 		public EventHandler OnOrderChanged { get; set; }
 
@@ -1254,14 +1251,6 @@ namespace DivinityModManager.ViewModels
 
 			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
 
-			LoadingOrder = false;
-
-			if (!Loaded)
-			{
-				Loaded = true;
-				OnLoaded?.Invoke(this, new EventArgs());
-			}
-
 			OnOrderChanged?.Invoke(this, new EventArgs());
 
 			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
@@ -1272,6 +1261,8 @@ namespace DivinityModManager.ViewModels
 				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
 					"Missing Mods in Load Order", MessageBoxButton.OK);
 			}
+			
+			LoadingOrder = false;
 		}
 
 		private void MainWindowMessageBox_Closed_ResetColor(object sender, EventArgs e)

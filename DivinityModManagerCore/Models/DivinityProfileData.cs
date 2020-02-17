@@ -45,9 +45,9 @@ namespace DivinityModManager.Models
 		public List<string> ModOrder { get; set; } = new List<string>();
 
 		/// <summary>
-		/// The mod UUIDs under the Mods node, from modsettings.lsx.
+		/// The mod data under the Mods node, from modsettings.lsx.
 		/// </summary>
-		public List<string> ActiveMods { get; set; } = new List<string>();
+		public List<DivinityProfileActiveModData> ActiveMods { get; set; } = new List<DivinityProfileActiveModData>();
 
 		/// <summary>
 		/// The ModOrder transformed into a DivinityLoadOrder. This is the "Current" order.

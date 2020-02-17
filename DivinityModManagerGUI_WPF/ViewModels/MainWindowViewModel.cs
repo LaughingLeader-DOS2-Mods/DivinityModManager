@@ -573,7 +573,7 @@ namespace DivinityModManager.ViewModels
 
 			this.WhenAnyValue(x => x.Settings.DarkThemeEnabled).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
 			{
-				ResourceLocator.SetColorScheme(view.Resources, !b ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+				view.UpdateColorTheme(b);
 				SaveSettings();
 			}).DisposeWith(Settings.Disposables);
 

@@ -28,6 +28,7 @@ using System.Windows.Threading;
 using AdonisUI.Controls;
 using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.WinForms;
+using AdonisUI;
 
 namespace DivinityModManager.Views
 {
@@ -212,6 +213,16 @@ namespace DivinityModManager.Views
 
 				//this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 			});
+		}
+
+		public void UpdateColorTheme(bool darkMode)
+		{
+			ResourceLocator.SetColorScheme(this.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+			ResourceLocator.SetColorScheme(SettingsWindow.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+			if(AboutWindow != null)
+			{
+				ResourceLocator.SetColorScheme(AboutWindow.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+			}
 		}
 
 		private void OnAppClosing(object sender, ExitEventArgs e)

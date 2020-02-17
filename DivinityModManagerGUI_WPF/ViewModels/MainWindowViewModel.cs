@@ -235,12 +235,9 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private DivinityLoadOrder selectedModOrder;
-
 		public DivinityLoadOrder SelectedModOrder
 		{
-			get => selectedModOrder;
-			set { this.RaiseAndSetIfChanged(ref selectedModOrder, value); }
+			get => ModOrderList.ElementAtOrDefault(SelectedModOrderIndex);
 		}
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
@@ -1119,12 +1116,13 @@ namespace DivinityModManager.ViewModels
 						try
 						{
 							selectedModOrderIndex = selectIndex;
-							LoadModOrder(ModOrderList.ElementAtOrDefault(selectedModOrderIndex), missingMods);
-							Settings.LastOrder = SelectedModOrder.Name;
+							var nextOrder = ModOrderList.ElementAtOrDefault(selectedModOrderIndex);
+							LoadModOrder(nextOrder, missingMods);
+							Settings.LastOrder = nextOrder?.Name;
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine($"Error setting next load order: {ex.ToString()}");
+							Trace.WriteLine($"Error setting next load order:\n{ex.ToString()}");
 						}
 					}
 					LoadingOrder = false;
@@ -1188,6 +1186,8 @@ namespace DivinityModManager.ViewModels
 			InactiveMods.Clear();
 
 			var loadFrom = order.Order;
+
+			Trace.WriteLine($"Loading mod order '{order.Name}'.");
 
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 			if(missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
@@ -1832,8 +1832,6 @@ namespace DivinityModManager.ViewModels
 						AutoUpdater.Start(DivinityApp.URL_UPDATE);
 					}
 				}
-
-				LoadModOrder(SelectedModOrder);
 			});
 		}
 
@@ -2102,6 +2100,7 @@ namespace DivinityModManager.ViewModels
 					try
 					{
 						File.WriteAllText(dialog.FileName, outputText);
+						view.AlertBar.SetSuccessAlert($"Exported order to '{dialog.FileName}'", 20);
 					}
 					catch (Exception ex)
 					{
@@ -2111,6 +2110,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
+				Trace.WriteLine($"SelectedProfile({SelectedProfile}) SelectedModOrder({SelectedModOrder})");
 				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
 		}
@@ -3018,11 +3018,10 @@ Directory the zip will be extracted to:
 			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
 
 			//Throttle in case the index changes quickly in a short timespan
-			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).Throttle(TimeSpan.FromMilliseconds(10)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
-				if (SelectedModOrderIndex > -1 && !LoadingOrder)
+			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
+				if (SelectedModOrderIndex > -1)
 				{
-					SelectedModOrder = ModOrderList.ElementAtOrDefault(SelectedModOrderIndex);
-					if(SelectedModOrder != null)
+					if (SelectedModOrder != null && !LoadingOrder && !SelectedModOrder.OrderEquals(ActiveMods.Select(x => x.UUID)))
 					{
 						LoadModOrder(SelectedModOrder);
 					}

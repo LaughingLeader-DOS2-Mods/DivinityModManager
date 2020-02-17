@@ -127,6 +127,11 @@ namespace DivinityModManager.Models
 			Order.AddRange(nextOrder.Order);
 		}
 
+		public bool OrderEquals(IEnumerable<string> orderList)
+		{
+			return Order.Select(x => x.UUID).SequenceEqual(orderList);
+		}
+
 		public DivinityLoadOrder Clone()
 		{
 			return new DivinityLoadOrder()

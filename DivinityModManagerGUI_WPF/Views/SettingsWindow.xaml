@@ -2,6 +2,8 @@
 	x:Class="DivinityModManager.Views.SettingsWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
 	xmlns:autogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
 	xmlns:c="clr-namespace:DivinityModManager.Controls"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
@@ -15,6 +17,7 @@
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:reactiveui="http://reactiveui.net"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
+	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	Title="Preferences"
 	Width="600"
 	Height="450"
@@ -130,77 +133,117 @@
 						<RowDefinition Height="*" />
 						<RowDefinition Height="auto" />
 					</Grid.RowDefinitions>
-					<autogrid:AutoGrid
-						Margin="20"
-						ChildMargin="4"
-						ColumnCount="2"
-						Columns="auto,*"
-						RowCount="8"
-						RowHeight="*"
-						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto">
-						<TextBlock
-							x:Name="SpeedupTextBlock"
-							Text="Enable Loading Speedup"
-							ToolTip="Enables the extender optimization that speeds up mod loading. Enabled by default without anything in the settings." />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.DisableModValidation, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=SpeedupTextBlock, Path=ToolTip}" />
-						<TextBlock
-							x:Name="EnableExtensionTextblock"
-							Text="Enable Extensions"
-							ToolTip="Enable script extensions. Default: Enabled"
-							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}"
-							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
-						<TextBlock
-							x:Name="EnableConsoleTextBlock"
-							Text="Enable Console Window:"
-							ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=EnableConsoleTextBlock, Path=ToolTip}" />
-						<TextBlock
-							x:Name="EnableLogTextBlock"
-							Text="Enable Logging"
-							ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=EnableLogTextBlock, Path=ToolTip}" />
-						<TextBlock
-							x:Name="LogMergesTextBlock"
-							Text="Log Story Merges"
-							ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=LogMergesTextBlock, Path=ToolTip}" />
-						<TextBlock
-							x:Name="LogDirectoryTextBlock"
-							Text="Log Directory"
-							ToolTip="The directory to write logs to." />
-						<controls:UnfocusableTextBox
-							VerticalAlignment="Center"
-							Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
-							TextAlignment="Left"
-							ToolTip="{Binding ElementName=LogDirectoryTextBlock, Path=ToolTip}" />
-						<TextBlock
-							x:Name="EnableExtensionTextblock"
-							Text="Enable Extensions"
-							ToolTip="Enable script extensions. Default: Enabled"
-							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
-						<CheckBox
-							VerticalAlignment="Center"
-							IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}"
-							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
-					</autogrid:AutoGrid>
-					<StackPanel Grid.Row="1">
+					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+						<autogrid:AutoGrid
+							Margin="20"
+							ChildMargin="4"
+							ColumnCount="2"
+							Columns="auto,*"
+							RowCount="13"
+							RowHeight="*"
+							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+							<TextBlock
+								x:Name="SpeedupTextBlock"
+								Text="Enable Loading Speedup"
+								ToolTip="Enables the extender optimization that speeds up mod loading. Enabled by default without anything in the settings." />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.DisableModValidation, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=SpeedupTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="EnableExtensionTextblock"
+								Text="Enable Extensions"
+								ToolTip="Enable script extensions. Default: Enabled"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="EnableConsoleTextBlock"
+								Text="Enable Console Window:"
+								ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableConsoleTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="EnableLogTextBlock"
+								Text="Enable Logging"
+								ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableLogTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="LogMergesTextBlock"
+								Text="Log Story Merges"
+								ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=LogMergesTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="LogDirectoryTextBlock"
+								Text="Log Directory"
+								ToolTip="The directory to write logs to." />
+							<controls:UnfocusableTextBox
+								VerticalAlignment="Center"
+								Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
+								TextAlignment="Left"
+								ToolTip="{Binding ElementName=LogDirectoryTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="SendCrashReportsTextblock"
+								Text="Send Crash Reports"
+								ToolTip="Send crash reports when the game crashes. Default: Enabled"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.SendCrashReports, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=SendCrashReportsTextblock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="DumpNetworkStringsTextblock"
+								Text="Dump Network Strings"
+								ToolTip="Dump the FixedString table to OsirisLogs\ on all clients for comparison, for debugging multiplayer desync. Default: Disabled"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.DumpNetworkStrings, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=DumpNetworkStringsTextblock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="EnableDebuggerTextblock"
+								Text="Enable Debugger"
+								ToolTip="Enable the Extensions Debugger. Default: Disabled"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.EnableDebugger, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableDebuggerTextblock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="DebuggerPortTextBlock"
+								Text="Debugger Port"
+								ToolTip="The port for the debugger to listen on. Default: 9999"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<xc:IntegerUpDown
+								ToolTip="{Binding ElementName=DebuggerPortTextBlock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}"
+								Value="{Binding ExtenderSettings.DebuggerPort, FallbackValue=9999}" />
+							<TextBlock
+								x:Name="DebuggerFlagsTextBlock"
+								Text="Debugger Flags"
+								ToolTip="Debugger flags to set. Default: 0"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								Text="{Binding ExtenderSettings.DebuggerFlags}"
+								ToolTip="{Binding ElementName=DebuggerFlagsTextBlock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+						</autogrid:AutoGrid>
+					</ScrollViewer>
+					<StackPanel Grid.Row="1" Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}">
 						<Button
 							Command="{Binding ExportExtenderSettingsCommand}"
 							Content="Export Settings"

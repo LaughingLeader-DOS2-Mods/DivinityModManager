@@ -80,16 +80,7 @@ namespace DivinityModManager.Models
 			get => logDirectory;
 			set { this.RaiseAndSetIfChanged(ref logDirectory, value); }
 		}
-/*
-		private bool sendCrashReports = true;
 
-		[DataMember]
-		public bool SendCrashReports
-		{
-			get => sendCrashReports;
-			set { this.RaiseAndSetIfChanged(ref sendCrashReports, value); }
-		}
-*/
 		private bool disableModValidation = true;
 
 		[DataMember]
@@ -99,6 +90,42 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref disableModValidation, value); }
 		}
 
+		private bool sendCrashReports = true;
+
+		[DataMember]
+		public bool SendCrashReports
+		{
+			get => sendCrashReports;
+			set { this.RaiseAndSetIfChanged(ref sendCrashReports, value); }
+		}
+
+		private bool enableDebugger = false;
+
+		[DataMember]
+		public bool EnableDebugger
+		{
+			get => enableDebugger;
+			set { this.RaiseAndSetIfChanged(ref enableDebugger, value); }
+		}
+
+		private int debuggerPort = 9999;
+
+		[DataMember]
+		public int DebuggerPort
+		{
+			get => debuggerPort;
+			set { this.RaiseAndSetIfChanged(ref debuggerPort, value); }
+		}
+
+		private int debuggerFlags = 0;
+
+		[DataMember]
+		public int DebuggerFlags
+		{
+			get => debuggerFlags;
+			set { this.RaiseAndSetIfChanged(ref debuggerFlags, value); }
+		}
+
 		public void Set(OsiExtenderSettings osirisExtenderSettings)
 		{
 			EnableExtensions = osirisExtenderSettings.EnableExtensions;
@@ -106,6 +133,11 @@ namespace DivinityModManager.Models
 			EnableLogging = osirisExtenderSettings.EnableLogging;
 			LogCompile = osirisExtenderSettings.LogCompile;
 			if (osirisExtenderSettings.LogDirectory.IsExistingDirectory()) LogDirectory = osirisExtenderSettings.LogDirectory;
+			DisableModValidation = osirisExtenderSettings.DisableModValidation;
+			DisableModValidation = osirisExtenderSettings.SendCrashReports;
+			EnableDebugger = osirisExtenderSettings.EnableDebugger;
+			DebuggerPort = osirisExtenderSettings.DebuggerPort;
+			DebuggerFlags = osirisExtenderSettings.DebuggerFlags;
 		}
 	}
 }

@@ -135,22 +135,58 @@
 						ChildMargin="4"
 						ColumnCount="2"
 						Columns="auto,*"
-						RowCount="5"
+						RowCount="6"
 						RowHeight="*"
-						Rows="auto,auto,auto,auto,auto,auto">
-						<TextBlock Text="Enable Extensions" ToolTip="Enable script extensions. Default: Enabled" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Enable Console Window:" ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Enable Logging" ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Log Story Merges" ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Log Directory" ToolTip="The directory to write logs to." />
+						Rows="auto,auto,auto,auto,auto,auto,auto">
+						<TextBlock
+							x:Name="SpeedupTextBlock"
+							Text="Enable Loading Speedup"
+							ToolTip="Enables the extender optimization that speeds up mod loading. Enabled by default without anything in the settings." />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.DisableModValidation, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=SpeedupTextBlock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="EnableExtensionTextblock"
+							Text="Enable Extensions"
+							ToolTip="Enable script extensions. Default: Enabled" />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="EnableConsoleTextBlock"
+							Text="Enable Console Window:"
+							ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=EnableConsoleTextBlock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="EnableLogTextBlock"
+							Text="Enable Logging"
+							ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=EnableLogTextBlock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="LogMergesTextBlock"
+							Text="Log Story Merges"
+							ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=LogMergesTextBlock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="LogDirectoryTextBlock"
+							Text="Log Directory"
+							ToolTip="The directory to write logs to." />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
 							Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
-							TextAlignment="Left" />
+							TextAlignment="Left"
+							ToolTip="{Binding ElementName=LogDirectoryTextBlock, Path=ToolTip}" />
 					</autogrid:AutoGrid>
 					<StackPanel Grid.Row="1">
 						<Button

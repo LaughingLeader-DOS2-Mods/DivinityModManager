@@ -235,11 +235,13 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private readonly ObservableAsPropertyHelper<DivinityLoadOrder> selectedModOrder;
-		public DivinityLoadOrder SelectedModOrder => selectedModOrder.Value;
+		private DivinityLoadOrder selectedModOrder;
 
-		private readonly ObservableAsPropertyHelper<string> selectedModOrderDisplayName;
-		public string SelectedModOrderDisplayName => selectedModOrderDisplayName.Value;
+		public DivinityLoadOrder SelectedModOrder
+		{
+			get => selectedModOrder;
+			set { this.RaiseAndSetIfChanged(ref selectedModOrder, value); }
+		}
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
 
@@ -394,6 +396,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenAboutWindowCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
+		public ICommand ExportLoadOrderAsTextFileCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
 		public ICommand ToggleDisplayNameCommand { get; set; }
 		public ICommand ToggleDarkModeCommand { get; set; }
@@ -1060,11 +1063,13 @@ namespace DivinityModManager.ViewModels
 			return null;
 		}
 
-		public void BuildModOrderList(bool selectLast = false)
+		public void BuildModOrderList(int selectIndex = -1)
 		{
 			if (SelectedProfile != null)
 			{
 				LoadingOrder = true;
+
+				List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
 				if (SelectedProfile.SavedLoadOrder == null)
 				{
@@ -1072,56 +1077,55 @@ namespace DivinityModManager.ViewModels
 
 					foreach (var uuid in SelectedProfile.ModOrder)
 					{
-						if (SelectedProfile.ActiveMods.Contains(uuid, StringComparer.OrdinalIgnoreCase))
+						var activeModData = SelectedProfile.ActiveMods.FirstOrDefault(y => y.UUID == uuid);
+						if (activeModData != null)
 						{
 							var mod = mods.Items.FirstOrDefault(m => m.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase));
 							if (mod != null)
 							{
 								currentOrder.Add(mod);
 							}
+							else
+							{
+								var x = new DivinityMissingModData
+								{
+									Index = SelectedProfile.ModOrder.IndexOf(uuid),
+									Name = activeModData.Name,
+									UUID = activeModData.UUID
+								};
+								missingMods.Add(x);
+							}
+						}
+						else
+						{
+							Trace.WriteLine($"UUID {uuid} is missing from the profile's active mod list.");
 						}
 					}
 
 					SelectedProfile.SavedLoadOrder = currentOrder;
 				}
 
+				Trace.WriteLine($"Profile order: {String.Join(";", SelectedProfile.SavedLoadOrder.Order.Select(x => x.Name))}");
+
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
-				SelectedProfile.SavedLoadOrder.Name = "Current";
 				ModOrderList.AddRange(SavedModOrderList);
-
-				int nextOrderIndex = 0;
-
-				if (selectLast)
-				{
-					if (ModOrderList.Count > 0) nextOrderIndex = ModOrderList.Count - 1;
-				}
-				else
-				{
-					if (!String.IsNullOrWhiteSpace(Settings.LastOrder) && Settings.LastOrder != "Current")
-					{
-						var order = ModOrderList.FirstOrDefault(x => x.Name.Equals(Settings.LastOrder, StringComparison.OrdinalIgnoreCase));
-						if (order != null)
-						{
-							int index = ModOrderList.IndexOf(order);
-							if (index > -1) nextOrderIndex = index;
-							Trace.WriteLine($"Set active load order to last order '{index}' - '{order.Name}'");
-						}
-					}
-				}
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{
-					Trace.WriteLine($"Setting next order index to '{nextOrderIndex}'.");
-					try
+					if(selectIndex != -1)
 					{
-						SelectedModOrderIndex = nextOrderIndex;
-						LoadModOrder(SelectedModOrder);
-						Settings.LastOrder = SelectedModOrder.Name;
-					}
-					catch (Exception ex)
-					{
-						Trace.WriteLine($"Error setting next load order: {ex.ToString()}");
+						Trace.WriteLine($"Setting next order index to {selectIndex}.");
+						try
+						{
+							selectedModOrderIndex = selectIndex;
+							LoadModOrder(ModOrderList[selectedModOrderIndex], missingMods);
+							Settings.LastOrder = SelectedModOrder.Name;
+						}
+						catch (Exception ex)
+						{
+							Trace.WriteLine($"Error setting next load order: {ex.ToString()}");
+						}
 					}
 					LoadingOrder = false;
 				});
@@ -1152,8 +1156,7 @@ namespace DivinityModManager.ViewModels
 			{
 				SavedModOrderList.Clear();
 				SavedModOrderList.AddRange(lastOrders);
-				BuildModOrderList();
-				SelectedModOrderIndex = lastIndex;
+				BuildModOrderList(lastIndex);
 			};
 
 			void redo()
@@ -1167,7 +1170,7 @@ namespace DivinityModManager.ViewModels
 					};
 				}
 				SavedModOrderList.Add(newOrder);
-				BuildModOrderList(true);
+				BuildModOrderList(SavedModOrderList.Count - 1);
 			};
 
 			this.CreateSnapshot(undo, redo);
@@ -1175,7 +1178,7 @@ namespace DivinityModManager.ViewModels
 			redo();
 		}
 
-		public void LoadModOrder(DivinityLoadOrder order)
+		public void LoadModOrder(DivinityLoadOrder order, List<DivinityMissingModData> missingModsFromProfileOrder = null)
 		{
 			if (order == null) return;
 
@@ -1195,10 +1198,18 @@ namespace DivinityModManager.ViewModels
 			//}
 
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
+			if(missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
+			{
+				missingMods.AddRange(missingModsFromProfileOrder);
+				Trace.WriteLine($"Missing mods (from profile): {String.Join(";", missingModsFromProfileOrder)}");
+			}
 
-			for(int i = 0; i < loadFrom.Count; i++)
+			Trace.WriteLine($"Loading mods: {String.Join(";", loadFrom.Select(x => x.Name))}");
+
+			for (int i = 0; i < loadFrom.Count; i++)
 			{
 				var entry = loadFrom[i];
+				Trace.WriteLine($"Looking for {entry.Name}");
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null)
 				{
@@ -1222,8 +1233,9 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 				}
-				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID))
+				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !!missingMods.Any(x => x.UUID == entry.UUID))
 				{
+					Trace.WriteLine($"*****MISSING***** {entry.Name}");
 					var x = new DivinityMissingModData
 					{
 						Index = i,
@@ -1267,6 +1279,7 @@ namespace DivinityModManager.ViewModels
 
 			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
 			{
+				Trace.WriteLine($"Missing mods: {String.Join(";", missingMods)}");
 				view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
 				view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
 				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
@@ -1314,16 +1327,20 @@ namespace DivinityModManager.ViewModels
 			SavedModOrderList = LoadExternalLoadOrders();
 			MainProgressValue += taskStepAmount;
 
-			BuildModOrderList();
-			MainProgressValue += taskStepAmount;
-
 			if (lastActiveOrder != null)
 			{
 				// Just in case a mod disappears
-				var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
-				SelectedModOrderIndex = lastOrderIndex;
+				//var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
 				SelectedModOrder.SetOrder(lastActiveOrder);
+				BuildModOrderList(lastOrderIndex);
 			}
+			else
+			{
+				BuildModOrderList(0);
+			}
+
+			MainProgressValue += taskStepAmount;
+
 			LoadWorkshopMods();
 			MainProgressValue += taskStepAmount;
 
@@ -1469,14 +1486,17 @@ namespace DivinityModManager.ViewModels
 					}
 
 					MainProgressWorkText = "Building mod order list...";
-					BuildModOrderList();
-					MainProgressValue += taskStepAmount;
-
+					
 					if (lastActiveOrder != null && lastActiveOrder.Count > 0)
 					{
-						SelectedModOrderIndex = lastOrderIndex;
 						SelectedModOrder.SetOrder(lastActiveOrder);
+						BuildModOrderList(lastOrderIndex);
 					}
+					else
+					{
+						BuildModOrderList(0);
+					}
+					MainProgressValue += taskStepAmount;
 
 					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
 					MainProgressWorkText = "Checking for mod updates...";
@@ -1542,58 +1562,6 @@ namespace DivinityModManager.ViewModels
 				return null;
 			}
 			
-		}
-
-		private void ActiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			//Trace.WriteLine($"[ActiveMods_SetItemIndex] Active collection changed. New({e.NewItems}) Old({e.OldItems}) Action({e.Action})");
-			foreach (var mod in ActiveMods)
-			{
-				mod.Index = ActiveMods.IndexOf(mod);
-			}
-
-			if (SelectedModOrder != null && !LoadingOrder)
-			{
-				if (e.OldItems != null)
-				{
-					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Removing {e.OldItems.Count} old items from order.");
-					foreach (DivinityModData m in e.OldItems)
-					{
-						SelectedModOrder.Remove(m);
-						m.IsActive = false;
-					}
-				}
-				if (e.NewItems != null)
-				{
-					foreach (DivinityModData m in e.NewItems)
-					{
-						m.IsActive = true;
-						SelectedModOrder.Add(m);
-
-						//Trace.WriteLine($"[ActiveMods_SetItemIndex] Mod {m.Name} became inactive.");
-					}
-
-					SelectedModOrder.Order = SelectedModOrder.Order.OrderBy(mEntry => ActiveMods.IndexOf(ActiveMods.First(mod => mod.UUID == mEntry.UUID))).ToList();
-					//Trace.WriteLine($"[ActiveMods_SetItemIndex] Reordered saved order {String.Join(",", SelectedModOrder.Order.Select(x => x.Name))}.");
-				}
-			}
-
-			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
-		}
-
-		private void InactiveMods_SetItemIndex(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e)
-		{
-			if (e.NewItems != null)
-			{
-				foreach (DivinityModData m in e.NewItems)
-				{
-					m.IsActive = false;
-					m.Index = -1;
-					//Trace.WriteLine($"[InactiveMods_SetItemIndex] Mod {m.Name} became inactive.");
-				}
-
-				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
-			}
 		}
 
 		private void SaveLoadOrder()
@@ -1778,6 +1746,19 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private DivinityProfileActiveModData ProfileActiveModDataFromUUID(string uuid)
+		{
+			var modData = mods.Items.FirstOrDefault(x => x.UUID == uuid);
+			if(modData != null)
+			{
+				modData.ToProfileModData();
+			}
+			return new DivinityProfileActiveModData()
+			{
+				UUID = uuid
+			};
+		}
+
 		private async Task<bool> ExportLoadOrderAsync()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
@@ -1813,7 +1794,7 @@ namespace DivinityModManager.ViewModels
 					SelectedProfile.ModOrder.Clear();
 					SelectedProfile.ModOrder.AddRange(orderList);
 					SelectedProfile.ActiveMods.Clear();
-					SelectedProfile.ActiveMods.AddRange(orderList);
+					SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
 
 					RxApp.MainThreadScheduler.Schedule(_ => DisplayMissingMods(SelectedModOrder));
 					return true;
@@ -1864,6 +1845,8 @@ namespace DivinityModManager.ViewModels
 						AutoUpdater.Start(DivinityApp.URL_UPDATE);
 					}
 				}
+
+				LoadModOrder(SelectedModOrder);
 			});
 		}
 
@@ -2079,6 +2062,70 @@ namespace DivinityModManager.ViewModels
 				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
 
+		}
+
+		private void ExportLoadOrderToTextFileAs()
+		{
+			if (SelectedProfile != null && SelectedModOrder != null)
+			{
+				var startDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
+
+				var dialog = new SaveFileDialog();
+				dialog.AddExtension = true;
+				dialog.DefaultExt = ".txt";
+				dialog.Filter = "Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv|JSON file (*.json)|*.json";
+				dialog.InitialDirectory = startDirectory;
+
+				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
+				string baseOrderName = SelectedModOrder.Name;
+				if (SelectedModOrder.Name.Equals("Current", StringComparison.OrdinalIgnoreCase))
+				{
+					baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
+				}
+				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.txt";
+
+				//dialog.RestoreDirectory = true;
+				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
+				dialog.CheckFileExists = false;
+				dialog.CheckPathExists = false;
+				dialog.OverwritePrompt = true;
+				dialog.Title = "Export Load Order As Text File...";
+
+				if (dialog.ShowDialog(view) == true)
+				{
+					var fileType = Path.GetExtension(dialog.FileName);
+					string outputText = "";
+					if (fileType.Equals(".json", StringComparison.OrdinalIgnoreCase))
+					{
+						outputText = JsonConvert.SerializeObject(ActiveMods, Formatting.Indented, new JsonSerializerSettings
+						{
+							NullValueHandling = NullValueHandling.Ignore
+						});
+					}
+					else if (fileType.Equals(".tsv", StringComparison.OrdinalIgnoreCase))
+					{
+						outputText = "Index\tName\tAuthor\tFileName\tType\tModes\tDependencies\n";
+						outputText += String.Join("\n", ActiveMods.Select(x => $"{x.Index}\t{x.Name}\t{x.Author}\t{x.OutputPakName}\t{x.Type}\t{String.Join(", ", x.Modes)}\t{String.Join(", ", x.Dependencies.Select(y => y.Name))}"));
+					}
+					else
+					{
+						//Text file format
+						outputText = String.Join("\n", ActiveMods.Select(x => $"{x.Index}. {x.Name} ({x.OutputPakName})"));
+					}
+					try
+					{
+						File.WriteAllText(dialog.FileName, outputText);
+					}
+					catch (Exception ex)
+					{
+						view.AlertBar.SetDangerAlert($"Error exporting mod order to '{dialog.FileName}':\n{ex.ToString()}");
+					}
+				}
+			}
+			else
+			{
+				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+			}
 		}
 
 		private DivinityLoadOrder ImportOrderFromSave()
@@ -2800,6 +2847,9 @@ Directory the zip will be extracted to:
 			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
 			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
 
+			var anyActiveObservable = this.WhenAnyValue(x => x.ActiveMods.Count, (c) => c > 0);
+			ExportLoadOrderAsTextFileCommand = ReactiveCommand.Create(ExportLoadOrderToTextFileAs, anyActiveObservable);
+
 			AddOrderConfigCommand = ReactiveCommand.Create(new Action( () => { AddNewModOrder(); }));
 
 			canOpenDialogWindow = this.WhenAnyValue(x => x.MainProgressIsActive, (b) => !b);
@@ -2959,9 +3009,9 @@ Directory the zip will be extracted to:
 			{
 				if (order != null)
 				{
-					foreach (var uuid in order)
+					foreach (var m in order)
 					{
-						var modData = AdventureMods.FirstOrDefault(x => x.UUID == uuid);
+						var modData = AdventureMods.FirstOrDefault(x => x.UUID == m.UUID);
 						if (modData != null)
 						{
 							var nextAdventure = AdventureMods.IndexOf(modData);
@@ -2974,18 +3024,21 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
-				(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);
+			//var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
+			//	(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);
 
-			selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder).DisposeWith(this.Disposables);
+			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder).DisposeWith(this.Disposables);
 			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
 
-			var indexChanged = this.WhenAnyValue(vm => vm.SelectedModOrderIndex);
 			//Throttle in case the index changes quickly in a short timespan
-			indexChanged.Throttle(TimeSpan.FromMilliseconds(10)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((selectedOrder) => {
-				if (selectedOrder > -1 && !LoadingOrder)
+			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).Throttle(TimeSpan.FromMilliseconds(10)).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
+				if (SelectedModOrderIndex > -1 && !LoadingOrder)
 				{
-					LoadModOrder(SelectedModOrder);
+					SelectedModOrder = ModOrderList.ElementAtOrDefault(SelectedModOrderIndex);
+					if(SelectedModOrder != null)
+					{
+						LoadModOrder(SelectedModOrder);
+					}
 				}
 			});
 
@@ -2993,7 +3046,7 @@ Directory the zip will be extracted to:
 			{
 				if (b)
 				{
-					BuildModOrderList();
+					BuildModOrderList(0);
 				}
 			});
 
@@ -3012,10 +3065,10 @@ Directory the zip will be extracted to:
 			{
 				if (AdventureMods != null && SelectedAdventureMod != null && SelectedProfile != null && SelectedProfile.ActiveMods != null)
 				{
-					if (!SelectedProfile.ActiveMods.Contains(SelectedAdventureMod.UUID))
+					if (!SelectedProfile.ActiveMods.Any(m => m.UUID == SelectedAdventureMod.UUID))
 					{
-						SelectedProfile.ActiveMods.RemoveAll(x => AdventureMods.Any(y => y.UUID == x));
-						SelectedProfile.ActiveMods.Insert(0, SelectedAdventureMod.UUID);
+						SelectedProfile.ActiveMods.RemoveAll(r => AdventureMods.Any(y => y.UUID == r.UUID));
+						SelectedProfile.ActiveMods.Insert(0, SelectedAdventureMod.ToProfileModData());
 					}
 				}
 			});
@@ -3085,9 +3138,6 @@ Directory the zip will be extracted to:
 
 			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
 				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
-
-			//ActiveMods.CollectionChanged += ActiveMods_SetItemIndex;
-			//InactiveMods.CollectionChanged += InactiveMods_SetItemIndex;
 
 			var activeModsConnection = this.ActiveMods.ToObservableChangeSet();
 			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet();

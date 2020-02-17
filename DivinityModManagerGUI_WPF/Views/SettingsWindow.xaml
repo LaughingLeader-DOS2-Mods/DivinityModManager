@@ -135,9 +135,9 @@
 						ChildMargin="4"
 						ColumnCount="2"
 						Columns="auto,*"
-						RowCount="6"
+						RowCount="8"
 						RowHeight="*"
-						Rows="auto,auto,auto,auto,auto,auto,auto">
+						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto">
 						<TextBlock
 							x:Name="SpeedupTextBlock"
 							Text="Enable Loading Speedup"
@@ -149,11 +149,13 @@
 						<TextBlock
 							x:Name="EnableExtensionTextblock"
 							Text="Enable Extensions"
-							ToolTip="Enable script extensions. Default: Enabled" />
+							ToolTip="Enable script extensions. Default: Enabled"
+							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 						<CheckBox
 							VerticalAlignment="Center"
 							IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
-							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}" />
+							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}"
+							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 						<TextBlock
 							x:Name="EnableConsoleTextBlock"
 							Text="Enable Console Window:"
@@ -187,6 +189,16 @@
 							Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
 							TextAlignment="Left"
 							ToolTip="{Binding ElementName=LogDirectoryTextBlock, Path=ToolTip}" />
+						<TextBlock
+							x:Name="EnableExtensionTextblock"
+							Text="Enable Extensions"
+							ToolTip="Enable script extensions. Default: Enabled"
+							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding ExtenderSettings.EnableExtensions, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=EnableExtensionTextblock, Path=ToolTip}"
+							Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 					</autogrid:AutoGrid>
 					<StackPanel Grid.Row="1">
 						<Button
@@ -202,9 +214,17 @@
 					ChildMargin="2"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="1"
+					RowCount="2"
 					RowHeight="*"
-					Rows="auto">
+					Rows="auto,auto">
+					<TextBlock
+						x:Name="DebugModeTextBlock"
+						Text="Enable Debug Mode"
+						ToolTip="Enables various debug features, such as additional OsiExtender options." />
+					<CheckBox
+						VerticalAlignment="Center"
+						IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"
+						ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
 					<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 				</autogrid:AutoGrid>
@@ -223,7 +243,5 @@
 					Content="Save" />
 			</StackPanel>
 		</Grid>
-
-
 	</Grid>
 </local:HideWindowBase>

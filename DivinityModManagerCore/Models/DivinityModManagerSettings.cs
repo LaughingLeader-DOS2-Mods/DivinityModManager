@@ -183,6 +183,7 @@ namespace DivinityModManager.Models
 
 		private bool disableMissingModWarnings = false;
 
+		[DataMember]
 		public bool DisableMissingModWarnings
 		{
 			get => disableMissingModWarnings;
@@ -197,6 +198,15 @@ namespace DivinityModManager.Models
 		{
 			get => displayFileNames;
 			set { this.RaiseAndSetIfChanged(ref displayFileNames, value); }
+		}
+
+		private bool debugModeEnabled = false;
+
+		[DataMember]
+		public bool DebugModeEnabled
+		{
+			get => debugModeEnabled;
+			set { this.RaiseAndSetIfChanged(ref debugModeEnabled, value); }
 		}
 
 		public ICommand SaveSettingsCommand { get; set; }

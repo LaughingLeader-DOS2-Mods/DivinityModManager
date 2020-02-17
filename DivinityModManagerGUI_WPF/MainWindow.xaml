@@ -379,7 +379,7 @@
 							<Button
 								x:Name="ExportOrderToArchiveAsButton"
 								Command="{Binding ExportLoadOrderAsArchiveToFileCommand}"
-								ToolTip="Export Active Mods As...">
+								ToolTip="Export Active Mods to Zip As...">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
 							<Rectangle />
@@ -766,8 +766,9 @@
 								Header="Export Order to Game"
 								InputGestureText="CTRL+Shift+E" />
 							<Separator />
-							<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods (.zip)" />
-							<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods As..." />
+							<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods to Archive (.zip)" />
+							<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods to Archive As..." />
+							<MenuItem x:Name="FileExportOrderToTextListMenuItem" Header="Export Active Mods to Text File..." />
 							<Separator />
 							<MenuItem
 								x:Name="FileRefreshMenuItem"

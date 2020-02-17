@@ -192,6 +192,7 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.ExportOrderCommand).BindTo(this, view => view.FileExportOrderToGameMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsTextFileCommand).BindTo(this, view => view.FileExportOrderToTextListMenuItem.Command);
 
 				this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
 

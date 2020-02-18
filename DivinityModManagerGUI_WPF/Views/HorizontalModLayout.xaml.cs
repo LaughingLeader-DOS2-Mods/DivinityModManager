@@ -43,9 +43,25 @@ namespace DivinityModManager.Views
 
 		private MainWindowViewModel _lastVM;
 
+		private void SetupListView(ListView listView)
+		{
+			listView.InputBindings.Add(new KeyBinding(ApplicationCommands.SelectAll, new KeyGesture(Key.A, ModifierKeys.Control)));
+			listView.CommandBindings.Add(new CommandBinding(ApplicationCommands.SelectAll, (_sender, _e) =>
+			{
+				listView.SelectAll();
+			}));
+
+			listView.InputBindings.Add(new KeyBinding(ReactiveCommand.Create(() =>
+			{
+				listView.SelectedItems.Clear();
+			}), new KeyGesture(Key.D, ModifierKeys.Control)));
+		}
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
+
+			SetupListView(ActiveModsListView);
+			SetupListView(InactiveModsListView);
 
 			this.WhenActivated((d) =>
 			{

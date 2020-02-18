@@ -110,7 +110,8 @@
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding ActiveMods}"
 				Style="{StaticResource ModOrderListView}"
-				View="{DynamicResource ModGridView}" />
+				View="{DynamicResource ModGridView}"
+				VirtualizingPanel.IsVirtualizing="False" />
 		</Grid>
 		<GridSplitter
 			Grid.Column="1"
@@ -170,7 +171,8 @@
 				Grid.Row="2"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding InactiveMods}"
-				View="{DynamicResource InactiveModGridView}" />
+				View="{DynamicResource InactiveModGridView}"
+				VirtualizingPanel.IsVirtualizing="False" />
 		</Grid>
 	</Grid>
 </UserControl>

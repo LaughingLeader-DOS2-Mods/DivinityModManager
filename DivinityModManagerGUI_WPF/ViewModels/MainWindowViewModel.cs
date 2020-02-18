@@ -3150,10 +3150,10 @@ Directory the zip will be extracted to:
 			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
 				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
 
-			var activeModsConnection = this.ActiveMods.ToObservableChangeSet();
-			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet();
+			var activeModsConnection = this.ActiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
+			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
 
-			activeModsConnection.ObserveOn(RxApp.MainThreadScheduler).Subscribe((x) =>
+			activeModsConnection.Subscribe((x) =>
 			{
 				for(int i = 0; i < ActiveMods.Count; i++)
 				{
@@ -3168,7 +3168,7 @@ Directory the zip will be extracted to:
 			});
 
 			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)
-			activeModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
+			activeModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
 			{
 				if (x != null && x.Current != null)
 				{
@@ -3184,7 +3184,7 @@ Directory the zip will be extracted to:
 				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 			});
 
-			inactiveModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
+			inactiveModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
 			{
 				if (x != null && x.Current != null)
 				{
@@ -3202,7 +3202,7 @@ Directory the zip will be extracted to:
 			activeModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, out activeSelected);
 
-			activeModsConnection.AutoRefresh(x => x.IsSelected).
+			inactiveModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;

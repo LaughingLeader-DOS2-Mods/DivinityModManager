@@ -80,7 +80,14 @@ namespace DivinityModManager.Models
 
 		public void Add(DivinityModData mod)
 		{
-			if(!Order.Any(x => x.UUID == mod.UUID))
+			if (Order.Count > 0)
+			{
+				if (!Order.Any(x => x.UUID == mod.UUID))
+				{
+					Order.Add(mod.ToOrderEntry());
+				}
+			}
+			else
 			{
 				Order.Add(mod.ToOrderEntry());
 			}
@@ -88,9 +95,16 @@ namespace DivinityModManager.Models
 
 		public void AddRange(IEnumerable<DivinityModData> mods)
 		{
-			foreach(var mod in mods)
+			foreach (var mod in mods)
 			{
-				if (!Order.Any(x => x.UUID == mod.UUID))
+				if (Order.Count > 0)
+				{
+					if (!Order.Any(x => x.UUID == mod.UUID))
+					{
+						Order.Add(mod.ToOrderEntry());
+					}
+				}
+				else
 				{
 					Order.Add(mod.ToOrderEntry());
 				}
@@ -99,20 +113,38 @@ namespace DivinityModManager.Models
 
 		public void Remove(DivinityModData mod)
 		{
-			Order.RemoveAll(x => x.UUID == mod.UUID);
+			if (Order.Count > 0 && mod != null)
+			{
+				var entry = Order.FirstOrDefault(x => x.UUID == mod.UUID);
+				if (entry != null) Order.Remove(entry);
+			}
 		}
 
 		public void RemoveRange(IEnumerable<DivinityModData> mods)
 		{
-			foreach (var mod in mods)
+			if (Order.Count > 0 && mods != null)
 			{
-				Order.RemoveAll(x => x.UUID == mod.UUID);
+				foreach (var mod in mods)
+				{
+					var entry = Order.FirstOrDefault(x => x.UUID == mod.UUID);
+					if(entry != null) Order.Remove(entry);
+				}
 			}
 		}
 
 		public void Sort(Comparison<DivinityLoadOrderEntry> comparison)
 		{
-			Order.Sort(comparison);
+			try
+			{
+				if (Order.Count > 0)
+				{
+					Order.Sort(comparison);
+				}
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error sorting order:\n{ex.ToString()}");
+			}
 		}
 
 		public void SetOrder(IEnumerable<DivinityLoadOrderEntry> nextOrder)
@@ -129,7 +161,11 @@ namespace DivinityModManager.Models
 
 		public bool OrderEquals(IEnumerable<string> orderList)
 		{
-			return Order.Select(x => x.UUID).SequenceEqual(orderList);
+			if(Order.Count > 0)
+			{
+				return Order.Select(x => x.UUID).SequenceEqual(orderList);
+			}
+			return false;
 		}
 
 		public DivinityLoadOrder Clone()

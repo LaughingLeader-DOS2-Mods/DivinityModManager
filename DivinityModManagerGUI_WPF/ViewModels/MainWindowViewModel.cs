@@ -1109,10 +1109,11 @@ namespace DivinityModManager.ViewModels
 				{
 					if(selectIndex != -1)
 					{
-						Trace.WriteLine($"Setting next order index to {selectIndex}.");
+						if (selectIndex >= ModOrderList.Count) selectIndex = ModOrderList.Count - 1;
+						Trace.WriteLine($"Setting next order index to [{selectIndex}/{ModOrderList.Count-1}].");
 						try
 						{
-							selectedModOrderIndex = selectIndex;
+							SelectedModOrderIndex = selectIndex;
 							var nextOrder = ModOrderList.ElementAtOrDefault(selectedModOrderIndex);
 							LoadModOrder(nextOrder, missingMods);
 							Settings.LastOrder = nextOrder?.Name;
@@ -1165,7 +1166,7 @@ namespace DivinityModManager.ViewModels
 					};
 				}
 				SavedModOrderList.Add(newOrder);
-				BuildModOrderList(SavedModOrderList.Count - 1);
+				BuildModOrderList(SavedModOrderList.Count);
 			};
 
 			this.CreateSnapshot(undo, redo);
@@ -2789,17 +2790,28 @@ Directory the zip will be extracted to:
 
 		private int SortModOrder(DivinityLoadOrderEntry a, DivinityLoadOrderEntry b)
 		{
-			var moda = mods.Items.FirstOrDefault(x => x.UUID == a.UUID);
-			var modb = mods.Items.FirstOrDefault(x => x.UUID == b.UUID);
-			if(moda != null && modb != null)
+			if(a != null && b != null)
 			{
-				return moda.Index.CompareTo(modb.Index);
+				var moda = mods.Items.FirstOrDefault(x => x.UUID == a.UUID);
+				var modb = mods.Items.FirstOrDefault(x => x.UUID == b.UUID);
+				if (moda != null && modb != null)
+				{
+					return moda.Index.CompareTo(modb.Index);
+				}
+				else if (moda != null)
+				{
+					return 1;
+				}
+				else if (modb != null)
+				{
+					return -1;
+				}
 			}
-			else if(moda != null)
+			else if (a != null)
 			{
 				return 1;
 			}
-			else if(modb != null)
+			else if (b != null)
 			{
 				return -1;
 			}
@@ -3154,13 +3166,17 @@ Directory the zip will be extracted to:
 					SelectedModOrder.Sort(SortModOrder);
 				}
 			});
+
 			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)
 			activeModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
 			{
-				x.Current.IsActive = true;
-				if (SelectedModOrder != null)
+				if (x != null && x.Current != null)
 				{
-					SelectedModOrder.Add(x.Current);
+					x.Current.IsActive = true;
+					if (SelectedModOrder != null)
+					{
+						SelectedModOrder.Add(x.Current);
+					}
 				}
 				//x.Current.Index = x.CurrentIndex;
 			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
@@ -3168,12 +3184,15 @@ Directory the zip will be extracted to:
 				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 			});
 
-			inactiveModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).Buffer(TimeSpan.FromMilliseconds(50)).SelectMany(x => x).ForEachItemChange((x) =>
+			inactiveModsConnection.ObserveOn(RxApp.MainThreadScheduler).WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
 			{
-				x.Current.IsActive = false;
-				if (SelectedModOrder != null)
+				if (x != null && x.Current != null)
 				{
-					SelectedModOrder.Remove(x.Current);
+					x.Current.IsActive = false;
+					if (SelectedModOrder != null)
+					{
+						SelectedModOrder.Remove(x.Current);
+					}
 				}
 			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
 			{

@@ -1405,6 +1405,9 @@ namespace DivinityModManager.ViewModels
 				lastOrderIndex = SelectedModOrderIndex;
 			}
 
+			string lastAdventureMod = null;
+			if (SelectedAdventureMod != null) lastAdventureMod = SelectedAdventureMod.UUID;
+
 			string selectedProfileUUID = "";
 			if(SelectedProfile != null)
 			{
@@ -1480,7 +1483,7 @@ namespace DivinityModManager.ViewModels
 					
 					if (lastActiveOrder != null && lastActiveOrder.Count > 0)
 					{
-						SelectedModOrder.SetOrder(lastActiveOrder);
+						if (SelectedModOrder != null) SelectedModOrder.SetOrder(lastActiveOrder);
 						BuildModOrderList(lastOrderIndex);
 					}
 					else
@@ -1506,6 +1509,20 @@ namespace DivinityModManager.ViewModels
 
 			RxApp.MainThreadScheduler.Schedule(_ =>
 			{
+				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
+				{
+					var nextAdventureMod = AdventureMods.FirstOrDefault(x => x.UUID == lastAdventureMod);
+					if (nextAdventureMod != null)
+					{
+						SelectedAdventureModIndex = AdventureMods.IndexOf(nextAdventureMod);
+					}
+					SelectedAdventureModIndex = 0;
+				}
+				else
+				{
+					SelectedAdventureModIndex = 0;
+				}
+
 				Refreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
@@ -3014,20 +3031,18 @@ Directory the zip will be extracted to:
 				Select(x => Profiles[SelectedProfileIndex]);
 			profileChanged.ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
 
-			this.WhenAnyValue(x => x.SelectedProfile.ActiveMods).Subscribe((order) =>
+			profileChanged.Subscribe((profile) =>
 			{
-				if (order != null)
+				if (profile.ActiveMods != null && profile.ActiveMods.Count > 0)
 				{
-					foreach (var m in order)
+					var adventureModData = AdventureMods.FirstOrDefault(x => profile.ActiveMods.Any(y => y.UUID == x.UUID));
+					if (adventureModData != null)
 					{
-						var modData = AdventureMods.FirstOrDefault(x => x.UUID == m.UUID);
-						if (modData != null)
+						var nextAdventure = AdventureMods.IndexOf(adventureModData);
+						Trace.WriteLine($"Found adventure mod in profile: {adventureModData.Name} | {nextAdventure}");
+						if (nextAdventure > -1)
 						{
-							var nextAdventure = AdventureMods.IndexOf(modData);
-							if (nextAdventure > -1)
-							{
-								SelectedAdventureModIndex = nextAdventure;
-							}
+							SelectedAdventureModIndex = nextAdventure;
 						}
 					}
 				}

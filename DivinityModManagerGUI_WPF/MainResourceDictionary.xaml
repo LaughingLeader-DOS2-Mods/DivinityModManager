@@ -37,6 +37,7 @@
 	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Icons/Steam_16x.png" />
 	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Icons/Kofi_16x.png" />
 	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Icons/Github_16x.png" />
+	<BitmapImage x:Key="DefaultIcon" UriSource="pack://application:,,,/Resources/Icons/DefaultIcon_16x.png" />
 	<BitmapImage x:Key="ExportScriptImage" UriSource="pack://application:,,,/Resources/Icons/ExportScript_16x.png" />
 	<BitmapImage x:Key="ZipFileImage" UriSource="pack://application:,,,/Resources/Icons/ZipFile_16x.png" />
 	<BitmapImage x:Key="ZipFileAsImage" UriSource="pack://application:,,,/Resources/Icons/ZipFileAs_16x.png" />

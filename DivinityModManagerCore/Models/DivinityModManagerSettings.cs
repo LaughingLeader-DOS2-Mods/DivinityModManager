@@ -209,9 +209,18 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref debugModeEnabled, value); }
 		}
 
+		private bool extenderTabIsVisible = false;
+
+		public bool ExtenderTabIsVisible
+		{
+			get => extenderTabIsVisible;
+			set { this.RaiseAndSetIfChanged(ref extenderTabIsVisible, value); }
+		}
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
 		public ICommand ExportExtenderSettingsCommand { get; set; }
+		public ICommand ResetExtenderSettingsToDefaultCommand { get; set; }
 
 		public CompositeDisposable Disposables { get; internal set; }
 

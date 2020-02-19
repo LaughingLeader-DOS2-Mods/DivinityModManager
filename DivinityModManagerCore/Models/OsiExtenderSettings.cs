@@ -90,6 +90,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref disableModValidation, value); }
 		}
 
+		private bool enableAchievements = true;
+
+		[DataMember]
+		public bool EnableAchievements
+		{
+			get => enableAchievements;
+			set { this.RaiseAndSetIfChanged(ref enableAchievements, value); }
+		}
+
 		private bool sendCrashReports = true;
 
 		[DataMember]
@@ -126,6 +135,21 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref debuggerFlags, value); }
 		}
 
+		public void SetToDefault()
+		{
+			EnableExtensions = true;
+			CreateConsole = false;
+			EnableLogging = false;
+			LogCompile = false;
+			LogDirectory = "";
+			DisableModValidation = true;
+			EnableAchievements = true;
+			SendCrashReports = true;
+			EnableDebugger = false;
+			DebuggerPort = 9999;
+			DebuggerFlags = 0;
+		}
+
 		public void Set(OsiExtenderSettings osirisExtenderSettings)
 		{
 			EnableExtensions = osirisExtenderSettings.EnableExtensions;
@@ -134,7 +158,8 @@ namespace DivinityModManager.Models
 			LogCompile = osirisExtenderSettings.LogCompile;
 			if (osirisExtenderSettings.LogDirectory.IsExistingDirectory()) LogDirectory = osirisExtenderSettings.LogDirectory;
 			DisableModValidation = osirisExtenderSettings.DisableModValidation;
-			DisableModValidation = osirisExtenderSettings.SendCrashReports;
+			EnableAchievements = osirisExtenderSettings.EnableAchievements;
+			SendCrashReports = osirisExtenderSettings.SendCrashReports;
 			EnableDebugger = osirisExtenderSettings.EnableDebugger;
 			DebuggerPort = osirisExtenderSettings.DebuggerPort;
 			DebuggerFlags = osirisExtenderSettings.DebuggerFlags;

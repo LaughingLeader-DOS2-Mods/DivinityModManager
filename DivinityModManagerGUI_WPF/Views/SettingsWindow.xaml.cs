@@ -61,5 +61,18 @@ namespace DivinityModManager.Views
 				OnWorkshopPathChanged?.Invoke(this, EventArgs.Empty);
 			}
 		}
+
+		private void TabItem_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+		{
+			if(sender is TabItem tabItem)
+			{
+				ViewModel.ExtenderTabIsVisible = tabItem.IsSelected;
+			}
+		}
+
+		private void PreferencesTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			ViewModel.ExtenderTabIsVisible = PreferencesTabControl.SelectedItem == this.OsirisExtenderTab;
+		}
 	}
 }

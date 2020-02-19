@@ -566,6 +566,17 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
+			var canResetExtenderSettingsObservable = this.WhenAny(x => x.Settings.ExtenderSettings, (extenderSettings) => extenderSettings != null);
+			Settings.ResetExtenderSettingsToDefaultCommand = ReactiveCommand.Create(() =>
+			{
+				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view.SettingsWindow, $"Reset Extender Settings to Default?\nCurrent Extender Settings will be lost.", "Confirm Extender Settings Reset",
+					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
+				if (result == MessageBoxResult.Yes)
+				{
+					Settings.ExtenderSettings.SetToDefault();
+				}
+			}, canResetExtenderSettingsObservable).DisposeWith(Settings.Disposables);
+
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
 				ToggleLogging(logEnabled);

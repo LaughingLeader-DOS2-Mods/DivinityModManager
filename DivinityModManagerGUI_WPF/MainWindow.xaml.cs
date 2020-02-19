@@ -52,8 +52,6 @@ namespace DivinityModManager.Views
 		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
-		//public WindowWrapper Wrapper { get; private set; }
-
 		public MainWindow()
 		{
 			InitializeComponent();

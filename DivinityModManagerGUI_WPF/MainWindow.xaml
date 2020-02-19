@@ -656,22 +656,6 @@
 	</Window.Resources>
 	<Window.InputBindings>
 		<KeyBinding
-			Key="Z"
-			Command="{Binding UndoCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="Z"
-			Command="{Binding RedoCommand}"
-			Modifiers="Ctrl+Alt" />
-		<KeyBinding
-			Key="Y"
-			Command="{Binding RedoCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="D"
-			Command="{Binding DebugCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
 			Key="S"
 			Command="{Binding SaveOrderCommand}"
 			Modifiers="Ctrl" />

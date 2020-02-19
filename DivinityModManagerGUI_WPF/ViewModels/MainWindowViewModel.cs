@@ -3028,12 +3028,12 @@ Directory the zip will be extracted to:
 			ExportOrderAsListCommand = ReactiveCommand.Create(ExportOrderToListAs, canExecuteSaveAsCommand);
 
 			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
-				Select(x => Profiles[SelectedProfileIndex]);
+				Select(x => Profiles.ElementAtOrDefault(SelectedProfileIndex));
 			profileChanged.ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
 
 			profileChanged.Subscribe((profile) =>
 			{
-				if (profile.ActiveMods != null && profile.ActiveMods.Count > 0)
+				if (profile != null && profile.ActiveMods != null && profile.ActiveMods.Count > 0)
 				{
 					var adventureModData = AdventureMods.FirstOrDefault(x => profile.ActiveMods.Any(y => y.UUID == x.UUID));
 					if (adventureModData != null)

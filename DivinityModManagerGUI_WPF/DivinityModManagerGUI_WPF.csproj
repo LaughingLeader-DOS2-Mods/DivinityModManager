@@ -171,6 +171,7 @@
     <Compile Include="Converters\EnumToStringConverter.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
+    <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
@@ -215,7 +216,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="MainResourceDictionary.xaml">
+    <Page Include="Resources\Themes\MainResourceDictionary.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -403,6 +404,12 @@
     <Resource Include="Resources\Icons\DefaultIcon_16x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Resources\Themes\DefaultStyles\ComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

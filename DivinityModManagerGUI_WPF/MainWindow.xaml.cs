@@ -235,26 +235,6 @@ namespace DivinityModManager.Views
 			App.Current.Shutdown();
 		}
 
-		private static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-		{
-			if (depObj != null)
-			{
-				for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-				{
-					DependencyObject child = VisualTreeHelper.GetChild(depObj, i);
-					if (child != null && child is T)
-					{
-						yield return (T)child;
-					}
-
-					foreach (T childOfChild in FindVisualChildren<T>(child))
-					{
-						yield return childOfChild;
-					}
-				}
-			}
-		}
-
 		private void AlertBar_Show(object sender, RoutedEventArgs e)
 		{
 			var spStandard = (StackPanel)AlertBar.FindName("spStandard");
@@ -264,15 +244,15 @@ namespace DivinityModManager.Views
 			switch (AlertBar.Theme)
 			{
 				case DivinityModManager.Controls.AlertBar.ThemeType.Standard:
-					grdParent = FindVisualChildren<Grid>(spStandard).FirstOrDefault();
+					grdParent = spStandard.FindVisualChildren<Grid>().FirstOrDefault();
 					break;
 				case DivinityModManager.Controls.AlertBar.ThemeType.Outline:
 				default:
-					grdParent = FindVisualChildren<Grid>(spOutline).FirstOrDefault();
+					grdParent = spOutline.FindVisualChildren<Grid>().FirstOrDefault();
 					break;
 			}
 
-			TextBlock lblMessage = FindVisualChildren<TextBlock>(grdParent).FirstOrDefault();
+			TextBlock lblMessage = grdParent.FindVisualChildren<TextBlock>().FirstOrDefault();
 			if(lblMessage != null)
 			{
 				Trace.WriteLine(lblMessage.Text);
@@ -340,7 +320,7 @@ namespace DivinityModManager.Views
 		{
 			if(sender is ComboBox ordersComboBox)
 			{
-				var tb = FindVisualChildren<TextBox>(ordersComboBox).FirstOrDefault();
+				var tb = ordersComboBox.FindVisualChildren<TextBox>().FirstOrDefault();
 				if(tb != null)
 				{
 					tb.ContextMenu = ordersComboBox.ContextMenu;

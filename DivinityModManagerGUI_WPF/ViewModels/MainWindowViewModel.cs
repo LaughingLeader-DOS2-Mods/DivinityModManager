@@ -3094,7 +3094,14 @@ Directory the zip will be extracted to:
 			{
 				if (b)
 				{
-					BuildModOrderList(0);
+					if (SelectedModOrder != null)
+					{
+						BuildModOrderList(SelectedModOrderIndex);
+					}
+					else
+					{
+						BuildModOrderList(0);
+					}
 				}
 			});
 

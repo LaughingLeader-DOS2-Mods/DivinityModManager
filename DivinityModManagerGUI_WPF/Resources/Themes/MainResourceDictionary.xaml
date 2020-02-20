@@ -16,6 +16,9 @@
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
 	x:Name="MainResources">
+	<ResourceDictionary.MergedDictionaries>
+		<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/DefaultStyles/ComboBox.xaml" />
+	</ResourceDictionary.MergedDictionaries>
 	<conv:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
 	<conv:BoolToVisibilityConverterReversed x:Key="BoolToVisibilityConverterReversed" />
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />

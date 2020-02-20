@@ -29,7 +29,7 @@
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
 				<Setter Property="Padding" Value="20,2" />

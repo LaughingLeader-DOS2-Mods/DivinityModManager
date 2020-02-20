@@ -33,7 +33,7 @@
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<DataTemplate x:Key="VerticalModLayout">
 				<local:VerticalModLayout />
@@ -230,11 +230,11 @@
 						<ComboBox
 							x:Name="ProfilesComboBox"
 							Grid.Column="1"
-							MinWidth="100"
+							MinWidth="125"
 							MinHeight="16"
-							HorizontalAlignment="Stretch"
-							VerticalAlignment="Center"
+							MaxWidth="250"
 							DisplayMemberPath="Name"
+							IsEditable="False"
 							IsTextSearchEnabled="False"
 							ItemsSource="{Binding Profiles}"
 							SelectedIndex="{Binding SelectedProfileIndex}"
@@ -265,12 +265,11 @@
 						<ComboBox
 							x:Name="OrdersComboBox"
 							Grid.Column="1"
-							MinWidth="100"
+							MinWidth="140"
 							MinHeight="16"
-							HorizontalAlignment="Stretch"
-							VerticalAlignment="Center"
+							MaxWidth="250"
 							DisplayMemberPath="Name"
-							IsEditable="True"
+							IsEditable="{Binding IsRenamingOrder, FallbackValue=False}"
 							IsTextSearchEnabled="False"
 							ItemsSource="{Binding ModOrderList}"
 							KeyDown="ComboBox_KeyDown_LoseFocus"
@@ -285,6 +284,10 @@
 							</ComboBox.ItemContainerStyle>
 							<ComboBox.ContextMenu>
 								<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+									<MenuItem
+										Command="{Binding ToggleOrderRenamingCommand}"
+										CommandParameter="{Binding RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=ContextMenu}, Path=PlacementTarget}"
+										Header="Toggle Renaming" />
 									<MenuItem
 										Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 										CommandParameter="{Binding SelectedModOrder.FilePath}"

@@ -364,6 +364,16 @@ namespace DivinityModManager.ViewModels
 		}
 		#endregion
 
+		private bool isRenamingOrder = false;
+
+		public bool IsRenamingOrder
+		{
+			get => isRenamingOrder;
+			set { this.RaiseAndSetIfChanged(ref isRenamingOrder, value); }
+		}
+
+		public IObservable<bool> canRenameOrder;
+
 		private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenDOS2DEGame;
@@ -406,6 +416,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
 		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
+		public ICommand ToggleOrderRenamingCommand { get; set; }
 
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
 		public DivinityGameLaunchWindowAction ActionOnGameLaunch
@@ -3127,6 +3138,50 @@ Directory the zip will be extracted to:
 					ShowAlert($"Path not found.", -1, 30);
 				}
 			}, adventureModCanOpenObservable);
+
+			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
+
+			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object>(async (object control) =>
+			{
+				IsRenamingOrder = !IsRenamingOrder;
+
+				await Task.Delay(50);
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					if (control is ComboBox comboBox)
+					{
+						var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
+						if(tb != null)
+						{
+							tb.Focus();
+							if (IsRenamingOrder)
+							{
+								tb.SelectAll();
+							}
+							else
+							{
+								tb.Select(0, 0);
+							}
+						}
+					}
+					else if (control is TextBox tb)
+					{
+						if (IsRenamingOrder)
+						{
+							tb.SelectAll();
+
+						}
+						else
+						{
+							tb.Select(0, 0);
+						}
+					}
+					else
+					{
+						Trace.WriteLine("Can't find OrdersComboBox!");
+					}
+				});
+			}, canRenameOrder);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 

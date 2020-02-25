@@ -21,10 +21,11 @@
 				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 
-			<Style BasedOn="{StaticResource ModOrderListView}" TargetType="ListView">
+			<Style
+				x:Key="ModOrderListViewWithDrag"
+				BasedOn="{StaticResource ModOrderListView}"
+				TargetType="ListView">
 				<Setter Property="dd:DragDrop.DragDirectlySelectedOnly" Value="True" />
-				<Setter Property="dd:DragDrop.DragHandler" Value="{Binding DragHandler}" />
-				<Setter Property="dd:DragDrop.DropHandler" Value="{Binding DropHandler}" />
 				<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
 				<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
 			</Style>
@@ -107,11 +108,15 @@
 			<ListView
 				x:Name="ActiveModsListView"
 				Grid.Row="1"
+				MaxHeight="99999"
+				dd:DragDrop.DragHandler="{Binding DragHandler}"
+				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding ActiveMods}"
-				Style="{StaticResource ModOrderListView}"
+				ScrollViewer.IsDeferredScrollingEnabled="True"
+				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource ModGridView}"
-				VirtualizingPanel.IsVirtualizing="False" />
+				VirtualizingPanel.IsVirtualizing="True" />
 		</Grid>
 		<GridSplitter
 			Grid.Column="1"
@@ -169,10 +174,15 @@
 			<ListView
 				x:Name="InactiveModsListView"
 				Grid.Row="2"
+				MaxHeight="99999"
+				dd:DragDrop.DragHandler="{Binding DragHandler}"
+				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding InactiveMods}"
+				ScrollViewer.IsDeferredScrollingEnabled="True"
+				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource InactiveModGridView}"
-				VirtualizingPanel.IsVirtualizing="False" />
+				VirtualizingPanel.IsVirtualizing="True" />
 		</Grid>
 	</Grid>
 </UserControl>

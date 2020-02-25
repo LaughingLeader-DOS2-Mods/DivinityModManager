@@ -21,6 +21,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Concurrency;
 using System.Reactive.Linq;
+using DivinityModManager.Models;
 
 namespace DivinityModManager.Views
 {
@@ -48,12 +49,26 @@ namespace DivinityModManager.Views
 			listView.InputBindings.Add(new KeyBinding(ApplicationCommands.SelectAll, new KeyGesture(Key.A, ModifierKeys.Control)));
 			listView.CommandBindings.Add(new CommandBinding(ApplicationCommands.SelectAll, (_sender, _e) =>
 			{
-				listView.SelectAll();
+				//listView.SelectAll();
+				if(listView.ItemsSource is IEnumerable<ISelectable> mods)
+				{
+					foreach(var mod in mods)
+					{
+						mod.IsSelected = true;
+					}
+				}
 			}));
 
 			listView.InputBindings.Add(new KeyBinding(ReactiveCommand.Create(() =>
 			{
-				listView.SelectedItems.Clear();
+				//listView.SelectedItems.Clear();
+				if (listView.ItemsSource is IEnumerable<ISelectable> mods)
+				{
+					foreach (var mod in mods)
+					{
+						mod.IsSelected = false;
+					}
+				}
 			}), new KeyGesture(Key.D, ModifierKeys.Control)));
 		}
 		public HorizontalModLayout()

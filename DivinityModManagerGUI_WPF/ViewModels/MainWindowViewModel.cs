@@ -45,29 +45,33 @@ namespace DivinityModManager.ViewModels
 	{
 		override public void Drop(IDropInfo dropInfo)
 		{
-			base.Drop(dropInfo);
+			var droppedMods = new List<DivinityModData>();
 
-			var newSelected = new List<object>();
-
-			if (dropInfo.Data is IEnumerable<object> list)
+			if (dropInfo.Data is IEnumerable<DivinityModData> list)
 			{
-				newSelected.AddRange(list);
+				droppedMods.AddRange(list);
 			}
-			else if (dropInfo.Data is ISelectable d)
+			else if (dropInfo.Data is DivinityModData d)
 			{
-				newSelected.Add(d);
+				droppedMods.Add(d);
 			}
 
-			foreach (var obj in dropInfo.TargetCollection)
+			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
+
+			foreach (var mod in _viewModel.Mods)
 			{
-				if (!newSelected.Contains(obj))
+				if(droppedMods.Contains(mod))
 				{
-					if (obj is ISelectable d)
-					{
-						d.IsSelected = false;
-					}
+					mod.IsSelected = true;
+					mod.IsActive = isActive;
+				}
+				else
+				{
+					mod.IsSelected = false;
 				}
 			}
+
+			base.Drop(dropInfo);
 
 			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
 		}
@@ -82,31 +86,30 @@ namespace DivinityModManager.ViewModels
 
 	public class ModListDragHandler : DefaultDragHandler
 	{
+		private MainWindowViewModel _viewModel;
+
+		public ModListDragHandler(MainWindowViewModel vm) : base()
+		{
+			_viewModel = vm;
+		}
+
 		public override void StartDrag(IDragInfo dragInfo)
 		{
-			base.StartDrag(dragInfo);
+			//base.StartDrag(dragInfo);
 			if(dragInfo != null)
 			{
-				var items = dragInfo.SourceItems.Cast<ISelectable>().Where(x => x.CanDrag).ToList();
-				if (items.Count > 1)
+				if(dragInfo.SourceCollection == _viewModel.ActiveMods)
 				{
-					dragInfo.Data = items;
+					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected);
+					dragInfo.Data = selected;
+					//Trace.WriteLine($"Drag source is ActiveMods | {selected.Count()}");
 				}
-				else
+				else if(dragInfo.SourceCollection == _viewModel.InactiveMods)
 				{
-					// special case: if the single item is an enumerable then we can not drop it as single item
-					var singleItem = items.FirstOrDefault();
-					if (singleItem is System.Collections.IEnumerable)
-					{
-						dragInfo.Data = new List<ISelectable>(items.Cast<ISelectable>().Where(x => x.CanDrag));
-					}
-					else if (singleItem is ISelectable d && d.CanDrag)
-					{
-						dragInfo.Data = singleItem;
-						//Trace.WriteLine("Can drag item");
-					}
+					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.CanDrag);
+					dragInfo.Data = selected;
+					//Trace.WriteLine($"Drag source is InactiveMods | {selected.Count()}");
 				}
-
 				dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
 			}
 		}
@@ -120,22 +123,31 @@ namespace DivinityModManager.ViewModels
 			}
 			return true;
 		}
-
-		public ModListDragHandler() : base()
-		{
-			
-		}
 	}
 
 	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
 	{
 		private MainWindow view;
 		public MainWindow View => view;
-		public ModListDropHandler DropHandler { get; set; }
-		public ModListDragHandler DragHandler { get; set; }
 
+		private ModListDropHandler dropHandler;
+
+		public ModListDropHandler DropHandler
+		{
+			get => dropHandler;
+			set { this.RaiseAndSetIfChanged(ref dropHandler, value); }
+		}
+
+		private ModListDragHandler dragHandler;
+
+		public ModListDragHandler DragHandler
+		{
+			get => dragHandler;
+			set { this.RaiseAndSetIfChanged(ref dragHandler, value); }
+		}
 
 		public string Title => "Divinity Mod Manager " + System.Reflection.Assembly.GetExecutingAssembly().GetName().Version.ToString();
+		private bool IsInitialized { get; set; } = false;
 
 		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
 
@@ -492,6 +504,147 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private async Task<Unit> LoadExtenderSettingsAsync(CancellationToken t)
+		{
+			try
+			{
+				string latestReleaseZipUrl = "";
+				Trace.WriteLine($"Checking for latest DXGI.dll release at 'Norbyte/ositools'.");
+				var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
+				var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
+				if (jsonData != null)
+				{
+					if (jsonData.TryGetValue("assets", out var assetsArray))
+					{
+						JArray assets = (JArray)assetsArray;
+						foreach (var obj in assets.Children<JObject>())
+						{
+							if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+							{
+								latestReleaseZipUrl = browserUrl.ToString();
+							}
+						}
+					}
+					if (jsonData.TryGetValue("tag_name", out var tagName))
+					{
+						PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
+					}
+	#if DEBUG
+					var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
+					Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+	#endif
+				}
+				if (!String.IsNullOrEmpty(latestReleaseZipUrl))
+				{
+					PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
+					Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+				}
+				else
+				{
+					Trace.WriteLine($"OsiTools latest release not found.");
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error checking for latest OsiExtender release: {ex.ToString()}");
+			}
+
+			try
+			{
+				string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
+				if (extenderSettingsJson.IsExistingFile())
+				{
+					var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
+					if (osirisExtenderSettings != null)
+					{
+						Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
+						Settings.ExtenderSettings.Set(osirisExtenderSettings);
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error loading extender settings: {ex.ToString()}");
+			}
+
+			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
+			Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
+			if (File.Exists(extenderUpdaterPath))
+			{
+				Trace.WriteLine($"Checking DXGI.dll for Osiris ASCII bytes.");
+				try
+				{
+					using (var stream = new FileStream(extenderUpdaterPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+					{
+						byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
+						if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
+						{
+							Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+							Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
+						}
+						else
+						{
+							Trace.WriteLine($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
+						}
+					}
+				}
+				catch (System.IO.IOException ex)
+				{
+					// This can happen if the game locks up the dll.
+					// Assume it's the extender for now.
+					Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+					Trace.WriteLine($"WARNING: {extenderUpdaterPath} is locked by a process.");
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
+				}
+
+				string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
+				if (File.Exists(extenderAppFile))
+				{
+					Settings.ExtenderSettings.ExtenderIsAvailable = true;
+					try
+					{
+						FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
+						if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+						{
+							var version = extenderInfo.FileVersion.Split('.')[0];
+							if (int.TryParse(version, out int intVersion))
+							{
+								Settings.ExtenderSettings.ExtenderVersion = intVersion;
+								Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+							}
+							else
+							{
+								Settings.ExtenderSettings.ExtenderVersion = -1;
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
+					}
+				}
+			}
+			return Unit.Default;
+		}
+
+		private void LoadExtenderSettings()
+		{
+			if (File.Exists(Settings.DOS2DEGameExecutable))
+			{
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
+				{
+					await LoadExtenderSettingsAsync(t);
+					RxApp.MainThreadScheduler.Schedule(CheckExtenderData);
+				});
+			}
+			else
+			{
+				CheckExtenderData();
+			}
+		}
 		private bool LoadSettings()
 		{
 			if (Settings != null)
@@ -806,137 +959,12 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 				}
+
+				LoadExtenderSettings();
 			}
 			catch(Exception ex)
 			{
 				Trace.WriteLine($"Error setting up game pathways: {ex.ToString()}");
-			}
-
-			if (File.Exists(Settings.DOS2DEGameExecutable))
-			{
-				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
-				{
-					try
-					{
-						string latestReleaseZipUrl = "";
-						var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
-						var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
-						if (jsonData != null)
-						{
-							if (jsonData.TryGetValue("assets", out var assetsArray))
-							{
-								JArray assets = (JArray)assetsArray;
-								foreach (var obj in assets.Children<JObject>())
-								{
-									if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
-									{
-										latestReleaseZipUrl = browserUrl.ToString();
-									}
-								}
-							}
-							if (jsonData.TryGetValue("tag_name", out var tagName))
-							{
-								PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
-							}
-#if DEBUG
-							var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-							Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
-#endif
-						}
-						if (!String.IsNullOrEmpty(latestReleaseZipUrl))
-						{
-							PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
-							Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
-						}
-						else
-						{
-							Trace.WriteLine($"OsiTools latest release not found.");
-						}
-					}
-					catch(Exception ex)
-					{
-						Trace.WriteLine($"Error checking for latest OsiExtender release: {ex.ToString()}");
-					}
-				});
-
-				try
-				{
-					string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
-					if (extenderSettingsJson.IsExistingFile())
-					{
-						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
-						if (osirisExtenderSettings != null)
-						{
-							Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
-							Settings.ExtenderSettings.Set(osirisExtenderSettings);
-						}
-					}
-				}
-				catch(Exception ex)
-				{
-					Trace.WriteLine($"Error loading extender settings: {ex.ToString()}");
-				}
-
-				string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
-				Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
-				if (File.Exists(extenderUpdaterPath))
-				{
-					Trace.WriteLine($"Checking DXGI.dll for Osiris ASCII bytes.");
-					try
-					{
-						using (var stream = new FileStream(extenderUpdaterPath, FileMode.Open, FileAccess.Read, FileShare.Read))
-						{
-							byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
-							if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
-							{
-								Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
-								Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
-							}
-							else
-							{
-								Trace.WriteLine($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
-							}
-						}
-					}
-					catch(System.IO.IOException ex)
-					{
-						// This can happen if the game locks up the dll.
-						// Assume it's the extender for now.
-						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
-						Trace.WriteLine($"WARNING: {extenderUpdaterPath} is locked by a process.");
-					}
-					catch (Exception ex)
-					{
-						Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
-					}
-
-					string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
-					if (File.Exists(extenderAppFile))
-					{
-						Settings.ExtenderSettings.ExtenderIsAvailable = true;
-						try
-						{
-							FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
-							if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
-							{
-								var version = extenderInfo.FileVersion.Split('.')[0];
-								if (int.TryParse(version, out int intVersion))
-								{
-									Settings.ExtenderSettings.ExtenderVersion = intVersion;
-									Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
-								}
-								else
-								{
-									Settings.ExtenderSettings.ExtenderVersion = -1;
-								}
-							}
-						}
-						catch (Exception ex)
-						{
-							Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
-						}
-					}
-				}
 			}
 		}
 
@@ -1537,7 +1565,14 @@ namespace DivinityModManager.ViewModels
 				Refreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
-				CheckExtenderData();
+				if (this.IsInitialized)
+				{
+					LoadExtenderSettings();
+				}
+				else
+				{
+					CheckExtenderData();
+				}
 			});
 
 			return Disposable.Empty;
@@ -2399,6 +2434,7 @@ namespace DivinityModManager.ViewModels
 			RefreshAsync_Start("Loading...");
 			//Refresh();
 			SaveSettings(); // New values
+			IsInitialized = true;
 		}
 
 		public bool AutoChangedOrder { get; set; } = false;
@@ -2863,7 +2899,7 @@ Directory the zip will be extracted to:
 			RxApp.DefaultExceptionHandler = exceptionHandler;
 
 			this.DropHandler = new ModListDropHandler(this);
-			this.DragHandler = new ModListDragHandler();
+			this.DragHandler = new ModListDragHandler(this);
 
 			Activator = new ViewModelActivator();
 
@@ -3241,7 +3277,7 @@ Directory the zip will be extracted to:
 			var activeModsConnection = this.ActiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
 			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
 
-			activeModsConnection.Subscribe((x) =>
+			activeModsConnection.ObserveOn(RxApp.TaskpoolScheduler).Subscribe((x) =>
 			{
 				for(int i = 0; i < ActiveMods.Count; i++)
 				{

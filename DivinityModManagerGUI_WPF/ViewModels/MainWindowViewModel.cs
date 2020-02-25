@@ -3277,7 +3277,7 @@ Directory the zip will be extracted to:
 			var activeModsConnection = this.ActiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
 			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
 
-			activeModsConnection.ObserveOn(RxApp.TaskpoolScheduler).Subscribe((x) =>
+			activeModsConnection.Subscribe((x) =>
 			{
 				for(int i = 0; i < ActiveMods.Count; i++)
 				{

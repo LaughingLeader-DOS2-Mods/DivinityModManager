@@ -116,17 +116,7 @@ namespace DivinityModManager.Models
 		{
 			foreach (var mod in mods)
 			{
-				if (Order.Count > 0)
-				{
-					if (!Order.Any(x => x.UUID == mod.UUID))
-					{
-						Order.Add(mod.ToOrderEntry());
-					}
-				}
-				else
-				{
-					Order.Add(mod.ToOrderEntry());
-				}
+				Add(mod);
 			}
 		}
 
@@ -160,8 +150,7 @@ namespace DivinityModManager.Models
 			{
 				foreach (var mod in mods)
 				{
-					var entry = Order.FirstOrDefault(x => x.UUID == mod.UUID);
-					if(entry != null) Order.Remove(entry);
+					Remove(mod);
 				}
 			}
 		}

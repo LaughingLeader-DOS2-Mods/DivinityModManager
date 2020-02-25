@@ -113,10 +113,10 @@
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding ActiveMods}"
-				ScrollViewer.IsDeferredScrollingEnabled="True"
 				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource ModGridView}"
-				VirtualizingPanel.IsVirtualizing="True" />
+				VirtualizingPanel.IsVirtualizing="True"
+				VirtualizingPanel.VirtualizationMode="Recycling" />
 		</Grid>
 		<GridSplitter
 			Grid.Column="1"
@@ -179,10 +179,10 @@
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemsSource="{Binding InactiveMods}"
-				ScrollViewer.IsDeferredScrollingEnabled="True"
 				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource InactiveModGridView}"
-				VirtualizingPanel.IsVirtualizing="True" />
+				VirtualizingPanel.IsVirtualizing="True"
+				VirtualizingPanel.VirtualizationMode="Recycling" />
 		</Grid>
 	</Grid>
 </UserControl>

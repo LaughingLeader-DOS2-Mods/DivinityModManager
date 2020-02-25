@@ -45,6 +45,7 @@ namespace DivinityModManager.ViewModels
 	{
 		override public void Drop(IDropInfo dropInfo)
 		{
+			base.Drop(dropInfo);
 			var droppedMods = new List<DivinityModData>();
 
 			if (dropInfo.Data is IEnumerable<DivinityModData> list)
@@ -62,16 +63,28 @@ namespace DivinityModManager.ViewModels
 			{
 				if(droppedMods.Contains(mod))
 				{
-					mod.IsSelected = true;
 					mod.IsActive = isActive;
 				}
 				else
 				{
+					mod.IsActive = !isActive;
 					mod.IsSelected = false;
 				}
 			}
 
-			base.Drop(dropInfo);
+			if(isActive)
+			{
+				_viewModel.OnFilterTextChanged(_viewModel.ActiveModFilterText, _viewModel.ActiveMods);
+			}
+			else
+			{
+				_viewModel.OnFilterTextChanged(_viewModel.InactiveModFilterText, _viewModel.InactiveMods);
+			}
+
+			if (_viewModel.SelectedModOrder != null)
+			{
+				_viewModel.SelectedModOrder.SetOrder(_viewModel.ActiveMods.Select(x => x.ToOrderEntry()));
+			}
 
 			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
 		}
@@ -98,7 +111,8 @@ namespace DivinityModManager.ViewModels
 			//base.StartDrag(dragInfo);
 			if(dragInfo != null)
 			{
-				if(dragInfo.SourceCollection == _viewModel.ActiveMods)
+				dragInfo.Data = null;
+				if (dragInfo.SourceCollection == _viewModel.ActiveMods)
 				{
 					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected);
 					dragInfo.Data = selected;
@@ -2443,7 +2457,7 @@ namespace DivinityModManager.ViewModels
 		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
 		private Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
 
-		private void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
+		public void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
 		{
 			//Trace.WriteLine("Filtering mod list with search term " + searchText);
 			if (String.IsNullOrWhiteSpace(searchText))
@@ -3292,20 +3306,25 @@ Directory the zip will be extracted to:
 			});
 
 			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)
+			/*
 			activeModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
 			{
 				if (x != null && x.Current != null)
 				{
 					x.Current.IsActive = true;
-					if (SelectedModOrder != null)
-					{
-						SelectedModOrder.Add(x.Current);
-					}
+					//if (SelectedModOrder != null)
+					//{
+					//	SelectedModOrder.Add(x.Current);
+					//}
 				}
 				//x.Current.Index = x.CurrentIndex;
 			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
 			{
 				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
+				if (SelectedModOrder != null)
+				{
+					SelectedModOrder.SetOrder(ActiveMods.Select(x => x.ToOrderEntry()));
+				}
 			});
 
 			inactiveModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
@@ -3315,13 +3334,18 @@ Directory the zip will be extracted to:
 					x.Current.IsActive = false;
 					if (SelectedModOrder != null)
 					{
-						SelectedModOrder.Remove(x.Current);
+						//SelectedModOrder.Remove(x.Current);
 					}
 				}
 			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
 			{
 				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
+				if (SelectedModOrder != null)
+				{
+					SelectedModOrder.SetOrder(ActiveMods.Select(x => x.ToOrderEntry()));
+				}
 			});
+			*/
 
 			activeModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, out activeSelected);

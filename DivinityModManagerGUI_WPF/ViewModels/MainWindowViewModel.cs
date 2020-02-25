@@ -3341,31 +3341,6 @@ Directory the zip will be extracted to:
 			//	Trace.WriteLine($"Total selected inactive mods: {x}");
 			//});
 #endif
-			//ActiveModOrder.ObserveCollectionChanges().Subscribe(e =>
-			//{
-			//	if(e.EventArgs.OldItems != null)
-			//	{
-			//		string str = "";
-			//		for (var i = 0; i < e.EventArgs.OldItems.Count; i++)
-			//		{
-			//			var obj = e.EventArgs.OldItems[i];
-			//			str += obj.ToString();
-			//			if (i < e.EventArgs.OldItems.Count - 1) str += ",";
-			//		}
-			//		Trace.WriteLine($"[OldItems] {str}");
-			//	}
-			//	if (e.EventArgs.NewItems != null)
-			//	{
-			//		string str = "";
-			//		for(var i = 0; i < e.EventArgs.NewItems.Count; i++)
-			//		{
-			//			var obj = e.EventArgs.NewItems[i];
-			//			str += obj.ToString();
-			//			if (i < e.EventArgs.NewItems.Count - 1) str += ",";
-			//		}
-			//		Trace.WriteLine($"[NewItems] {str}");
-			//	}
-			//});
 		}
 	}
 }

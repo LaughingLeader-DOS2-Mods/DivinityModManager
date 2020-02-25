@@ -80,16 +80,35 @@ namespace DivinityModManager.Models
 
 		public void Add(DivinityModData mod)
 		{
-			if (Order.Count > 0)
+			try
 			{
-				if (!Order.Any(x => x.UUID == mod.UUID))
+				if (Order != null && mod != null)
 				{
-					Order.Add(mod.ToOrderEntry());
+					if (Order.Count > 0)
+					{
+						bool alreadyInOrder = false;
+						foreach (var x in Order)
+						{
+							if (x != null && x.UUID == mod.UUID)
+							{
+								alreadyInOrder = true;
+								break;
+							}
+						}
+						if (!alreadyInOrder)
+						{
+							Order.Add(mod.ToOrderEntry());
+						}
+					}
+					else
+					{
+						Order.Add(mod.ToOrderEntry());
+					}
 				}
 			}
-			else
+			catch (Exception ex)
 			{
-				Order.Add(mod.ToOrderEntry());
+				Trace.WriteLine($"Error adding mod to order:\n{ex.ToString()}");
 			}
 		}
 
@@ -113,10 +132,25 @@ namespace DivinityModManager.Models
 
 		public void Remove(DivinityModData mod)
 		{
-			if (Order.Count > 0 && mod != null)
+			try
 			{
-				var entry = Order.FirstOrDefault(x => x.UUID == mod.UUID);
-				if (entry != null) Order.Remove(entry);
+				if (Order != null && Order.Count > 0 && mod != null)
+				{
+					DivinityLoadOrderEntry entry = null;
+					foreach(var x in Order)
+					{
+						if(x != null && x.UUID == mod.UUID)
+						{
+							entry = x;
+							break;
+						}
+					}
+					if (entry != null) Order.Remove(entry);
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error removing mod from order:\n{ex.ToString()}");
 			}
 		}
 

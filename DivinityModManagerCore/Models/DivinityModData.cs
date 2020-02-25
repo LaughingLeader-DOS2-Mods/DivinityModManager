@@ -146,11 +146,18 @@ namespace DivinityModManager.Models
 				{
 					if (OsiExtenderData != null && OsiExtenderData.RequiredExtensionVersion > 0)
 					{
-						MissingOsirisExtenderText = $"Missing Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
+						if(OsiExtenderData.FeatureFlags.Contains("Preprocessor"))
+						{
+							MissingOsirisExtenderText = $"Supports Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
+						}
+						else
+						{
+							MissingOsirisExtenderText = $"Missing Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
+						}
 					}
 					else
 					{
-						MissingOsirisExtenderText = "Missing the Osiris Extender";
+						MissingOsirisExtenderText = "May require the Osiris Extender";
 					}
 					this.RaisePropertyChanged("MissingOsirisExtenderText");
 				}

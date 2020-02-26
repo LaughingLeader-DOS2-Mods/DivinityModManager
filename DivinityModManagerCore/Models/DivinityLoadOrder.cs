@@ -159,7 +159,7 @@ namespace DivinityModManager.Models
 		{
 			try
 			{
-				if (Order.Count > 0)
+				if (Order.Count > 1)
 				{
 					Order.Sort(comparison);
 				}

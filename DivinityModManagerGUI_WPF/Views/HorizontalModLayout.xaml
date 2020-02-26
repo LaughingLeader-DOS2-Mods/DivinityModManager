@@ -28,6 +28,13 @@
 				<Setter Property="dd:DragDrop.DragDirectlySelectedOnly" Value="True" />
 				<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
 				<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
+				<Setter Property="ItemContainerStyle">
+					<Setter.Value>
+						<Style BasedOn="{StaticResource DivinityModDataListItem}" TargetType="{x:Type ListViewItem}">
+							<EventSetter Event="MouseLeftButtonUp" Handler="ListViewItem_ModifySelection" />
+						</Style>
+					</Setter.Value>
+				</Setter>
 			</Style>
 		</ResourceDictionary>
 	</UserControl.Resources>

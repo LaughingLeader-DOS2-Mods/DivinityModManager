@@ -37,6 +37,7 @@ using System.Reflection;
 using AutoUpdaterDotNET;
 using DivinityModManager.Extensions;
 using Newtonsoft.Json.Linq;
+using GongSolutions.Wpf.DragDrop.Utilities;
 
 namespace DivinityModManager.ViewModels
 {
@@ -45,29 +46,79 @@ namespace DivinityModManager.ViewModels
 	{
 		override public void Drop(IDropInfo dropInfo)
 		{
-			base.Drop(dropInfo);
-			var droppedMods = new List<DivinityModData>();
-
-			if (dropInfo.Data is IEnumerable<DivinityModData> list)
+			if (dropInfo == null || dropInfo.DragInfo == null)
 			{
-				droppedMods.AddRange(list);
+				return;
 			}
-			else if (dropInfo.Data is DivinityModData d)
+
+			var insertIndex = dropInfo.UnfilteredInsertIndex;
+
+			var itemsControl = dropInfo.VisualTarget as ItemsControl;
+			if (itemsControl != null)
 			{
-				droppedMods.Add(d);
+				var editableItems = itemsControl.Items as IEditableCollectionView;
+				if (editableItems != null)
+				{
+					var newItemPlaceholderPosition = editableItems.NewItemPlaceholderPosition;
+					if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtBeginning && insertIndex == 0)
+					{
+						++insertIndex;
+					}
+					else if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtEnd && insertIndex == itemsControl.Items.Count)
+					{
+						--insertIndex;
+					}
+				}
+			}
+
+			var destinationList = dropInfo.TargetCollection.TryGetList();
+			var data = ExtractData(dropInfo.Data).OfType<DivinityModData>().ToList();
+
+			var sourceList = dropInfo.DragInfo.SourceCollection.TryGetList();
+			if (sourceList != null)
+			{
+				foreach (var o in data)
+				{
+					var index = sourceList.IndexOf(o);
+					if (index != -1)
+					{
+						sourceList.RemoveAt(index);
+						// so, is the source list the destination list too ?
+						if (destinationList != null && Equals(sourceList, destinationList) && index < insertIndex)
+						{
+							--insertIndex;
+						}
+					}
+				}
+			}
+
+			if (destinationList != null)
+			{
+				var objects2Insert = new List<object>();
+				foreach (var o in data)
+				{
+					var obj2Insert = o;
+					objects2Insert.Add(obj2Insert);
+					destinationList.Insert(insertIndex++, obj2Insert);
+				}
+
+				var selectDroppedItems = itemsControl is TabControl || (itemsControl != null && GongSolutions.Wpf.DragDrop.DragDrop.GetSelectDroppedItems(itemsControl));
+				if (selectDroppedItems)
+				{
+					SelectDroppedItems(dropInfo, objects2Insert);
+				}
 			}
 
 			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
 
 			foreach (var mod in _viewModel.Mods)
 			{
-				if(droppedMods.Contains(mod))
+				if(data.Contains(mod))
 				{
 					mod.IsActive = isActive;
 				}
 				else
 				{
-					mod.IsActive = !isActive;
 					mod.IsSelected = false;
 				}
 			}
@@ -83,7 +134,11 @@ namespace DivinityModManager.ViewModels
 
 			if (_viewModel.SelectedModOrder != null)
 			{
-				_viewModel.SelectedModOrder.SetOrder(_viewModel.ActiveMods.Select(x => x.ToOrderEntry()));
+				_viewModel.SelectedModOrder.Order.Clear();
+				foreach (var x in _viewModel.ActiveMods)
+				{
+					_viewModel.SelectedModOrder.Add(x);
+				}
 			}
 
 			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
@@ -122,7 +177,7 @@ namespace DivinityModManager.ViewModels
 				{
 					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.CanDrag);
 					dragInfo.Data = selected;
-					//Trace.WriteLine($"Drag source is InactiveMods | {selected.Count()}");
+					//Trace.WriteLine($"Drag source is InactiveMods | {selected.Count()} | Classic: {selected.Where(x => x.IsClassicMod && x.CanDrag).Count()}");
 				}
 				dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
 			}
@@ -130,10 +185,16 @@ namespace DivinityModManager.ViewModels
 
 		public override bool CanStartDrag(IDragInfo dragInfo)
 		{
-			base.CanStartDrag(dragInfo);
-			if(dragInfo.SourceItem is ISelectable d && !d.CanDrag)
+			if(dragInfo.Data is ISelectable d && !d.CanDrag)
 			{
 				return false;
+			}
+			else if(dragInfo.Data is IEnumerable<DivinityModData> modData)
+			{
+				if(modData.All(x => !x.CanDrag))
+				{
+					return false;
+				}
 			}
 			return true;
 		}
@@ -1262,7 +1323,7 @@ namespace DivinityModManager.ViewModels
 			{
 				var entry = loadFrom[i];
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-				if (mod != null)
+				if (mod != null && !mod.IsClassicMod)
 				{
 					ActiveMods.Add(mod);
 					if (mod.Dependencies.Count > 0)
@@ -3298,8 +3359,10 @@ Directory the zip will be extracted to:
 					var mod = ActiveMods[i];
 					mod.Index = i;
 				}
+			});
 
-				if(SelectedModOrder != null)
+			activeModsConnection.WhenAnyPropertyChanged("Index").Throttle(TimeSpan.FromMilliseconds(25)).Subscribe(_ => {
+				if (SelectedModOrder != null)
 				{
 					SelectedModOrder.Sort(SortModOrder);
 				}

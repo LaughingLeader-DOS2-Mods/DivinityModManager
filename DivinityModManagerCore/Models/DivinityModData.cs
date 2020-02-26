@@ -127,9 +127,9 @@ namespace DivinityModManager.Models
 			set 
 			{ 
 				this.RaiseAndSetIfChanged(ref isClassicMod, value); 
-				if(IsClassicMod)
+				if(value)
 				{
-					CanDrag = !IsActive;
+					CanDrag = false;
 				}
 			}
 		}
@@ -265,7 +265,7 @@ namespace DivinityModManager.Models
 				this.RaiseAndSetIfChanged(ref isActive, value);
 				if(IsClassicMod)
 				{
-					CanDrag = isActive;
+					CanDrag = false;
 				}
 			}
 		}

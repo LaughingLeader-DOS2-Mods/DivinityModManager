@@ -58,6 +58,8 @@ namespace DivinityModManager.Views
 
 			self = this;
 
+			RxExceptionHandler.view = this;
+
 			App.Current.Exit += OnAppClosing;
 
 			//Wrapper = new WindowWrapper(this);

@@ -172,6 +172,7 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="Util\RxExceptionHandler.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />

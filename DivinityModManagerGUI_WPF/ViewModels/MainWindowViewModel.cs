@@ -702,6 +702,10 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 			}
+			else
+			{
+				Trace.WriteLine($"DXGI.dll not found. Skipping extender check.");
+			}
 			return Unit.Default;
 		}
 
@@ -712,7 +716,9 @@ namespace DivinityModManager.ViewModels
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
 				{
 					await LoadExtenderSettingsAsync(t);
+					await c.Yield();
 					RxApp.MainThreadScheduler.Schedule(CheckExtenderData);
+					return Disposable.Empty;
 				});
 			}
 			else
@@ -1479,28 +1485,33 @@ namespace DivinityModManager.ViewModels
 
 		private void CheckExtenderData()
 		{
-			if (Settings.ExtenderSettings.ExtenderIsAvailable)
+			if (Settings != null && Mods.Count > 0)
 			{
-				if (Settings.ExtenderSettings.ExtenderVersion > -1)
+				if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderIsAvailable)
 				{
-					foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
+					Trace.WriteLine($"Extender is available. Updating mod data.");
+					if (Settings.ExtenderSettings.ExtenderVersion > -1)
 					{
-						mod.IsMissingOsirisExtender = Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion;
+						foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
+						{
+							mod.IsMissingOsirisExtender = Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion;
+						}
+					}
+					else
+					{
+						foreach (var mod in Mods)
+						{
+							mod.IsMissingOsirisExtender = false;
+						}
 					}
 				}
 				else
 				{
-					foreach(var mod in Mods)
+					Trace.WriteLine($"Extender is not available. Updating mod data.");
+					foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
 					{
-						mod.IsMissingOsirisExtender = false;
+						mod.IsMissingOsirisExtender = true;
 					}
-				}
-			}
-			else
-			{
-				foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
-				{
-					mod.IsMissingOsirisExtender = true;
 				}
 			}
 		}
@@ -1625,6 +1636,7 @@ namespace DivinityModManager.ViewModels
 			{
 				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
 				{
+					Trace.WriteLine($"Setting selected adventure mod.");
 					var nextAdventureMod = AdventureMods.FirstOrDefault(x => x.UUID == lastAdventureMod);
 					if (nextAdventureMod != null)
 					{
@@ -1637,15 +1649,19 @@ namespace DivinityModManager.ViewModels
 					SelectedAdventureModIndex = 0;
 				}
 
+				Trace.WriteLine($"Finishing up refresh.");
+
 				Refreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
 				if (this.IsInitialized)
 				{
+					Trace.WriteLine($"Loading extender settings.");
 					LoadExtenderSettings();
 				}
 				else
 				{
+					Trace.WriteLine($"Checking extender data.");
 					CheckExtenderData();
 				}
 			});
@@ -1952,6 +1968,7 @@ namespace DivinityModManager.ViewModels
 
 		private void OnMainProgressComplete(double delay = 0)
 		{
+			Trace.WriteLine($"Main progress is complete.");
 			TimeSpan delaySpan = TimeSpan.Zero;
 			if (delay > 0) delaySpan = TimeSpan.FromMilliseconds(delay);
 
@@ -1971,7 +1988,14 @@ namespace DivinityModManager.ViewModels
 				{
 					if (Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - Settings.LastUpdateCheck >= 43200))
 					{
-						AutoUpdater.Start(DivinityApp.URL_UPDATE);
+						try
+						{
+							AutoUpdater.Start(DivinityApp.URL_UPDATE);
+						}
+						catch(Exception ex)
+						{
+							Trace.WriteLine($"Error running AutoUpdater:\n{ex.ToString()}");
+						}
 					}
 				}
 			});

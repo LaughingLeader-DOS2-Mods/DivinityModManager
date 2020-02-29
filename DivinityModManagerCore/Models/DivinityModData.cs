@@ -142,11 +142,11 @@ namespace DivinityModManager.Models
 			set 
 			{ 
 				this.RaiseAndSetIfChanged(ref isMissingOsirisExtender, value);
-				if(value)
+				if(isMissingOsirisExtender)
 				{
 					if (OsiExtenderData != null && OsiExtenderData.RequiredExtensionVersion > 0)
 					{
-						if(OsiExtenderData.FeatureFlags.Contains("Preprocessor"))
+						if(OsiExtenderData.FeatureFlags != null && OsiExtenderData.FeatureFlags.Contains("Preprocessor"))
 						{
 							MissingOsirisExtenderText = $"Supports Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
 						}

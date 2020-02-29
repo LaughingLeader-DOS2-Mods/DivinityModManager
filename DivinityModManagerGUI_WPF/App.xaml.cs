@@ -1,4 +1,6 @@
-﻿using DivinityModManager.Views;
+﻿using DivinityModManager.Util;
+using DivinityModManager.Views;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,6 +18,15 @@ namespace DivinityModManager
 	/// </summary>
 	public partial class App : Application
 	{
+		public App()
+		{
+			RxApp.DefaultExceptionHandler = new RxExceptionHandler();
+#if DEBUG
+			RxApp.SuppressViewCommandBindingMessage = false;
+#else
+			RxApp.SuppressViewCommandBindingMessage = true;
+#endif
+		}
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
 			//For making date display use the current system's culture

@@ -20,7 +20,13 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-
+			<Style
+				x:Key="ListViewItemMouseEvents"
+				BasedOn="{StaticResource DivinityModDataListItem}"
+				TargetType="{x:Type ListViewItem}">
+				<EventSetter Event="MouseLeftButtonUp" Handler="ListViewItem_ModifySelection" />
+				<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_HandleShiftSelection" />
+			</Style>
 			<Style
 				x:Key="ModOrderListViewWithDrag"
 				BasedOn="{StaticResource ModOrderListView}"
@@ -28,13 +34,6 @@
 				<Setter Property="dd:DragDrop.DragDirectlySelectedOnly" Value="True" />
 				<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
 				<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
-				<Setter Property="ItemContainerStyle">
-					<Setter.Value>
-						<Style BasedOn="{StaticResource DivinityModDataListItem}" TargetType="{x:Type ListViewItem}">
-							<EventSetter Event="MouseLeftButtonUp" Handler="ListViewItem_ModifySelection" />
-						</Style>
-					</Setter.Value>
-				</Setter>
 			</Style>
 		</ResourceDictionary>
 	</UserControl.Resources>
@@ -119,6 +118,7 @@
 				dd:DragDrop.DragHandler="{Binding DragHandler}"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
+				ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
 				ItemsSource="{Binding ActiveMods}"
 				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource ModGridView}"
@@ -185,6 +185,7 @@
 				dd:DragDrop.DragHandler="{Binding DragHandler}"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
+				ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
 				ItemsSource="{Binding InactiveMods}"
 				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource InactiveModGridView}"

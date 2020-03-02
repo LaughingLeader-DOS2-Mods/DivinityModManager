@@ -197,7 +197,7 @@
 			</Setter.Value>
 		</Setter>
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
-		<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+		<!--<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />-->
 		<Setter Property="Visibility" Value="{Binding Visibility, FallbackValue='Visible'}" />
 		<Style.Triggers>
 			<MultiDataTrigger>

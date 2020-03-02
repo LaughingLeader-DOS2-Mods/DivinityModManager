@@ -116,6 +116,7 @@ namespace DivinityModManager.ViewModels
 				if(data.Contains(mod))
 				{
 					mod.IsActive = isActive;
+					mod.IsSelected = true;
 				}
 				else
 				{
@@ -123,12 +124,14 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			if(isActive)
+			if (isActive)
 			{
+				_viewModel.Layout.UpdateViewSelection(_viewModel.ActiveMods);
 				_viewModel.OnFilterTextChanged(_viewModel.ActiveModFilterText, _viewModel.ActiveMods);
 			}
 			else
 			{
+				_viewModel.Layout.UpdateViewSelection(_viewModel.InactiveMods);
 				_viewModel.OnFilterTextChanged(_viewModel.InactiveModFilterText, _viewModel.InactiveMods);
 			}
 
@@ -204,6 +207,8 @@ namespace DivinityModManager.ViewModels
 	{
 		private MainWindow view;
 		public MainWindow View => view;
+
+		public ModViewLayout Layout { get; set; }
 
 		private ModListDropHandler dropHandler;
 
@@ -1664,6 +1669,9 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Checking extender data.");
 					CheckExtenderData();
 				}
+
+				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
+				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
 			});
 
 			return Disposable.Empty;

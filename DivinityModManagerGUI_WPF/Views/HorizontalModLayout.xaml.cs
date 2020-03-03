@@ -28,7 +28,7 @@ namespace DivinityModManager.Views
 {
 	public interface ModViewLayout
 	{
-		void UpdateViewSelection(IEnumerable<DivinityModData> dataList, ListView listView = null);
+		void UpdateViewSelection(IEnumerable<ISelectable> dataList, ListView listView = null);
 		void FixActiveModsScrollbar();
 	}
 	/// <summary>
@@ -62,6 +62,7 @@ namespace DivinityModManager.Views
 					{
 						mod.IsSelected = true;
 					}
+					UpdateViewSelection(mods, listView);
 				}
 			}));
 
@@ -74,7 +75,9 @@ namespace DivinityModManager.Views
 					{
 						mod.IsSelected = false;
 					}
+					UpdateViewSelection(mods, listView);
 				}
+
 			}), new KeyGesture(Key.D, ModifierKeys.Control)));
 
 			listView.ItemContainerStyle = this.FindResource("ListViewItemMouseEvents") as Style;
@@ -89,7 +92,7 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		public void UpdateViewSelection(IEnumerable<DivinityModData> dataList, ListView listView = null)
+		public void UpdateViewSelection(IEnumerable<ISelectable> dataList, ListView listView = null)
 		{
 			if(dataList != null)
 			{

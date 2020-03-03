@@ -53,6 +53,7 @@
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="*" />
 				</Grid.ColumnDefinitions>
 				<TextBlock Padding="4" Text="Active Mods" />
@@ -95,8 +96,16 @@
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
 					Visibility="{Binding TotalActiveModsHidden, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding TotalActiveModsHidden}" />
+					<Run Text="{Binding TotalActiveModsHidden, Mode=OneWay}" />
 					<Run Text="Hidden" /></TextBlock>
+				<TextBlock
+					Grid.Column="3"
+					Margin="4,0,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					Visibility="{Binding ActiveSelected, Converter={StaticResource IntToVisibilityConverter}}">
+					<Run Text="{Binding ActiveSelected, Mode=OneWay}" />
+					<Run Text="Selected" /></TextBlock>
 			</Grid>
 			<ListView
 				x:Name="ActiveModsListView"
@@ -125,6 +134,7 @@
 			</Grid.RowDefinitions>
 			<Grid Margin="4,0,0,4">
 				<Grid.ColumnDefinitions>
+					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
 					<ColumnDefinition Width="Auto" />
@@ -171,8 +181,16 @@
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
 					Visibility="{Binding TotalInactiveModsHidden, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding TotalInactiveModsHidden}" />
+					<Run Text="{Binding TotalInactiveModsHidden, Mode=OneWay}" />
 					<Run Text="Hidden" /></TextBlock>
+				<TextBlock
+					Grid.Column="3"
+					Margin="4,0,0,0"
+					HorizontalAlignment="Left"
+					VerticalAlignment="Center"
+					Visibility="{Binding InactiveSelected, Converter={StaticResource IntToVisibilityConverter}}">
+					<Run Text="{Binding InactiveSelected, Mode=OneWay}" />
+					<Run Text="Selected" /></TextBlock>
 			</Grid>
 			<ListView
 				x:Name="InactiveModsListView"

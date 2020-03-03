@@ -507,16 +507,6 @@
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn
-				Width="70"
-				Header="Type"
-				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
-				<GridViewColumn.CellTemplate>
-					<DataTemplate>
-						<TextBlock Text="{Binding Type}" ToolTip="{Binding Type}" />
-					</DataTemplate>
-				</GridViewColumn.CellTemplate>
-			</GridViewColumn>
-			<GridViewColumn
 				Width="75"
 				Header="Modes"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
@@ -559,7 +549,7 @@
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
-			<GridViewColumn
+			<!--<GridViewColumn
 				Width="70"
 				Header="Type"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
@@ -568,7 +558,7 @@
 						<TextBlock Text="{Binding Type}" ToolTip="{Binding Type}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
-			</GridViewColumn>
+			</GridViewColumn>-->
 			<GridViewColumn
 				Width="75"
 				Header="Modes"

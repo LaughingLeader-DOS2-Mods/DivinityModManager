@@ -23,7 +23,9 @@
 			<Style
 				x:Key="ListViewItemMouseEvents"
 				BasedOn="{StaticResource DivinityModDataListItem}"
-				TargetType="{x:Type ListViewItem}" />
+				TargetType="{x:Type ListViewItem}">
+				<!--<EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListViewItem_ModifySelection" />-->
+			</Style>
 			<Style
 				x:Key="ModOrderListViewWithDrag"
 				BasedOn="{StaticResource ModOrderListView}"

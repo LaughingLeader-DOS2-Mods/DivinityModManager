@@ -55,30 +55,38 @@ namespace DivinityModManager.Views
 			listView.InputBindings.Add(new KeyBinding(ApplicationCommands.SelectAll, new KeyGesture(Key.A, ModifierKeys.Control)));
 			listView.CommandBindings.Add(new CommandBinding(ApplicationCommands.SelectAll, (_sender, _e) =>
 			{
-				//listView.SelectAll();
-				if(listView.ItemsSource is IEnumerable<ISelectable> mods)
-				{
-					foreach(var mod in mods)
-					{
-						mod.IsSelected = true;
-					}
-					UpdateViewSelection(mods, listView);
-				}
+				listView.SelectAll();
+				//if(listView.ItemsSource is IEnumerable<ISelectable> mods)
+				//{
+				//	foreach(var mod in mods)
+				//	{
+				//		mod.IsSelected = true;
+				//	}
+				//	UpdateViewSelection(mods, listView);
+				//}
 			}));
 
 			listView.InputBindings.Add(new KeyBinding(ReactiveCommand.Create(() =>
 			{
-				//listView.SelectedItems.Clear();
-				if (listView.ItemsSource is IEnumerable<ISelectable> mods)
-				{
-					foreach (var mod in mods)
-					{
-						mod.IsSelected = false;
-					}
-					UpdateViewSelection(mods, listView);
-				}
+				listView.SelectedItems.Clear();
+				//if (listView.ItemsSource is IEnumerable<ISelectable> mods)
+				//{
+				//	foreach (var mod in mods)
+				//	{
+				//		mod.IsSelected = false;
+				//	}
+				//	UpdateViewSelection(mods, listView);
+				//}
 
 			}), new KeyGesture(Key.D, ModifierKeys.Control)));
+
+			//listView.PreviewMouseLeftButtonDown += (s, e) =>
+			//{
+			//	if(!Keyboard.Modifiers.HasFlag(ModifierKeys.Control) && !Keyboard.Modifiers.HasFlag(ModifierKeys.Shift))
+			//	{
+					
+			//	}
+			//};
 
 			listView.ItemContainerStyle = this.FindResource("ListViewItemMouseEvents") as Style;
 		}
@@ -369,6 +377,34 @@ namespace DivinityModManager.Views
 			}
 
 			return new Size(totalWidth, height);
+		}
+
+		private void ListViewItem_ModifySelection(object sender, MouseButtonEventArgs e)
+		{
+			//Fix for when virtualization is enabled, and selected entries outside the view don't get deselected
+			if ((Keyboard.Modifiers & ModifierKeys.Control) != ModifierKeys.Control && (Keyboard.Modifiers & ModifierKeys.Shift) != ModifierKeys.Shift)
+				{
+					if (sender is ListViewItem listViewitem)
+					{
+						if (listViewitem.DataContext is DivinityModData modData)
+						{
+							if (modData.IsActive)
+							{
+								foreach (var x in ViewModel.ActiveMods)
+								{
+									if (x != modData && x.IsSelected) x.IsSelected = false;
+								}
+							}
+							else
+							{
+								foreach (var x in ViewModel.InactiveMods)
+								{
+									if (x != modData && x.IsSelected) x.IsSelected = false;
+								}
+							}
+						}
+					}
+				}
 		}
 	}
 }

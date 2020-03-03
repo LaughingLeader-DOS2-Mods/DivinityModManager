@@ -161,7 +161,6 @@
     <Compile Include="Controls\AutoGrayableImage.cs" />
     <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
     <Compile Include="Controls\CircleDecorator.cs" />
-    <Compile Include="Controls\CustomListView.cs" />
     <Compile Include="Controls\Extensions\EnumExtension.cs" />
     <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
     <Compile Include="Controls\HyperlinkText.xaml.cs">

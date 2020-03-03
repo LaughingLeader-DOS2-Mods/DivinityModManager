@@ -193,7 +193,7 @@ namespace DivinityModManager.Views
 
 				if(ViewModel != null)
 				{
-					//ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
+					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 					ViewModel.Layout = this;
 				}
@@ -286,12 +286,16 @@ namespace DivinityModManager.Views
 						{
 							var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
 							//Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
-							gridView.Columns[1].Width = MeasureText(longestName,
+							var targetWidth = MeasureText(longestName,
 								ActiveModsListView.FontFamily,
 								ActiveModsListView.FontStyle,
 								ActiveModsListView.FontWeight,
 								ActiveModsListView.FontStretch,
 								ActiveModsListView.FontSize).Width + 12;
+							if(gridView.Columns[1].Width > targetWidth)
+							{
+								gridView.Columns[1].Width = targetWidth;
+							}
 						});
 					}
 				}

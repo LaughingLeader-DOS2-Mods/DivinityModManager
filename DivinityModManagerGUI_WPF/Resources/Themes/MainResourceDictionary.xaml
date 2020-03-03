@@ -24,6 +24,7 @@
 	<conv:ModIsAvailableConverter x:Key="ModIsAvailableConverter" />
 	<conv:StringToUriConverter x:Key="StringToUriConverter" />
 	<conv:DivinityGameLaunchWindowActionToStringConverter x:Key="GameLaunchActionToStringConverter" />
+	<conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Icons/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/Icons/SaveAs_16x.png" />

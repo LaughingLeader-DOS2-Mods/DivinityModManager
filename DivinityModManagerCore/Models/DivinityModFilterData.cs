@@ -73,7 +73,7 @@ namespace DivinityModManager.Models
 
 			if (PropertyContains("Name"))
 			{
-				Trace.WriteLine($"Searching for '{FilterValue}' in '{mod.Name}' | {mod.Name.IndexOf(FilterValue)}");
+				//Trace.WriteLine($"Searching for '{FilterValue}' in '{mod.Name}' | {mod.Name.IndexOf(FilterValue)}");
 				if (ValueContains(mod.Name)) return true;
 			}
 

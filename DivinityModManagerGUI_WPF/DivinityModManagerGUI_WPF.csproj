@@ -169,6 +169,7 @@
     <Compile Include="Controls\SelectableTextBlock.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\EnumToStringConverter.cs" />
+    <Compile Include="Converters\IntToVisibilityConverter.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />

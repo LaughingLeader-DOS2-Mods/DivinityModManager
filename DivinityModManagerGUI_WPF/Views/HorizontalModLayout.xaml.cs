@@ -115,7 +115,7 @@ namespace DivinityModManager.Views
 
 				if(ViewModel != null)
 				{
-					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
+					//ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 
 					ViewModel.Layout = this;

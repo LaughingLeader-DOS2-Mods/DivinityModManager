@@ -128,6 +128,7 @@ namespace DivinityModManager.ViewModels
 			{
 				_viewModel.Layout.UpdateViewSelection(_viewModel.ActiveMods);
 				_viewModel.OnFilterTextChanged(_viewModel.ActiveModFilterText, _viewModel.ActiveMods);
+				//_viewModel.Layout.FixActiveModsScrollbar();
 			}
 			else
 			{

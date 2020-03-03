@@ -1323,7 +1323,6 @@ namespace DivinityModManager.ViewModels
 			var loadFrom = order.Order;
 
 			Trace.WriteLine($"Loading mod order '{order.Name}'.");
-
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 			if(missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
 			{
@@ -1388,6 +1387,9 @@ namespace DivinityModManager.ViewModels
 			}
 
 			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
+
+			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
+			OnFilterTextChanged(InactiveModFilterText, InactiveMods);
 
 			OnOrderChanged?.Invoke(this, new EventArgs());
 
@@ -1670,10 +1672,15 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Checking extender data.");
 					CheckExtenderData();
 				}
+			});
 
+			/*
+			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
+			{
 				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
 			});
+			*/
 
 			return Disposable.Empty;
 		}
@@ -2551,8 +2558,25 @@ namespace DivinityModManager.ViewModels
 		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
 		private Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
 
+		private int totalActiveModsHidden = 0;
+
+		public int TotalActiveModsHidden
+		{
+			get => totalActiveModsHidden;
+			set { this.RaiseAndSetIfChanged(ref totalActiveModsHidden, value); }
+		}
+
+		private int totalInactiveModsHidden = 0;
+
+		public int TotalInactiveModsHidden
+		{
+			get => totalInactiveModsHidden;
+			set { this.RaiseAndSetIfChanged(ref totalInactiveModsHidden, value); }
+		}
+
 		public void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
 		{
+			int totalHidden = 0;
 			//Trace.WriteLine("Filtering mod list with search term " + searchText);
 			if (String.IsNullOrWhiteSpace(searchText))
 			{
@@ -2633,6 +2657,7 @@ namespace DivinityModManager.ViewModels
 						else
 						{
 							mod.Visibility = Visibility.Collapsed;
+							totalHidden += 1;
 						}
 					}
 				}
@@ -2647,9 +2672,19 @@ namespace DivinityModManager.ViewModels
 						else
 						{
 							m.Visibility = Visibility.Collapsed;
+							totalHidden += 1;
 						}
 					}
 				}
+			}
+		
+			if(modDataList == ActiveMods)
+			{
+				TotalActiveModsHidden = totalHidden;
+			}
+			else if(modDataList == InactiveMods)
+			{
+				TotalInactiveModsHidden = totalHidden;
 			}
 		}
 

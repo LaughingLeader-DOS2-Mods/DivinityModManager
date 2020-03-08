@@ -1356,7 +1356,7 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 				}
-				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !!missingMods.Any(x => x.UUID == entry.UUID))
+				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !missingMods.Any(x => x.UUID == entry.UUID))
 				{
 					var x = new DivinityMissingModData
 					{
@@ -1393,13 +1393,20 @@ namespace DivinityModManager.ViewModels
 
 			OnOrderChanged?.Invoke(this, new EventArgs());
 
-			if (missingMods.Count > 0 && Settings?.DisableMissingModWarnings != true)
+			if (missingMods.Count > 0)
 			{
 				Trace.WriteLine($"Missing mods: {String.Join(";", missingMods)}");
-				view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-				view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-				view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
-					"Missing Mods in Load Order", MessageBoxButton.OK);
+				if(Settings?.DisableMissingModWarnings == true)
+				{
+					Trace.WriteLine("Skipping missing mod display.");
+				}
+				else
+				{
+					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
+						"Missing Mods in Load Order", MessageBoxButton.OK);
+				}
 			}
 			
 			LoadingOrder = false;

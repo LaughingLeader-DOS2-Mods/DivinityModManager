@@ -102,7 +102,7 @@ namespace DivinityModManager.Views
 
 		public void UpdateViewSelection(IEnumerable<ISelectable> dataList, ListView listView = null)
 		{
-			if(dataList != null)
+			if (dataList != null)
 			{
 				if (listView == null)
 				{
@@ -116,12 +116,15 @@ namespace DivinityModManager.Views
 					}
 				}
 
-				foreach (var mod in dataList)
+				if (listView != null && dataList.Count() > 0)
 				{
-					var listItem = (ListViewItem)listView.ItemContainerGenerator.ContainerFromItem(mod);
-					if (listItem != null)
+					foreach (var mod in dataList)
 					{
-						listItem.IsSelected = mod.IsSelected;
+						var listItem = (ListViewItem)listView.ItemContainerGenerator.ContainerFromItem(mod);
+						if (listItem != null)
+						{
+							listItem.IsSelected = mod.IsSelected;
+						}
 					}
 				}
 			}
@@ -129,24 +132,60 @@ namespace DivinityModManager.Views
 
 		private void UpdateIsSelected(SelectionChangedEventArgs e, ObservableCollectionExtended<DivinityModData> list)
 		{
-			if (e.RemovedItems != null && e.RemovedItems.Count > 0)
+			if(e != null && list != null)
 			{
-				foreach (var removedItem in e.RemovedItems.Cast<DivinityModData>())
+				if (e.RemovedItems != null && e.RemovedItems.Count > 0)
 				{
-					if (list != null && list.Contains(removedItem)) removedItem.IsSelected = false;
+					foreach (var removedItem in e.RemovedItems.Cast<DivinityModData>())
+					{
+						if (list != null && list.Contains(removedItem)) removedItem.IsSelected = false;
+					}
 				}
-			}
-			if (e.AddedItems != null && e.AddedItems.Count > 0)
-			{
-				foreach (var addedItem in e.AddedItems.Cast<DivinityModData>())
+				if (e.AddedItems != null && e.AddedItems.Count > 0)
 				{
-					addedItem.IsSelected = true;
+					foreach (var addedItem in e.AddedItems.Cast<DivinityModData>())
+					{
+						addedItem.IsSelected = true;
+					}
 				}
 			}
 		}
 
 		private IDisposable updatingActiveViewSelection;
 		private IDisposable updatingInactiveViewSelection;
+
+		private void ActiveModListView_ItemContainerStatusChanged(object s, EventArgs e)
+		{
+			if (ActiveModsListView.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+			{
+				if (updatingActiveViewSelection == null)
+				{
+					updatingActiveViewSelection = RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(25), () =>
+					{
+						UpdateViewSelection(ViewModel.ActiveMods, ActiveModsListView);
+						updatingActiveViewSelection.Dispose();
+						updatingActiveViewSelection = null;
+					});
+				}
+			}
+		}
+
+		private void InactiveModListView_ItemContainerStatusChanged(object s, EventArgs e)
+		{
+			if (InactiveModsListView.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
+			{
+				if (updatingInactiveViewSelection == null)
+				{
+					updatingInactiveViewSelection = RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(25), () =>
+					{
+						UpdateViewSelection(ViewModel.InactiveMods, InactiveModsListView);
+						updatingInactiveViewSelection.Dispose();
+						updatingInactiveViewSelection = null;
+					});
+				}
+
+			}
+		}
 
 		public HorizontalModLayout()
 		{
@@ -157,46 +196,18 @@ namespace DivinityModManager.Views
 
 			ActiveModsListView.SelectionChanged += (object sender, SelectionChangedEventArgs e) =>
 			{
+				if (ActiveModsListView.Items.Count == 0) return;
 				UpdateIsSelected(e, ViewModel.ActiveMods);
 			};
 
 			InactiveModsListView.SelectionChanged += (object sender, SelectionChangedEventArgs e) =>
 			{
+				if (InactiveModsListView.Items.Count == 0) return;
 				UpdateIsSelected(e, ViewModel.InactiveMods);
 			};
 
-			ActiveModsListView.ItemContainerGenerator.StatusChanged += (s, e) =>
-			{
-				if (ActiveModsListView.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
-				{
-					if(updatingActiveViewSelection == null)
-					{
-						updatingActiveViewSelection = RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(25), () =>
-						{
-							UpdateViewSelection(ViewModel.ActiveMods, ActiveModsListView);
-							updatingActiveViewSelection.Dispose();
-							updatingActiveViewSelection = null;
-						});
-					}
-				}
-			};
-
-			InactiveModsListView.ItemContainerGenerator.StatusChanged += (s, e) =>
-			{
-				if (InactiveModsListView.ItemContainerGenerator.Status == System.Windows.Controls.Primitives.GeneratorStatus.ContainersGenerated)
-				{
-					if (updatingInactiveViewSelection == null)
-					{
-						updatingInactiveViewSelection = RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(25), () =>
-						{
-							UpdateViewSelection(ViewModel.InactiveMods, InactiveModsListView);
-							updatingInactiveViewSelection.Dispose();
-							updatingInactiveViewSelection = null;
-						});
-					}
-					
-				}
-			};
+			ActiveModsListView.ItemContainerGenerator.StatusChanged += ActiveModListView_ItemContainerStatusChanged;
+			InactiveModsListView.ItemContainerGenerator.StatusChanged += InactiveModListView_ItemContainerStatusChanged;
 
 			this.WhenActivated((d) =>
 			{

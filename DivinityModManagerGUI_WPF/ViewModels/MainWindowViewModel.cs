@@ -839,6 +839,12 @@ namespace DivinityModManager.ViewModels
 				SaveSettings();
 			}).DisposeWith(Settings.Disposables);
 
+			// Updating extender requirement display
+			this.WhenAnyValue(x => x.Settings.ExtenderSettings.EnableExtensions).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+			{
+				CheckExtenderData();
+			}).DisposeWith(Settings.Disposables);
+
 			ActionOnGameLaunch = Settings.ActionOnGameLaunch;
 
 			var actionLaunchChanged = this.WhenAnyValue(x => x.ActionOnGameLaunch).ObserveOn(RxApp.MainThreadScheduler);
@@ -1502,30 +1508,46 @@ namespace DivinityModManager.ViewModels
 		{
 			if (Settings != null && Mods.Count > 0)
 			{
-				if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderIsAvailable)
+				foreach (var mod in Mods)
 				{
-					Trace.WriteLine($"Extender is available. Updating mod data.");
-					if (Settings.ExtenderSettings.ExtenderVersion > -1)
+					if (mod.OsiExtenderData != null && mod.OsiExtenderData.HasAnySettings)
 					{
-						foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
+						// Lua support without Osiris makes it optional
+						bool onlyUsesLua = mod.OsiExtenderData.FeatureFlags.Contains("Lua") && !mod.OsiExtenderData.FeatureFlags.Contains("OsirisExtensions");
+
+						if (!mod.OsiExtenderData.FeatureFlags.Contains("Preprocessor") && !onlyUsesLua)
 						{
-							mod.IsMissingOsirisExtender = Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion;
+							if(!Settings.ExtenderSettings.EnableExtensions)
+							{
+								mod.ExtenderModStatus = DivinityExtenderModStatus.REQUIRED_DISABLED;
+							}
+							else
+							{
+								if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderVersion > -1)
+								{
+									if (mod.OsiExtenderData.RequiredExtensionVersion > -1 && Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion)
+									{
+										mod.ExtenderModStatus = DivinityExtenderModStatus.REQUIRED_OLD;
+									}
+									else
+									{
+										mod.ExtenderModStatus = DivinityExtenderModStatus.REQUIRED;
+									}
+								}
+								else
+								{
+									mod.ExtenderModStatus = DivinityExtenderModStatus.REQUIRED_MISSING;
+								}
+							}
+						}
+						else
+						{
+							mod.ExtenderModStatus = DivinityExtenderModStatus.SUPPORTS;
 						}
 					}
 					else
 					{
-						foreach (var mod in Mods)
-						{
-							mod.IsMissingOsirisExtender = false;
-						}
-					}
-				}
-				else
-				{
-					Trace.WriteLine($"Extender is not available. Updating mod data.");
-					foreach (var mod in Mods.Where(x => x.OsiExtenderData != null && x.OsiExtenderData.RequiredExtensionVersion > -1))
-					{
-						mod.IsMissingOsirisExtender = true;
+						mod.ExtenderModStatus = DivinityExtenderModStatus.NONE;
 					}
 				}
 			}
@@ -1860,14 +1882,16 @@ namespace DivinityModManager.ViewModels
 
 		private void DisplayMissingMods(DivinityLoadOrder order = null)
 		{
+			bool displayExtenderModWarning = false;
+
 			if (order == null) order = SelectedModOrder;
 			if (order != null && Settings?.DisableMissingModWarnings != true)
 			{
 				List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
-				for (int i = 0; i < SelectedModOrder.Order.Count;i++)
+				for (int i = 0; i < order.Order.Count;i++)
 				{
-					var entry = SelectedModOrder.Order[i];
+					var entry = order.Order[i];
 					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 					if (mod != null)
 					{
@@ -1910,6 +1934,66 @@ namespace DivinityModManager.ViewModels
 					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
 					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
 						"Missing Mods in Load Order", MessageBoxButton.OK);
+				}
+				else
+				{
+					displayExtenderModWarning = true;
+				}
+			}
+			else
+			{
+				displayExtenderModWarning = true;
+			}
+
+			if(displayExtenderModWarning)
+			{
+				List<DivinityMissingModData> extenderRequiredMods = new List<DivinityMissingModData>();
+				for (int i = 0; i < order.Order.Count; i++)
+				{
+					var entry = order.Order[i];
+					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
+					if (mod != null)
+					{
+						if(mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+						{
+							var x = new DivinityMissingModData
+							{
+								Index = i,
+								Name = mod.DisplayName,
+								UUID = mod.UUID,
+								Dependency = false
+							};
+							extenderRequiredMods.Add(x);
+						}
+						if (mod.Dependencies.Count > 0)
+						{
+							foreach (var dependency in mod.Dependencies)
+							{
+								// Dependencies not in the order that require the extender
+								if (!order.Order.Any(e => e.UUID == dependency.UUID) && 
+									(mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING))
+								{
+									var x = new DivinityMissingModData
+									{
+										Index = i - 1,
+										Name = dependency.Name,
+										UUID = dependency.UUID,
+										Dependency = true
+									};
+									extenderRequiredMods.Add(x);
+								}
+							}
+						}
+					}
+					i++;
+				}
+
+				if (extenderRequiredMods.Count > 0)
+				{
+					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", extenderRequiredMods.OrderBy(x => x.Index)),
+						"Mods that Require the Script Extender", MessageBoxButton.OK);
 				}
 			}
 		}

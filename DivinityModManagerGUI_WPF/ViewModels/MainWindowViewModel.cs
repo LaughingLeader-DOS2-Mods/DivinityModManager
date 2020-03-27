@@ -391,6 +391,14 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
 		}
 
+		private bool highlightExtenderDownload = false;
+
+		public bool HighlightExtenderDownload
+		{
+			get => highlightExtenderDownload;
+			set { this.RaiseAndSetIfChanged(ref highlightExtenderDownload, value); }
+		}
+
 		private bool gameDirectoryFound = false;
 
 		public bool GameDirectoryFound
@@ -680,37 +688,38 @@ namespace DivinityModManager.ViewModels
 				{
 					Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
 				}
-
-				string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
-				if (File.Exists(extenderAppFile))
-				{
-					Settings.ExtenderSettings.ExtenderIsAvailable = true;
-					try
-					{
-						FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
-						if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
-						{
-							var version = extenderInfo.FileVersion.Split('.')[0];
-							if (int.TryParse(version, out int intVersion))
-							{
-								Settings.ExtenderSettings.ExtenderVersion = intVersion;
-								Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
-							}
-							else
-							{
-								Settings.ExtenderSettings.ExtenderVersion = -1;
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
-					}
-				}
 			}
 			else
 			{
-				Trace.WriteLine($"DXGI.dll not found. Skipping extender check.");
+				Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = false;
+				Trace.WriteLine($"Extender DXGI.dll not found.");
+			}
+
+			string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
+			if (File.Exists(extenderAppFile))
+			{
+				Settings.ExtenderSettings.ExtenderIsAvailable = true;
+				try
+				{
+					FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
+					if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+					{
+						var version = extenderInfo.FileVersion.Split('.')[0];
+						if (int.TryParse(version, out int intVersion))
+						{
+							Settings.ExtenderSettings.ExtenderVersion = intVersion;
+							Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+						}
+						else
+						{
+							Settings.ExtenderSettings.ExtenderVersion = -1;
+						}
+					}
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
+				}
 			}
 			return Unit.Default;
 		}
@@ -1523,7 +1532,7 @@ namespace DivinityModManager.ViewModels
 							}
 							else
 							{
-								if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderVersion > -1)
+								if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderVersion > -1 && Settings.ExtenderSettings.ExtenderUpdaterIsAvailable)
 								{
 									if (mod.OsiExtenderData.RequiredExtensionVersion > -1 && Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion)
 									{
@@ -3039,30 +3048,34 @@ namespace DivinityModManager.ViewModels
 					if (successes >= 3)
 					{
 						view.AlertBar.SetSuccessAlert($"Successfully installed the Osiris Extender DXGI.dll to '{exeDir}'.", 20);
-						Settings.ExtenderSettings.ExtenderIsAvailable = true;
-						if(!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
+						HighlightExtenderDownload = false;
+						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+						if(Settings.ExtenderSettings.ExtenderVersion <= -1)
 						{
-							var re = new Regex("v([0-9]+)");
-							var m = re.Match(PathwayData.OsirisExtenderLatestReleaseVersion);
-							if (m.Success)
+							if (!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
 							{
-								if (int.TryParse(m.Groups[1].Value, out int version))
+								var re = new Regex("v([0-9]+)");
+								var m = re.Match(PathwayData.OsirisExtenderLatestReleaseVersion);
+								if (m.Success)
 								{
-									Settings.ExtenderSettings.ExtenderVersion = version;
-									Trace.WriteLine($"Set extender version to v{version},");
+									if (int.TryParse(m.Groups[1].Value, out int version))
+									{
+										Settings.ExtenderSettings.ExtenderVersion = version;
+										Trace.WriteLine($"Set extender version to v{version},");
+									}
 								}
 							}
-						}
-						else if(PathwayData.OsirisExtenderLatestReleaseUrl.Contains("v"))
-						{
-							var re = new Regex("v([0-9]+).*.zip");
-							var m = re.Match(PathwayData.OsirisExtenderLatestReleaseUrl);
-							if(m.Success)
+							else if (PathwayData.OsirisExtenderLatestReleaseUrl.Contains("v"))
 							{
-								if(int.TryParse(m.Groups[1].Value, out int version))
+								var re = new Regex("v([0-9]+).*.zip");
+								var m = re.Match(PathwayData.OsirisExtenderLatestReleaseUrl);
+								if (m.Success)
 								{
-									Settings.ExtenderSettings.ExtenderVersion = version;
-									Trace.WriteLine($"Set extender version to v{version},");
+									if (int.TryParse(m.Groups[1].Value, out int version))
+									{
+										Settings.ExtenderSettings.ExtenderVersion = version;
+										Trace.WriteLine($"Set extender version to v{version},");
+									}
 								}
 							}
 						}
@@ -3469,6 +3482,27 @@ Directory the zip will be extracted to:
 
 			modsConnecton.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 
+			// Blinky animation on the tools/download buttons if the extender is required by mods and is missing
+			modsConnecton.ObserveOn(RxApp.MainThreadScheduler).AutoRefresh(x => x.ExtenderModStatus).
+				Filter(x => x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING || x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED).
+				Select(x => x.Count).Subscribe(totalWithRequirements => {
+					if (totalWithRequirements > 0)
+					{
+						if (Settings.ExtenderSettings != null)
+						{
+							HighlightExtenderDownload = !Settings.ExtenderSettings.ExtenderUpdaterIsAvailable;
+						}
+						else
+						{
+							HighlightExtenderDownload = true;
+						}
+					}
+					else
+					{
+						HighlightExtenderDownload = false;
+					}
+			});
+
 			var anyPakModSelectedObservable = this.WhenAnyValue(x => x.SelectedPakMods.Count, (count) => count > 0);
 			ExtractSelectedModsCommand = ReactiveCommand.Create(ExtractSelectedMods_Start, anyPakModSelectedObservable);
 
@@ -3520,7 +3554,7 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			activeModsConnection.WhenAnyPropertyChanged("Index").Throttle(TimeSpan.FromMilliseconds(25)).Subscribe(_ => {
+			activeModsConnection.WhenAnyPropertyChanged("Index").Throttle(TimeSpan.FromMilliseconds(25)).Subscribe(mod => {
 				if (SelectedModOrder != null)
 				{
 					SelectedModOrder.Sort(SortModOrder);

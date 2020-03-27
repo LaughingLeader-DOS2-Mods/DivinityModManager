@@ -133,38 +133,76 @@ namespace DivinityModManager.Models
 				}
 			}
 		}
-		
-		private bool isMissingOsirisExtender = false;
 
-		public bool IsMissingOsirisExtender
+		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
+
+		public DivinityExtenderModStatus ExtenderModStatus
 		{
-			get => isMissingOsirisExtender;
+			get => extenderModStatus;
 			set 
 			{ 
-				this.RaiseAndSetIfChanged(ref isMissingOsirisExtender, value);
-				if(isMissingOsirisExtender)
-				{
-					if (OsiExtenderData != null && OsiExtenderData.RequiredExtensionVersion > 0)
-					{
-						if(OsiExtenderData.FeatureFlags != null && OsiExtenderData.FeatureFlags.Contains("Preprocessor"))
-						{
-							MissingOsirisExtenderText = $"Supports Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
-						}
-						else
-						{
-							MissingOsirisExtenderText = $"Missing Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher.";
-						}
-					}
-					else
-					{
-						MissingOsirisExtenderText = "May require the Osiris Extender";
-					}
-					this.RaisePropertyChanged("MissingOsirisExtenderText");
-				}
+				this.RaiseAndSetIfChanged(ref extenderModStatus, value);
+				UpdateOsirisExtenderToolTip();
 			}
 		}
 
-		public string MissingOsirisExtenderText { get; private set; }
+		public string OsirisExtenderSupportToolTipText { get; private set; }
+
+		public void UpdateOsirisExtenderToolTip()
+		{
+			switch(ExtenderModStatus)
+			{
+				case DivinityExtenderModStatus.REQUIRED:
+				case DivinityExtenderModStatus.REQUIRED_MISSING:
+				case DivinityExtenderModStatus.REQUIRED_DISABLED:
+				case DivinityExtenderModStatus.REQUIRED_OLD:
+					OsirisExtenderSupportToolTipText = "";
+					if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+					{
+						OsirisExtenderSupportToolTipText = "[MISSING] ";
+					}
+					else if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED)
+					{
+						OsirisExtenderSupportToolTipText = "[EXTENSIONS DISABLED] ";
+					}
+					else if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_OLD)
+					{
+						OsirisExtenderSupportToolTipText = "[OLD] ";
+					}
+					if (OsiExtenderData.RequiredExtensionVersion > -1)
+					{
+						OsirisExtenderSupportToolTipText += $"Requires Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher";
+					}
+					else
+					{
+						OsirisExtenderSupportToolTipText += "Requires the Osiris Extender";
+					}
+					if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED)
+					{
+						OsirisExtenderSupportToolTipText += " (Enable Extensions in the OsiExtender config)";
+					}
+					if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_OLD)
+					{
+						OsirisExtenderSupportToolTipText += " (Update by running the game)";
+					}
+					break;
+				case DivinityExtenderModStatus.SUPPORTS:
+					if (OsiExtenderData.RequiredExtensionVersion > -1)
+					{
+						OsirisExtenderSupportToolTipText = $"Supports Osiris Extender v{OsiExtenderData.RequiredExtensionVersion} or higher";
+					}
+					else
+					{
+						OsirisExtenderSupportToolTipText = $"Supports the Osiris Extender";
+					}
+					break;
+				case DivinityExtenderModStatus.NONE:
+				default:
+					OsirisExtenderSupportToolTipText = "";
+					break;
+			}
+			this.RaisePropertyChanged("OsirisExtenderSupportToolTipText");
+		}
 
 		[JsonProperty] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
 		[JsonProperty] public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();

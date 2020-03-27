@@ -15,5 +15,13 @@ namespace DivinityModManager.Models
 
 		[JsonProperty("FeatureFlags")]
 		public List<string> FeatureFlags { get; set; } = new List<string>();
+
+		public bool HasAnySettings
+		{
+			get
+			{
+				return RequiredExtensionVersion > -1 || FeatureFlags?.Count > 0;
+			}
+		}
 	}
 }

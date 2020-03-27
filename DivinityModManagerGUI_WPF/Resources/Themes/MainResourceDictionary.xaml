@@ -53,6 +53,7 @@
 	<BitmapImage x:Key="AlertBar_Information" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Information_16x.png" />
 	<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Success_16x.png" />
 	<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Warning_16x.png" />
+	<BitmapImage x:Key="DivinityEngine2" UriSource="pack://application:,,,/Resources/Icons/DivinityEngine2_64x.png" />
 	<Style
 		x:Key="IconButtonStyle"
 		BasedOn="{StaticResource {x:Type Button}}"
@@ -439,9 +440,47 @@
 				ToolTip="{StaticResource ModToolTip}" />
 			<StackPanel Grid.Column="1" Orientation="Horizontal">
 				<Image
-					Source="{StaticResource StatusWarning}"
-					ToolTip="{Binding MissingOsirisExtenderText}"
-					Visibility="{Binding IsMissingOsirisExtender, Converter={StaticResource BoolToVisibilityConverter}}" />
+					x:Name="ExtenderStatusImage"
+					Width="16"
+					Height="16"
+					MaxWidth="16"
+					MaxHeight="16"
+					HorizontalAlignment="Center"
+					VerticalAlignment="Center"
+					DataContext="{Binding}"
+					RenderOptions.BitmapScalingMode="HighQuality"
+					Stretch="UniformToFill"
+					ToolTip="{Binding OsirisExtenderSupportToolTipText}">
+					<Image.Style>
+						<Style TargetType="{x:Type Image}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.NONE}">
+									<Setter Property="Source" Value="{x:Null}" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.REQUIRED_MISSING}">
+									<Setter Property="Source" Value="{StaticResource AlertBar_Danger}" />
+									<Setter Property="Opacity" Value="1.0" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.REQUIRED_DISABLED}">
+									<Setter Property="Source" Value="{StaticResource AlertBar_Danger}" />
+									<Setter Property="Opacity" Value="1.0" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.REQUIRED_OLD}">
+									<Setter Property="Source" Value="{StaticResource AlertBar_Warning}" />
+									<Setter Property="Opacity" Value="1.0" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.REQUIRED}">
+									<Setter Property="Source" Value="{StaticResource DivinityEngine2}" />
+									<Setter Property="Opacity" Value="1.0" />
+								</DataTrigger>
+								<DataTrigger Binding="{Binding Path=ExtenderModStatus}" Value="{x:Static dapp:DivinityExtenderModStatus.SUPPORTS}">
+									<Setter Property="Source" Value="{StaticResource DivinityEngine2}" />
+									<Setter Property="Opacity" Value="0.5" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Image.Style>
+				</Image>
 			</StackPanel>
 		</Grid>
 	</DataTemplate>

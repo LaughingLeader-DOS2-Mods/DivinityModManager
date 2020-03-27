@@ -1078,9 +1078,10 @@
 									<Button
 										MinWidth="65"
 										Margin="6,0,0,0"
+										Padding="6,0,6,0"
 										Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 										CommandParameter="{Binding ElementName=MessageText, Path=Text}"
-										Content="Copy"
+										Content="Copy to Clipboard"
 										Style="{TemplateBinding OkButtonStyle}"
 										ToolTip="Copy to Clipboard" />
 								</Grid>

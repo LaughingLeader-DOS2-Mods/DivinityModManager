@@ -275,7 +275,14 @@ namespace DivinityModManager.Models
 		public bool IsSelected
 		{
 			get => isSelected;
-			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
+			set 
+			{ 
+				if(value && Visibility != Visibility.Visible)
+				{
+					value = false;
+				}
+				this.RaiseAndSetIfChanged(ref isSelected, value); 
+			}
 		}
 
 		private bool canDrag = true;

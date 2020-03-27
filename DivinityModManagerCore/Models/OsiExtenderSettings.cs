@@ -135,6 +135,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref debuggerFlags, value); }
 		}
 
+		private bool developerMode = false;
+
+		[DataMember]
+		public bool DeveloperMode
+		{
+			get => developerMode;
+			set { this.RaiseAndSetIfChanged(ref developerMode, value); }
+		}
+
 		public void SetToDefault()
 		{
 			EnableExtensions = true;
@@ -148,6 +157,7 @@ namespace DivinityModManager.Models
 			EnableDebugger = false;
 			DebuggerPort = 9999;
 			DebuggerFlags = 0;
+			DeveloperMode = false;
 		}
 
 		public void Set(OsiExtenderSettings osirisExtenderSettings)
@@ -163,6 +173,7 @@ namespace DivinityModManager.Models
 			EnableDebugger = osirisExtenderSettings.EnableDebugger;
 			DebuggerPort = osirisExtenderSettings.DebuggerPort;
 			DebuggerFlags = osirisExtenderSettings.DebuggerFlags;
+			DeveloperMode = osirisExtenderSettings.DeveloperMode;
 		}
 	}
 }

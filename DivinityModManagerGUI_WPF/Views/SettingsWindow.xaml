@@ -156,9 +156,9 @@
 							ChildMargin="4"
 							ColumnCount="2"
 							Columns="auto,*"
-							RowCount="13"
+							RowCount="14"
 							RowHeight="*"
-							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
 							<TextBlock
 								x:Name="EnableAchievementsTextBlock"
 								Text="Enable Achievements"
@@ -193,6 +193,14 @@
 								VerticalAlignment="Center"
 								IsChecked="{Binding ExtenderSettings.CreateConsole, UpdateSourceTrigger=PropertyChanged}"
 								ToolTip="{Binding ElementName=EnableConsoleTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="DeveloperModeTextBlock"
+								Text="Enable Developer Mode"
+								ToolTip="Enable developer mode. This can be checked for in mods, and also displays UI (Flash/swf) errors in the console." />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.DeveloperMode, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=DeveloperModeTextBlock, Path=ToolTip}" />
 							<TextBlock
 								x:Name="EnableLogTextBlock"
 								Text="Enable Logging"

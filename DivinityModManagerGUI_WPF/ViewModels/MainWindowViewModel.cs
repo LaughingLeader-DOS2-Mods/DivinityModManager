@@ -482,6 +482,8 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> gameExeFoundObservable;
 		private IObservable<bool> canInstallOsiExtender;
 
+		private bool OpenRepoLinkToDownload { get; set; } = false;
+
 		public ICommand SaveOrderCommand { get; private set; }
 		public ICommand SaveOrderAsCommand { get; private set; }
 		public ICommand ExportOrderCommand { get; private set; }
@@ -600,42 +602,52 @@ namespace DivinityModManager.ViewModels
 				string latestReleaseZipUrl = "";
 				Trace.WriteLine($"Checking for latest DXGI.dll release at 'Norbyte/ositools'.");
 				var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
-				var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
-				if (jsonData != null)
+				if(!String.IsNullOrEmpty(latestReleaseData))
 				{
-					if (jsonData.TryGetValue("assets", out var assetsArray))
+					var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
+					if (jsonData != null)
 					{
-						JArray assets = (JArray)assetsArray;
-						foreach (var obj in assets.Children<JObject>())
+						if (jsonData.TryGetValue("assets", out var assetsArray))
 						{
-							if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+							JArray assets = (JArray)assetsArray;
+							foreach (var obj in assets.Children<JObject>())
 							{
-								latestReleaseZipUrl = browserUrl.ToString();
+								if (obj.TryGetValue("browser_download_url", StringComparison.OrdinalIgnoreCase, out var browserUrl))
+								{
+									latestReleaseZipUrl = browserUrl.ToString();
+								}
 							}
 						}
-					}
-					if (jsonData.TryGetValue("tag_name", out var tagName))
-					{
-						PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
-					}
-	#if DEBUG
+						if (jsonData.TryGetValue("tag_name", out var tagName))
+						{
+							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
+						}
+#if DEBUG
 					var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
 					Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
-	#endif
-				}
-				if (!String.IsNullOrEmpty(latestReleaseZipUrl))
-				{
-					PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
-					Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+#endif
+					}
+					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
+					{
+						OpenRepoLinkToDownload = false;
+						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
+						Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+					}
+					else
+					{
+						Trace.WriteLine($"OsiTools latest release not found.");
+					}
 				}
 				else
 				{
-					Trace.WriteLine($"OsiTools latest release not found.");
+					OpenRepoLinkToDownload = true;
 				}
 			}
 			catch (Exception ex)
 			{
 				Trace.WriteLine($"Error checking for latest OsiExtender release: {ex.ToString()}");
+
+				OpenRepoLinkToDownload = true;
 			}
 
 			try
@@ -793,10 +805,10 @@ namespace DivinityModManager.ViewModels
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
-			canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
-				(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
+			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
+			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
 
-			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start, canInstallOsiExtender).DisposeWith(Settings.Disposables);
+			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start).DisposeWith(Settings.Disposables);
 
 			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
 			{
@@ -3093,8 +3105,10 @@ namespace DivinityModManager.ViewModels
 
 		private void InstallOsiExtender_Start()
 		{
-			string exeDir = Path.GetDirectoryName(Settings.DOS2DEGameExecutable);
-			string messageText = String.Format(@"Download and install the Osiris Extender?
+			if(!OpenRepoLinkToDownload)
+			{
+				string exeDir = Path.GetDirectoryName(Settings.DOS2DEGameExecutable);
+				string messageText = String.Format(@"Download and install the Osiris Extender?
 The Osiris Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
 The extenders needs to only be installed once, as it can auto-update itself automatically when you launch the game.
 Download url: 
@@ -3102,11 +3116,17 @@ Download url:
 Directory the zip will be extracted to:
 {1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
 
-			MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Osiris Extender?",
-				MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
-			if (result == MessageBoxResult.Yes)
+				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Osiris Extender?",
+					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
+				if (result == MessageBoxResult.Yes)
+				{
+					InstallOsiExtender_DownloadStart(exeDir);
+				}
+			}
+			else
 			{
-				InstallOsiExtender_DownloadStart(exeDir);
+				Trace.WriteLine($"Getting a release download link failed for some reason. Opening repo url: https://github.com/Norbyte/ositools/releases/latest");
+				Process.Start("https://github.com/Norbyte/ositools/releases/latest");
 			}
 		}
 

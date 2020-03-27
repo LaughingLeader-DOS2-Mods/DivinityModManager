@@ -22,6 +22,8 @@ namespace DivinityModManager.Util
         public static string Get(string uri, params WebRequestHeaderValue[] webRequestHeaders)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.UseDefaultCredentials = true;
+            request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             if (webRequestHeaders != null)
             {
                 foreach(var x in webRequestHeaders)
@@ -49,6 +51,8 @@ namespace DivinityModManager.Util
         public static async Task<string> GetAsync(string uri, params WebRequestHeaderValue[] webRequestHeaders)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.UseDefaultCredentials = true;
+            request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             if (webRequestHeaders != null)
             {
                 foreach (var x in webRequestHeaders)
@@ -78,6 +82,8 @@ namespace DivinityModManager.Util
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.UseDefaultCredentials = true;
+            request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.ContentLength = dataBytes.Length;
             request.ContentType = contentType;
@@ -101,6 +107,8 @@ namespace DivinityModManager.Util
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
+            request.UseDefaultCredentials = true;
+            request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.ContentLength = dataBytes.Length;
             request.ContentType = contentType;

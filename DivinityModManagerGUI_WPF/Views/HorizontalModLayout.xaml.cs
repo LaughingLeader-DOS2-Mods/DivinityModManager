@@ -123,7 +123,14 @@ namespace DivinityModManager.Views
 						var listItem = (ListViewItem)listView.ItemContainerGenerator.ContainerFromItem(mod);
 						if (listItem != null)
 						{
-							listItem.IsSelected = mod.IsSelected;
+							if(mod.Visibility == Visibility.Visible)
+							{
+								listItem.IsSelected = mod.IsSelected;
+							}
+							else
+							{
+								listItem.IsSelected = false;
+							}
 						}
 					}
 				}

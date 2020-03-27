@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Input;
 
 namespace DivinityModManager.Models
@@ -40,6 +41,7 @@ namespace DivinityModManager.Models
 
 		public bool IsEditorMod { get; set; } = false;
 		public bool CanDrag { get; set; } = true;
+		public Visibility Visibility { get; set; } = Visibility.Visible;
 
 		public DivinityModUpdateData()
 		{

@@ -514,7 +514,7 @@
 														Text="{Binding FileName}"
 														Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
 													<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
-														<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
+														<Run Foreground="Goldenrod" Text="Script Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
 												</StackPanel>
 											</StackPanel>
 										</ToolTip>
@@ -715,6 +715,46 @@
 					Fill="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
 					Visibility="{Binding MainProgressIsActive, Converter={StaticResource BoolToVisibilityConverter}}" />
 				<Grid Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}">
+					<Grid.Resources>
+						<!--<Color x:Key="WhiteColor">White</Color>
+						<Color x:Key="GoldColor">Gold</Color>-->
+						<Style
+							x:Key="MenuItemHightlightBlink"
+							BasedOn="{StaticResource {x:Type MenuItem}}"
+							TargetType="{x:Type MenuItem}">
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding HighlightExtenderDownload}" Value="True">
+									<Setter Property="Foreground" Value="Gold" />
+									<DataTrigger.EnterActions>
+										<BeginStoryboard Name="BlinkyMenuItemStoryboard">
+											<Storyboard
+												AutoReverse="True"
+												BeginTime="00:00:00"
+												FillBehavior="Stop"
+												RepeatBehavior="Forever"
+												Duration="0:0:0.5">
+												<!--<ColorAnimation
+													Storyboard.TargetProperty="Foreground.Color"
+													From="{StaticResource WhiteColor}"
+													To="{StaticResource GoldColor}" />-->
+												<DoubleAnimation
+													Storyboard.TargetProperty="Opacity"
+													From="1.0"
+													To="0.5" />
+											</Storyboard>
+										</BeginStoryboard>
+									</DataTrigger.EnterActions>
+									<DataTrigger.ExitActions>
+										<StopStoryboard BeginStoryboardName="BlinkyMenuItemStoryboard" />
+									</DataTrigger.ExitActions>
+								</DataTrigger>
+								<DataTrigger Binding="{Binding HighlightExtenderDownload}" Value="False">
+									<Setter Property="Opacity" Value="1.0" />
+									<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
+								</DataTrigger>
+							</Style.Triggers>
+						</Style>
+					</Grid.Resources>
 					<Grid.ColumnDefinitions>
 						<ColumnDefinition Width="*" />
 						<ColumnDefinition Width="1" />
@@ -775,11 +815,12 @@
 								Command="{Binding ToggleDarkModeCommand}"
 								Header="Toggle Dark/Light Mode" />
 						</MenuItem>
-						<MenuItem Header="Tools">
+						<MenuItem Header="Tools" Style="{StaticResource MenuItemHightlightBlink}">
 							<MenuItem
 								x:Name="ToolsInstallOsiExtenderMenuItem"
 								Command="{Binding DownloadAndInstallOsiExtenderCommand}"
-								Header="Download &amp; Install the Osiris Extender..." />
+								Header="Download &amp; Install the Script Extender..."
+								Style="{StaticResource MenuItemHightlightBlink}" />
 							<MenuItem
 								x:Name="ToolsExtractSelectedModsMenuItem"
 								Command="{Binding ExtractSelectedModsCommand}"

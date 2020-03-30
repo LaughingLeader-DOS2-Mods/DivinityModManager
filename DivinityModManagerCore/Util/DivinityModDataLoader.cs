@@ -639,7 +639,7 @@ namespace DivinityModManager.Util
 							if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
 							if (metaFile != null)
 							{
-								Trace.WriteLine($"Parsing meta.lsx for mod pak '{pakPath}'.");
+								//Trace.WriteLine($"Parsing meta.lsx for mod pak '{pakPath}'.");
 								using (var stream = metaFile.MakeStream())
 								{
 									using (var sr = new System.IO.StreamReader(stream))

@@ -745,17 +745,28 @@ namespace DivinityModManager.Util
 					var profileFile = Path.Combine(folder, "profile.lsb");
 					if (File.Exists(profileFile))
 					{
-						var profileRes = ResourceUtils.LoadResource(profileFile, LSLib.LS.Enums.ResourceFormat.LSB);
-						if(profileRes != null && profileRes.Regions.TryGetValue("PlayerProfile", out var region))
+						try
 						{
-							if(region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
+							var profileRes = ResourceUtils.LoadResource(profileFile, LSLib.LS.Enums.ResourceFormat.LSB);
+							if (profileRes != null && profileRes.Regions.TryGetValue("PlayerProfile", out var region))
 							{
-								storedDisplayedName = (string)profileDisplayNameAtt.Value;
+								if (region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
+								{
+									string storedName = (string)profileDisplayNameAtt.Value;
+									if (!String.IsNullOrEmpty(storedName))
+									{
+										storedDisplayedName = storedName;
+									}
+								}
+								if (region.Attributes.TryGetValue("PlayerProfileID", out var profileIdAtt))
+								{
+									profileUUID = (string)profileIdAtt.Value;
+								}
 							}
-							if (region.Attributes.TryGetValue("PlayerProfileID", out var profileIdAtt))
-							{
-								profileUUID = (string)profileIdAtt.Value;
-							}
+						}
+						catch(Exception ex)
+						{
+							Trace.WriteLine($"Error parsing profile data: \n{ex.ToString()}");
 						}
 					}
 

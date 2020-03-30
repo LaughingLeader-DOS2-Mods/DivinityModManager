@@ -305,15 +305,15 @@ namespace DivinityModManager.Views
 
 		public void AutoSizeNameColumn_ActiveMods(object sender, EventArgs e)
 		{
-			if (ActiveModsListView.View is GridView gridView)
+			if (ViewModel.ActiveMods.Count > 0 && ActiveModsListView.View is GridView gridView && gridView.Columns.Count >= 2)
 			{
-				if (gridView.Columns.Count >= 2)
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
 				{
-					if (ViewModel.ActiveMods.Count > 0)
+					if(ViewModel.ActiveMods.Count > 0)
 					{
-						RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
+						var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
+						if (!String.IsNullOrEmpty(longestName))
 						{
-							var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
 							//Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
 							var targetWidth = MeasureText(longestName,
 								ActiveModsListView.FontFamily,
@@ -321,33 +321,30 @@ namespace DivinityModManager.Views
 								ActiveModsListView.FontWeight,
 								ActiveModsListView.FontStretch,
 								ActiveModsListView.FontSize).Width + 12;
-							if(gridView.Columns[1].Width > targetWidth)
+							if (gridView.Columns[1].Width > targetWidth)
 							{
 								gridView.Columns[1].Width = targetWidth;
 							}
-						});
+						}
 					}
-				}
+				});
 			}
 		}
 
 		public void AutoSizeNameColumn_InactiveMods(object sender, EventArgs e)
 		{
-			if (InactiveModsListView.View is GridView gridView)
+			if (ViewModel.InactiveMods.Count > 0 && InactiveModsListView.View is GridView gridView && gridView.Columns.Count >= 2)
 			{
-				if (gridView.Columns.Count >= 2)
+				var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
+				if (!String.IsNullOrEmpty(longestName))
 				{
-					if (ViewModel.InactiveMods.Count > 0)
-					{
-						var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
-						//Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
-						gridView.Columns[0].Width = MeasureText(longestName,
-							ActiveModsListView.FontFamily,
-							ActiveModsListView.FontStyle,
-							ActiveModsListView.FontWeight,
-							ActiveModsListView.FontStretch,
-							ActiveModsListView.FontSize).Width + 12;
-					}
+					//Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
+					gridView.Columns[0].Width = MeasureText(longestName,
+						ActiveModsListView.FontFamily,
+						ActiveModsListView.FontStyle,
+						ActiveModsListView.FontWeight,
+						ActiveModsListView.FontStretch,
+						ActiveModsListView.FontSize).Width + 12;
 				}
 			}
 		}

@@ -54,6 +54,8 @@
 	<BitmapImage x:Key="AlertBar_Success" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Success_16x.png" />
 	<BitmapImage x:Key="AlertBar_Warning" UriSource="pack://application:,,,/Resources/Icons/AlertBar_Warning_16x.png" />
 	<BitmapImage x:Key="DivinityEngine2" UriSource="pack://application:,,,/Resources/Icons/DivinityEngine2_64x.png" />
+	<!--  Overrides the default context menu open animation to remove flickering.  -->
+	<PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
 	<Style
 		x:Key="IconButtonStyle"
 		BasedOn="{StaticResource {x:Type Button}}"
@@ -179,6 +181,7 @@
 						Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 						CommandParameter="{Binding FilePath}"
 						Header="Open in File Explorer..." />
+					<MenuItem Command="{Binding OpenWorkshopPageCommand}" Header="Open Steam Workshop Page..." />
 					<MenuItem Command="{Binding Path=ToggleNameDisplayCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding}">
 						<MenuItem.Header>
 							<TextBlock>
@@ -274,6 +277,7 @@
 						Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
 						CommandParameter="{Binding FilePath}"
 						Header="Open in File Explorer..." />
+					<MenuItem Command="{Binding Path=OpenWorkshopPageCommand}" Header="Open Steam Workshop Page..." />
 					<MenuItem Command="{Binding Path=ToggleNameDisplayCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding}">
 						<MenuItem.Header>
 							<TextBlock>

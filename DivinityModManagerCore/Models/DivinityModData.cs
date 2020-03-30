@@ -364,6 +364,27 @@ namespace DivinityModManager.Models
 
 			HasToolTip = HasDescription | HasDependencies;
 		}
+
+		private DivinityModWorkshopData workshopData = new DivinityModWorkshopData();
+
+		public DivinityModWorkshopData WorkshopData
+		{
+			get => workshopData;
+			set { this.RaiseAndSetIfChanged(ref workshopData, value); }
+		}
+
+		//public DivinityModWorkshopData WorkshopData { get; private set; } = new DivinityModWorkshopData();
+		public ICommand OpenWorkshopPageCommand { get; private set; }
+
+		public void OpenSteamWorkshopPage()
+		{
+			if (WorkshopData != null && WorkshopData.ID > -1)
+			{
+				string url = $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
+				System.Diagnostics.Process.Start(url);
+			}
+		}
+
 		public override string ToString()
 		{
 			return $"Mod|Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
@@ -388,6 +409,12 @@ namespace DivinityModManager.Models
 				UUID = UUID,
 				Version = Version.VersionInt
 			};
+		}
+
+		public DivinityModData()
+		{
+			var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => id > -1);
+			OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
 		}
 	}
 }

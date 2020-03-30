@@ -931,6 +931,52 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
+		public void LoadWorkshopMods()
+		{
+			if (Directory.Exists(Settings.DOS2WorkshopPath))
+			{
+				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath, true);
+				if (modPakData.Count > 0)
+				{
+					foreach(var workshopMod in modPakData)
+					{
+						string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
+						if (!String.IsNullOrEmpty(workshopID))
+						{
+							workshopMod.WorkshopData.ID = long.Parse(workshopID);
+						}
+					}
+					//Ignore Classic mods since they share the same workshop folder
+					var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
+					workshopMods.Clear();
+					workshopMods.AddRange(sortedWorkshopMods);
+
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+				}
+			}
+		}
+
+		public async Task<List<DivinityModData>> LoadWorkshopModsAsync()
+		{
+			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
+
+			if (Directory.Exists(Settings.DOS2WorkshopPath))
+			{
+				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true);
+				foreach (var workshopMod in newWorkshopMods)
+				{
+					string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
+					if (!String.IsNullOrEmpty(workshopID))
+					{
+						workshopMod.WorkshopData.ID = long.Parse(workshopID);
+					}
+				}
+				return newWorkshopMods.OrderBy(m => m.Name).ToList();
+			}
+
+			return newWorkshopMods;
+		}
+
 		public void CheckForModUpdates()
 		{
 			ModUpdatesViewData.Clear();
@@ -940,8 +986,10 @@ namespace DivinityModManager.ViewModels
 			{
 				workshopMod.UpdateDisplayName();
 				DivinityModData pakMod = mods.Items.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
+
 				if (pakMod != null)
 				{
+					pakMod.WorkshopData.ID = workshopMod.WorkshopData.ID;
 					if (!pakMod.IsEditorMod)
 					{
 						//Trace.WriteLine($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
@@ -974,36 +1022,6 @@ namespace DivinityModManager.ViewModels
 			}
 
 			ModUpdatesViewData.OnLoaded?.Invoke();
-		}
-
-		public void LoadWorkshopMods()
-		{
-			if (Directory.Exists(Settings.DOS2WorkshopPath))
-			{
-				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath, true);
-				if (modPakData.Count > 0)
-				{
-					//Ignore Classic mods since they share the same workshop folder
-					var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
-					workshopMods.Clear();
-					workshopMods.AddRange(sortedWorkshopMods);
-
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-				}
-			}
-		}
-
-		public async Task<List<DivinityModData>> LoadWorkshopModsAsync()
-		{
-			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
-
-			if (Directory.Exists(Settings.DOS2WorkshopPath))
-			{
-				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true);
-				return newWorkshopMods.OrderBy(m => m.Name).ToList();
-			}
-
-			return newWorkshopMods;
 		}
 
 		private void SetDOS2Pathways(string currentGameDataPath)

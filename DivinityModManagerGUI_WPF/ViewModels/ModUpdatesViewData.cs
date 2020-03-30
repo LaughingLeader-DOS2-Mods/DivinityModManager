@@ -174,10 +174,13 @@ namespace DivinityModManager.ViewModels
 						new TaskDialogButton(ButtonType.No)
 					},
 					WindowTitle = "Update Mods?",
+					Content = "Override local mods with the latest workshop versions?",
+					/*
 					Content = string.Format("Override local mods with the latest workshop versions?{0}{1}{0}{2}",
 						Environment.NewLine,
 						"Existing paks will be moved to the backup folder:",
 						"(Larian Studios/Divinity Original Sin 2 Definitive Edition/Mods_Backup/)"),
+					*/
 					MainIcon = TaskDialogIcon.Warning
 				})
 				{
@@ -264,6 +267,7 @@ namespace DivinityModManager.ViewModels
 					{
 						if (e.Cancel) return;
 						string baseName = Path.GetFileName(file);
+						/*
 						string existingMod = Path.Combine(args.ModPakFolder, baseName);
 						bool movedFile = false;
 						if (File.Exists(existingMod))
@@ -295,8 +299,19 @@ namespace DivinityModManager.ViewModels
 						{
 							dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
 							Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
-							File.Move(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)));
+							File.Copy(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)));
 						}
+						*/
+						try
+						{
+							Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
+							File.Copy(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)), true);
+						}
+						catch(Exception ex)
+						{
+							Trace.WriteLine($"Error copying workshop mod:\n{ex.ToString()}");
+						}
+						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
 						args.TotalMoved++;
 					}
 				}

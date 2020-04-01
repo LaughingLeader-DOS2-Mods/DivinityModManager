@@ -293,11 +293,46 @@ namespace DivinityModManager.Views
 
 		private void ComboBox_KeyDown_LoseFocus(object sender, KeyEventArgs e)
 		{
+			bool loseFocus = false;
 			if((e.Key == Key.Enter || e.Key == Key.Return))
 			{
 				UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
 				elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+				ViewModel.StopRenaming(false);
+				loseFocus = true;
 				e.Handled = true;
+			}
+			else if(e.Key == Key.Escape)
+			{
+				ViewModel.StopRenaming(true);
+				loseFocus = true;
+			}
+
+			if(loseFocus && sender is ComboBox comboBox)
+			{
+				var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
+				if (tb != null)
+				{
+					tb.Select(0, 0);
+				}
+			}
+		}
+
+		private void OrdersComboBox_LostFocus(object sender, RoutedEventArgs e)
+		{
+			if(sender is ComboBox comboBox && comboBox.IsEditable)
+			{
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), _ =>
+				{
+					if(ViewModel.IsRenamingOrder)
+					{
+						var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
+						if (tb != null && !tb.IsFocused)
+						{
+							ViewModel.StopRenaming(false);
+						}
+					}
+				});
 			}
 		}
 

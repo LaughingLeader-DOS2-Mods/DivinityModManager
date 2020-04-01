@@ -1163,6 +1163,7 @@ namespace DivinityModManager.Util
 							var fileText = await reader.ReadToEndAsync();
 				
 							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
+							order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
 							if (order != null)
 							{
 								order.FilePath = loadOrderFile;

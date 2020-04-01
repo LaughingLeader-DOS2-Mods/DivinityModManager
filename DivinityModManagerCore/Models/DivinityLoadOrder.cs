@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using System.Windows.Input;
+using Alphaleonis.Win32.Filesystem;
 
 namespace DivinityModManager.Models
 {
@@ -32,8 +33,6 @@ namespace DivinityModManager.Models
 	public class DivinityLoadOrder : ReactiveObject
 	{
 		private string name;
-
-		[DataMember]
 		public string Name
 		{
 			get => name;

@@ -1819,13 +1819,6 @@ namespace DivinityModManager.ViewModels
 				}
 
 				string outputPath = SelectedModOrder.FilePath;
-
-				if (String.IsNullOrWhiteSpace(outputPath))
-				{
-					string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
-					outputPath = Path.Combine(outputDirectory, outputName);
-				}
-
 				try
 				{
 					if (SelectedModOrder.Name.Equals("Current"))
@@ -1836,6 +1829,41 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
+						string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
+
+						// Renaming existing files
+						if (!String.IsNullOrWhiteSpace(outputPath) && !String.IsNullOrWhiteSpace(SelectedModOrder.Name) && File.Exists(outputPath))
+						{
+							string baseName = Path.GetFileNameWithoutExtension(outputPath);
+							if (baseName != SelectedModOrder.Name)
+							{
+								var lastPath = outputPath;
+								outputPath = Path.Combine(outputDirectory, outputName);
+								try
+								{
+									if (File.Exists(outputPath))
+									{
+										MessageBoxResult messageBoxResult = Xceed.Wpf.Toolkit.MessageBox.Show(view, $"Overwrite saved load order file with new name?{Environment.NewLine}Renaming {baseName}.json to {SelectedModOrder.Name}.json", "Confirm Overwrite",
+											MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel, view.MainWindowMessageBox_OK.Style);
+										if (messageBoxResult == MessageBoxResult.OK)
+										{
+											Trace.WriteLine($"Renaming load order file '{lastPath}' to '{outputPath}'.");
+											File.Move(lastPath, outputPath);
+										}
+									}
+									else
+									{
+										Trace.WriteLine($"Renaming load order file '{lastPath}' to '{outputPath}'.");
+										File.Move(lastPath, outputPath);
+									}
+								}
+								catch (Exception ex)
+								{
+									Trace.WriteLine($"Error renaming file:\n{ex.ToString()}");
+								}
+							}
+						}
+
 						// Save mods that aren't missing
 						var tempOrder = new DivinityLoadOrder
 						{
@@ -3178,6 +3206,73 @@ Directory the zip will be extracted to:
 			return 0;
 		}
 
+		private string LastRenamingOrderName { get; set; } = "";
+
+		public void StopRenaming(bool cancel = false)
+		{
+			if (IsRenamingOrder)
+			{
+				if (!cancel)
+				{
+					LastRenamingOrderName = "";
+				}
+				else if (!String.IsNullOrEmpty(LastRenamingOrderName))
+				{
+					SelectedModOrder.Name = LastRenamingOrderName;
+					LastRenamingOrderName = "";
+				}
+				IsRenamingOrder = false;
+			}
+		}
+
+		private async Task<Unit> ToggleRenamingLoadOrder(object control)
+		{
+			IsRenamingOrder = !IsRenamingOrder;
+
+			if(IsRenamingOrder)
+			{
+				LastRenamingOrderName = SelectedModOrder.Name;
+			}
+
+			await Task.Delay(50);
+			RxApp.MainThreadScheduler.Schedule(() =>
+			{
+				if (control is ComboBox comboBox)
+				{
+					var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
+					if(tb != null)
+					{
+						tb.Focus();
+						if (IsRenamingOrder)
+						{
+							tb.SelectAll();
+						}
+						else
+						{
+							tb.Select(0, 0);
+						}
+					}
+				}
+				else if (control is TextBox tb)
+				{
+					if (IsRenamingOrder)
+					{
+						tb.SelectAll();
+
+					}
+					else
+					{
+						tb.Select(0, 0);
+					}
+				}
+				else
+				{
+					Trace.WriteLine("Can't find OrdersComboBox!");
+				}
+			});
+			return Unit.Default;
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -3469,47 +3564,7 @@ Directory the zip will be extracted to:
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 
-			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object>(async (object control) =>
-			{
-				IsRenamingOrder = !IsRenamingOrder;
-
-				await Task.Delay(50);
-				RxApp.MainThreadScheduler.Schedule(() =>
-				{
-					if (control is ComboBox comboBox)
-					{
-						var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
-						if(tb != null)
-						{
-							tb.Focus();
-							if (IsRenamingOrder)
-							{
-								tb.SelectAll();
-							}
-							else
-							{
-								tb.Select(0, 0);
-							}
-						}
-					}
-					else if (control is TextBox tb)
-					{
-						if (IsRenamingOrder)
-						{
-							tb.SelectAll();
-
-						}
-						else
-						{
-							tb.Select(0, 0);
-						}
-					}
-					else
-					{
-						Trace.WriteLine("Can't find OrdersComboBox!");
-					}
-				});
-			}, canRenameOrder);
+			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object>(ToggleRenamingLoadOrder, canRenameOrder);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 

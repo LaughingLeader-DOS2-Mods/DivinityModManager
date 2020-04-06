@@ -116,6 +116,16 @@ namespace DivinityModManager.Models
 				}
 			}
 
+			if (PropertyContains("Tag"))
+			{
+				if(mod.WorkshopData != null && mod.WorkshopData.Tags != null && mod.WorkshopData.Tags.Count > 0)
+				{
+					Trace.WriteLine("Looking for tag " + this.FilterValue);
+					var f = this;
+					if (mod.WorkshopData.Tags.Any(x => f.ValueContains(x))) return true;
+				}
+			}
+
 			/*
 			 *	var propertyValue = (string)mod.GetType().GetProperty(FilterProperty).GetValue(mod, null);
 				if(propertyValue != null)

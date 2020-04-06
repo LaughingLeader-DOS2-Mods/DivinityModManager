@@ -20,6 +20,7 @@ namespace DivinityModManager
 	{
 		public App()
 		{
+			WebHelper.SetupClient();
 #if DEBUG
 			RxApp.SuppressViewCommandBindingMessage = false;
 #else

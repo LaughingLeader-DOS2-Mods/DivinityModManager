@@ -20,6 +20,12 @@ namespace DivinityModManager.Util
 	{
         public static readonly HttpClient Client = new HttpClient();
 
+        public static void SetupClient()
+        {
+            // Required for Github permissions
+            Client.DefaultRequestHeaders.Add("User-Agent", "DivinityModManager");
+        }
+
         public static async Task<Stream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
         {
             using (System.Net.WebClient webClient = new System.Net.WebClient())

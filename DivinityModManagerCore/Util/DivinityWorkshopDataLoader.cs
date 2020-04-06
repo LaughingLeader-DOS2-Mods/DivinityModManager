@@ -48,15 +48,24 @@ namespace DivinityModManager.Util
 
 			Trace.WriteLine($"Attempting to get workshop data from mods.");
 
-			var content = new FormUrlEncodedContent(values);
-			var response = await WebHelper.Client.PostAsync(STEAM_API_GET_WORKSHOP_DATA_URL, content);
-			var responseData = await response.Content.ReadAsStringAsync();
+			string responseData = "";
+			try
+			{
+				var content = new FormUrlEncodedContent(values);
+				var response = await WebHelper.Client.PostAsync(STEAM_API_GET_WORKSHOP_DATA_URL, content);
+				responseData = await response.Content.ReadAsStringAsync();
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+			}
 
 			if (!String.IsNullOrEmpty(responseData))
 			{
 				PublishedFileDetailsResponse pResponse = DivinityJsonUtils.SafeDeserialize<PublishedFileDetailsResponse>(responseData);
 				if(pResponse != null && pResponse.response != null && pResponse.response.publishedfiledetails != null && pResponse.response.publishedfiledetails.Count > 0)
 				{
+					int totalLoaded = 0;
 					var details = pResponse.response.publishedfiledetails;
 					foreach (var d in details)
 					{
@@ -68,7 +77,7 @@ namespace DivinityModManager.Util
 								if (d.tags != null && d.tags.Count > 0)
 								{
 									mod.WorkshopData.Tags = d.tags.Select(x => x.tag).ToList();
-									Trace.WriteLine($"Tags: {String.Join(";", mod.WorkshopData.Tags)}");
+									//Trace.WriteLine($"Tags: {String.Join(";", mod.WorkshopData.Tags)}");
 								}
 								mod.WorkshopData.PreviewUrl = d.preview_url;
 								mod.WorkshopData.Title = d.title;
@@ -80,8 +89,8 @@ namespace DivinityModManager.Util
 								mod.WorkshopData.Favorites = d.favorited;
 								mod.WorkshopData.LifetimeFavorites = d.lifetime_favorited;
 								mod.WorkshopData.Views = d.views;
-
-								Trace.WriteLine($"Loaded workshop details for mod {mod.Name}:");
+								//Trace.WriteLine($"Loaded workshop details for mod {mod.Name}:");
+								totalLoaded++;
 							}
 						}
 						catch(Exception ex)
@@ -89,17 +98,18 @@ namespace DivinityModManager.Util
 							Trace.WriteLine($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
 						}
 					}
+
+					Trace.WriteLine($"Successfully loaded workshop data for {totalLoaded} mods.");
 				}
 				else
 				{
-					Trace.WriteLine("Response data parsing failed!");
+					Trace.WriteLine("Failed to load workshop data for mods.");
 					Trace.WriteLine($"{responseData}");
 				}
 			}
 			else
 			{
-				Trace.WriteLine($"Response data is null!");
-				//throw new Exception("Response data is null!");
+				Trace.WriteLine("Failed to load workshop data for mods - no response data.");
 			}
 			return Unit.Default;
 		}

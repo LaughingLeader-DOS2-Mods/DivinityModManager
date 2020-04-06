@@ -39,7 +39,7 @@ namespace DivinityModManager.Util
 			}
 			else
 			{
-				Trace.WriteLine("Error deserializing json:\n\t" + String.Join("\n\t", errors));
+				Trace.WriteLine($"Error deserializing json:\n\n{text}\n\t" + String.Join("\n\t", errors));
 				return default(T);
 			}
 		}

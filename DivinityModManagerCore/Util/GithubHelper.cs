@@ -17,7 +17,7 @@ namespace DivinityModManager.Util
 
 		public static async Task<string> GetLatestReleaseDataAsync(string repo)
 		{
-			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo));
+			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo), System.Net.Http.HttpCompletionOption.ResponseContentRead);
 			return await response.Content.ReadAsStringAsync();
 		}
 
@@ -47,7 +47,7 @@ namespace DivinityModManager.Util
 
 		public static async Task<string> GetLatestReleaseLinkAsync(string repo)
 		{
-			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo));
+			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo), System.Net.Http.HttpCompletionOption.ResponseContentRead);
 			return GetBrowserDownloadUrl(await response.Content.ReadAsStringAsync());
 		}
 	}

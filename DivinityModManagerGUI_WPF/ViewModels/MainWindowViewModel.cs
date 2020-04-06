@@ -943,7 +943,7 @@ namespace DivinityModManager.ViewModels
 						string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
 						if (!String.IsNullOrEmpty(workshopID))
 						{
-							workshopMod.WorkshopData.ID = long.Parse(workshopID);
+							workshopMod.WorkshopData.ID = workshopID;
 						}
 					}
 					//Ignore Classic mods since they share the same workshop folder
@@ -968,9 +968,10 @@ namespace DivinityModManager.ViewModels
 					string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
 					if (!String.IsNullOrEmpty(workshopID))
 					{
-						workshopMod.WorkshopData.ID = long.Parse(workshopID);
+						workshopMod.WorkshopData.ID = workshopID;
 					}
 				}
+
 				return newWorkshopMods.OrderBy(m => m.Name).ToList();
 			}
 
@@ -1020,6 +1021,11 @@ namespace DivinityModManager.ViewModels
 				ModUpdatesViewData.SelectAll(true);
 				Trace.WriteLine($"'{count}' mod updates pending.");
 			}
+
+			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) => {
+				await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
+			});
+
 
 			ModUpdatesViewData.OnLoaded?.Invoke();
 		}
@@ -1652,6 +1658,7 @@ namespace DivinityModManager.ViewModels
 				{
 					Trace.WriteLine("No saved orders found.");
 				}
+
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{

@@ -378,7 +378,7 @@ namespace DivinityModManager.Models
 
 		public void OpenSteamWorkshopPage()
 		{
-			if (WorkshopData != null && WorkshopData.ID > -1)
+			if (WorkshopData != null && !String.IsNullOrEmpty(WorkshopData.ID))
 			{
 				string url = $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
 				System.Diagnostics.Process.Start(url);
@@ -413,7 +413,7 @@ namespace DivinityModManager.Models
 
 		public DivinityModData()
 		{
-			var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => id > -1);
+			var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
 			OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
 		}
 	}

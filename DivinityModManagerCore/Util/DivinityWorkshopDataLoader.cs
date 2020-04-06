@@ -32,6 +32,10 @@ namespace DivinityModManager.Util
 
 		public static async Task<Unit> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods)
 		{
+			if(workshopMods.Count == 0)
+			{
+				return Unit.Default;
+			}
 			//var workshopMods = mods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
 			var values = new Dictionary<string, string>
 			{

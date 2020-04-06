@@ -588,7 +588,7 @@ namespace DivinityModManager.Util
 			return mods;
 		}
 
-		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false)
+		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false, CancellationToken? token = null)
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
@@ -617,6 +617,10 @@ namespace DivinityModManager.Util
 				{
 					try
 					{
+						if(token.HasValue && token.Value.IsCancellationRequested)
+						{
+							return mods;
+						}
 						using (var pr = new LSLib.LS.PackageReader(pakPath))
 						{
 							DivinityModData modData = null;

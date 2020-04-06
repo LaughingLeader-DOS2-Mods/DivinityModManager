@@ -448,6 +448,15 @@ namespace DivinityModManager.ViewModels
 			});
 		}
 
+		public async Task<Unit> IncreaseMainProgressValueAsync(double val, string message = "")
+		{
+			return await Observable.Start(() => {
+				MainProgressValue += val;
+				if (!String.IsNullOrEmpty(message)) MainProgressWorkText = message;
+				return Unit.Default;
+			}, RxApp.MainThreadScheduler);
+		}
+
 		private CancellationTokenSource mainProgressToken;
 
 		public CancellationTokenSource MainProgressToken
@@ -956,13 +965,17 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public async Task<List<DivinityModData>> LoadWorkshopModsAsync()
+		public async Task<List<DivinityModData>> LoadWorkshopModsAsync(CancellationToken? token = null)
 		{
 			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
 
 			if (Directory.Exists(Settings.DOS2WorkshopPath))
 			{
-				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true);
+				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true, token);
+				if(token.HasValue && token.Value.IsCancellationRequested)
+				{
+					return newWorkshopMods;
+				}
 				foreach (var workshopMod in newWorkshopMods)
 				{
 					string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
@@ -978,13 +991,17 @@ namespace DivinityModManager.ViewModels
 			return newWorkshopMods;
 		}
 
-		public void CheckForModUpdates()
+		public void CheckForModUpdates(CancellationToken? token = null)
 		{
 			ModUpdatesViewData.Clear();
 
 			int count = 0;
 			foreach (var workshopMod in WorkshopMods)
 			{
+				if(token.HasValue && token.Value.IsCancellationRequested)
+				{
+					break;
+				}
 				workshopMod.UpdateDisplayName();
 				DivinityModData pakMod = mods.Items.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
 
@@ -1475,55 +1492,6 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref refreshing, value); }
 		}
 
-		public void Refresh()
-		{
-			Refreshing = true;
-			double taskStepAmount = 1.0 / 6;
-
-			List<DivinityLoadOrderEntry> lastActiveOrder = null;
-			int lastOrderIndex = -1;
-			if (SelectedModOrder != null)
-			{
-				lastActiveOrder = SelectedModOrder.Order.ToList();
-				lastOrderIndex = SelectedModOrderIndex;
-			}
-			mods.Clear();
-			Profiles.Clear();
-			LoadMods();
-			MainProgressValue += taskStepAmount;
-
-			LoadProfiles();
-			MainProgressValue += taskStepAmount;
-
-			SavedModOrderList = LoadExternalLoadOrders();
-			MainProgressValue += taskStepAmount;
-
-			if (lastActiveOrder != null)
-			{
-				// Just in case a mod disappears
-				//var restoredOrder = lastActiveOrder.Where(x => Mods.Any(y => y.UUID == x.UUID));
-				SelectedModOrder.SetOrder(lastActiveOrder);
-				BuildModOrderList(lastOrderIndex);
-			}
-			else
-			{
-				BuildModOrderList(0);
-			}
-
-			MainProgressValue += taskStepAmount;
-
-			LoadWorkshopMods();
-			MainProgressValue += taskStepAmount;
-
-			CheckForModUpdates();
-			MainProgressValue += taskStepAmount;
-
-			Refreshing = false;
-
-			OnRefreshed?.Invoke(this, new EventArgs());
-			OnMainProgressComplete(250);
-		}
-
 		private List<DivinityLoadOrder> LoadExternalLoadOrders()
 		{
 			string loadOrderDirectory = Settings.LoadOrderPath;
@@ -1592,6 +1560,35 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private async Task<Unit> SetMainProgressTextAsync(string text)
+		{
+			return await Observable.Start(() => {
+				MainProgressWorkText = text;
+				return Unit.Default;
+			}, RxApp.MainThreadScheduler);
+		}
+
+		private CancellationToken? workshopModLoadingCancelToken;
+
+		private void LoadWorkshopModDataBackground()
+		{
+			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
+			{
+				workshopModLoadingCancelToken = token;
+				var loadedWorkshopMods = await LoadWorkshopModsAsync(workshopModLoadingCancelToken);
+				await Observable.Start(() => {
+					workshopMods.AddRange(loadedWorkshopMods);
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					if(!workshopModLoadingCancelToken.Value.IsCancellationRequested)
+					{
+						CheckForModUpdates(workshopModLoadingCancelToken);
+					}
+					return Unit.Default;
+				}, RxApp.MainThreadScheduler);
+				await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
+			});
+		}
+
 		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
 		{
 			Trace.WriteLine($"Refreshing data asynchronously...");
@@ -1617,32 +1614,32 @@ namespace DivinityModManager.ViewModels
 
 			if (Directory.Exists(PathwayData.LarianDocumentsFolder))
 			{
-				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading mods...");
+				await SetMainProgressTextAsync("Loading mods...");
 				var loadedMods = await LoadModsAsync();
-				IncreaseMainProgressValue(taskStepAmount);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				//RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
 				//var loadedWorkshopMods = await LoadWorkshopModsAsync();
-				IncreaseMainProgressValue(taskStepAmount);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 
-				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading profiles...");
+				await SetMainProgressTextAsync("Loading profiles...");
 				var loadedProfiles = await LoadProfilesAsync();
-				IncreaseMainProgressValue(taskStepAmount);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				if (String.IsNullOrEmpty(selectedProfileUUID) && (loadedProfiles != null && loadedProfiles.Count > 0))
 				{
-					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading current profile...");
+					await SetMainProgressTextAsync("Loading current profile...");
 					selectedProfileUUID = await DivinityModDataLoader.GetSelectedProfileUUIDAsync(PathwayData.DocumentsProfilesPath);
-					IncreaseMainProgressValue(taskStepAmount);
+					await IncreaseMainProgressValueAsync(taskStepAmount);
 				}
 				else
 				{
-					IncreaseMainProgressValue(taskStepAmount);
+					await IncreaseMainProgressValueAsync(taskStepAmount);
 				}
 
-				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading external load orders...");
+				await SetMainProgressTextAsync("Loading external load orders...");
 				var savedModOrderList = await LoadExternalLoadOrdersAsync();
-				IncreaseMainProgressValue(taskStepAmount);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				if (savedModOrderList.Count > 0)
 				{
@@ -1699,29 +1696,14 @@ namespace DivinityModManager.ViewModels
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
 
-				RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
-				{
-					var loadedWorkshopMods = await LoadWorkshopModsAsync();
-					await Observable.Start(() => {
-						workshopMods.AddRange(loadedWorkshopMods);
-						Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-						CheckForModUpdates();
-						return Unit.Default;
-					}, RxApp.MainThreadScheduler);
-					await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
-				});
-
-				IncreaseMainProgressValue(taskStepAmount);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
 			else
 			{
 				Trace.WriteLine($"[*ERROR*] Larian documents folder not found!");
 			}
 
-			await ctrl.Yield();
-
-			RxApp.MainThreadScheduler.Schedule(_ =>
-			{
+			await Observable.Start(() => {
 				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
 				{
 					Trace.WriteLine($"Setting selected adventure mod.");
@@ -1752,7 +1734,10 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Checking extender data.");
 					CheckExtenderData();
 				}
-			});
+				return Unit.Default;
+			}, RxApp.MainThreadScheduler);
+
+			LoadWorkshopModDataBackground();
 
 			/*
 			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>

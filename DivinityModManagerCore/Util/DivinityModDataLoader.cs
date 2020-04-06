@@ -1502,7 +1502,6 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-
 		private static DivinityModOsiExtenderConfig LoadOsiConfig(string osiToolsConfig)
 		{
 			try

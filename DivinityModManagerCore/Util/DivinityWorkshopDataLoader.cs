@@ -28,8 +28,6 @@ namespace DivinityModManager.Util
 			return output;
 		}
 
-		private static readonly HttpClient client = new HttpClient();
-
 		public static async Task<Unit> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods)
 		{
 			if(workshopMods.Count == 0)
@@ -51,7 +49,7 @@ namespace DivinityModManager.Util
 			Trace.WriteLine($"Attempting to get workshop data from mods.");
 
 			var content = new FormUrlEncodedContent(values);
-			var response = await client.PostAsync(STEAM_API_GET_WORKSHOP_DATA_URL, content);
+			var response = await WebHelper.Client.PostAsync(STEAM_API_GET_WORKSHOP_DATA_URL, content);
 			var responseData = await response.Content.ReadAsStringAsync();
 
 			if (!String.IsNullOrEmpty(responseData))
@@ -67,7 +65,11 @@ namespace DivinityModManager.Util
 							var mod = workshopMods.FirstOrDefault(x => x.WorkshopData.ID == d.publishedfileid);
 							if (mod != null)
 							{
-								if(d.tags != null && d.tags.Count > 0) mod.WorkshopData.Tags = d.tags.Select(x => x.tag).ToList();
+								if (d.tags != null && d.tags.Count > 0)
+								{
+									mod.WorkshopData.Tags = d.tags.Select(x => x.tag).ToList();
+									Trace.WriteLine($"Tags: {String.Join(";", mod.WorkshopData.Tags)}");
+								}
 								mod.WorkshopData.PreviewUrl = d.preview_url;
 								mod.WorkshopData.Title = d.title;
 								mod.WorkshopData.Description = d.description;
@@ -80,7 +82,6 @@ namespace DivinityModManager.Util
 								mod.WorkshopData.Views = d.views;
 
 								Trace.WriteLine($"Loaded workshop details for mod {mod.Name}:");
-								Trace.WriteLine($"Tags: {String.Join(";", mod.WorkshopData.Tags)}");
 							}
 						}
 						catch(Exception ex)

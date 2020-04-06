@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,9 +18,34 @@ namespace DivinityModManager.Util
     }
 	public static class WebHelper
 	{
+        public static readonly HttpClient Client = new HttpClient();
+
+        public static async Task<Stream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
+        {
+            using (System.Net.WebClient webClient = new System.Net.WebClient())
+            {
+                int receivedBytes = 0;
+
+                Stream stream = await webClient.OpenReadTaskAsync(downloadUrl);
+                MemoryStream ms = new MemoryStream();
+                var buffer = new byte[4096];
+                int read = 0;
+                var totalBytes = Int32.Parse(webClient.ResponseHeaders[HttpResponseHeader.ContentLength]);
+
+                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                    receivedBytes += read;
+                }
+                stream.Close();
+                return ms;
+            }
+        }
+
+        #region OLD
+
         // Get/Post sources from here: https://stackoverflow.com/a/27108442
-
-
+        /*
         public static string Get(string uri, params WebRequestHeaderValue[] webRequestHeaders)
         {
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(uri);
@@ -26,9 +53,9 @@ namespace DivinityModManager.Util
             request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             if (webRequestHeaders != null)
             {
-                foreach(var x in webRequestHeaders)
+                foreach (var x in webRequestHeaders)
                 {
-                    if(x.HttpRequestHeader == HttpRequestHeader.UserAgent)
+                    if (x.HttpRequestHeader == HttpRequestHeader.UserAgent)
                     {
                         request.UserAgent = x.Value;
                     }
@@ -89,20 +116,29 @@ namespace DivinityModManager.Util
             request.ContentType = contentType;
             request.Method = method;
 
-            using (Stream requestBody = request.GetRequestStream())
+            try
             {
-                requestBody.Write(dataBytes, 0, dataBytes.Length);
+                using (Stream requestBody = request.GetRequestStream())
+                {
+                    requestBody.Write(dataBytes, 0, dataBytes.Length);
+                }
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return reader.ReadToEnd();
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Error reading stream:\n{ex.ToString()}");
             }
 
-            using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
+            return "";
         }
 
-        public static async Task<string> PostAsync(string uri, string data, string contentType, string method = "POST")
+        public static async Task<string> PostAsync(string uri, string data, string contentType = "", string accept = "", string method = "POST")
         {
             byte[] dataBytes = Encoding.UTF8.GetBytes(data);
 
@@ -111,42 +147,32 @@ namespace DivinityModManager.Util
             request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             request.ContentLength = dataBytes.Length;
-            request.ContentType = contentType;
+            if (!String.IsNullOrEmpty(contentType)) request.ContentType = contentType;
+            if (!String.IsNullOrEmpty(accept)) request.Accept = accept;
             request.Method = method;
 
-            using (Stream requestBody = request.GetRequestStream())
+            try
             {
-                await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
-            }
-
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream stream = response.GetResponseStream())
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return await reader.ReadToEndAsync();
-            }
-        }
-
-        public static async Task<Stream> DownloadFileAsStreamAsync(string downloadUrl, CancellationToken token)
-        {
-            using (System.Net.WebClient webClient = new System.Net.WebClient())
-            {
-                int receivedBytes = 0;
-
-                Stream stream = await webClient.OpenReadTaskAsync(downloadUrl);
-                MemoryStream ms = new MemoryStream();
-                var buffer = new byte[4096];
-                int read = 0;
-                var totalBytes = Int32.Parse(webClient.ResponseHeaders[HttpResponseHeader.ContentLength]);
-
-                while ((read = await stream.ReadAsync(buffer, 0, buffer.Length, token)) > 0)
+                using (Stream requestBody = request.GetRequestStream())
                 {
-                    ms.Write(buffer, 0, read);
-                    receivedBytes += read;
+                    await requestBody.WriteAsync(dataBytes, 0, dataBytes.Length);
                 }
-                stream.Close();
-                return ms;
+
+                using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+                using (Stream stream = response.GetResponseStream())
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    return await reader.ReadToEndAsync();
+                }
             }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Error reading stream:\n{ex.ToString()}");
+            }
+
+            return "";
         }
+        */
+        #endregion
     }
 }

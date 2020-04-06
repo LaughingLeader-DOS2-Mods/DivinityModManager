@@ -13,24 +13,12 @@ namespace DivinityModManager.Util
 {
 	public static class GithubHelper
 	{
-		public static string GetLatestReleaseData(string repo)
-		{
-			string url = $"https://api.github.com/repos/{repo}/releases/latest";
-			return WebHelper.Get(url, new WebRequestHeaderValue
-			{
-				HttpRequestHeader = HttpRequestHeader.UserAgent,
-				Value = "DivinityModManagerUser"
-			});
-		}
+		private static readonly string GIT_URL_REPO_LATEST = "https://api.github.com/repos/{0}/releases/latest";
 
 		public static async Task<string> GetLatestReleaseDataAsync(string repo)
 		{
-			string url = $"https://api.github.com/repos/{repo}/releases/latest";
-			return await WebHelper.GetAsync(url, new WebRequestHeaderValue
-			{
-				HttpRequestHeader = HttpRequestHeader.UserAgent,
-				Value = "DivinityModManagerUser"
-			});
+			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo));
+			return await response.Content.ReadAsStringAsync();
 		}
 
 		private static string GetBrowserDownloadUrl(string dataString)
@@ -56,26 +44,11 @@ namespace DivinityModManager.Util
 			}
 			return "";
 		}
-		public static string GetLatestReleaseLink(string repo)
-		{
-			string url = $"https://api.github.com/repos/{repo}/releases/latest";
-			var dataString = WebHelper.Get(url, new WebRequestHeaderValue
-			{
-				HttpRequestHeader = HttpRequestHeader.UserAgent,
-				Value = "DivinityModManagerUser"
-			});
-			return GetBrowserDownloadUrl(dataString);
-		}
 
 		public static async Task<string> GetLatestReleaseLinkAsync(string repo)
 		{
-			string url = $"https://api.github.com/repos/{repo}/releases/latest";
-			var dataString = await WebHelper.GetAsync(url, new WebRequestHeaderValue
-			{
-				HttpRequestHeader = HttpRequestHeader.UserAgent,
-				Value = "DivinityModManagerUser"
-			});
-			return GetBrowserDownloadUrl(dataString);
+			var response = await WebHelper.Client.GetAsync(String.Format(GIT_URL_REPO_LATEST, repo));
+			return GetBrowserDownloadUrl(await response.Content.ReadAsStringAsync());
 		}
 	}
 }

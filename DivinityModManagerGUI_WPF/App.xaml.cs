@@ -20,10 +20,10 @@ namespace DivinityModManager
 	{
 		public App()
 		{
-			RxApp.DefaultExceptionHandler = new RxExceptionHandler();
 #if DEBUG
 			RxApp.SuppressViewCommandBindingMessage = false;
 #else
+			RxApp.DefaultExceptionHandler = new RxExceptionHandler();
 			RxApp.SuppressViewCommandBindingMessage = true;
 #endif
 		}

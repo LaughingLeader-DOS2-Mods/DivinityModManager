@@ -1021,12 +1021,6 @@ namespace DivinityModManager.ViewModels
 				ModUpdatesViewData.SelectAll(true);
 				Trace.WriteLine($"'{count}' mod updates pending.");
 			}
-
-			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) => {
-				await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
-			});
-
-
 			ModUpdatesViewData.OnLoaded?.Invoke();
 		}
 
@@ -1627,8 +1621,8 @@ namespace DivinityModManager.ViewModels
 				var loadedMods = await LoadModsAsync();
 				IncreaseMainProgressValue(taskStepAmount);
 
-				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
-				var loadedWorkshopMods = await LoadWorkshopModsAsync();
+				//RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
+				//var loadedWorkshopMods = await LoadWorkshopModsAsync();
 				IncreaseMainProgressValue(taskStepAmount);
 
 				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading profiles...");
@@ -1659,12 +1653,10 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine("No saved orders found.");
 				}
 
-
-				RxApp.MainThreadScheduler.Schedule(_ =>
-				{
+				await Observable.Start(() => {
 					mods.AddRange(DivinityApp.MODS_Larian_All);
 					mods.AddRange(loadedMods);
-					workshopMods.AddRange(loadedWorkshopMods);
+
 					Profiles.AddRange(loadedProfiles);
 
 					SavedModOrderList = savedModOrderList;
@@ -1688,7 +1680,7 @@ namespace DivinityModManager.ViewModels
 					}
 
 					MainProgressWorkText = "Building mod order list...";
-					
+
 					if (lastActiveOrder != null && lastActiveOrder.Count > 0)
 					{
 						if (SelectedModOrder != null) SelectedModOrder.SetOrder(lastActiveOrder);
@@ -1700,10 +1692,23 @@ namespace DivinityModManager.ViewModels
 					}
 					MainProgressValue += taskStepAmount;
 
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
-					MainProgressWorkText = "Checking for mod updates...";
-					CheckForModUpdates();
+					//Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					//MainProgressWorkText = "Checking for mod updates...";
+					//CheckForModUpdates();
 					MainProgressValue += taskStepAmount;
+					return Unit.Default;
+				}, RxApp.MainThreadScheduler);
+
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
+				{
+					var loadedWorkshopMods = await LoadWorkshopModsAsync();
+					await Observable.Start(() => {
+						workshopMods.AddRange(loadedWorkshopMods);
+						Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+						CheckForModUpdates();
+						return Unit.Default;
+					}, RxApp.MainThreadScheduler);
+					await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
 				});
 
 				IncreaseMainProgressValue(taskStepAmount);

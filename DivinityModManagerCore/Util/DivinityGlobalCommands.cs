@@ -10,6 +10,7 @@ using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace DivinityModManager.Util
 {
@@ -17,6 +18,7 @@ namespace DivinityModManager.Util
 	{
 		public ReactiveCommand<string, Unit> OpenFileCommand { get; private set; }
 		public ReactiveCommand<string, Unit> OpenInFileExplorerCommand { get; private set; }
+		public ICommand ClearMissingModsCommand { get; private set; }
 		public ReactiveCommand<DivinityModData, Unit> ToggleNameDisplayCommand { get; private set; }
 		public ReactiveCommand<string, Unit> CopyToClipboardCommand { get; private set; }
 
@@ -72,6 +74,14 @@ namespace DivinityModManager.Util
 			}
 		}
 
+		public void ClearMissingMods()
+		{
+			if (_viewModel != null)
+			{
+				_viewModel.ClearMissingMods();
+			}
+		}
+
 		private IDivinityAppViewModel _viewModel;
 
 		public void SetViewModel(IDivinityAppViewModel vm)
@@ -83,6 +93,7 @@ namespace DivinityModManager.Util
 		{
 			OpenFileCommand = ReactiveCommand.Create<string>(OpenFile);
 			OpenInFileExplorerCommand = ReactiveCommand.Create<string>(OpenInFileExplorer);
+			ClearMissingModsCommand = ReactiveCommand.Create(ClearMissingMods);
 			ToggleNameDisplayCommand = ReactiveCommand.Create<DivinityModData>((mod) =>
 			{
 				mod.DisplayFileForName = !mod.DisplayFileForName;

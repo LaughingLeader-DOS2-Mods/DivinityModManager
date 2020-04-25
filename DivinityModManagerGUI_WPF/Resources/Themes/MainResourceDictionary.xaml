@@ -1079,6 +1079,10 @@
 									<ColumnDefinition Width="*" />
 								</Grid.ColumnDefinitions>
 								<Grid Grid.Column="0" HorizontalAlignment="Left">
+									<Grid.ColumnDefinitions>
+										<ColumnDefinition Width="*" />
+										<ColumnDefinition Width="*" />
+									</Grid.ColumnDefinitions>
 									<Button
 										MinWidth="65"
 										Margin="6,0,0,0"
@@ -1088,6 +1092,15 @@
 										Content="Copy to Clipboard"
 										Style="{TemplateBinding OkButtonStyle}"
 										ToolTip="Copy to Clipboard" />
+									<Button
+										Grid.Column="1"
+										MinWidth="65"
+										Margin="6,0,0,0"
+										Padding="6,0,6,0"
+										Command="{Binding Path=ClearMissingModsCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+										Content="Remove All Missing"
+										Style="{TemplateBinding OkButtonStyle}"
+										ToolTip="Remove all missing mods from the load order." />
 								</Grid>
 								<Grid Grid.Column="1" HorizontalAlignment="Right">
 									<Grid.ColumnDefinitions>

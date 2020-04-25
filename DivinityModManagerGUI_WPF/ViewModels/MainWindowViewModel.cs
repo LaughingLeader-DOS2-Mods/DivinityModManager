@@ -2847,19 +2847,21 @@ namespace DivinityModManager.ViewModels
 
 		public void ShowAlert(string message, int alertType = 0, int timeout = 0)
 		{
+			if (timeout < 0) timeout = 0;
 			switch (alertType)
 			{
 				case -1:
 					view.AlertBar.SetDangerAlert(message, timeout);
 					break;
-				case 0:
-					view.AlertBar.SetInformationAlert(message, timeout);
+				case 2:
+					view.AlertBar.SetWarningAlert(message, timeout);
 					break;
 				case 1:
 					view.AlertBar.SetSuccessAlert(message, timeout);
 					break;
-				case 2:
-					view.AlertBar.SetWarningAlert(message, timeout);
+				case 0:
+				default:
+					view.AlertBar.SetInformationAlert(message, timeout);
 					break;
 			}
 		}
@@ -3268,6 +3270,45 @@ Directory the zip will be extracted to:
 				}
 			});
 			return Unit.Default;
+		}
+
+		public void ClearMissingMods()
+		{
+			//if (SelectedProfile.SavedLoadOrder == null)
+			//{
+			//	foreach (var uuid in SelectedProfile.ModOrder.ToList())
+			//	{
+			//		var activeModData = SelectedProfile.ActiveMods.FirstOrDefault(y => y.UUID == uuid);
+			//		if (activeModData != null)
+			//		{
+			//			var mod = mods.Items.FirstOrDefault(m => m.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase));
+			//			if (mod == null)
+			//			{
+			//				SelectedProfile.ActiveMods.Remove(activeModData);
+			//			}
+			//		}
+			//	}
+			//}
+
+			int totalRemoved = 0;
+
+			if (SelectedModOrder != null)
+			{
+				foreach(var entry in SelectedModOrder.Order.ToList())
+				{
+					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
+					if(mod == null)
+					{
+						SelectedModOrder.Order.Remove(entry);
+						totalRemoved++;
+					}
+				}
+			}
+
+			if (totalRemoved > 0)
+			{
+				ShowAlert($"Removed {totalRemoved} missing mods from the current order. Save to confirm.", 2);
+			}
 		}
 
 		public MainWindowViewModel() : base()

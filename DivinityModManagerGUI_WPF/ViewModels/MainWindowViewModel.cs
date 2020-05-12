@@ -1752,6 +1752,7 @@ namespace DivinityModManager.ViewModels
 
 		public void RefreshAsync_Start(string title = "Refreshing...")
 		{
+			ModUpdatesViewVisible = ModUpdatesAvailable = false;
 			MainProgressTitle = title;
 			MainProgressValue = 0d;
 			CanCancelProgress = false;

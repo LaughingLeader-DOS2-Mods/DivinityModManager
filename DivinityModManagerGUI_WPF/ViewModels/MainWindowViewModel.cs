@@ -21,7 +21,6 @@ using System.Reactive.Concurrency;
 using ReactiveUI.Legacy;
 using System.ComponentModel;
 using System.IO;
-using System.Reactive.Concurrency;
 using Newtonsoft.Json;
 using Microsoft.Win32;
 using DivinityModManager.Views;
@@ -231,6 +230,8 @@ namespace DivinityModManager.ViewModels
 		private bool IsInitialized { get; set; } = false;
 
 		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
+
+		private List<DivinityModData> userMods = new List<DivinityModData>();
 
 		protected ReadOnlyObservableCollection<DivinityModData> allMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
@@ -528,7 +529,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
 		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
-		public ICommand ToggleOrderRenamingCommand { get; set; }
+		public ReactiveCommand<object, Unit> ToggleOrderRenamingCommand { get; set; }
 
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
 		public DivinityGameLaunchWindowAction ActionOnGameLaunch
@@ -1157,6 +1158,8 @@ namespace DivinityModManager.ViewModels
 			mods.Clear();
 			mods.AddRange(DivinityApp.MODS_Larian_All);
 			mods.AddRange(finalMods);
+			userMods.Clear();
+			userMods.AddRange(finalMods);
 
 			Trace.WriteLine($"Loaded '{finalMods.Count()}' mods.");
 			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
@@ -1585,7 +1588,10 @@ namespace DivinityModManager.ViewModels
 					}
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
-				await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(mods.Items.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
+				//await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
+				await DivinityWorkshopDataLoader.FindWorkshopDataAsync(userMods.Where(x => 
+					String.IsNullOrEmpty(x.WorkshopData.ID) && x.PublishVersion.VersionInt > -1 
+					&& !String.IsNullOrEmpty(x.DisplayName)).ToList());
 			});
 		}
 
@@ -1653,6 +1659,7 @@ namespace DivinityModManager.ViewModels
 				await Observable.Start(() => {
 					mods.AddRange(DivinityApp.MODS_Larian_All);
 					mods.AddRange(loadedMods);
+					userMods.AddRange(loadedMods);
 
 					Profiles.AddRange(loadedProfiles);
 
@@ -1759,6 +1766,7 @@ namespace DivinityModManager.ViewModels
 			MainProgressIsActive = true;
 			Refreshing = true;
 			mods.Clear();
+			userMods.Clear();
 			Profiles.Clear();
 			workshopMods.Clear();
 			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
@@ -3603,7 +3611,7 @@ Directory the zip will be extracted to:
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 
-			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object>(ToggleRenamingLoadOrder, canRenameOrder);
+			ToggleOrderRenamingCommand = ReactiveUI.ReactiveCommand.CreateFromTask<object, Unit>(ToggleRenamingLoadOrder, canRenameOrder);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 

@@ -43,7 +43,7 @@ namespace DivinityModManager.Models.Steam
 		public int time_created { get; set; }
 		public int time_updated { get; set; }
 		public int visibility { get; set; }
-		public int banned { get; set; }
+		public bool banned { get; set; }
 		public string ban_reason { get; set; }
 		public int subscriptions { get; set; }
 		public int favorited { get; set; }

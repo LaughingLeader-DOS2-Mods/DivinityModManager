@@ -22,7 +22,6 @@ namespace DivinityModManager.Util
 
 		private async Task<bool> BuildDatabaseAsync(List<DivinityModData> mods)
 		{
-
 			return true;
 		}
 	}

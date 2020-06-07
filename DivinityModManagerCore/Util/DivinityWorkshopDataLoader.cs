@@ -9,12 +9,15 @@ using System.Net.Http;
 using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
+using DivinityModManager.Enums.Steam;
+using System.Web;
 
 namespace DivinityModManager.Util
 {
 	public static class DivinityWorkshopDataLoader
 	{
-		public static readonly string STEAM_API_GET_WORKSHOP_DATA_URL = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/?";
+		private static readonly string STEAM_API_GET_WORKSHOP_DATA_URL = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/?";
+		private static readonly string STEAM_API_GET_WORKSHOP_MODS_URL = "https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?";
 
 		private static string CreatePublishFileIds(List<DivinityModData> mods)
 		{
@@ -111,6 +114,87 @@ namespace DivinityModManager.Util
 			{
 				Trace.WriteLine("Failed to load workshop data for mods - no response data.");
 			}
+			return Unit.Default;
+		}
+
+		public static async Task<Unit> FindWorkshopDataAsync(List<DivinityModData> mods)
+		{
+			if (mods.Count == 0)
+			{
+				Trace.WriteLine($"Skipping FindWorkshopDataAsync");
+				return Unit.Default;
+			}
+			Trace.WriteLine($"Attempting to get workshop data for mods missing workshop folders.");
+			int totalLoaded = 0;
+			foreach (var mod in mods)
+			{
+				string name = Uri.EscapeUriString(mod.DisplayName);
+				string url = $"https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key={ApiKeys.STEAM_WEB_API}&appid=435150&search_text={name}&return_tags=true&return_details=true&return_metadata=true&requiredtags[0]=Definitive+Edition";
+				string responseData = "";
+				try
+				{
+					var response = await WebHelper.Client.GetAsync(url);
+					responseData = await response.Content.ReadAsStringAsync();
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+				}
+
+				//Trace.WriteLine(responseData);
+				if (!String.IsNullOrEmpty(responseData))
+				{
+					QueryFilesResponse pResponse = null;
+					//QueryFilesResponse pResponse = DivinityJsonUtils.SafeDeserialize<QueryFilesResponse>(responseData);
+					try
+					{
+						pResponse = JsonConvert.DeserializeObject<QueryFilesResponse>(responseData);
+					}
+					catch(Exception ex)
+					{
+						Trace.WriteLine(ex.ToString());
+					}
+					
+					if (pResponse != null && pResponse.response != null && pResponse.response.publishedfiledetails != null && pResponse.response.publishedfiledetails.Count > 0)
+					{
+						var details = pResponse.response.publishedfiledetails;
+						
+						foreach (var d in details)
+						{
+							try
+							{
+								d.DeserializeMetadata();
+								if (d.GetGuid() == mod.UUID)
+								{
+									mod.WorkshopData.ID = d.publishedfileid;
+									mod.WorkshopData.PreviewUrl = d.preview_url;
+									mod.WorkshopData.Title = d.title;
+									mod.WorkshopData.Description = d.description;
+									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(d.time_created);
+									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(d.time_updated);
+									Trace.WriteLine($"Found workshop ID {mod.WorkshopData.ID} for mod {mod.DisplayName}.");
+									break;
+								}
+							}
+							catch (Exception ex)
+							{
+								Trace.WriteLine($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
+							}
+						}
+					}
+					else
+					{
+						Trace.WriteLine($"Failed to find workshop data for mod {mod.DisplayName}");
+					}
+				}
+				else
+				{
+					Trace.WriteLine("Failed to load workshop data for mods - no response data.");
+				}
+			}
+
+			Trace.WriteLine($"Successfully loaded workshop data for {totalLoaded} mods.");
+
 			return Unit.Default;
 		}
 	}

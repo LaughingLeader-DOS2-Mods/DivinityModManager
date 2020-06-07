@@ -36,7 +36,4 @@
 	    <LastGenOutput>Resources.Designer.cs</LastGenOutput>
 	  </EmbeddedResource>
 	</ItemGroup>
-	<Target Name="PreBuild" BeforeTargets="PreBuildEvent">
-	  <Exec Command="echo namespace DivinityModManager&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo {&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo 	public class ApiKeys&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo 	{&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo 		public const string STEAM_WEB_API=&quot;%25STEAM_API_KEY%25&quot;;&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo 	}&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;&#xD;&#xA;echo }&gt;&gt;&quot;$(SolutionDir)DivinityModManagerCore\ApiKeys.cs&quot;" />
-	</Target>
 </Project>

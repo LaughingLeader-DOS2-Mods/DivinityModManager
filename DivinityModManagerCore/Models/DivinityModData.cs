@@ -91,6 +91,7 @@ namespace DivinityModManager.Models
 		[JsonProperty] public string Description { get; set; }
 		[JsonProperty] public string Author { get; set; }
 		[JsonProperty] public DivinityModVersion Version { get; set; }
+		public DivinityModVersion PublishVersion { get; set; } = new DivinityModVersion();
 		public string Folder { get; set; }
 		public string MD5 { get; set; }
 		[JsonProperty] public string Type { get; set; }
@@ -337,6 +338,14 @@ namespace DivinityModManager.Models
 		{
 			get => visibility;
 			set { this.RaiseAndSetIfChanged(ref visibility, value); }
+		}
+
+		private bool developerMode = false;
+
+		public bool DeveloperMode
+		{
+			get => developerMode;
+			private set { this.RaiseAndSetIfChanged(ref developerMode, value); }
 		}
 
 		public void UpdateDependencyText()

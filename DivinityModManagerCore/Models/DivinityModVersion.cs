@@ -71,7 +71,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private int versionInt;
+		private int versionInt = -1;
 
 		[JsonProperty]
 		public int VersionInt

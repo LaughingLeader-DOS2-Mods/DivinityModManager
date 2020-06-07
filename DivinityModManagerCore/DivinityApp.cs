@@ -1,8 +1,11 @@
 ﻿using DivinityModManager.Models;
 using DivinityModManager.Util;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -98,5 +101,25 @@ namespace DivinityModManager
 
 		public static DivinityGlobalCommands Commands { get; private set; } = new DivinityGlobalCommands();
 		public static DivinityGlobalEvents Events { get; private set; } = new DivinityGlobalEvents();
+
+		public static event PropertyChangedEventHandler StaticPropertyChanged;
+
+		private static void NotifyStaticPropertyChanged([CallerMemberName] string name = null)
+		{
+			StaticPropertyChanged?.Invoke(null, new PropertyChangedEventArgs(name));
+		}
+
+		private static bool developerModeEnabled = false;
+
+		public static bool DeveloperModeEnabled
+		{
+			get => developerModeEnabled;
+			set 
+			{ 
+				developerModeEnabled = value;
+				NotifyStaticPropertyChanged();
+			}
+		}
+
 	}
 }

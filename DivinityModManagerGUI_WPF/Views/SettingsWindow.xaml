@@ -278,7 +278,7 @@
 					</ScrollViewer>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Debug">
+			<TabItem Header="Advanced">
 				<autogrid:AutoGrid
 					Margin="20"
 					ChildMargin="2"
@@ -289,8 +289,8 @@
 					Rows="auto,auto">
 					<TextBlock
 						x:Name="DebugModeTextBlock"
-						Text="Enable Debug Mode"
-						ToolTip="Enables various debug features, such as additional OsiExtender options." />
+						Text="Enable Developer Mode"
+						ToolTip="This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options." />
 					<CheckBox
 						VerticalAlignment="Center"
 						IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"

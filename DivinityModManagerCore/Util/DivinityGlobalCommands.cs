@@ -16,6 +16,13 @@ namespace DivinityModManager.Util
 {
 	public class DivinityGlobalCommands
 	{
+		private IDivinityAppViewModel _viewModel;
+
+		public void SetViewModel(IDivinityAppViewModel vm)
+		{
+			_viewModel = vm;
+		}
+
 		public ReactiveCommand<string, Unit> OpenFileCommand { get; private set; }
 		public ReactiveCommand<string, Unit> OpenInFileExplorerCommand { get; private set; }
 		public ICommand ClearMissingModsCommand { get; private set; }
@@ -80,13 +87,6 @@ namespace DivinityModManager.Util
 			{
 				_viewModel.ClearMissingMods();
 			}
-		}
-
-		private IDivinityAppViewModel _viewModel;
-
-		public void SetViewModel(IDivinityAppViewModel vm)
-		{
-			_viewModel = vm;
 		}
 
 		public DivinityGlobalCommands()

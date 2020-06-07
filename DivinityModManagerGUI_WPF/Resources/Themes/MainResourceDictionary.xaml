@@ -198,6 +198,16 @@
 							</TextBlock>
 						</MenuItem.Header>
 					</MenuItem>
+					<MenuItem
+						Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+						CommandParameter="{Binding UUID}"
+						Header="Copy UUID to Clipboard"
+						Visibility="{Binding Path=(dapp:DivinityApp.DeveloperModeEnabled), Converter={StaticResource BoolToVisibilityConverter}}" />
+					<MenuItem
+						Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+						CommandParameter="{Binding Folder}"
+						Header="Copy FolderName to Clipboard"
+						Visibility="{Binding Path=(dapp:DivinityApp.DeveloperModeEnabled), Converter={StaticResource BoolToVisibilityConverter}}" />
 				</ContextMenu>
 			</Setter.Value>
 		</Setter>

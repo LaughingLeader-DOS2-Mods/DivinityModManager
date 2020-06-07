@@ -206,7 +206,12 @@ namespace DivinityModManager.Models
 		public bool DebugModeEnabled
 		{
 			get => debugModeEnabled;
-			set { this.RaiseAndSetIfChanged(ref debugModeEnabled, value); }
+			set
+			{
+				this.RaiseAndSetIfChanged(ref debugModeEnabled, value);
+				DivinityApp.DeveloperModeEnabled = value;
+			}
+
 		}
 
 		private bool extenderTabIsVisible = false;

@@ -40,169 +40,6 @@ using GongSolutions.Wpf.DragDrop.Utilities;
 
 namespace DivinityModManager.ViewModels
 {
-
-	public class ModListDropHandler : DefaultDropHandler
-	{
-		override public void Drop(IDropInfo dropInfo)
-		{
-			if (dropInfo == null || dropInfo.DragInfo == null)
-			{
-				return;
-			}
-
-			var insertIndex = dropInfo.UnfilteredInsertIndex;
-
-			var itemsControl = dropInfo.VisualTarget as ItemsControl;
-			if (itemsControl != null)
-			{
-				var editableItems = itemsControl.Items as IEditableCollectionView;
-				if (editableItems != null)
-				{
-					var newItemPlaceholderPosition = editableItems.NewItemPlaceholderPosition;
-					if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtBeginning && insertIndex == 0)
-					{
-						++insertIndex;
-					}
-					else if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtEnd && insertIndex == itemsControl.Items.Count)
-					{
-						--insertIndex;
-					}
-				}
-			}
-
-			var destinationList = dropInfo.TargetCollection.TryGetList();
-			var data = ExtractData(dropInfo.Data).OfType<DivinityModData>().ToList();
-
-			var sourceList = dropInfo.DragInfo.SourceCollection.TryGetList();
-			if (sourceList != null)
-			{
-				foreach (var o in data)
-				{
-					var index = sourceList.IndexOf(o);
-					if (index != -1)
-					{
-						sourceList.RemoveAt(index);
-						// so, is the source list the destination list too ?
-						if (destinationList != null && Equals(sourceList, destinationList) && index < insertIndex)
-						{
-							--insertIndex;
-						}
-					}
-				}
-			}
-
-			if (destinationList != null)
-			{
-				var objects2Insert = new List<object>();
-				foreach (var o in data)
-				{
-					var obj2Insert = o;
-					objects2Insert.Add(obj2Insert);
-					destinationList.Insert(insertIndex++, obj2Insert);
-				}
-
-				var selectDroppedItems = itemsControl is TabControl || (itemsControl != null && GongSolutions.Wpf.DragDrop.DragDrop.GetSelectDroppedItems(itemsControl));
-				if (selectDroppedItems)
-				{
-					SelectDroppedItems(dropInfo, objects2Insert);
-				}
-			}
-
-			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
-
-			foreach (var mod in _viewModel.Mods)
-			{
-				if(data.Contains(mod))
-				{
-					mod.IsActive = isActive;
-					mod.IsSelected = true;
-				}
-				else
-				{
-					mod.IsSelected = false;
-				}
-			}
-
-			if (isActive)
-			{
-				_viewModel.Layout.UpdateViewSelection(_viewModel.ActiveMods);
-				_viewModel.OnFilterTextChanged(_viewModel.ActiveModFilterText, _viewModel.ActiveMods);
-				//_viewModel.Layout.FixActiveModsScrollbar();
-			}
-			else
-			{
-				_viewModel.Layout.UpdateViewSelection(_viewModel.InactiveMods);
-				_viewModel.OnFilterTextChanged(_viewModel.InactiveModFilterText, _viewModel.InactiveMods);
-			}
-
-			if (_viewModel.SelectedModOrder != null)
-			{
-				_viewModel.SelectedModOrder.Order.Clear();
-				foreach (var x in _viewModel.ActiveMods)
-				{
-					_viewModel.SelectedModOrder.Add(x);
-				}
-			}
-
-			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
-		}
-
-		private MainWindowViewModel _viewModel;
-
-		public ModListDropHandler(MainWindowViewModel vm) : base()
-		{
-			_viewModel = vm;
-		}
-	}
-
-	public class ModListDragHandler : DefaultDragHandler
-	{
-		private MainWindowViewModel _viewModel;
-
-		public ModListDragHandler(MainWindowViewModel vm) : base()
-		{
-			_viewModel = vm;
-		}
-
-		public override void StartDrag(IDragInfo dragInfo)
-		{
-			//base.StartDrag(dragInfo);
-			if(dragInfo != null)
-			{
-				dragInfo.Data = null;
-				if (dragInfo.SourceCollection == _viewModel.ActiveMods)
-				{
-					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected);
-					dragInfo.Data = selected;
-					//Trace.WriteLine($"Drag source is ActiveMods | {selected.Count()}");
-				}
-				else if(dragInfo.SourceCollection == _viewModel.InactiveMods)
-				{
-					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.CanDrag);
-					dragInfo.Data = selected;
-					//Trace.WriteLine($"Drag source is InactiveMods | {selected.Count()} | Classic: {selected.Where(x => x.IsClassicMod && x.CanDrag).Count()}");
-				}
-				dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
-			}
-		}
-
-		public override bool CanStartDrag(IDragInfo dragInfo)
-		{
-			if(dragInfo.Data is ISelectable d && !d.CanDrag)
-			{
-				return false;
-			}
-			else if(dragInfo.Data is IEnumerable<DivinityModData> modData)
-			{
-				if(modData.All(x => !x.CanDrag))
-				{
-					return false;
-				}
-			}
-			return true;
-		}
-	}
-
 	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
 	{
 		private MainWindow view;
@@ -261,6 +98,8 @@ namespace DivinityModManager.ViewModels
 
 		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
 		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
+
+		private DivinityModManagerCachedWorkshopData CachedWorkshopData { get; set; } = new DivinityModManagerCachedWorkshopData();
 
 		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
 
@@ -1573,6 +1412,20 @@ namespace DivinityModManager.ViewModels
 
 		private CancellationToken? workshopModLoadingCancelToken;
 
+		private List<string> ignoredModProjectNames = new List<string> { "Test", "Debug" };
+		private bool CanFetchWorkshopData(DivinityModData mod)
+		{
+			if(mod.IsEditorMod && (ignoredModProjectNames.Any(x => mod.Folder.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1) || 
+				String.IsNullOrEmpty(mod.Author) || String.IsNullOrEmpty(mod.Description)))
+			{
+				return false;
+			}
+			else if(mod.Author == "Larian" || String.IsNullOrEmpty(mod.DisplayName))
+			{
+				return false;
+			}
+			return String.IsNullOrEmpty(mod.WorkshopData.ID);
+		}
 		private void LoadWorkshopModDataBackground()
 		{
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
@@ -1588,10 +1441,56 @@ namespace DivinityModManager.ViewModels
 					}
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
-				//await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList());
-				await DivinityWorkshopDataLoader.FindWorkshopDataAsync(userMods.Where(x => 
-					String.IsNullOrEmpty(x.WorkshopData.ID) && x.PublishVersion.VersionInt > -1 
-					&& !String.IsNullOrEmpty(x.DisplayName)).ToList());
+
+				if (File.Exists("Data\\workshopdata.json"))
+				{
+					DivinityModManagerCachedWorkshopData cachedData = DivinityJsonUtils.SafeDeserializeFromPath<DivinityModManagerCachedWorkshopData>("Data\\workshopdata.json");
+					if (cachedData != null)
+					{
+						CachedWorkshopData = cachedData;
+						foreach (var entry in cachedData.Mods)
+						{
+							if(!String.IsNullOrEmpty(entry.UUID))
+							{
+								var mod = Mods.FirstOrDefault(x => x.UUID == entry.UUID);
+								if (mod != null)
+								{
+									mod.WorkshopData.ID = entry.WorkshopID;
+									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(entry.Created);
+									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
+									mod.WorkshopData.Tags = entry.Tags;
+									mod.UpdateTagsText();
+								}
+							}
+						}
+					}
+				}
+
+				if (CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
+				{
+					var foundWorkshopMods = userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
+					if (foundWorkshopMods.Count > 0)
+					{
+						await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
+					}
+				}
+
+				var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
+				// Only try and find workshop data if there's a non-editor mod, in case all our pending mods missing workshop IDs are in-progress/editor-only mods
+				bool hasPakMod = unknownWorkshopMods.Any(x => !x.IsEditorMod);
+				bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
+				if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
+				{
+					await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
+				}
+
+				CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+				if(CachedWorkshopData.CacheUpdated)
+				{
+					await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
+					CachedWorkshopData.CacheUpdated = false;
+				}
 			});
 		}
 

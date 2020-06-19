@@ -87,7 +87,6 @@ namespace DivinityModManager.Models
 			}
 		}
 
-
 		[JsonProperty] public string Description { get; set; }
 		[JsonProperty] public string Author { get; set; }
 		[JsonProperty] public DivinityModVersion Version { get; set; }
@@ -115,6 +114,14 @@ namespace DivinityModManager.Models
 					}
 				}
 			}
+		}
+
+		private string tagsText = "";
+
+		public string TagsText
+		{
+			get => tagsText;
+			set { this.RaiseAndSetIfChanged(ref tagsText, value); }
 		}
 
 		public bool IsHidden { get; set; } = false;
@@ -391,6 +398,18 @@ namespace DivinityModManager.Models
 			{
 				string url = $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
 				System.Diagnostics.Process.Start(url);
+			}
+		}
+
+		public void UpdateTagsText()
+		{
+			if (WorkshopData.Tags.Count > 0)
+			{
+				TagsText = String.Join(", ", WorkshopData.Tags);
+			}
+			else
+			{
+				TagsText = "";
 			}
 		}
 

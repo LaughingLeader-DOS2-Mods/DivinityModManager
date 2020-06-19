@@ -293,14 +293,24 @@ namespace DivinityModManager.Views
 			if (sortBy == "Version") sortBy = "Version.Version";
 			if (sortBy == "#") sortBy = "Index";
 			if (sortBy == "Name") sortBy = "DisplayName";
-			ListView lv = sender as ListView;
-			ICollectionView dataView =
-			  CollectionViewSource.GetDefaultView(lv.ItemsSource);
+			if (sortBy == "Modes") sortBy = "Targets";
 
-			dataView.SortDescriptions.Clear();
-			SortDescription sd = new SortDescription(sortBy, direction);
-			dataView.SortDescriptions.Add(sd);
-			dataView.Refresh();
+			try
+			{
+				ListView lv = sender as ListView;
+				ICollectionView dataView =
+				  CollectionViewSource.GetDefaultView(lv.ItemsSource);
+
+				dataView.SortDescriptions.Clear();
+				SortDescription sd = new SortDescription(sortBy, direction);
+				dataView.SortDescriptions.Add(sd);
+				dataView.Refresh();
+			}
+			catch(Exception ex)
+			{
+				Trace.WriteLine("Error sorting mods:");
+				Trace.WriteLine(ex.ToString());
+			}
 		}
 
 		public void AutoSizeNameColumn_ActiveMods(object sender, EventArgs e)

@@ -177,6 +177,8 @@
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\ModListDragHandler.cs" />
+    <Compile Include="ViewModels\ModListDropHandler.cs" />
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>

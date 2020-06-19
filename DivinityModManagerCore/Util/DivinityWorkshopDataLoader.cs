@@ -22,7 +22,7 @@ namespace DivinityModManager.Util
 		private static string CreatePublishFileIds(List<DivinityModData> mods)
 		{
 			string output = "";
-			for(int i = 0; i < mods.Count; i++)
+			for (int i = 0; i < mods.Count; i++)
 			{
 				var mod = mods[i];
 				output += output + $"publishedfileids[{i}]: {mod.WorkshopData.ID}";
@@ -31,9 +31,20 @@ namespace DivinityModManager.Util
 			return output;
 		}
 
-		public static async Task<Unit> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods)
+		private static List<string> ignoredTags = new List<string>{"Add-on", "Adventure", "GM", "Arena", "Story", "Definitive Edition"};
+		private static List<string> GetWorkshopTags(IWorkshopPublishFileDetails data)
 		{
-			if(workshopMods.Count == 0)
+			var tags = data.tags.Where(t => !ignoredTags.Contains(t.tag)).Select(x => x.tag).ToList();
+			if (tags != null)
+			{
+				return tags;
+			}
+			return new List<string>();
+		}
+
+		public static async Task<Unit> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods, DivinityModManagerCachedWorkshopData cachedData)
+		{
+			if(workshopMods == null || workshopMods.Count == 0)
 			{
 				return Unit.Default;
 			}
@@ -46,10 +57,10 @@ namespace DivinityModManager.Util
 			foreach (var mod in workshopMods)
 			{
 				values.Add($"publishedfileids[{i}]", mod.WorkshopData.ID);
-				i = i + 1;
+				i++;
 			}
 
-			Trace.WriteLine($"Attempting to get workshop data from mods.");
+			Trace.WriteLine($"Updating workshop data for mods.");
 
 			string responseData = "";
 			try
@@ -77,21 +88,14 @@ namespace DivinityModManager.Util
 							var mod = workshopMods.FirstOrDefault(x => x.WorkshopData.ID == d.publishedfileid);
 							if (mod != null)
 							{
-								if (d.tags != null && d.tags.Count > 0)
-								{
-									mod.WorkshopData.Tags = d.tags.Select(x => x.tag).ToList();
-									//Trace.WriteLine($"Tags: {String.Join(";", mod.WorkshopData.Tags)}");
-								}
-								mod.WorkshopData.PreviewUrl = d.preview_url;
-								mod.WorkshopData.Title = d.title;
-								mod.WorkshopData.Description = d.description;
 								mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(d.time_created);
 								mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(d.time_updated);
-								mod.WorkshopData.Subscriptions = d.subscriptions;
-								mod.WorkshopData.LifetimeSubscriptions = d.lifetime_subscriptions;
-								mod.WorkshopData.Favorites = d.favorited;
-								mod.WorkshopData.LifetimeFavorites = d.lifetime_favorited;
-								mod.WorkshopData.Views = d.views;
+								if (d.tags != null && d.tags.Count > 0)
+								{
+									mod.WorkshopData.Tags = GetWorkshopTags(d);
+									mod.UpdateTagsText();
+								}
+								cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
 								//Trace.WriteLine($"Loaded workshop details for mod {mod.Name}:");
 								totalLoaded++;
 							}
@@ -117,15 +121,15 @@ namespace DivinityModManager.Util
 			return Unit.Default;
 		}
 
-		public static async Task<Unit> FindWorkshopDataAsync(List<DivinityModData> mods)
+		public static async Task<Unit> FindWorkshopDataAsync(List<DivinityModData> mods, DivinityModManagerCachedWorkshopData cachedData)
 		{
-			if (mods.Count == 0)
+			if (mods == null || mods.Count == 0)
 			{
 				Trace.WriteLine($"Skipping FindWorkshopDataAsync");
 				return Unit.Default;
 			}
 			Trace.WriteLine($"Attempting to get workshop data for mods missing workshop folders.");
-			int totalLoaded = 0;
+			int totalFound = 0;
 			foreach (var mod in mods)
 			{
 				string name = Uri.EscapeUriString(mod.DisplayName);
@@ -167,12 +171,16 @@ namespace DivinityModManager.Util
 								if (d.GetGuid() == mod.UUID)
 								{
 									mod.WorkshopData.ID = d.publishedfileid;
-									mod.WorkshopData.PreviewUrl = d.preview_url;
-									mod.WorkshopData.Title = d.title;
-									mod.WorkshopData.Description = d.description;
 									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(d.time_created);
 									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(d.time_updated);
+									if (d.tags != null && d.tags.Count > 0)
+									{
+										mod.WorkshopData.Tags = GetWorkshopTags(d);
+										mod.UpdateTagsText();
+									}
+									cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
 									Trace.WriteLine($"Found workshop ID {mod.WorkshopData.ID} for mod {mod.DisplayName}.");
+									totalFound++;
 									break;
 								}
 							}
@@ -185,6 +193,11 @@ namespace DivinityModManager.Util
 					else
 					{
 						Trace.WriteLine($"Failed to find workshop data for mod {mod.DisplayName}");
+						if(!cachedData.NonWorkshopMods.Contains(mod.UUID))
+						{
+							cachedData.NonWorkshopMods.Add(mod.UUID);
+							cachedData.CacheUpdated = true;
+						}
 					}
 				}
 				else
@@ -193,7 +206,14 @@ namespace DivinityModManager.Util
 				}
 			}
 
-			Trace.WriteLine($"Successfully loaded workshop data for {totalLoaded} mods.");
+			if (totalFound > 0)
+			{
+				Trace.WriteLine($"Successfully loaded workshop data for {totalFound} mods.");
+			}
+			else
+			{
+				Trace.WriteLine($"Failed to find workshop data for {mods.Count} mods (they're probably not on the workshop).");
+			}
 
 			return Unit.Default;
 		}

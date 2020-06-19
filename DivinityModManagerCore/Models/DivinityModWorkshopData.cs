@@ -17,26 +17,31 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref id, value); }
 		}
 
-		private string description;
+		private DateTime createdDate;
 
-		public string Description
+		public DateTime CreatedDate
 		{
-			get => description;
-			set { this.RaiseAndSetIfChanged(ref description, value); }
+			get => createdDate;
+			set { this.RaiseAndSetIfChanged(ref createdDate, value); }
 		}
 
-		public string PreviewUrl { get; set; }
-		public string Title { get; set; }
+		private DateTime updatedDate;
 
-		public List<string> Tags { get; set; }
+		public DateTime UpdatedDate
+		{
+			get => updatedDate;
+			set { this.RaiseAndSetIfChanged(ref updatedDate, value); }
+		}
 
-		public DateTime CreatedDate { get; set; }
-		public DateTime UpdatedDate { get; set; }
+		private List<string> tags;
 
-		public int Subscriptions { get; set; }
-		public int Favorites { get; set; }
-		public int LifetimeSubscriptions { get; set; }
-		public int LifetimeFavorites { get; set; }
-		public int Views { get; set; }
+		public List<string> Tags
+		{
+			get => tags;
+			set 
+			{ 
+				this.RaiseAndSetIfChanged(ref tags, value);
+			}
+		}
 	}
 }

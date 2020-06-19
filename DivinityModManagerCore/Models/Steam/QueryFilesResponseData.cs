@@ -20,7 +20,7 @@ namespace DivinityModManager.Models.Steam
 		public List<QueryFilesPublishedFileDetails> publishedfiledetails { get; set; }
 	}
 
-	public class QueryFilesPublishedFileDetails
+	public class QueryFilesPublishedFileDetails : IWorkshopPublishFileDetails
 	{
 		public int result { get; set; }
 		public string publishedfileid { get; set; }
@@ -32,8 +32,8 @@ namespace DivinityModManager.Models.Steam
 		public string url { get; set; }
 		public string title { get; set; }
 		public string description { get; set; }
-		public int time_created { get; set; }
-		public int time_updated { get; set; }
+		public long time_created { get; set; }
+		public long time_updated { get; set; }
 		public int visibility { get; set; }
 		public int flags { get; set; }
 		public List<WorkshopTag> tags { get; set; }

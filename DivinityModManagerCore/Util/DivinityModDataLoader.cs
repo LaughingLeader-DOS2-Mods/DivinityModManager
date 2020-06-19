@@ -210,6 +210,7 @@ namespace DivinityModManager.Util
 					{
 						var publishVersion = DivinityModVersion.FromInt(SafeConvertString(GetAttributeWithId(publishVersionNode, "Version", "")));
 						modData.PublishVersion = publishVersion;
+						//Trace.WriteLine($"{modData.Folder} PublishVersion is {publishVersion.Version}");
 					}
 
 					var targets = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "Target");

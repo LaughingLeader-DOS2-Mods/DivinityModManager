@@ -360,5 +360,22 @@ namespace DivinityModManager.Util
 
 			return task;
 		}
+
+		public static async Task<bool> WriteFileAsync(string path, string content)
+		{
+			try
+			{
+				using (System.IO.StreamWriter outputFile = new System.IO.StreamWriter(path))
+				{
+					await outputFile.WriteAsync(content);
+				}
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"Error writing file: {ex.ToString()}");
+				return false;
+			}
+		}
 	}
 }

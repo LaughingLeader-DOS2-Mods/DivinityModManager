@@ -25,7 +25,7 @@ namespace DivinityModManager.Models.Steam
 	}
 
 
-	public class PublishedFileDetails
+	public class PublishedFileDetails : IWorkshopPublishFileDetails
 	{
 		public string publishedfileid { get; set; }
 		public int result { get; set; }
@@ -40,8 +40,8 @@ namespace DivinityModManager.Models.Steam
 		public string hcontent_preview { get; set; }
 		public string title { get; set; }
 		public string description { get; set; }
-		public int time_created { get; set; }
-		public int time_updated { get; set; }
+		public long time_created { get; set; }
+		public long time_updated { get; set; }
 		public int visibility { get; set; }
 		public bool banned { get; set; }
 		public string ban_reason { get; set; }

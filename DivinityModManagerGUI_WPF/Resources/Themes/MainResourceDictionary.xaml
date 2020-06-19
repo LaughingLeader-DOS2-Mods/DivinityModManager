@@ -428,6 +428,11 @@
 				<TextBlock
 					Margin="0,2,2,2"
 					FontWeight="Bold"
+					Text="{Binding TagsText}" />
+				<Rectangle Fill="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}" Style="{StaticResource VerticalSeparator}" />
+				<TextBlock
+					Margin="0,2,2,2"
+					FontWeight="Bold"
 					Text="{Binding Targets}" />
 			</StackPanel>
 			<StackPanel Orientation="Vertical">

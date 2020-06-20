@@ -72,8 +72,8 @@ namespace DivinityModManager.Models
 						writer.WritePropertyName("WorkshopID");
 						writer.WriteValue(data.WorkshopID);
 
-						writer.WritePropertyName("Created");
-						writer.WriteValue(data.Created);
+						//writer.WritePropertyName("Created");
+						//writer.WriteValue(data.Created);
 
 						writer.WritePropertyName("LastUpdated");
 						writer.WriteValue(data.LastUpdated);

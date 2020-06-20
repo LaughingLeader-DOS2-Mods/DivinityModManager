@@ -384,7 +384,7 @@ namespace DivinityModManager.ViewModels
 			foreach (var mod in mods)
 			{
 				Trace.WriteLine($"Found mod. Name({mod.Name}) Author({mod.Author}) Version({mod.Version}) UUID({mod.UUID}) Description({mod.Description})");
-				foreach (var dependency in mod.Dependencies)
+				foreach (var dependency in mod.Dependencies.Items)
 				{
 					Console.WriteLine($"  {dependency.ToString()}");
 				}
@@ -733,6 +733,14 @@ namespace DivinityModManager.ViewModels
 				else
 				{
 					view.EditToggleFileNameDisplayMenuItem.Header = "Show File Names for Mods";
+				}
+			}).DisposeWith(Settings.Disposables);
+
+			this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Subscribe((b) =>
+			{
+				foreach (var mod in Mods)
+				{
+					mod.UpdateDisplayedDependencies();
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -1243,7 +1251,7 @@ namespace DivinityModManager.ViewModels
 					ActiveMods.Add(mod);
 					if (mod.Dependencies.Count > 0)
 					{
-						foreach (var dependency in mod.Dependencies)
+						foreach (var dependency in mod.Dependencies.Items)
 						{
 							if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
 								!missingMods.Any(x => x.UUID == dependency.UUID))
@@ -1869,7 +1877,7 @@ namespace DivinityModManager.ViewModels
 					{
 						if (mod.Dependencies.Count > 0)
 						{
-							foreach (var dependency in mod.Dependencies)
+							foreach (var dependency in mod.Dependencies.Items)
 							{
 								if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
 									!missingMods.Any(x => x.UUID == dependency.UUID))
@@ -1940,7 +1948,7 @@ namespace DivinityModManager.ViewModels
 
 							if (mod.Dependencies.Count > 0)
 							{
-								foreach (var dependency in mod.Dependencies)
+								foreach (var dependency in mod.Dependencies.Items)
 								{
 									var dependencyMod = mods.Items.FirstOrDefault(m => m.UUID == dependency.UUID);
 									// Dependencies not in the order that require the extender
@@ -2335,7 +2343,7 @@ namespace DivinityModManager.ViewModels
 					else if (fileType.Equals(".tsv", StringComparison.OrdinalIgnoreCase))
 					{
 						outputText = "Index\tName\tAuthor\tFileName\tType\tModes\tDependencies\n";
-						outputText += String.Join("\n", ActiveMods.Select(x => $"{x.Index}\t{x.Name}\t{x.Author}\t{x.OutputPakName}\t{x.Type}\t{String.Join(", ", x.Modes)}\t{String.Join(", ", x.Dependencies.Select(y => y.Name))}"));
+						outputText += String.Join("\n", ActiveMods.Select(x => $"{x.Index}\t{x.Name}\t{x.Author}\t{x.OutputPakName}\t{x.Type}\t{String.Join(", ", x.Modes)}\t{String.Join(", ", x.Dependencies.Items.Select(y => y.Name))}"));
 					}
 					else
 					{

@@ -144,7 +144,7 @@
 			<TabItem
 				x:Name="OsirisExtenderTab"
 				Header="Script Extender"
-				Visibility="{Binding ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
+				Visibility="{Binding ExtenderSettings.ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="*" />

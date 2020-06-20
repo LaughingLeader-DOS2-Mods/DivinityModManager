@@ -62,8 +62,8 @@ namespace DivinityModManager.Models
 
 			if (PropertyContains("Depend"))
 			{
-				foreach(var dependency in mod.Dependencies)
-					{
+				foreach(var dependency in mod.Dependencies.Items)
+				{
 					if (ValueContains(dependency.Name))
 					{
 						return true;

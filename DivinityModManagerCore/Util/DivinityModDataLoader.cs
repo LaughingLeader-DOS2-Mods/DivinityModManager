@@ -15,6 +15,7 @@ using Newtonsoft.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Newtonsoft.Json.Linq;
+using DynamicData;
 
 namespace DivinityModManager.Util
 {
@@ -1284,7 +1285,7 @@ namespace DivinityModManager.Util
 				{
 					if (addDependencies && mData.HasDependencies)
 					{
-						var dependencies = mData.Dependencies.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
+						var dependencies = mData.Dependencies.Items.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
 						foreach (var d in dependencies)
 						{
 							if (!orderList.Any(x => x == d.UUID))

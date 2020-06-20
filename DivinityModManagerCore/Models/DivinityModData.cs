@@ -1,9 +1,11 @@
 ﻿using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Util;
+using DynamicData;
 using Newtonsoft.Json;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
@@ -213,7 +215,10 @@ namespace DivinityModManager.Models
 		}
 
 		[JsonProperty] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
-		[JsonProperty] public List<DivinityModDependencyData> Dependencies { get; set; } = new List<DivinityModDependencyData>();
+		[JsonProperty] public SourceList<DivinityModDependencyData> Dependencies { get; set; } = new SourceList<DivinityModDependencyData>();
+
+		protected ReadOnlyObservableCollection<DivinityModDependencyData> displayedDependencies;
+		public ReadOnlyObservableCollection<DivinityModDependencyData> DisplayedDependencies => displayedDependencies;
 
 		private string displayName;
 
@@ -359,7 +364,7 @@ namespace DivinityModManager.Models
 		{
 			HasDescription = !String.IsNullOrWhiteSpace(Description);
 			string t = "";
-			var listDependencies = Dependencies.Where(d => !DivinityModDataLoader.IgnoreMod(d.UUID)).ToList();
+			var listDependencies = Dependencies.Items.Where(d => !DivinityModDataLoader.IgnoreMod(d.UUID)).ToList();
 			if (listDependencies.Count > 0)
 			{
 				HasDependencies = true;
@@ -439,10 +444,41 @@ namespace DivinityModManager.Models
 			};
 		}
 
+		private bool FilterDependencies(DivinityModDependencyData x)
+		{
+			if(!DivinityApp.DeveloperModeEnabled)
+			{
+				return !DivinityModDataLoader.IgnoreMod(x.UUID);
+			}
+			return true;
+		}
+
+		private IObservable<bool> refreshDisplayedDependencies;
+
+		private bool dependenciesUpdating = false;
+
+		public bool DependenciesUpdating
+		{
+			get => dependenciesUpdating;
+			set { this.RaiseAndSetIfChanged(ref dependenciesUpdating, value); }
+		}
+
+		public void UpdateDisplayedDependencies()
+		{
+			DependenciesUpdating = true;
+		}
+
 		public DivinityModData()
 		{
 			var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
 			OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
+
+			refreshDisplayedDependencies = this.WhenAnyValue(x => x.DependenciesUpdating);
+			refreshDisplayedDependencies.Subscribe();
+			var dependencyConnection = this.Dependencies.Connect();
+			dependencyConnection.AutoRefreshOnObservable(_ => refreshDisplayedDependencies).Filter(FilterDependencies).Bind(out displayedDependencies).DisposeMany().Subscribe(_ => {
+				DependenciesUpdating = false;
+			});
 		}
 	}
 }

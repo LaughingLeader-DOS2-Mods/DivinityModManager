@@ -135,6 +135,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref debuggerFlags, value); }
 		}
 
+		private bool dumpNetworkStrings = false;
+
+		[DataMember]
+		public bool DumpNetworkStrings
+		{
+			get => dumpNetworkStrings;
+			set { this.RaiseAndSetIfChanged(ref dumpNetworkStrings, value); }
+		}
+
 		private bool developerMode = false;
 
 		[DataMember]

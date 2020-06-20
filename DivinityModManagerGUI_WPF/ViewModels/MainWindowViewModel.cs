@@ -1477,7 +1477,7 @@ namespace DivinityModManager.ViewModels
 									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(entry.Created);
 									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
 									mod.WorkshopData.Tags = entry.Tags;
-									mod.UpdateTagsText();
+									mod.AddTags(mod.WorkshopData.Tags);
 								}
 							}
 						}

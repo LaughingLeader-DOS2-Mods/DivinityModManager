@@ -1,6 +1,7 @@
 ﻿using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Util;
 using DynamicData;
+using DynamicData.Binding;
 using Newtonsoft.Json;
 using ReactiveUI;
 using System;
@@ -125,6 +126,8 @@ namespace DivinityModManager.Models
 			get => tagsText;
 			set { this.RaiseAndSetIfChanged(ref tagsText, value); }
 		}
+
+		public List<string> Tags { get; set; } = new List<string>();
 
 		public bool IsHidden { get; set; } = false;
 		public bool IsLarianMod { get; set; } = false;
@@ -406,16 +409,25 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public void UpdateTagsText()
+		public void AddTag(string tag)
 		{
-			if (WorkshopData.Tags.Count > 0)
+			if(!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
 			{
-				TagsText = String.Join(", ", WorkshopData.Tags);
+				Tags.Add(tag);
+				Tags.Sort((x, y) => string.Compare(x, y, true));
 			}
-			else
+		}
+
+		public void AddTags(IEnumerable<string> tags)
+		{
+			foreach(var tag in tags)
 			{
-				TagsText = "";
+				if (!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
+				{
+					Tags.Add(tag);
+				}
 			}
+			Tags.Sort((x, y) => string.Compare(x, y, true));
 		}
 
 		public override string ToString()

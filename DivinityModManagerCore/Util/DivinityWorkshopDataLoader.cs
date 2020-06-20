@@ -93,7 +93,7 @@ namespace DivinityModManager.Util
 								if (d.tags != null && d.tags.Count > 0)
 								{
 									mod.WorkshopData.Tags = GetWorkshopTags(d);
-									mod.UpdateTagsText();
+									mod.AddTags(mod.WorkshopData.Tags);
 								}
 								cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
 								//Trace.WriteLine($"Loaded workshop details for mod {mod.Name}:");
@@ -176,7 +176,7 @@ namespace DivinityModManager.Util
 									if (d.tags != null && d.tags.Count > 0)
 									{
 										mod.WorkshopData.Tags = GetWorkshopTags(d);
-										mod.UpdateTagsText();
+										mod.AddTags(mod.WorkshopData.Tags);
 									}
 									cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
 									Trace.WriteLine($"Found workshop ID {mod.WorkshopData.ID} for mod {mod.DisplayName}.");

@@ -179,8 +179,14 @@ namespace DivinityModManager.Util
 						Description = description,
 						MD5 = GetAttributeWithId(moduleInfoNode, "MD5", ""),
 						Type = GetAttributeWithId(moduleInfoNode, "Type", ""),
+						TagsText = GetAttributeWithId(moduleInfoNode, "Tags", ""),
 						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
+					if(!String.IsNullOrEmpty(modData.TagsText))
+					{
+						var tags = modData.TagsText.Split(';');
+						modData.AddTags(tags);
+					}
 					modData.UpdateDisplayName();
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");

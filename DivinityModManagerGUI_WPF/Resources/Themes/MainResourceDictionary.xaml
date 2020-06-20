@@ -417,43 +417,83 @@
 					BorderThickness="1"
 					ItemsSource="{Binding DisplayedDependencies}" />
 			</StackPanel>
-			<ItemsControl Margin="2" ItemsSource="{Binding WorkshopData.Tags}">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<StackPanel Orientation="Horizontal" />
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border
-							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionBrush}}"
-							BorderThickness="2"
-							CornerRadius="12">
-							<TextBlock
-								Padding="12,2"
-								Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
-								Text="{Binding}">
-								<TextBlock.Effect>
+			<StackPanel Margin="2" Orientation="Vertical">
+				<ItemsControl ItemsSource="{Binding Tags}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Horizontal" />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Border
+								Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionBrush}}"
+								BorderThickness="2"
+								CornerRadius="12">
+								<TextBlock
+									Padding="12,2"
+									Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+									Text="{Binding}">
+									<TextBlock.Effect>
+										<DropShadowEffect
+											BlurRadius="4"
+											Direction="330"
+											Opacity="0.5"
+											ShadowDepth="4"
+											Color="Black" />
+									</TextBlock.Effect>
+								</TextBlock>
+								<Border.Effect>
 									<DropShadowEffect
 										BlurRadius="4"
 										Direction="330"
-										Opacity="0.5"
-										ShadowDepth="4"
+										Opacity="0.35"
+										ShadowDepth="2"
 										Color="Black" />
-								</TextBlock.Effect>
-							</TextBlock>
-							<Border.Effect>
-								<DropShadowEffect
-									BlurRadius="4"
-									Direction="330"
-									Opacity="0.35"
-									ShadowDepth="2"
-									Color="Black" />
-							</Border.Effect>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
+								</Border.Effect>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+				<ItemsControl ItemsSource="{Binding Modes}">
+					<ItemsControl.ItemsPanel>
+						<ItemsPanelTemplate>
+							<StackPanel Orientation="Horizontal" />
+						</ItemsPanelTemplate>
+					</ItemsControl.ItemsPanel>
+					<ItemsControl.ItemTemplate>
+						<DataTemplate>
+							<Border
+								Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
+								BorderThickness="2"
+								CornerRadius="12">
+								<TextBlock
+									Padding="12,2"
+									Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+									Text="{Binding}">
+									<TextBlock.Effect>
+										<DropShadowEffect
+											BlurRadius="4"
+											Direction="330"
+											Opacity="0.5"
+											ShadowDepth="4"
+											Color="Black" />
+									</TextBlock.Effect>
+								</TextBlock>
+								<Border.Effect>
+									<DropShadowEffect
+										BlurRadius="4"
+										Direction="330"
+										Opacity="0.35"
+										ShadowDepth="2"
+										Color="Black" />
+								</Border.Effect>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</StackPanel>
+
 			<StackPanel Orientation="Vertical">
 				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
 				<TextBlock
@@ -463,46 +503,6 @@
 				<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
 					<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
 			</StackPanel>
-			<ItemsControl
-				Margin="2"
-				HorizontalAlignment="Left"
-				ItemsSource="{Binding Modes}">
-				<ItemsControl.ItemsPanel>
-					<ItemsPanelTemplate>
-						<StackPanel Orientation="Horizontal" />
-					</ItemsPanelTemplate>
-				</ItemsControl.ItemsPanel>
-				<ItemsControl.ItemTemplate>
-					<DataTemplate>
-						<Border
-							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
-							BorderThickness="2"
-							CornerRadius="12">
-							<TextBlock
-								Padding="12,2"
-								Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
-								Text="{Binding}">
-								<TextBlock.Effect>
-									<DropShadowEffect
-										BlurRadius="4"
-										Direction="330"
-										Opacity="0.5"
-										ShadowDepth="4"
-										Color="Black" />
-								</TextBlock.Effect>
-							</TextBlock>
-							<Border.Effect>
-								<DropShadowEffect
-									BlurRadius="4"
-									Direction="330"
-									Opacity="0.35"
-									ShadowDepth="2"
-									Color="Black" />
-							</Border.Effect>
-						</Border>
-					</DataTemplate>
-				</ItemsControl.ItemTemplate>
-			</ItemsControl>
 		</StackPanel>
 	</ToolTip>
 	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">

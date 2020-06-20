@@ -118,11 +118,18 @@ namespace DivinityModManager.Models
 
 			if (PropertyContains("Tag"))
 			{
-				if(mod.WorkshopData != null && mod.WorkshopData.Tags != null && mod.WorkshopData.Tags.Count > 0)
+				if(mod.Tags != null && mod.Tags.Count > 0)
 				{
-					Trace.WriteLine("Looking for tag " + this.FilterValue);
 					var f = this;
-					if (mod.WorkshopData.Tags.Any(x => f.ValueContains(x))) return true;
+					if (mod.Tags.Any(x => f.ValueContains(x))) return true;
+					// GM, Story, Arena are technically tags as well
+					foreach (var mode in mod.Modes)
+					{
+						if (ValueContains(mode))
+						{
+							return true;
+						}
+					}
 				}
 			}
 

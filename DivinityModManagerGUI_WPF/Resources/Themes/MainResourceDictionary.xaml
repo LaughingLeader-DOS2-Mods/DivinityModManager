@@ -454,7 +454,19 @@
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
-			<ItemsControl Margin="2" ItemsSource="{Binding Modes}">
+			<StackPanel Orientation="Vertical">
+				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+				<TextBlock
+					Margin="2"
+					Text="{Binding FileName}"
+					Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
+				<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
+					<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
+			</StackPanel>
+			<ItemsControl
+				Margin="2"
+				HorizontalAlignment="Left"
+				ItemsSource="{Binding Modes}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<StackPanel Orientation="Horizontal" />
@@ -491,15 +503,6 @@
 					</DataTemplate>
 				</ItemsControl.ItemTemplate>
 			</ItemsControl>
-			<StackPanel Orientation="Vertical">
-				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
-				<TextBlock
-					Margin="2"
-					Text="{Binding FileName}"
-					Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
-				<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
-					<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" /></TextBlock>
-			</StackPanel>
 		</StackPanel>
 	</ToolTip>
 	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">

@@ -602,6 +602,21 @@ namespace DivinityModManager.ViewModels
 				CheckExtenderData();
 			}
 		}
+
+		private bool FilterDependencies(DivinityModDependencyData x, bool devMode)
+		{
+			if (!devMode)
+			{
+				return !DivinityModDataLoader.IgnoreMod(x.UUID);
+			}
+			return true;
+		}
+
+		private Func<DivinityModDependencyData, bool> MakeDependencyFilter(bool b)
+		{
+			return (x) => FilterDependencies(x, b);
+		}
+
 		private bool LoadSettings()
 		{
 			if (Settings != null)
@@ -736,13 +751,8 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
-			this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Subscribe((b) =>
-			{
-				foreach (var mod in Mods)
-				{
-					mod.UpdateDisplayedDependencies();
-				}
-			}).DisposeWith(Settings.Disposables);
+			//DivinityApp.DependencyFilter = this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Select(MakeDependencyFilter);
+			//DisposeWith(Settings.Disposables);
 
 			if (Settings.LogEnabled)
 			{
@@ -3236,6 +3246,8 @@ Directory the zip will be extracted to:
 			this.DragHandler = new ModListDragHandler(this);
 
 			Activator = new ViewModelActivator();
+
+			DivinityApp.DependencyFilter = this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Select(MakeDependencyFilter);
 
 			this.WhenActivated((CompositeDisposable disposables) =>
 			{

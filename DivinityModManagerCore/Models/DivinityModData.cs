@@ -444,41 +444,22 @@ namespace DivinityModManager.Models
 			};
 		}
 
-		private bool FilterDependencies(DivinityModDependencyData x)
+		public DivinityModData(bool isBaseGameMod = false)
 		{
-			if(!DivinityApp.DeveloperModeEnabled)
+			if(!isBaseGameMod)
 			{
-				return !DivinityModDataLoader.IgnoreMod(x.UUID);
+				var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
+				OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
+
+				if(DivinityApp.DependencyFilter != null)
+				{
+					this.Dependencies.Connect().Filter(DivinityApp.DependencyFilter).Bind(out displayedDependencies).DisposeMany().Subscribe();
+				}
+				else
+				{
+					this.Dependencies.Connect().Filter(x => !DivinityModDataLoader.IgnoreMod(x.UUID)).Bind(out displayedDependencies).DisposeMany().Subscribe();
+				}
 			}
-			return true;
-		}
-
-		private IObservable<bool> refreshDisplayedDependencies;
-
-		private bool dependenciesUpdating = false;
-
-		public bool DependenciesUpdating
-		{
-			get => dependenciesUpdating;
-			set { this.RaiseAndSetIfChanged(ref dependenciesUpdating, value); }
-		}
-
-		public void UpdateDisplayedDependencies()
-		{
-			DependenciesUpdating = true;
-		}
-
-		public DivinityModData()
-		{
-			var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
-			OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
-
-			refreshDisplayedDependencies = this.WhenAnyValue(x => x.DependenciesUpdating);
-			refreshDisplayedDependencies.Subscribe();
-			var dependencyConnection = this.Dependencies.Connect();
-			dependencyConnection.AutoRefreshOnObservable(_ => refreshDisplayedDependencies).Filter(FilterDependencies).Bind(out displayedDependencies).DisposeMany().Subscribe(_ => {
-				DependenciesUpdating = false;
-			});
 		}
 	}
 }

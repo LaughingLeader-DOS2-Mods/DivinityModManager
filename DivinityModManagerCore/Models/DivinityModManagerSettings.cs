@@ -245,6 +245,8 @@ namespace DivinityModManager.Models
 			Disposables = null;
 		}
 
+		
+
 		public DivinityModManagerSettings()
 		{
 			Disposables = new CompositeDisposable();

@@ -366,9 +366,9 @@
 						<DropShadowEffect
 							BlurRadius="4"
 							Direction="330"
-							Opacity="0.5"
-							ShadowDepth="4"
-							Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+							Opacity="0.25"
+							ShadowDepth="2"
+							Color="Black" />
 					</TextBlock.Effect>
 				</TextBlock>
 				<TextBlock
@@ -395,9 +395,9 @@
 					<DropShadowEffect
 						BlurRadius="4"
 						Direction="330"
-						Opacity="0.5"
-						ShadowDepth="4"
-						Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+						Opacity="0.25"
+						ShadowDepth="3"
+						Color="Black" />
 				</TextBlock.Effect>
 			</TextBlock>
 			<TextBlock
@@ -415,26 +415,82 @@
 					Padding="0"
 					BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}"
 					BorderThickness="1"
-					ItemsSource="{Binding Dependencies}" />
+					ItemsSource="{Binding DisplayedDependencies}" />
 			</StackPanel>
-			<StackPanel Margin="2" Orientation="Horizontal">
-				<TextBlock
-					Margin="2,2,0,2"
-					FontSize="12"
-					FontWeight="Bold"
-					Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
-					Text="{Binding Type}" />
-				<Rectangle Fill="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}" Style="{StaticResource VerticalSeparator}" />
-				<TextBlock
-					Margin="0,2,2,2"
-					FontWeight="Bold"
-					Text="{Binding TagsText}" />
-				<Rectangle Fill="{DynamicResource {x:Static adonisUI:Brushes.AccentHighlightBrush}}" Style="{StaticResource VerticalSeparator}" />
-				<TextBlock
-					Margin="0,2,2,2"
-					FontWeight="Bold"
-					Text="{Binding Targets}" />
-			</StackPanel>
+			<ItemsControl Margin="2" ItemsSource="{Binding WorkshopData.Tags}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Orientation="Horizontal" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border
+							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionBrush}}"
+							BorderThickness="2"
+							CornerRadius="12">
+							<TextBlock
+								Padding="12,2"
+								Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+								Text="{Binding}">
+								<TextBlock.Effect>
+									<DropShadowEffect
+										BlurRadius="4"
+										Direction="330"
+										Opacity="0.5"
+										ShadowDepth="4"
+										Color="Black" />
+								</TextBlock.Effect>
+							</TextBlock>
+							<Border.Effect>
+								<DropShadowEffect
+									BlurRadius="4"
+									Direction="330"
+									Opacity="0.35"
+									ShadowDepth="2"
+									Color="Black" />
+							</Border.Effect>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+			<ItemsControl Margin="2" ItemsSource="{Binding Modes}">
+				<ItemsControl.ItemsPanel>
+					<ItemsPanelTemplate>
+						<StackPanel Orientation="Horizontal" />
+					</ItemsPanelTemplate>
+				</ItemsControl.ItemsPanel>
+				<ItemsControl.ItemTemplate>
+					<DataTemplate>
+						<Border
+							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
+							BorderThickness="2"
+							CornerRadius="12">
+							<TextBlock
+								Padding="12,2"
+								Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+								Text="{Binding}">
+								<TextBlock.Effect>
+									<DropShadowEffect
+										BlurRadius="4"
+										Direction="330"
+										Opacity="0.5"
+										ShadowDepth="4"
+										Color="Black" />
+								</TextBlock.Effect>
+							</TextBlock>
+							<Border.Effect>
+								<DropShadowEffect
+									BlurRadius="4"
+									Direction="330"
+									Opacity="0.35"
+									ShadowDepth="2"
+									Color="Black" />
+							</Border.Effect>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
 			<StackPanel Orientation="Vertical">
 				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
 				<TextBlock

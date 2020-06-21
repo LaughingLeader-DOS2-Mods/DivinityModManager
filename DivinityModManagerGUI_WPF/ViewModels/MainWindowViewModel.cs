@@ -730,6 +730,28 @@ namespace DivinityModManager.ViewModels
 				}
 			}, canResetExtenderSettingsObservable).DisposeWith(Settings.Disposables);
 
+			Settings.ClearWorkshopCacheCommand = ReactiveCommand.Create(() =>
+			{
+				if (File.Exists("Data\\workshopdata.json"))
+				{
+					MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view.SettingsWindow, $"Delete local workshop cache?\nThis cannot be undone.\nRefresh to download tag data once more.", "Confirm Delete Cache",
+					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
+					if (result == MessageBoxResult.Yes)
+					{
+						try
+						{
+							var fullFilePath = Path.GetFullPath("Data\\workshopdata.json");
+							RecycleBinHelper.DeleteFile(fullFilePath, false, true);
+							view.AlertBar.SetSuccessAlert($"Deleted local workshop cache at '{fullFilePath}'.", 20);
+						}
+						catch (Exception ex)
+						{
+							view.AlertBar.SetDangerAlert($"Error deleting workshop cache:\n{ex.ToString()}");
+						}
+					}
+				}
+			}).DisposeWith(Settings.Disposables);
+
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>
 			{
 				ToggleLogging(logEnabled);
@@ -1501,58 +1523,61 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-				var totalSuccess = 0;
-
-				if (CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
+				if(!Settings.DisableWorkshopTagCheck)
 				{
-					RxApp.MainThreadScheduler.Schedule(() =>
+					var totalSuccess = 0;
+
+					if (CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
 					{
-						StatusBarRightText = "Checking for workshop tags...";
-						StatusBarBusyIndicatorVisibility = Visibility.Visible;
-					});
-					var foundWorkshopMods = userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
-					if (foundWorkshopMods.Count > 0)
-					{
-						totalSuccess += await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
+						RxApp.MainThreadScheduler.Schedule(() =>
+						{
+							StatusBarRightText = "Checking for workshop tags...";
+							StatusBarBusyIndicatorVisibility = Visibility.Visible;
+						});
+						var foundWorkshopMods = userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
+						if (foundWorkshopMods.Count > 0)
+						{
+							totalSuccess += await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
+						}
 					}
-				}
 
-				var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) == true).ToList();
-				// Only try and find workshop data if there's a non-editor mod, in case all our pending mods missing workshop IDs are in-progress/editor-only mods
-				bool hasPakMod = unknownWorkshopMods.Any(x => !x.IsEditorMod);
-				bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
-				if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
-				{
-					//Trace.WriteLine("Mods:");
-					//Trace.WriteLine(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
-					RxApp.MainThreadScheduler.Schedule(() =>
+					var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) == true).ToList();
+					// Only try and find workshop data if there's a non-editor mod, in case all our pending mods missing workshop IDs are in-progress/editor-only mods
+					bool hasPakMod = unknownWorkshopMods.Any(x => !x.IsEditorMod);
+					bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
+					if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
 					{
-						StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
-					});
-					totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
-				}
-
-				CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
-
-				if(CachedWorkshopData.CacheUpdated)
-				{
-					RxApp.MainThreadScheduler.Schedule(() =>
-					{
-						StatusBarRightText = $"Caching workshop tags...";
-					});
-					await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
-					CachedWorkshopData.CacheUpdated = false;
-				}
-
-				RxApp.MainThreadScheduler.Schedule(() =>
-				{
-					StatusBarRightText = "";
-					StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
-					if (totalSuccess > 0)
-					{
-						view.AlertBar.SetSuccessAlert($"Loaded workshop tags for {totalSuccess} mods.", 60);
+						//Trace.WriteLine("Mods:");
+						//Trace.WriteLine(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
+						RxApp.MainThreadScheduler.Schedule(() =>
+						{
+							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
+						});
+						totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
 					}
-				});
+
+					CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+					if (CachedWorkshopData.CacheUpdated)
+					{
+						RxApp.MainThreadScheduler.Schedule(() =>
+						{
+							StatusBarRightText = $"Caching workshop tags...";
+						});
+						await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
+						CachedWorkshopData.CacheUpdated = false;
+					}
+
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						StatusBarRightText = "";
+						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
+						if (totalSuccess > 0)
+						{
+							view.AlertBar.SetSuccessAlert($"Loaded workshop tags for {totalSuccess} mods.", 60);
+						}
+					});
+				}
 			});
 		}
 

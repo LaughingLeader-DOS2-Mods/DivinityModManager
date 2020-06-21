@@ -190,6 +190,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref disableMissingModWarnings, value); }
 		}
 
+		private bool disableWorkshopTagCheck = false;
+
+		[DataMember]
+		public bool DisableWorkshopTagCheck
+		{
+			get => disableWorkshopTagCheck;
+			set { this.RaiseAndSetIfChanged(ref disableWorkshopTagCheck, value); }
+		}
+
 		//Not saved for now
 
 		private bool displayFileNames = false;
@@ -226,6 +235,7 @@ namespace DivinityModManager.Models
 		public ICommand OpenSettingsFolderCommand { get; set; }
 		public ICommand ExportExtenderSettingsCommand { get; set; }
 		public ICommand ResetExtenderSettingsToDefaultCommand { get; set; }
+		public ICommand ClearWorkshopCacheCommand { get; set; }
 
 		public CompositeDisposable Disposables { get; internal set; }
 
@@ -244,8 +254,6 @@ namespace DivinityModManager.Models
 			Disposables?.Dispose();
 			Disposables = null;
 		}
-
-		
 
 		public DivinityModManagerSettings()
 		{

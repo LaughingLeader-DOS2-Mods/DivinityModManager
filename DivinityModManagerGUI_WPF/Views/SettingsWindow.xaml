@@ -98,9 +98,9 @@
 					ChildMargin="4"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="9"
+					RowCount="10"
 					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto">
+					Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
 					<TextBlock Text="Game Data Path" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
 					<controls:UnfocusableTextBox
 						VerticalAlignment="Center"
@@ -132,6 +132,8 @@
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="Disable Missing Mod Warnings" ToolTip="If a load order is missing mods, no warnings will be displayed." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableMissingModWarnings, UpdateSourceTrigger=PropertyChanged}" />
+					<TextBlock Text="Disable Checking for Steam Workshop Tags" ToolTip="The mod manager will try and find mod tags from the workshop by default." />
+					<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
 					<TextBlock Text="On Game Launch" />
 					<ComboBox
 						DisplayMemberPath="Description"
@@ -284,9 +286,9 @@
 					ChildMargin="2"
 					ColumnCount="2"
 					Columns="auto,*"
-					RowCount="2"
+					RowCount="3"
 					RowHeight="*"
-					Rows="auto,auto">
+					Rows="auto,auto,auto">
 					<TextBlock
 						x:Name="DebugModeTextBlock"
 						Text="Enable Developer Mode"
@@ -297,6 +299,16 @@
 						ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
 					<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
 					<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
+					<TextBlock
+						x:Name="ClearCacheTextBlock"
+						Text="Clear Workshop Cache"
+						ToolTip="Delete the local workshop cache used for tag display, located at Data\workshopdata.json." />
+					<Button
+						HorizontalAlignment="Left"
+						VerticalAlignment="Center"
+						Command="{Binding ClearWorkshopCacheCommand}"
+						Content="Delete Cache"
+						ToolTip="{Binding ElementName=ClearCacheTextBlock, Path=ToolTip}" />
 				</autogrid:AutoGrid>
 			</TabItem>
 		</TabControl>

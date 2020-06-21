@@ -469,7 +469,7 @@ namespace DivinityModManager.Models
 				}
 				else
 				{
-					this.Dependencies.Connect().Filter(x => !DivinityModDataLoader.IgnoreMod(x.UUID)).Bind(out displayedDependencies).DisposeMany().Subscribe();
+					this.Dependencies.Connect().Filter(x => !DivinityModDataLoader.IgnoreModDependency(x.UUID)).Bind(out displayedDependencies).DisposeMany().Subscribe();
 				}
 			}
 		}

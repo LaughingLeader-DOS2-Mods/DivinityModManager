@@ -607,7 +607,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if (!devMode)
 			{
-				return !DivinityModDataLoader.IgnoreMod(x.UUID);
+				return !DivinityModDataLoader.IgnoreModDependency(x.UUID);
 			}
 			return true;
 		}

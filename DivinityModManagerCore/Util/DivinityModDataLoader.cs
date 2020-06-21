@@ -26,6 +26,11 @@ namespace DivinityModManager.Util
 			return DivinityApp.IgnoredMods.Any(m => m.UUID == modUUID);
 		}
 
+		public static bool IgnoreModDependency(string modUUID)
+		{
+			return DivinityApp.MODS_Larian_IgnoreDependencies.Any(m => m.UUID == modUUID);
+		}
+
 		public static bool IgnoreModByFolder(string folder)
 		{
 			return DivinityApp.IgnoredEditorMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));

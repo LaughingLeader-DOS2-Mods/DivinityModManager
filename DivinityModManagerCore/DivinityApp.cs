@@ -78,6 +78,16 @@ namespace DivinityModManager
 			MOD_Arena
 		}.Concat(MODS_GiftBag).ToList();
 
+		public static List<DivinityModData> MODS_Larian_IgnoreDependencies { get; private set; } = new List<DivinityModData>()
+		{
+			MOD_Origins,
+			MOD_Shared,
+			MOD_Shared_DOS,
+			MOD_Character_Creation_Pack,
+			MOD_GameMaster,
+			MOD_Arena
+		};
+
 		public static List<DivinityModData> GetIgnoredMods(bool all = false)
 		{
 			var mods = new List<DivinityModData>();
@@ -97,7 +107,6 @@ namespace DivinityModManager
 
 		// Hide Larian mods for now, since we can't add them to the active order without the game automatically removing them
 		public static List<DivinityModData> IgnoredMods { get; set; } = MODS_Larian_All.ToList();
-
 
 		public static DivinityGlobalCommands Commands { get; private set; } = new DivinityGlobalCommands();
 		public static DivinityGlobalEvents Events { get; private set; } = new DivinityGlobalEvents();

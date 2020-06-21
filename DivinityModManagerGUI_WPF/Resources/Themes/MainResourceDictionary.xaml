@@ -9,9 +9,11 @@
 	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
+	xmlns:divResources="clr-namespace:DivinityModManager.Resources"
 	xmlns:dmcore="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
+	xmlns:templateSelectors="clr-namespace:DivinityModManager.Controls.TemplateSelectors"
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels;assembly=DivinityModManagerCore"
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
@@ -26,6 +28,7 @@
 	<conv:DivinityGameLaunchWindowActionToStringConverter x:Key="GameLaunchActionToStringConverter" />
 	<conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
+	<templateSelectors:TagTemplateSelector x:Key="TagTemplateSelector" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Icons/Save_16x.png" />
 	<BitmapImage x:Key="SaveAsImage" UriSource="pack://application:,,,/Resources/Icons/SaveAs_16x.png" />
 	<BitmapImage x:Key="SaveDisabledImage" UriSource="pack://application:,,,/Resources/Icons/SaveGrey_16x.png" />
@@ -324,6 +327,90 @@
 		<Setter Property="dd:DragDrop.IsDropTarget" Value="True" />
 		<Setter Property="ItemContainerStyle" Value="{StaticResource DivinityModDataListItem}" />
 	</Style>
+	<DataTemplate x:Key="TagTemplate">
+		<Border
+			Background="{DynamicResource {x:Static divResources:DivinityColors.TagBackgroundBrush}}"
+			BorderThickness="2"
+			CornerRadius="12">
+			<TextBlock
+				Padding="12,2"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+				Text="{Binding}">
+				<TextBlock.Effect>
+					<DropShadowEffect
+						BlurRadius="4"
+						Direction="330"
+						Opacity="0.5"
+						ShadowDepth="4"
+						Color="Black" />
+				</TextBlock.Effect>
+			</TextBlock>
+			<Border.Effect>
+				<DropShadowEffect
+					BlurRadius="4"
+					Direction="330"
+					Opacity="0.35"
+					ShadowDepth="2"
+					Color="Black" />
+			</Border.Effect>
+		</Border>
+	</DataTemplate>
+	<DataTemplate x:Key="ModeTagTemplate">
+		<Border
+			Background="{DynamicResource {x:Static divResources:DivinityColors.ModeTagBackgroundBrush}}"
+			BorderThickness="2"
+			CornerRadius="12">
+			<TextBlock
+				Padding="12,2"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+				Text="{Binding}">
+				<TextBlock.Effect>
+					<DropShadowEffect
+						BlurRadius="4"
+						Direction="330"
+						Opacity="0.5"
+						ShadowDepth="4"
+						Color="Black" />
+				</TextBlock.Effect>
+			</TextBlock>
+			<Border.Effect>
+				<DropShadowEffect
+					BlurRadius="4"
+					Direction="330"
+					Opacity="0.35"
+					ShadowDepth="2"
+					Color="Black" />
+			</Border.Effect>
+		</Border>
+	</DataTemplate>
+	<DataTemplate x:Key="CustomTagTemplate">
+		<Border
+			Background="{DynamicResource {x:Static divResources:DivinityColors.CustomTagBackgroundBrush}}"
+			BorderThickness="2"
+			CornerRadius="12">
+			<TextBlock
+				Padding="12,2"
+				Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
+				Text="{Binding}">
+				<TextBlock.Effect>
+					<DropShadowEffect
+						BlurRadius="4"
+						Direction="330"
+						Opacity="0.5"
+						ShadowDepth="4"
+						Color="Black" />
+				</TextBlock.Effect>
+			</TextBlock>
+			<Border.Effect>
+				<DropShadowEffect
+					BlurRadius="4"
+					Direction="330"
+					Opacity="0.35"
+					ShadowDepth="2"
+					Color="Black" />
+			</Border.Effect>
+		</Border>
+	</DataTemplate>
 	<ToolTip x:Key="ModToolTip" DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 		<ToolTip.Style>
 			<Style BasedOn="{StaticResource {x:Type ToolTip}}" TargetType="ToolTip">
@@ -417,83 +504,34 @@
 					BorderThickness="1"
 					ItemsSource="{Binding DisplayedDependencies}" />
 			</StackPanel>
-			<StackPanel Margin="2" Orientation="Vertical">
-				<ItemsControl ItemsSource="{Binding Tags}">
+			<StackPanel
+				x:Name="TagsStackPanel"
+				Margin="2"
+				DataContext="{Binding}"
+				Orientation="Vertical">
+				<StackPanel.Resources>
+					<CollectionViewSource x:Key="TagsSource" Source="{Binding Tags}" />
+					<CollectionViewSource x:Key="ModesSource" Source="{Binding Modes}" />
+					<CompositeCollection x:Key="CombinedTags">
+						<CollectionContainer Collection="{Binding Source={StaticResource TagsSource}}" />
+						<CollectionContainer Collection="{Binding Source={StaticResource ModesSource}}" />
+					</CompositeCollection>
+				</StackPanel.Resources>
+				<ItemsControl ItemTemplateSelector="{StaticResource TagTemplateSelector}" ItemsSource="{StaticResource CombinedTags}">
 					<ItemsControl.ItemsPanel>
 						<ItemsPanelTemplate>
 							<StackPanel Orientation="Horizontal" />
 						</ItemsPanelTemplate>
 					</ItemsControl.ItemsPanel>
-					<ItemsControl.ItemTemplate>
-						<DataTemplate>
-							<Border
-								Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionBrush}}"
-								BorderThickness="2"
-								CornerRadius="12">
-								<TextBlock
-									Padding="12,2"
-									Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
-									Text="{Binding}">
-									<TextBlock.Effect>
-										<DropShadowEffect
-											BlurRadius="4"
-											Direction="330"
-											Opacity="0.5"
-											ShadowDepth="4"
-											Color="Black" />
-									</TextBlock.Effect>
-								</TextBlock>
-								<Border.Effect>
-									<DropShadowEffect
-										BlurRadius="4"
-										Direction="330"
-										Opacity="0.35"
-										ShadowDepth="2"
-										Color="Black" />
-								</Border.Effect>
-							</Border>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
-				</ItemsControl>
-				<ItemsControl ItemsSource="{Binding Modes}">
-					<ItemsControl.ItemsPanel>
-						<ItemsPanelTemplate>
-							<StackPanel Orientation="Horizontal" />
-						</ItemsPanelTemplate>
-					</ItemsControl.ItemsPanel>
-					<ItemsControl.ItemTemplate>
-						<DataTemplate>
-							<Border
-								Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
-								BorderThickness="2"
-								CornerRadius="12">
-								<TextBlock
-									Padding="12,2"
-									Foreground="{DynamicResource {x:Static adonisUI:Brushes.Layer3InteractionForegroundBrush}}"
-									Text="{Binding}">
-									<TextBlock.Effect>
-										<DropShadowEffect
-											BlurRadius="4"
-											Direction="330"
-											Opacity="0.5"
-											ShadowDepth="4"
-											Color="Black" />
-									</TextBlock.Effect>
-								</TextBlock>
-								<Border.Effect>
-									<DropShadowEffect
-										BlurRadius="4"
-										Direction="330"
-										Opacity="0.35"
-										ShadowDepth="2"
-										Color="Black" />
-								</Border.Effect>
-							</Border>
-						</DataTemplate>
-					</ItemsControl.ItemTemplate>
+					<ItemsControl.Style>
+						<Style>
+							<Style.Triggers>
+								<DataTrigger Binding="{Binding}" />
+							</Style.Triggers>
+						</Style>
+					</ItemsControl.Style>
 				</ItemsControl>
 			</StackPanel>
-
 			<StackPanel Orientation="Vertical">
 				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
 				<TextBlock

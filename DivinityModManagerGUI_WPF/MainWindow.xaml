@@ -884,6 +884,19 @@
 		</xc:BusyIndicator>
 		<StatusBar Grid.Row="1" MinHeight="16">
 			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+				<StackPanel Orientation="Horizontal">
+					<controls:BusyIndicator
+						Width="16"
+						Height="16"
+						Margin="2"
+						Visibility="{Binding StatusBarBusyIndicatorVisibility, FallbackValue=Collapsed}" />
+					<TextBlock
+						x:Name="StatusBarLoadingOperationTextBlock"
+						VerticalAlignment="Center"
+						Text="{Binding StatusBarRightText}" />
+				</StackPanel>
+			</StatusBarItem>
+			<StatusBarItem HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
 				<controls:AlertBar x:Name="AlertBar" Theme="Standard" />
 			</StatusBarItem>
 		</StatusBar>

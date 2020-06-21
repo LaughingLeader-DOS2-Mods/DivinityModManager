@@ -1523,6 +1523,8 @@ namespace DivinityModManager.ViewModels
 				bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
 				if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
 				{
+					//Trace.WriteLine("Mods:");
+					//Trace.WriteLine(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
 					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";

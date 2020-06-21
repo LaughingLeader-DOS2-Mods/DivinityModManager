@@ -42,11 +42,11 @@ namespace DivinityModManager.Util
 			return new List<string>();
 		}
 
-		public static async Task<Unit> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods, DivinityModManagerCachedWorkshopData cachedData)
+		public static async Task<int> LoadAllWorkshopDataAsync(List<DivinityModData> workshopMods, DivinityModManagerCachedWorkshopData cachedData)
 		{
 			if(workshopMods == null || workshopMods.Count == 0)
 			{
-				return Unit.Default;
+				return 0;
 			}
 			//var workshopMods = mods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
 			var values = new Dictionary<string, string>
@@ -74,12 +74,13 @@ namespace DivinityModManager.Util
 				Trace.WriteLine($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
 			}
 
+			int totalLoaded = 0;
+
 			if (!String.IsNullOrEmpty(responseData))
 			{
 				PublishedFileDetailsResponse pResponse = DivinityJsonUtils.SafeDeserialize<PublishedFileDetailsResponse>(responseData);
 				if(pResponse != null && pResponse.response != null && pResponse.response.publishedfiledetails != null && pResponse.response.publishedfiledetails.Count > 0)
 				{
-					int totalLoaded = 0;
 					var details = pResponse.response.publishedfiledetails;
 					foreach (var d in details)
 					{
@@ -118,15 +119,15 @@ namespace DivinityModManager.Util
 			{
 				Trace.WriteLine("Failed to load workshop data for mods - no response data.");
 			}
-			return Unit.Default;
+			return totalLoaded;
 		}
 
-		public static async Task<Unit> FindWorkshopDataAsync(List<DivinityModData> mods, DivinityModManagerCachedWorkshopData cachedData)
+		public static async Task<int> FindWorkshopDataAsync(List<DivinityModData> mods, DivinityModManagerCachedWorkshopData cachedData)
 		{
 			if (mods == null || mods.Count == 0)
 			{
 				Trace.WriteLine($"Skipping FindWorkshopDataAsync");
-				return Unit.Default;
+				return 0;
 			}
 			Trace.WriteLine($"Attempting to get workshop data for mods missing workshop folders.");
 			int totalFound = 0;
@@ -215,7 +216,7 @@ namespace DivinityModManager.Util
 				Trace.WriteLine($"Failed to find workshop data for {mods.Count} mods (they're probably not on the workshop).");
 			}
 
-			return Unit.Default;
+			return totalFound;
 		}
 	}
 }

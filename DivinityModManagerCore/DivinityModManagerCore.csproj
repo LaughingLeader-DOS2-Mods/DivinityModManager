@@ -20,6 +20,7 @@
 		</Reference>
 		<Reference Include="Microsoft.CSharp" />
 		<Reference Include="Microsoft.VisualBasic" />
+		<Reference Include="PresentationCore" />
 		<Reference Include="System.Net.Http" />
 		<Reference Include="System.Web" />
 	</ItemGroup>

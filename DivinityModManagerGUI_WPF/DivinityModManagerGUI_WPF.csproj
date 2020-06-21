@@ -170,6 +170,9 @@
     </Compile>
     <Compile Include="Controls\AutoGrayableImage.cs" />
     <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
+    <Compile Include="Controls\BusyIndicator.xaml.cs">
+      <DependentUpon>BusyIndicator.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Controls\CircleDecorator.cs" />
     <Compile Include="Controls\Extensions\EnumExtension.cs" />
     <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
@@ -177,12 +180,15 @@
       <DependentUpon>HyperlinkText.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\SelectableTextBlock.cs" />
+    <Compile Include="Controls\TemplateSelectors\TagTemplateSelector.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
     <Compile Include="Converters\EnumToStringConverter.cs" />
     <Compile Include="Converters\IntToVisibilityConverter.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="Resources\DivinityColors.cs" />
+    <Compile Include="Resources\Themes\ResourceAliasHelper.cs" />
     <Compile Include="Util\RxExceptionHandler.cs" />
     <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
@@ -214,7 +220,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Controls\BusyIndicator.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Controls\HyperlinkText.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Themes\Dark.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Resources\Themes\Light.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

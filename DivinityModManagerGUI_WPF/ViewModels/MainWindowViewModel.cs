@@ -322,6 +322,23 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref isRenamingOrder, value); }
 		}
 
+		private string statusBarRightText = "";
+
+		public string StatusBarRightText
+		{
+			get => statusBarRightText;
+			set { this.RaiseAndSetIfChanged(ref statusBarRightText, value); }
+		}
+
+		private Visibility statusBarBusyIndicatorVisibility = Visibility.Collapsed;
+
+		public Visibility StatusBarBusyIndicatorVisibility
+		{
+			get => statusBarBusyIndicatorVisibility;
+			set { this.RaiseAndSetIfChanged(ref statusBarBusyIndicatorVisibility, value); }
+		}
+
+
 		public IObservable<bool> canRenameOrder;
 
 		private IObservable<bool> canSaveSettings;
@@ -764,7 +781,7 @@ namespace DivinityModManager.ViewModels
 			if (loaded)
 			{
 				Settings.CanSaveSettings = false;
-				view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.", 5);
+				//view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.", 5);
 			}
 
 			return loaded;
@@ -1484,31 +1501,56 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
+				var totalSuccess = 0;
+
 				if (CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
 				{
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						StatusBarRightText = "Checking for workshop tags...";
+						StatusBarBusyIndicatorVisibility = Visibility.Visible;
+					});
 					var foundWorkshopMods = userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
 					if (foundWorkshopMods.Count > 0)
 					{
-						await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
+						totalSuccess += await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
 					}
 				}
 
-				var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
+				var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) == true).ToList();
 				// Only try and find workshop data if there's a non-editor mod, in case all our pending mods missing workshop IDs are in-progress/editor-only mods
 				bool hasPakMod = unknownWorkshopMods.Any(x => !x.IsEditorMod);
 				bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
 				if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
 				{
-					await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
+					});
+					totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
 				}
 
 				CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
 
 				if(CachedWorkshopData.CacheUpdated)
 				{
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						StatusBarRightText = $"Caching workshop tags...";
+					});
 					await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
 					CachedWorkshopData.CacheUpdated = false;
 				}
+
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					StatusBarRightText = "";
+					StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
+					if (totalSuccess > 0)
+					{
+						view.AlertBar.SetSuccessAlert($"Loaded workshop tags for {totalSuccess} mods.", 60);
+					}
+				});
 			});
 		}
 

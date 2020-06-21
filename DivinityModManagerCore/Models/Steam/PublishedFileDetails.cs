@@ -33,7 +33,7 @@ namespace DivinityModManager.Models.Steam
 		public int creator_app_id { get; set; }
 		public int consumer_app_id { get; set; }
 		public string filename { get; set; }
-		public int file_size { get; set; }
+		public string file_size { get; set; }
 		public string file_url { get; set; }
 		public string hcontent_file { get; set; }
 		public string preview_url { get; set; }

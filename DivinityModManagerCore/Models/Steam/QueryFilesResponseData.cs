@@ -26,7 +26,7 @@ namespace DivinityModManager.Models.Steam
 		public string publishedfileid { get; set; }
 		public string creator { get; set; }
 		public string filename { get; set; }
-		public int file_size { get; set; }
+		public string file_size { get; set; }
 		public string file_url { get; set; }
 		public string preview_url { get; set; }
 		public string url { get; set; }

@@ -1553,7 +1553,28 @@ namespace DivinityModManager.ViewModels
 						{
 							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
 						});
-						totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
+						//totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
+						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData);
+						if(success)
+						{
+							foreach(var mod in unknownWorkshopMods)
+							{
+								var cachedMod = CachedWorkshopData.Mods.FirstOrDefault(x => x.UUID == mod.UUID);
+								if (cachedMod != null)
+								{
+									mod.WorkshopData.ID = cachedMod.WorkshopID;
+									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
+									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
+									mod.AddTags(cachedMod.Tags);
+									totalSuccess++;
+								}
+								else
+								{
+									CachedWorkshopData.AddNonWorkshopMod(mod.UUID);
+									Trace.WriteLine($"Adding mod {mod.Name} to NonWorkshop mods");
+								}
+							}
+						}
 					}
 
 					CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();

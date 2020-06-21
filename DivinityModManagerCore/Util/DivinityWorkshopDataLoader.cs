@@ -122,6 +122,92 @@ namespace DivinityModManager.Util
 			return totalLoaded;
 		}
 
+		public static async Task<bool> GetAllWorkshopDataAsync(DivinityModManagerCachedWorkshopData cachedData)
+		{
+			Trace.WriteLine($"Attempting to get workshop data for mods missing workshop folders.");
+			int totalFound = 0;
+
+			int total = 1482;
+			int page = 0;
+			int maxPage = (total / 99)+1;
+
+			while (page < maxPage)
+			{
+				string url = $"https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key={ApiKeys.STEAM_WEB_API}&appid=435150&return_short_description=true&numperpage=99&return_tags=true&return_metadata=true&requiredtags[0]=Definitive+Edition&excludedtags[0]=GM+Campaign&page={page}";
+				string responseData = "";
+				try
+				{
+					var response = await WebHelper.Client.GetAsync(url);
+					responseData = await response.Content.ReadAsStringAsync();
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+				}
+
+				if (!String.IsNullOrEmpty(responseData))
+				{
+					QueryFilesResponse pResponse = null;
+					try
+					{
+						pResponse = JsonConvert.DeserializeObject<QueryFilesResponse>(responseData);
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine(ex.ToString());
+					}
+
+					if (pResponse != null && pResponse.response != null && pResponse.response.publishedfiledetails != null && pResponse.response.publishedfiledetails.Count > 0)
+					{
+						if (pResponse.response.total > total)
+						{
+							total = pResponse.response.total;
+							maxPage = (total / 99)+1;
+						}
+						var details = pResponse.response.publishedfiledetails;
+
+						foreach (var d in details)
+						{
+							try
+							{
+								d.DeserializeMetadata();
+								string uuid = d.GetGuid();
+								if (!String.IsNullOrEmpty(uuid))
+								{
+									cachedData.AddOrUpdate(uuid, d, GetWorkshopTags(d));
+									totalFound++;
+								}
+							}
+							catch (Exception ex)
+							{
+								Trace.WriteLine($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
+							}
+						}
+					}
+					else
+					{
+						Trace.WriteLine($"Failed to get workshop data.");
+					}
+				}
+				else
+				{
+					Trace.WriteLine("Failed to load workshop data for mods - no response data.");
+				}
+
+				page++;
+			}
+
+			if(totalFound > 0)
+			{
+				Trace.WriteLine($"Cached workshop data for {totalFound} mods.");
+				return true;
+			}
+			else
+			{
+				return false;
+			}
+		}
+
 		public static async Task<int> FindWorkshopDataAsync(List<DivinityModData> mods, DivinityModManagerCachedWorkshopData cachedData)
 		{
 			if (mods == null || mods.Count == 0)
@@ -134,7 +220,7 @@ namespace DivinityModManager.Util
 			foreach (var mod in mods)
 			{
 				string name = Uri.EscapeUriString(mod.DisplayName);
-				string url = $"https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key={ApiKeys.STEAM_WEB_API}&appid=435150&search_text={name}&return_tags=true&return_details=true&return_metadata=true&requiredtags[0]=Definitive+Edition";
+				string url = $"https://api.steampowered.com/IPublishedFileService/QueryFiles/v1/?key={ApiKeys.STEAM_WEB_API}&appid=435150&search_text={name}&return_short_description=true&return_tags=true&numperpage=99&return_metadata=true&requiredtags[0]=Definitive+Edition";
 				string responseData = "";
 				try
 				{

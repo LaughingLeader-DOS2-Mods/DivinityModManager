@@ -45,6 +45,15 @@ namespace DivinityModManager.Models
 			CacheUpdated = true;
 		}
 
+		public void AddNonWorkshopMod(string uuid)
+		{
+			if(!NonWorkshopMods.Any(x => x == uuid))
+			{
+				NonWorkshopMods.Add(uuid);
+			}
+			CacheUpdated = true;
+		}
+
 		public string Serialize()
 		{
 			StringBuilder sb = new StringBuilder();

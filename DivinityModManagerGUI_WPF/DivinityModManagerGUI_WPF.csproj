@@ -53,20 +53,20 @@
     <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AdonisUI, Version=1.13.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AdonisUI.1.13.0\lib\net45\AdonisUI.dll</HintPath>
+    <Reference Include="AdonisUI, Version=1.15.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdonisUI.1.15.0\lib\net45\AdonisUI.dll</HintPath>
     </Reference>
-    <Reference Include="AdonisUI.ClassicTheme, Version=1.13.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\AdonisUI.ClassicTheme.1.13.0\lib\net45\AdonisUI.ClassicTheme.dll</HintPath>
+    <Reference Include="AdonisUI.ClassicTheme, Version=1.15.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdonisUI.ClassicTheme.1.15.0\lib\net45\AdonisUI.ClassicTheme.dll</HintPath>
     </Reference>
     <Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
       <HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
     </Reference>
-    <Reference Include="AutoUpdater.NET, Version=1.5.8.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autoupdater.NET.Official.1.5.8\lib\net40\AutoUpdater.NET.dll</HintPath>
+    <Reference Include="AutoUpdater.NET, Version=1.6.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autoupdater.NET.Official.1.6.0\lib\net40\AutoUpdater.NET.dll</HintPath>
     </Reference>
-    <Reference Include="DynamicData, Version=6.14.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamicData.6.14.3\lib\net461\DynamicData.dll</HintPath>
+    <Reference Include="DynamicData, Version=6.15.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.6.15.1\lib\net461\DynamicData.dll</HintPath>
     </Reference>
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
       <HintPath>..\packages\gong-wpf-dragdrop.2.2.0\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
@@ -77,22 +77,25 @@
     <Reference Include="Ookii.Dialogs.Wpf, Version=1.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.Wpf.1.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=11.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.11.1.12\lib\net461\ReactiveUI.dll</HintPath>
+    <Reference Include="ReactiveUI, Version=11.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.11.4.17\lib\net461\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.WPF, Version=11.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.11.1.12\lib\net461\ReactiveUI.WPF.dll</HintPath>
+    <Reference Include="ReactiveUI.WPF, Version=11.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.WPF.11.4.17\lib\net461\ReactiveUI.WPF.dll</HintPath>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.24.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.24.0\lib\net45\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.25.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.25.1\lib\net46\SharpCompress.dll</HintPath>
     </Reference>
-    <Reference Include="Splat, Version=9.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.9.3.11\lib\net461\Splat.dll</HintPath>
+    <Reference Include="Splat, Version=9.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.9.4.5\lib\net461\Splat.dll</HintPath>
     </Reference>
-    <Reference Include="Splat.Drawing, Version=9.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.Drawing.9.3.11\lib\net461\Splat.Drawing.dll</HintPath>
+    <Reference Include="Splat.Drawing, Version=9.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.Drawing.9.4.5\lib\net461\Splat.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Design" />
     <Reference Include="System.Drawing" />
@@ -103,15 +106,22 @@
     </Reference>
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
-    <Reference Include="System.Reactive, Version=4.3.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Reactive.4.3.2\lib\net46\System.Reactive.dll</HintPath>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive, Version=4.4.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.4.4.1\lib\net46\System.Reactive.dll</HintPath>
     </Reference>
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.7.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.7.1\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
     <Reference Include="System.Security" />
     <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.3\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
     </Reference>
     <Reference Include="System.Transactions" />
     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -134,20 +144,20 @@
     <Reference Include="WpfAutoGrid, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\WpfAutoGrid.1.4.0.0\lib\net45\WpfAutoGrid.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock, Version=3.7.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.7.0\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock, Version=3.8.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.8.1\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=3.7.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.7.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=3.8.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.8.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=3.7.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.7.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=3.8.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.8.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=3.7.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.7.0\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=3.8.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.8.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
     </Reference>
-    <Reference Include="Xceed.Wpf.Toolkit, Version=3.7.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-      <HintPath>..\packages\Extended.Wpf.Toolkit.3.7.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=3.8.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.3.8.1\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

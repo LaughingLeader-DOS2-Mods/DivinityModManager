@@ -107,7 +107,7 @@ namespace DivinityModManager.Models
 				if (mod.IsEditorMod) return true;
 			}
 
-			if (PropertyContains("LastModified"))
+			if (PropertyContains("Modified") || PropertyContains("Updated"))
 			{
 				DateTime date = DateTime.Now;
 				if(DateTime.TryParse(FilterValue, out date))

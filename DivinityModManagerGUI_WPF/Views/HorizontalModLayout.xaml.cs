@@ -294,6 +294,7 @@ namespace DivinityModManager.Views
 			if (sortBy == "#") sortBy = "Index";
 			if (sortBy == "Name") sortBy = "DisplayName";
 			if (sortBy == "Modes") sortBy = "Targets";
+			if (sortBy == "Last Updated") sortBy = "LastUpdated";
 
 			try
 			{

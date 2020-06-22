@@ -101,6 +101,14 @@ namespace DivinityModManager.Models
 		public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
+		private DateTime lastUpdated;
+
+		public DateTime LastUpdated
+		{
+			get => lastUpdated;
+			set { this.RaiseAndSetIfChanged(ref lastUpdated, value); }
+		}
+
 		private DivinityModVersion headerVersion;
 		public DivinityModVersion HeaderVersion
 		{

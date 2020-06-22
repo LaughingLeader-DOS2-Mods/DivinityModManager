@@ -131,5 +131,8 @@ namespace DivinityModManager
 		}
 
 		public static IObservable<Func<DivinityModDependencyData, bool>> DependencyFilter { get; set; }
+
+		public static string DateTimeColumnFormat { get; set; } = "dd/MM/yyyy";
+		public static string DateTimeTooltipFormat { get; set; } = "MMMM dd, yyyy";
 	}
 }

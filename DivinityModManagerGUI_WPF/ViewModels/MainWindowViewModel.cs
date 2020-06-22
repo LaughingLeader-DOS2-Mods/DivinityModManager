@@ -1517,6 +1517,10 @@ namespace DivinityModManager.ViewModels
 									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
 									mod.WorkshopData.Tags = entry.Tags;
 									mod.AddTags(mod.WorkshopData.Tags);
+									if (entry.LastUpdated > 0)
+									{
+										mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+									}
 								}
 							}
 						}
@@ -1541,11 +1545,8 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 
-					var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) == true).ToList();
-					// Only try and find workshop data if there's a non-editor mod, in case all our pending mods missing workshop IDs are in-progress/editor-only mods
-					bool hasPakMod = unknownWorkshopMods.Any(x => !x.IsEditorMod);
-					bool hasIgnoredMod = unknownWorkshopMods.Any(x => CachedWorkshopData.NonWorkshopMods.Contains(x.UUID));
-					if (unknownWorkshopMods.Count > 0 && hasPakMod && !hasIgnoredMod)
+					var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) && !CachedWorkshopData.NonWorkshopMods.Contains(x.UUID)).ToList();
+					if (unknownWorkshopMods.Count > 0)
 					{
 						//Trace.WriteLine("Mods:");
 						//Trace.WriteLine(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
@@ -1566,6 +1567,10 @@ namespace DivinityModManager.ViewModels
 									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
 									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
 									mod.AddTags(cachedMod.Tags);
+									if (cachedMod.LastUpdated > 0)
+									{
+										mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+									}
 									totalSuccess++;
 								}
 								else

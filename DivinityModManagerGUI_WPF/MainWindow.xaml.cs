@@ -58,6 +58,9 @@ namespace DivinityModManager.Views
 
 			self = this;
 
+			DivinityApp.DateTimeColumnFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern;
+			DivinityApp.DateTimeTooltipFormat = CultureInfo.CurrentCulture.DateTimeFormat.LongDatePattern;
+
 			RxExceptionHandler.view = this;
 
 			App.Current.Exit += OnAppClosing;

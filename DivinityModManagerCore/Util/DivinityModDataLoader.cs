@@ -238,7 +238,6 @@ namespace DivinityModManager.Util
 						}
 						modData.Targets = string.Join(", ", modData.Modes);
 					}
-
 					return modData;
 				}
 				else
@@ -290,6 +289,7 @@ namespace DivinityModManager.Util
 									try
 									{
 										modData.LastModified = File.GetChangeTime(metaFile);
+										modData.LastUpdated = modData.LastModified;
 									}
 									catch (PlatformNotSupportedException ex)
 									{
@@ -372,6 +372,7 @@ namespace DivinityModManager.Util
 										try
 										{
 											modData.LastModified = File.GetChangeTime(metaFile);
+											modData.LastUpdated = modData.LastModified;
 										}
 										catch (PlatformNotSupportedException ex)
 										{
@@ -502,6 +503,7 @@ namespace DivinityModManager.Util
 								try
 								{
 									modData.LastModified = File.GetChangeTime(pakPath);
+									modData.LastUpdated = modData.LastModified;
 								}
 								catch (PlatformNotSupportedException ex)
 								{
@@ -679,6 +681,7 @@ namespace DivinityModManager.Util
 									try
 									{
 										modData.LastModified = File.GetChangeTime(pakPath);
+										modData.LastUpdated = modData.LastModified;
 									}
 									catch (PlatformNotSupportedException ex)
 									{

@@ -912,7 +912,7 @@
 				</GridViewColumn.HeaderContainerStyle>
 				<GridViewColumn.CellTemplate>
 					<DataTemplate>
-						<TextBlock Text="{Binding WorkshopMod.LastModified}" ToolTip="{Binding WorkshopMod.LastModified}" />
+						<TextBlock Text="{Binding WorkshopMod.LastModified, StringFormat={x:Static dapp:DivinityApp.DateTimeColumnFormat}}" ToolTip="{Binding WorkshopMod.LastModified, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />
 					</DataTemplate>
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>

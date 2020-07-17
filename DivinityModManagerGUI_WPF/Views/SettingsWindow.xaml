@@ -93,55 +93,57 @@
 			Grid.Row="1"
 			SelectionChanged="PreferencesTabControl_SelectionChanged">
 			<TabItem Header="General">
-				<autogrid:AutoGrid
-					Margin="20"
-					ChildMargin="4"
-					ColumnCount="2"
-					Columns="auto,*"
-					RowCount="10"
-					RowHeight="*"
-					Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
-					<TextBlock Text="Game Data Path" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
-					<controls:UnfocusableTextBox
-						VerticalAlignment="Center"
-						Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
-						TextAlignment="Left" />
-					<TextBlock Text="Game Executable Path" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
-					<controls:UnfocusableTextBox
-						VerticalAlignment="Center"
-						Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
-						TextAlignment="Left" />
-					<TextBlock Text="DOS2 Workshop Path" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
-					<controls:UnfocusableTextBox
-						x:Name="WorkshopPathTextbox"
-						VerticalAlignment="Center"
-						GotFocus="WorkshopPathTextbox_GotFocus"
-						LostFocus="WorkshopPathTextbox_LostFocus"
-						Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
-						TextAlignment="Left" />
-					<TextBlock Text="Saved Load Orders Path" ToolTip="The folder to save and load load orders to." />
-					<controls:UnfocusableTextBox
-						VerticalAlignment="Center"
-						Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
-						TextAlignment="Left" />
-					<TextBlock Text="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Auto Add Missing Dependencies When Exporting" ToolTip="Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoAddDependenciesWhenExporting, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Disable Missing Mod Warnings" ToolTip="If a load order is missing mods, no warnings will be displayed." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableMissingModWarnings, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="Disable Checking for Steam Workshop Tags" ToolTip="The mod manager will try and find mod tags from the workshop by default." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock Text="On Game Launch" />
-					<ComboBox
-						DisplayMemberPath="Description"
-						ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
-						SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-						SelectedValuePath="Value"
-						ToolTip="When the game launches through the mod manager, this action will be performed" />
-				</autogrid:AutoGrid>
+				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+					<autogrid:AutoGrid
+						Margin="20"
+						ChildMargin="4"
+						ColumnCount="2"
+						Columns="auto,*"
+						RowCount="10"
+						RowHeight="*"
+						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+						<TextBlock Text="Game Data Path" ToolTip="The path to the DOS2DE Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
+						<TextBlock Text="Game Executable Path" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
+						<TextBlock Text="DOS2 Workshop Path" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
+						<controls:UnfocusableTextBox
+							x:Name="WorkshopPathTextbox"
+							VerticalAlignment="Center"
+							GotFocus="WorkshopPathTextbox_GotFocus"
+							LostFocus="WorkshopPathTextbox_LostFocus"
+							Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
+						<TextBlock Text="Saved Load Orders Path" ToolTip="The folder to save and load load orders to." />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
+							TextAlignment="Left" />
+						<TextBlock Text="Enable Story Log" ToolTip="When launching DOS2DE, enable the story log." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Auto Add Missing Dependencies When Exporting" ToolTip="Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoAddDependenciesWhenExporting, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Disable Missing Mod Warnings" ToolTip="If a load order is missing mods, no warnings will be displayed." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableMissingModWarnings, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="Disable Checking for Steam Workshop Tags" ToolTip="The mod manager will try and find mod tags from the workshop by default." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock Text="On Game Launch" />
+						<ComboBox
+							DisplayMemberPath="Description"
+							ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
+							SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+							SelectedValuePath="Value"
+							ToolTip="When the game launches through the mod manager, this action will be performed" />
+					</autogrid:AutoGrid>
+				</ScrollViewer>
 			</TabItem>
 			<TabItem
 				x:Name="OsirisExtenderTab"
@@ -189,7 +191,7 @@
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock
 								x:Name="EnableConsoleTextBlock"
-								Text="Enable Console Window:"
+								Text="Enable Console Window"
 								ToolTip="Enable the Console Window. Displays the OsiExtender version and general debug messages." />
 							<CheckBox
 								VerticalAlignment="Center"
@@ -281,35 +283,37 @@
 				</Grid>
 			</TabItem>
 			<TabItem Header="Advanced">
-				<autogrid:AutoGrid
-					Margin="20"
-					ChildMargin="2"
-					ColumnCount="2"
-					Columns="auto,*"
-					RowCount="3"
-					RowHeight="*"
-					Rows="auto,auto,auto">
-					<TextBlock
-						x:Name="DebugModeTextBlock"
-						Text="Enable Developer Mode"
-						ToolTip="This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options." />
-					<CheckBox
-						VerticalAlignment="Center"
-						IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"
-						ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
-					<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
-					<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
-					<TextBlock
-						x:Name="ClearCacheTextBlock"
-						Text="Clear Workshop Cache"
-						ToolTip="Delete the local workshop cache used for tag display, located at Data\workshopdata.json." />
-					<Button
-						HorizontalAlignment="Left"
-						VerticalAlignment="Center"
-						Command="{Binding ClearWorkshopCacheCommand}"
-						Content="Delete Cache"
-						ToolTip="{Binding ElementName=ClearCacheTextBlock, Path=ToolTip}" />
-				</autogrid:AutoGrid>
+				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+					<autogrid:AutoGrid
+						Margin="20"
+						ChildMargin="2"
+						ColumnCount="2"
+						Columns="auto,*"
+						RowCount="3"
+						RowHeight="*"
+						Rows="auto,auto,auto">
+						<TextBlock
+							x:Name="DebugModeTextBlock"
+							Text="Enable Developer Mode"
+							ToolTip="This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options." />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
+						<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock
+							x:Name="ClearCacheTextBlock"
+							Text="Clear Workshop Cache"
+							ToolTip="Delete the local workshop cache used for tag display, located at Data\workshopdata.json." />
+						<Button
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Command="{Binding ClearWorkshopCacheCommand}"
+							Content="Delete Cache"
+							ToolTip="{Binding ElementName=ClearCacheTextBlock, Path=ToolTip}" />
+					</autogrid:AutoGrid>
+				</ScrollViewer>
 			</TabItem>
 		</TabControl>
 		<Grid Grid.Row="2" Margin="0,8">

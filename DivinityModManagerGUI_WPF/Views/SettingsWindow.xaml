@@ -328,12 +328,12 @@
 					Command="{Binding ExportExtenderSettingsCommand}"
 					Content="Export Settings"
 					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json"
-					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
+					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=COllapsed}" />
 			</Grid>
 			<Grid Grid.Column="1">
 				<Button
 					x:Name="SaveSettingsButton"
-					Width="{Binding ElementName=ExportExtenderSettingsButton, Path=ActualWidth}"
+					Padding="30,0"
 					HorizontalAlignment="Center"
 					Command="{Binding SaveSettingsCommand}"
 					Content="Save" />

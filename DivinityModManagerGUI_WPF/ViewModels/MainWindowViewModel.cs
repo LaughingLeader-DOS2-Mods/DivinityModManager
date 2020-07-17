@@ -1418,10 +1418,10 @@ namespace DivinityModManager.ViewModels
 				{
 					if (mod.OsiExtenderData != null && mod.OsiExtenderData.HasAnySettings)
 					{
-						// Lua support without Osiris makes it optional
+						// Assume an Lua-only mod actually requires the extender, otherwise functionality is limited.
 						bool onlyUsesLua = mod.OsiExtenderData.FeatureFlags.Contains("Lua") && !mod.OsiExtenderData.FeatureFlags.Contains("OsirisExtensions");
 
-						if (!mod.OsiExtenderData.FeatureFlags.Contains("Preprocessor") && !onlyUsesLua)
+						if (!mod.OsiExtenderData.FeatureFlags.Contains("Preprocessor") || onlyUsesLua)
 						{
 							if(!Settings.ExtenderSettings.EnableExtensions)
 							{

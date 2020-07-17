@@ -693,6 +693,20 @@ namespace DivinityModManager.ViewModels
 
 			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
 			{
+				try
+				{
+					System.IO.FileAttributes attr = File.GetAttributes(Settings.DOS2DEGameExecutable);
+
+					if (attr.HasFlag(System.IO.FileAttributes.Directory))
+					{
+						var exe = Path.Combine(Settings.DOS2DEGameExecutable, "EoCApp.exe");
+						if (File.Exists(exe))
+						{
+							Settings.DOS2DEGameExecutable = exe;
+						}
+					}
+				}
+				catch (Exception ex) { }
 				if (SaveSettings())
 				{
 					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.", 10);

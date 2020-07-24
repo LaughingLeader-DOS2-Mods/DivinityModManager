@@ -31,6 +31,7 @@ namespace DivinityModManager
 		public static DivinityModData MOD_Shared { get; private set; } = new DivinityModData(true) { Name = "Shared", UUID = "2bd9bdbe-22ae-4aa2-9c93-205880fc6564", Folder = "Shared", Version = DivinityModVersion.FromInt(389028377), Type = "Adventure", Targets = "Story", Author = "Larian Studios", Description = "", MD5 = "", IsLarianMod = true, IsHidden = true };
 		public static DivinityModData MOD_Shared_DOS { get; private set; } = new DivinityModData(true) { Name = "Shared_DOS", UUID = "eedf7638-36ff-4f26-a50a-076b87d53ba0", Folder = "Shared_DOS", Version = DivinityModVersion.FromInt(268435456), Type = "Adventure", Targets = "Story", Author = "Larian Studios", Description = "", MD5 = "", IsLarianMod = true, IsHidden = true };
 		public static DivinityModData MOD_Character_Creation_Pack { get; private set; } = new DivinityModData(true) { Name = "Character_Creation_Pack", UUID = "b40e443e-badd-4727-82b3-f88a170c4db7", Folder = "Character_Creation_Pack", Version = DivinityModVersion.FromInt(268435456), Type = "Add-on", Targets = "Story", Author = "Larian Studios", Description = "", MD5 = "" , IsLarianMod = true};
+		public static DivinityModData MOD_ArmorSets { get; private set; } = new DivinityModData(true) { Name = "ArmorSets", UUID = "3da57b9d-8b41-46c7-a33c-afb31eea38a3", Folder = "ArmorSets", Version = DivinityModVersion.FromInt(268435456), Type = "Add-on", Targets = "Story", Author = "Larian Studios", Description = "", MD5 = "" , IsLarianMod = true};
 		public static DivinityModData MOD_GameMaster { get; private set; } = new DivinityModData(true) { Name = "Game Master", UUID = "00550ab2-ac92-410c-8d94-742f7629de0e", Folder = "GameMaster", Version = DivinityModVersion.FromInt(271587865), Type = "Adventure", Targets = "Story", Author = "Larian Studios", Description = "GM mode is for when you want a highly curated adventure, much like a tradition tabletop game. Multiplayer required.", MD5 = "a81ffa30bfb55ccddbdc37256bc6f7f4" , IsLarianMod = true, HasDescription = true };
 		public static DivinityModData MOD_Arena { get; private set; } = new DivinityModData(true) { Name = "Arena", UUID = "a99afe76-e1b0-43a1-98c2-0fd1448c223b", Folder = "DOS2_Arena", Version = DivinityModVersion.FromInt(271981796), Type = "Adventure", Targets = "Story", Author = "Larian Studios", Description = "A PvP mode designed for quick battles.", MD5 = "ba12b04eb34b2bcac60bb3edcceb7c5e" , IsLarianMod = true, HasDescription = true };
 
@@ -40,6 +41,7 @@ namespace DivinityModManager
 			MOD_Shared,
 			MOD_Shared_DOS,
 			MOD_Character_Creation_Pack,
+			MOD_ArmorSets
 		};
 
 		public static List<DivinityModData> MODS_GameModes { get; private set; } = new List<DivinityModData>()
@@ -74,6 +76,7 @@ namespace DivinityModManager
 			MOD_Shared,
 			MOD_Shared_DOS,
 			MOD_Character_Creation_Pack,
+			MOD_ArmorSets,
 			MOD_GameMaster,
 			MOD_Arena
 		}.Concat(MODS_GiftBag).ToList();
@@ -84,6 +87,7 @@ namespace DivinityModManager
 			MOD_Shared,
 			MOD_Shared_DOS,
 			MOD_Character_Creation_Pack,
+			MOD_ArmorSets,
 			MOD_GameMaster,
 			MOD_Arena
 		};

@@ -91,7 +91,13 @@ namespace DivinityModManager.Util
 			".ailog",
 			".log",
 			".debugInfo",
-			".dmp"
+			".dmp",
+			"goals.div",
+			"goals.raw",
+			"story.div",
+			"story_ac.dat",
+			"story_definitions.div",
+			"story.div.osi",
 		};
 
 		private static bool IgnoreFile(string targetFilePath, string ignoredFileName)
@@ -245,7 +251,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error creating package: {ex.ToString()}");
+				Trace.WriteLine($"Error creating package: {ex}");
 				return false;
 			}
 		}

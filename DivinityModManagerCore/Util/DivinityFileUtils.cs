@@ -88,16 +88,16 @@ namespace DivinityModManager.Util
 			"log.txt",
 			"personallog.txt",
 			"story_orphanqueries_found.txt",
-			".ailog",
-			".log",
-			".debugInfo",
-			".dmp",
 			"goals.div",
 			"goals.raw",
 			"story.div",
 			"story_ac.dat",
 			"story_definitions.div",
 			"story.div.osi",
+			".ailog",
+			".log",
+			".debugInfo",
+			".dmp",
 		};
 
 		private static bool IgnoreFile(string targetFilePath, string ignoredFileName)
@@ -106,7 +106,7 @@ namespace DivinityModManager.Util
 			{
 				return true;
 			}
-			if (Path.GetExtension(targetFilePath).Equals(ignoredFileName, StringComparison.OrdinalIgnoreCase))
+			else if (ignoredFileName.Substring(0) == "." && Path.GetExtension(targetFilePath).Equals(ignoredFileName, StringComparison.OrdinalIgnoreCase))
 			{
 				return true;
 			}

@@ -10,8 +10,8 @@
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 		<PackageReference Include="ReactiveHistory" Version="0.9.4" />
-		<PackageReference Include="ReactiveProperty" Version="7.1.0" />
-		<PackageReference Include="ReactiveUI" Version="11.4.17" />
+		<PackageReference Include="ReactiveProperty" Version="7.2.0" />
+		<PackageReference Include="ReactiveUI" Version="11.5.26" />
 		<PackageReference Include="System.Reactive" Version="4.4.1" />
 	</ItemGroup>
 	<ItemGroup>

@@ -959,28 +959,27 @@ namespace DivinityModManager.ViewModels
 				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 
 				string larianDocumentsFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition");
-				if (Directory.Exists(larianDocumentsFolder))
+				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
+				Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
+				if (!Directory.Exists(larianDocumentsFolder))
 				{
-					PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
-					Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
+					Directory.CreateDirectory(larianDocumentsFolder);
 				}
 
 				string modPakFolder = Path.Combine(larianDocumentsFolder, "Mods");
-				if (Directory.Exists(modPakFolder))
+				PathwayData.DocumentsModsPath = modPakFolder;
+				if (!Directory.Exists(modPakFolder))
 				{
-					PathwayData.DocumentsModsPath = modPakFolder;
-					Trace.WriteLine($"Mods folder set to '{modPakFolder}'.");
-				}
-				else
-				{
-					Trace.WriteLine($"No mods folder found at '{modPakFolder}'.");
+					Trace.WriteLine($"No mods folder found at '{modPakFolder}'. Creating folder.");
+					Directory.CreateDirectory(modPakFolder);
 				}
 
 				string profileFolder = (Path.Combine(larianDocumentsFolder, "PlayerProfiles"));
-				if (Directory.Exists(profileFolder))
+				PathwayData.DocumentsProfilesPath = profileFolder;
+				if (!Directory.Exists(profileFolder))
 				{
-					PathwayData.DocumentsProfilesPath = profileFolder;
-					Trace.WriteLine($"Larian profile folder set to '{profileFolder}'.");
+					Trace.WriteLine($"Creating profile folder at '{profileFolder}'.");
+					Directory.CreateDirectory(profileFolder);
 				}
 
 				if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))

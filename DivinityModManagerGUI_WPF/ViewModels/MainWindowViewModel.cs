@@ -1970,6 +1970,14 @@ namespace DivinityModManager.ViewModels
 				if (result)
 				{
 					view.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'", 10);
+					foreach(var order in this.ModOrderList)
+					{
+						if (order.FilePath == dialog.FileName)
+						{
+							order.SetOrder(tempOrder);
+							Trace.WriteLine($"Updated saved order {order.Name} from {dialog.FileName}");
+						}
+					}
 				}
 				else
 				{

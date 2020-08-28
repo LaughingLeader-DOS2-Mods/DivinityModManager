@@ -5,6 +5,7 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 
 # Setup
 
+0. Run the game once if you haven't already, so a profile and the mods folders get created.
 1. Make sure you have [Microsoft .NET Framework 4.7.2](https://dotnet.microsoft.com/download/dotnet-framework/net472) installed
 2. [Grab the latest release.](https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/releases/latest/download/DivinityModManager_Latest.zip)
 3. The Divinity Mod Manager is portable, so extract it wherever you wish.

@@ -27,13 +27,13 @@ namespace DivinityModManager.ViewModels
 				dragInfo.Data = null;
 				if (dragInfo.SourceCollection == _viewModel.ActiveMods)
 				{
-					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected);
+					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected && x.Visibility == Visibility.Visible);
 					dragInfo.Data = selected;
 					//Trace.WriteLine($"Drag source is ActiveMods | {selected.Count()}");
 				}
 				else if (dragInfo.SourceCollection == _viewModel.InactiveMods)
 				{
-					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.CanDrag);
+					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.Visibility == Visibility.Visible && x.CanDrag);
 					dragInfo.Data = selected;
 					//Trace.WriteLine($"Drag source is InactiveMods | {selected.Count()} | Classic: {selected.Where(x => x.IsClassicMod && x.CanDrag).Count()}");
 				}

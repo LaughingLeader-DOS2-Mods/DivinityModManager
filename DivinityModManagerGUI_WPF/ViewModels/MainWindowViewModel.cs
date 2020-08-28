@@ -723,7 +723,12 @@ namespace DivinityModManager.ViewModels
 				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "OsirisExtenderSettings.json");
 				try
 				{
-					string contents = JsonConvert.SerializeObject(Settings.ExtenderSettings, Newtonsoft.Json.Formatting.Indented);
+					var jsonSettings = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore, Formatting = Formatting.Indented };
+					if (Settings.ExportDefaultExtenderSettings)
+					{
+						jsonSettings.DefaultValueHandling = DefaultValueHandling.Include;
+					}
+					string contents = JsonConvert.SerializeObject(Settings.ExtenderSettings, jsonSettings);
 					File.WriteAllText(outputFile, contents);
 					view.AlertBar.SetSuccessAlert($"Saved Osiris Extender settings to '{outputFile}'.", 20);
 				}

@@ -2846,6 +2846,7 @@ namespace DivinityModManager.ViewModels
 						else
 						{
 							mod.Visibility = Visibility.Collapsed;
+							mod.IsSelected = false;
 							totalHidden += 1;
 						}
 					}
@@ -2861,6 +2862,7 @@ namespace DivinityModManager.ViewModels
 						else
 						{
 							m.Visibility = Visibility.Collapsed;
+							m.IsSelected = false;
 							totalHidden += 1;
 						}
 					}

@@ -740,6 +740,7 @@ namespace DivinityModManager.ViewModels
 					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
 				if (result == MessageBoxResult.Yes)
 				{
+					Settings.ExportDefaultExtenderSettings = false;
 					Settings.ExtenderSettings.SetToDefault();
 				}
 			}, canResetExtenderSettingsObservable).DisposeWith(Settings.Disposables);
@@ -1975,7 +1976,7 @@ namespace DivinityModManager.ViewModels
 						if (order.FilePath == dialog.FileName)
 						{
 							order.SetOrder(tempOrder);
-							Trace.WriteLine($"Updated saved order {order.Name} from {dialog.FileName}");
+							Trace.WriteLine($"Updated saved order '{order.Name}' from '{dialog.FileName}'.");
 						}
 					}
 				}

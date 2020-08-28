@@ -54,6 +54,15 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref createConsole, value); }
 		}
 
+		private bool logFailedCompile = true;
+
+		[DataMember]
+		public bool LogFailedCompile
+		{
+			get => logFailedCompile;
+			set { this.RaiseAndSetIfChanged(ref logFailedCompile, value); }
+		}
+
 		private bool enableLogging = false;
 
 		[DataMember]
@@ -63,7 +72,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref enableLogging, value); }
 		}
 
-		private bool logCompile;
+		private bool logCompile = true;
 
 		[DataMember]
 		public bool LogCompile
@@ -79,6 +88,15 @@ namespace DivinityModManager.Models
 		{
 			get => logDirectory;
 			set { this.RaiseAndSetIfChanged(ref logDirectory, value); }
+		}
+
+		private bool logRuntime = false;
+
+		[DataMember]
+		public bool LogRuntime
+		{
+			get => logRuntime;
+			set { this.RaiseAndSetIfChanged(ref logRuntime, value); }
 		}
 
 		private bool disableModValidation = true;
@@ -153,12 +171,16 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref developerMode, value); }
 		}
 
+		public static OsiExtenderSettings DefaultSettings = new OsiExtenderSettings();
+
 		public void SetToDefault()
 		{
 			EnableExtensions = true;
 			CreateConsole = false;
 			EnableLogging = false;
+			LogFailedCompile = true;
 			LogCompile = false;
+			LogRuntime = false;
 			LogDirectory = "";
 			DisableModValidation = true;
 			EnableAchievements = true;

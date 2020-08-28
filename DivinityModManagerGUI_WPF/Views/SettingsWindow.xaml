@@ -160,9 +160,14 @@
 							ChildMargin="4"
 							ColumnCount="2"
 							Columns="auto,*"
-							RowCount="14"
+							RowCount="17"
 							RowHeight="*"
-							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+							<TextBlock Text="Export Default Values" ToolTip="If a value matches a default settings value, by default it won't be written. Default: False (Unchecked)" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExportDefaultExtenderSettings, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="Default: False (Unchecked)" />
 							<TextBlock
 								x:Name="EnableAchievementsTextBlock"
 								Text="Enable Achievements"
@@ -206,22 +211,6 @@
 								IsChecked="{Binding ExtenderSettings.DeveloperMode, UpdateSourceTrigger=PropertyChanged}"
 								ToolTip="{Binding ElementName=DeveloperModeTextBlock, Path=ToolTip}" />
 							<TextBlock
-								x:Name="EnableLogTextBlock"
-								Text="Enable Logging"
-								ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
-							<CheckBox
-								VerticalAlignment="Center"
-								IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}"
-								ToolTip="{Binding ElementName=EnableLogTextBlock, Path=ToolTip}" />
-							<TextBlock
-								x:Name="LogMergesTextBlock"
-								Text="Log Story Merges"
-								ToolTip="Create a log when story scripting in mods merges. Useful for reporting 'Working Story Errors' to mod authors!" />
-							<CheckBox
-								VerticalAlignment="Center"
-								IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}"
-								ToolTip="{Binding ElementName=LogMergesTextBlock, Path=ToolTip}" />
-							<TextBlock
 								x:Name="LogDirectoryTextBlock"
 								Text="Log Directory"
 								ToolTip="The directory to write logs to." />
@@ -230,6 +219,42 @@
 								Text="{Binding ExtenderSettings.LogDirectory, UpdateSourceTrigger=PropertyChanged}"
 								TextAlignment="Left"
 								ToolTip="{Binding ElementName=LogDirectoryTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="EnableLogTextBlock"
+								Text="Enable Logging"
+								ToolTip="Story scripting logs will be created and saves to your Logs pathway (Default: Documents\OsirisLogs)" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.EnableLogging, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableLogTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="LogFailedCompileTextBlock"
+								Text="Log Working Story Errors"
+								ToolTip="If a 'Working Story Error' is encountered, a compile log is created." />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.LogFailedCompile, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=LogFailedCompileTextBlock, Path=ToolTip}" />
+							<TextBlock
+								x:Name="LogRuntimeTextBlock"
+								Text="Log Runtime"
+								ToolTip="Log the text written to the extender console window."
+								Visibility="{Binding ExtenderSettings.EnableLogging, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.LogRuntime, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=LogRuntimeTextBlock, Path=ToolTip}"
+								Visibility="{Binding ExtenderSettings.EnableLogging, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="LogMergesTextBlock"
+								Text="Log Story Merges"
+								ToolTip="Log when story scripting compilations. This is when the game merges all story scripts together."
+								Visibility="{Binding ExtenderSettings.EnableLogging, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.LogCompile, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=LogMergesTextBlock, Path=ToolTip}"
+								Visibility="{Binding ExtenderSettings.EnableLogging, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock
 								x:Name="SendCrashReportsTextblock"
 								Text="Send Crash Reports"
@@ -252,8 +277,8 @@
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock
 								x:Name="EnableDebuggerTextblock"
-								Text="Enable Debugger"
-								ToolTip="Enable the Extensions Debugger. Default: Disabled"
+								Text="Enable Osiris Debugger"
+								ToolTip="Enable the Divinity VSCode Extension Debugger. Default: Disabled"
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<CheckBox
 								VerticalAlignment="Center"
@@ -262,7 +287,7 @@
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock
 								x:Name="DebuggerPortTextBlock"
-								Text="Debugger Port"
+								Text="Osiris Debugger Port"
 								ToolTip="The port for the debugger to listen on. Default: 9999"
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<xc:IntegerUpDown
@@ -271,7 +296,7 @@
 								Value="{Binding ExtenderSettings.DebuggerPort, FallbackValue=9999}" />
 							<TextBlock
 								x:Name="DebuggerFlagsTextBlock"
-								Text="Debugger Flags"
+								Text="Osiris Debugger Flags"
 								ToolTip="Debugger flags to set. Default: 0"
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock

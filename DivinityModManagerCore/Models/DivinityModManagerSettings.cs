@@ -199,6 +199,19 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref disableWorkshopTagCheck, value); }
 		}
 
+		private bool exportDefaultExtenderSettings = false;
+
+		[DataMember]
+		public bool ExportDefaultExtenderSettings
+		{
+			get => exportDefaultExtenderSettings;
+			set
+			{
+				this.RaiseAndSetIfChanged(ref exportDefaultExtenderSettings, value);
+			}
+
+		}
+
 		//Not saved for now
 
 		private bool displayFileNames = false;

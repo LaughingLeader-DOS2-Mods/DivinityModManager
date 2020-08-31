@@ -408,11 +408,20 @@ namespace DivinityModManager.Models
 		//public DivinityModWorkshopData WorkshopData { get; private set; } = new DivinityModWorkshopData();
 		public ICommand OpenWorkshopPageCommand { get; private set; }
 
+		public string GetURL()
+		{
+			if (WorkshopData != null && WorkshopData.ID != "")
+			{
+				return $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
+			}
+			return "";
+		}
+
 		public void OpenSteamWorkshopPage()
 		{
-			if (WorkshopData != null && !String.IsNullOrEmpty(WorkshopData.ID))
+			var url = GetURL();
+			if (!String.IsNullOrEmpty(url))
 			{
-				string url = $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
 				System.Diagnostics.Process.Start(url);
 			}
 		}

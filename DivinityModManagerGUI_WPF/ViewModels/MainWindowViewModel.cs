@@ -1790,6 +1790,10 @@ namespace DivinityModManager.ViewModels
 
 		public void RefreshAsync_Start(string title = "Refreshing...")
 		{
+			if (ModUpdatesViewData != null)
+			{
+				ModUpdatesViewData.Clear();
+			}
 			ModUpdatesViewVisible = ModUpdatesAvailable = false;
 			MainProgressTitle = title;
 			MainProgressValue = 0d;
@@ -2474,8 +2478,8 @@ namespace DivinityModManager.ViewModels
 					}
 					else if (fileType.Equals(".tsv", StringComparison.OrdinalIgnoreCase))
 					{
-						outputText = "Index\tName\tAuthor\tFileName\tType\tModes\tDependencies\n";
-						outputText += String.Join("\n", ActiveMods.Select(x => $"{x.Index}\t{x.Name}\t{x.Author}\t{x.OutputPakName}\t{x.Type}\t{String.Join(", ", x.Modes)}\t{String.Join(", ", x.Dependencies.Items.Select(y => y.Name))}"));
+						outputText = "Index\tName\tAuthor\tFileName\tTags\tDependencies\tURL\n";
+						outputText += String.Join("\n", ActiveMods.Select(x => $"{x.Index}\t{x.Name}\t{x.Author}\t{x.OutputPakName}\t{String.Join(", ", x.Tags)}\t{String.Join(", ", x.Dependencies.Items.Select(y => y.Name))}\t{x.GetURL()}"));
 					}
 					else
 					{
@@ -2996,6 +3000,7 @@ namespace DivinityModManager.ViewModels
 						}
 						IncreaseMainProgressValue(taskStepAmount);
 					}
+
 					await ctrl.Yield();
 					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
 

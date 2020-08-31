@@ -2942,11 +2942,11 @@ namespace DivinityModManager.ViewModels
 
 			if (Settings.LastExtractOutputPath.IsExistingDirectory())
 			{
-				dialog.SelectedPath = Settings.LastExtractOutputPath;
+				dialog.SelectedPath = Settings.LastExtractOutputPath + "\\";
 			}
 			else if (PathwayData.LastSaveFilePath.IsExistingDirectory())
 			{
-				dialog.SelectedPath = PathwayData.LastSaveFilePath;
+				dialog.SelectedPath = PathwayData.LastSaveFilePath + "\\";
 			}
 			else
 			{
@@ -3004,6 +3004,7 @@ namespace DivinityModManager.ViewModels
 						if (successes >= totalWork)
 						{
 							view.AlertBar.SetSuccessAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", 20);
+							Process.Start(dialog.SelectedPath);
 						}
 						else
 						{

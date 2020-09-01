@@ -42,6 +42,7 @@
 	<BitmapImage x:Key="ExpandUpImageDisabled" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronUp_lightGrey_16x.png" />
 	<BitmapImage x:Key="OpenDOS2Image" UriSource="pack://application:,,,/Resources/Icons/DivinityOS2_EoCApp_16x.png" />
 	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Icons/Steam_16x.png" />
+	<BitmapImage x:Key="LogImage" UriSource="pack://application:,,,/Resources/Icons/Log_Normal_32x.png" />
 	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Icons/Kofi_16x.png" />
 	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Icons/Github_16x.png" />
 	<BitmapImage x:Key="DefaultIcon" UriSource="pack://application:,,,/Resources/Icons/DefaultIcon_16x.png" />

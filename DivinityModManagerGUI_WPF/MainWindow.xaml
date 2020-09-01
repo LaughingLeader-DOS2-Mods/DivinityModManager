@@ -573,6 +573,23 @@
 								</Button.ContextMenu>
 							</Button>
 							<Button
+								x:Name="OpenExtenderLogsFolderButton"
+								Command="{Binding OpenExtenderLogDirectoryCommand}"
+								ToolTip="Open Logs Folder">
+								<controls:AutoGrayableImage
+									Width="16"
+									Height="16"
+									Source="{StaticResource LogImage}" />
+								<Button.ContextMenu>
+									<ContextMenu>
+										<MenuItem
+											Command="{Binding CopyPathToClipboardCommand}"
+											CommandParameter="{Binding Settings.ExtenderLogDirectory}"
+											Header="Copy Path to Clipboard" />
+									</ContextMenu>
+								</Button.ContextMenu>
+							</Button>
+							<Button
 								x:Name="OpenDOS2GameButton"
 								Command="{Binding OpenDOS2GameCommand}"
 								ToolTip="Run Divinity: Original Sin 2 - Definitive Edition">

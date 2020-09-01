@@ -347,6 +347,7 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenDialogWindow;
 		private IObservable<bool> gameExeFoundObservable;
 		private IObservable<bool> canInstallOsiExtender;
+		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
 
@@ -362,6 +363,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
+		public ICommand OpenExtenderLogDirectoryCommand { get; private set; }
 		public ICommand OpenDOS2GameCommand { get; private set; }
 		public ICommand OpenDonationPageCommand { get; private set; }
 		public ICommand OpenRepoPageCommand { get; private set; }
@@ -684,10 +686,16 @@ namespace DivinityModManager.ViewModels
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
-
+			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
 			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
 			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
+
+			OpenExtenderLogDirectoryCommand = ReactiveCommand.Create(() =>
+			{
+				Process.Start(Settings.ExtenderLogDirectory);
+			}, canOpenLogDirectory).DisposeWith(Settings.Disposables);
+			this.RaisePropertyChanged("OpenExtenderLogDirectoryCommand");
 
 			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start).DisposeWith(Settings.Disposables);
 

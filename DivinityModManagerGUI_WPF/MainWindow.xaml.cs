@@ -214,6 +214,8 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 
+				//this.WhenAnyValue(x => x.ViewModel.OpenExtenderLogDirectoryCommand).BindTo(this, view => view.OpenExtenderLogsFolderButton.Command);
+
 				//this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 			});
 		}

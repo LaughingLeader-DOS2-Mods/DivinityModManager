@@ -12,6 +12,7 @@ using System.Windows.Input;
 using DivinityModManager.Util;
 using System.Reactive.Disposables;
 using System.Reflection;
+using Alphaleonis.Win32.Filesystem;
 
 namespace DivinityModManager.Models
 {
@@ -172,6 +173,20 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
 		}
 
+		public string ExtenderLogDirectory
+		{
+			get
+			{
+				if (ExtenderSettings == null || String.IsNullOrWhiteSpace(ExtenderSettings.LogDirectory))
+				{
+
+					return Path.Combine(System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "OsirisLogs");
+				}
+				return ExtenderSettings.LogDirectory;
+			}
+		}
+
+
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
 
 		[DataMember]
@@ -293,6 +308,7 @@ namespace DivinityModManager.Models
 			ExtenderSettings.WhenAnyPropertyChanged(extender_properties).Subscribe((c) =>
 			{
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
+				this.RaisePropertyChanged("ExtenderLogDirectory");
 			}).DisposeWith(Disposables);
 		}
 	}

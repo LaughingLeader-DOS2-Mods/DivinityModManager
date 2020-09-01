@@ -2492,7 +2492,7 @@ namespace DivinityModManager.ViewModels
 					else
 					{
 						//Text file format
-						outputText = String.Join("\n", ActiveMods.Select(x => $"{x.Index}. {x.Name} ({x.OutputPakName})"));
+						outputText = String.Join("\n", ActiveMods.Select(x => $"{x.Index}. {x.Name} ({x.OutputPakName}) {x.GetURL()}"));
 					}
 					try
 					{

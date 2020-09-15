@@ -30,7 +30,7 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * View pending Steam Workshop mod updates and update with a few clicks.
 * Filter mods by Steam Workshop tags. Mods can also specify custom tags in their meta.lsx file.
 * If a mod has a Steam Workshop page, you can open this by right clicking the mod and selecting "Open Steam Workshop Page".  
-[![Opening a Workshop Page with Right Click](https://i.imgur.com/gs1BV0ys.jpg)](https://i.imgur.com/gs1BV0y.png)
+[![Opening a Workshop Page with Right Click](https://i.imgur.com/gs1BV0ym.jpg)](https://i.imgur.com/gs1BV0y.png)
 
 ## Script Extender Support
 

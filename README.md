@@ -23,13 +23,14 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Export load order mods to zip files (including editor mods), for easier sharing of a playthrough's mods between friends.
 * Extract selected mods with a few clicks. Useful for mod authors, or those wanting to study mod files for learning.
 * Import load orders from save files.
-* Shortcut buttons to all the various game-related folders (mods folder, workshop folder, game directory, etc). You can also open mod Steam Workshop pages by right clicking them.
+* Shortcut buttons to all the various game-related folders (mods folder, workshop folder, game directory, etc).
 * Dark and light theme support.
 
 ## Steam Workshop Support
 
 * View pending Steam Workshop mod updates and update with a few clicks.
 * Filter mods by Steam Workshop tags. Mods can also specify custom tags in their meta.lsx file.
+* If a mod has a Steam Workshop page, you can open this by right clicking the mod and selecting "Open Steam Workshop Page".
 
 ## Script Extender Support
 

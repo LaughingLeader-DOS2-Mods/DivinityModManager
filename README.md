@@ -21,7 +21,6 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Export your active mod order to various text formats (i.e. a spreadsheet). These formats will include extra data, such as the mod's steam workshop url, if any.
 * Filter mods by name and properties (author, mode, etc.).
 * Export load order mods to zip files (including editor mods), for easier sharing of a playthrough's mods between friends.
-* Extract selected mods with a few clicks. Useful for mod authors, or those wanting to study mod files for learning.
 * Import load orders from save files.
 * Shortcut buttons to all the various game-related folders (mods folder, workshop folder, game directory, etc).
 * Dark and light theme support.
@@ -39,6 +38,13 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Install the Script Extender with a few clicks (Tools -> Download & Install the Script Extender).
 * Configure Script Extender settings in Settings -> Preferences -> the Script Extender tab.
 * See if mods use or require the script extender.
+
+## Features for Mod Authors
+
+* Extract selected mods with a few clicks. Useful for mod authors, or those wanting to study mod files for learning.
+* Copy a mod's UUID or FolderName in the right click menu. Useful for if you're setting up Ext.IsModLoaded checks with the script extender, for mod support.
+* You can specify custom tags in your project's meta.lsx (the "Tags" property"). Seperate tags with a semi-colon, and the mod manager will display them.
+[![Custom Tags](https://i.imgur.com/bxkVqssl.jpg)](https://i.imgur.com/bxkVqss.png)
 
 # Notes
 

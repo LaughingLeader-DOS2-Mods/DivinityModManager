@@ -44,6 +44,8 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 * Extract selected mods with a few clicks. Useful for mod authors, or those wanting to study mod files for learning.
 * Copy a mod's UUID or FolderName in the right click menu. Useful for if you're setting up Ext.IsModLoaded checks with the script extender, for mod support.
 * You can specify custom tags in your project's meta.lsx (the "Tags" property"). Seperate tags with a semi-colon, and the mod manager will display them.
+
+
 [![Custom Tags](https://i.imgur.com/bxkVqssl.jpg)](https://i.imgur.com/bxkVqss.png)
 
 # Notes

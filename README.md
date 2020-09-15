@@ -17,16 +17,29 @@ A work-in-progress mod manager for Divinity: Original Sin 2 - Definitive Edition
 
 * Reorganize mod load orders with a quick drag-and-drop interface. Allows reordering multiple mods at once.
   * View details about each mod, including the description and dependencies.
-* Save your mod load orders to external json files.
+* Save your mod load orders to external json files, or export them to various text formats (i.e. a spreadsheet) for sharing.
 * Filter mods by name and properties (author, mode, etc.).
 * Export load order mods to zip files (including editor mods), for easier sharing of a playthrough's mods between friends.
-* View pending Steam Workshop mod updates and update with a few clicks.
+* Shortcut buttons to all the various game-related folders (mods folder, workshop folder, game directory, etc).
 * Dark and light theme support.
+
+## Steam Workshop Support
+
+* View pending Steam Workshop mod updates and update with a few clicks.
+* Filter mods by Steam Workshop tags. Mods can also specify custom tags in their meta.lsx file.
+
+## Script Extender Support
+
+[Norbyte's Script Extender (ositools)](https://github.com/Norbyte/ositools) allows mods to mod the game even further, and is required by many newer mods. The Divinity Mod Manager makes this easier to install and configure with the following features:
+
+* Install the Script Extender with a few clicks (Tools -> Download & Install the Script Extender).
+* Configure Script Extender settings in Settings -> Preferences -> the Script Extender tab.
+* See if mods use or require the script extender.
 
 # Notes
 
 * Divinity Engine 2 (editor) projects are highlighted in green. They can be used in the load order like regular mods, and even exported to zip files.
-* New profiles must be made in-game. This is on the list of planned features.
+* New profiles must be made in-game. You should also run the game at least once, so all of the game's user folders are created.
 * Highlight over mods to see their description and list of dependencies. Red dependencies are missing dependencies.
 
 # Links

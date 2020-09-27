@@ -1325,9 +1325,19 @@ namespace DivinityModManager.Util
 				modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, uuid) + Environment.NewLine;
 			}
 
+			/* Larian stores all mods in the order, active or not. */
+			/*foreach (var mod in allMods)
+			{
+				if (!orderList.Contains(mod.UUID) && mod.Type != "Adventure")
+				{
+					modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, mod.UUID) + Environment.NewLine;
+				}
+			}*/
+
 			/* Active mods are contained within the Mods node. Origins is always included at the top, despite it not being in ModOrder. */
 			string modShortDescText = "";
 
+			/*
 			if(selectedAdventure == DivinityApp.MOD_Origins)
 			{
 				foreach (var mod in DivinityApp.MODS_Base)
@@ -1336,21 +1346,21 @@ namespace DivinityModManager.Util
 					modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 				}
 			}
-			else
-			{
-				modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, 
+			*/
+			modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC,
 					selectedAdventure.Folder, selectedAdventure.MD5, System.Security.SecurityElement.Escape(selectedAdventure.Name), selectedAdventure.UUID, selectedAdventure.Version.VersionInt) + Environment.NewLine;
-				foreach (var mod in DivinityApp.MODS_Base.Where(x => x != DivinityApp.MOD_Origins))
+
+			/* Fix for the game using the active mod nodes as the mod order, as of Patch 9 (8/13/2020).
+			 * The set of ModOrder nodes are now no longer used for the load order it seems.
+			 */
+			foreach (var uuid in orderList)
+			{
+				var mod = allMods.FirstOrDefault(x => x.UUID == uuid);
+				if (mod != null)
 				{
 					string safeName = System.Security.SecurityElement.Escape(mod.Name);
 					modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 				}
-			}
-			
-			foreach (var mod in allMods.Where(m => orderList.Any(o => o == m.UUID)))
-			{
-				string safeName = System.Security.SecurityElement.Escape(mod.Name);
-				modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 			}
 			//string output = String.Format(Properties.Resources.ModSettingsTemplate, modulesText, modShortDescText);
 			string output = String.Format(DivinityApp.XML_MOD_SETTINGS_TEMPLATE, modulesText, modShortDescText);

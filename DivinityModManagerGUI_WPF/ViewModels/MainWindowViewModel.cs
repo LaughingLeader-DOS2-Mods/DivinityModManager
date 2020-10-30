@@ -1,42 +1,44 @@
-﻿using DivinityModManager.Models;
+﻿using AutoUpdaterDotNET;
+
+using DivinityModManager.Extensions;
+using DivinityModManager.Models;
+using DivinityModManager.Models.App;
 using DivinityModManager.Util;
+using DivinityModManager.Views;
+
+using DynamicData;
+using DynamicData.Binding;
+
+using Microsoft.Win32;
+
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using ReactiveUI;
+
+using SharpCompress.Common;
+using SharpCompress.Writers;
+
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using ReactiveUI;
-using DynamicData;
 using System.Collections.ObjectModel;
-using System.Windows.Input;
-using System.Threading.Tasks;
-using DynamicData.Binding;
-using System.Reactive.Linq;
-using System.Reactive.Disposables;
-using GongSolutions.Wpf.DragDrop;
-using System.Windows;
-using System.Windows.Controls;
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
 using System.Reactive;
 using System.Reactive.Concurrency;
-using ReactiveUI.Legacy;
-using System.ComponentModel;
-using System.IO;
-using Newtonsoft.Json;
-using Microsoft.Win32;
-using DivinityModManager.Views;
-using System.Globalization;
-using System.IO.Compression;
-using System.Threading;
-using SharpCompress.Writers;
-using SharpCompress.Common;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
-using AdonisUI;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
-using System.Reflection;
-using AutoUpdaterDotNET;
-using DivinityModManager.Extensions;
-using Newtonsoft.Json.Linq;
-using GongSolutions.Wpf.DragDrop.Utilities;
 
 namespace DivinityModManager.ViewModels
 {
@@ -104,6 +106,14 @@ namespace DivinityModManager.ViewModels
 		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
 
 		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData();
+
+		private IgnoredModsData ignoredModsData;
+
+		public IgnoredModsData IgnoredMods => ignoredModsData;
+
+		private DefaultPathwayData defaultPathwayData;
+
+		public DefaultPathwayData DefaultPathways => defaultPathwayData;
 
 		public DivinityModManagerSettings Settings { get; set; }
 
@@ -205,14 +215,6 @@ namespace DivinityModManager.ViewModels
 		{
 			get => statusText;
 			set { this.RaiseAndSetIfChanged(ref statusText, value); }
-		}
-
-		private bool conflictCheckerWindowOpen = false;
-
-		public bool ConflictCheckerWindowOpen
-		{
-			get => conflictCheckerWindowOpen;
-			set { this.RaiseAndSetIfChanged(ref conflictCheckerWindowOpen, value); }
 		}
 
 		private bool modUpdatesAvailable = false;
@@ -368,7 +370,6 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenDonationPageCommand { get; private set; }
 		public ICommand OpenRepoPageCommand { get; private set; }
 		public ICommand DebugCommand { get; private set; }
-		public ICommand OpenConflictCheckerCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand OpenAboutWindowCommand { get; set; }
@@ -669,22 +670,22 @@ namespace DivinityModManager.ViewModels
 				SaveSettings();
 			}
 
-			if (String.IsNullOrEmpty(Settings.DOS2WorkshopPath) || !Directory.Exists(Settings.DOS2WorkshopPath))
+			if (String.IsNullOrEmpty(Settings.WorkshopPath) || !Directory.Exists(Settings.WorkshopPath))
 			{
-				Settings.DOS2WorkshopPath = DivinityRegistryHelper.GetDOS2WorkshopPath().Replace("\\", "/");
-				if (!String.IsNullOrEmpty(Settings.DOS2WorkshopPath) && Directory.Exists(Settings.DOS2WorkshopPath))
+				Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(DefaultPathways.Steam.AppID).Replace("\\", "/");
+				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 				{
-					Trace.WriteLine($"Invalid workshop path set in settings file. Found DOS2 workshop folder at: '{Settings.DOS2WorkshopPath}'.");
+					Trace.WriteLine($"Invalid workshop path set in settings file. Found DOS2 workshop folder at: '{Settings.WorkshopPath}'.");
 					SaveSettings();
 				}
 			}
 			else
 			{
-				Trace.WriteLine($"Found DOS2 workshop folder at: '{Settings.DOS2WorkshopPath}'.");
+				Trace.WriteLine($"Found DOS2 workshop folder at: '{Settings.WorkshopPath}'.");
 			}
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
-			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.DOS2WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
+			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
@@ -867,9 +868,9 @@ namespace DivinityModManager.ViewModels
 
 		public void LoadWorkshopMods()
 		{
-			if (Directory.Exists(Settings.DOS2WorkshopPath))
+			if (Directory.Exists(Settings.WorkshopPath))
 			{
-				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.DOS2WorkshopPath, true);
+				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.WorkshopPath, true);
 				if (modPakData.Count > 0)
 				{
 					foreach(var workshopMod in modPakData)
@@ -885,7 +886,7 @@ namespace DivinityModManager.ViewModels
 					workshopMods.Clear();
 					workshopMods.AddRange(sortedWorkshopMods);
 
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 				}
 			}
 		}
@@ -894,9 +895,9 @@ namespace DivinityModManager.ViewModels
 		{
 			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
 
-			if (Directory.Exists(Settings.DOS2WorkshopPath))
+			if (Directory.Exists(Settings.WorkshopPath))
 			{
-				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.DOS2WorkshopPath, true, token);
+				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.WorkshopPath, true, token);
 				if(token.HasValue && token.Value.IsCancellationRequested)
 				{
 					return newWorkshopMods;
@@ -998,17 +999,25 @@ namespace DivinityModManager.ViewModels
 
 				if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
 				{
-					string installPath = DivinityRegistryHelper.GetDOS2Path();
+					string installPath = DivinityRegistryHelper.GetGameInstallPath(DefaultPathways.Steam.RootFolderName, DefaultPathways.GOG.Registry_32, DefaultPathways.GOG.Registry_64);
 					if (Directory.Exists(installPath))
 					{
 						PathwayData.InstallPath = installPath;
 						if (!File.Exists(Settings.DOS2DEGameExecutable))
 						{
-							string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+							string exePath = "";
+							if (!DivinityRegistryHelper.IsGOG)
+							{
+								exePath = Path.Combine(installPath, DefaultPathways.Steam.ExePath);
+							}
+							else
+							{
+								exePath = Path.Combine(installPath, DefaultPathways.GOG.ExePath);
+							}
 							if (File.Exists(exePath))
 							{
 								Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
-								Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+								Trace.WriteLine($"Exe path set to '{exePath}'.");
 							}
 						}
 
@@ -1024,11 +1033,19 @@ namespace DivinityModManager.ViewModels
 					PathwayData.InstallPath = installPath;
 					if (!File.Exists(Settings.DOS2DEGameExecutable))
 					{
-						string exePath = Path.Combine(installPath, "DefEd\\bin\\EoCApp.exe");
+						string exePath = "";
+						if (!DivinityRegistryHelper.IsGOG)
+						{
+							exePath = Path.Combine(installPath, DefaultPathways.Steam.ExePath);
+						}
+						else
+						{
+							exePath = Path.Combine(installPath, DefaultPathways.GOG.ExePath);
+						}
 						if (File.Exists(exePath))
 						{
 							Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
-							Trace.WriteLine($"DOS2DE Exe path set to '{exePath}'.");
+							Trace.WriteLine($"Exe path set to '{exePath}'.");
 						}
 					}
 				}
@@ -1078,11 +1095,25 @@ namespace DivinityModManager.ViewModels
 			//var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).Concat(DivinityModDataLoader.Larian_Mods).OrderBy(m => m.Name);
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
 
+			LoadAppConfig();
+
 			mods.Clear();
-			mods.AddRange(DivinityApp.MODS_Larian_All);
+			mods.AddRange(DivinityApp.IgnoredMods);
 			mods.AddRange(finalMods);
 			userMods.Clear();
 			userMods.AddRange(finalMods);
+
+			if (ignoredModsData != null)
+			{
+				foreach (var uuid in ignoredModsData.IgnoreDependencies)
+				{
+					var mod = Mods.FirstOrDefault(x => x.UUID == uuid);
+					if (mod != null)
+					{
+						DivinityApp.IgnoredDependencyMods.Add(mod);
+					}
+				}
+			}
 
 			Trace.WriteLine($"Loaded '{finalMods.Count()}' mods.");
 			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
@@ -1518,7 +1549,7 @@ namespace DivinityModManager.ViewModels
 				var loadedWorkshopMods = await LoadWorkshopModsAsync(workshopModLoadingCancelToken);
 				await Observable.Start(() => {
 					workshopMods.AddRange(loadedWorkshopMods);
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 					if(!workshopModLoadingCancelToken.Value.IsCancellationRequested)
 					{
 						CheckForModUpdates(workshopModLoadingCancelToken);
@@ -1696,7 +1727,8 @@ namespace DivinityModManager.ViewModels
 				}
 
 				await Observable.Start(() => {
-					mods.AddRange(DivinityApp.MODS_Larian_All);
+					LoadAppConfig();
+					mods.AddRange(DivinityApp.IgnoredMods);
 					mods.AddRange(loadedMods);
 					userMods.AddRange(loadedMods);
 
@@ -1735,7 +1767,7 @@ namespace DivinityModManager.ViewModels
 					}
 					MainProgressValue += taskStepAmount;
 
-					//Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.DOS2WorkshopPath}'.");
+					//Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 					//MainProgressWorkText = "Checking for mod updates...";
 					//CheckForModUpdates();
 					MainProgressValue += taskStepAmount;
@@ -2747,11 +2779,6 @@ namespace DivinityModManager.ViewModels
 
 			DivinityApp.Commands.SetViewModel(this);
 
-			OpenConflictCheckerCommand = ReactiveCommand.Create(() =>
-			{
-				view.ToggleConflictChecker(!ConflictCheckerWindowOpen);
-			});
-
 			if (DebugMode)
 			{
 				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
@@ -3375,6 +3402,23 @@ Directory the zip will be extracted to:
 			}
 		}
 
+		private void LoadAppConfig()
+		{
+			if (File.Exists(DivinityApp.PATH_DEFAULT_PATHWAYS))
+			{
+				defaultPathwayData = DivinityJsonUtils.SafeDeserializeFromPath<DefaultPathwayData>(DivinityApp.PATH_DEFAULT_PATHWAYS);
+			}
+
+			if (File.Exists(DivinityApp.PATH_IGNORED_MODS))
+			{
+				ignoredModsData = DivinityJsonUtils.SafeDeserializeFromPath<IgnoredModsData>(DivinityApp.PATH_IGNORED_MODS);
+				if (ignoredModsData != null)
+				{
+					DivinityApp.IgnoredMods.UnionWith(ignoredModsData.Mods);
+				}
+			}
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -3453,12 +3497,12 @@ Directory the zip will be extracted to:
 
 			//canOpenWorkshopFolder.Subscribe((b) =>
 			//{
-			//	Trace.WriteLine($"Workshop folder exists: {b} | {Settings.DOS2WorkshopPath}");
+			//	Trace.WriteLine($"Workshop folder exists: {b} | {Settings.WorkshopPath}");
 			//});
 
 			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(Settings.DOS2WorkshopPath);
+				Process.Start(Settings.WorkshopPath);
 			}, canOpenWorkshopFolder);
 
 			OpenDOS2GameCommand = ReactiveCommand.Create(() =>

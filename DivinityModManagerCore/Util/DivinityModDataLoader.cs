@@ -28,12 +28,12 @@ namespace DivinityModManager.Util
 
 		public static bool IgnoreModDependency(string modUUID)
 		{
-			return DivinityApp.MODS_Larian_IgnoreDependencies.Any(m => m.UUID == modUUID);
+			return DivinityApp.IgnoredDependencyMods.Any(m => m.UUID == modUUID);
 		}
 
 		public static bool IgnoreModByFolder(string folder)
 		{
-			return DivinityApp.IgnoredEditorMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
+			return DivinityApp.IgnoredMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
 		}
 
 		public static string MakeSafeFilename(string filename, char replaceChar)
@@ -168,12 +168,14 @@ namespace DivinityModManager.Util
 					var name = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Name", ""));
 					var description = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Description", ""));
 					var author = UnescapeXml(GetAttributeWithId(moduleInfoNode, "Author", ""));
+					/*
 					if (DivinityApp.MODS_GiftBag.Any(x => x.UUID == uuid))
 					{
 						name = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DisplayName", name));
 						description = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DescriptionName", description));
 						author = "Larian Studios";
 					}
+					*/
 					DivinityModData modData = new DivinityModData()
 					{
 						UUID = uuid,

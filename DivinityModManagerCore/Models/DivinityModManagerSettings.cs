@@ -58,16 +58,16 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private string dos2workshopPath = "";
+		private string workshopPath = "";
 
 		[DataMember]
-		public string DOS2WorkshopPath
+		public string WorkshopPath
 		{
-			get => dos2workshopPath;
+			get => workshopPath;
 			set 
 			{
-				if (value != dos2workshopPath) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref dos2workshopPath, value);
+				if (value != workshopPath) CanSaveSettings = true;
+				this.RaiseAndSetIfChanged(ref workshopPath, value);
 			}
 		}
 

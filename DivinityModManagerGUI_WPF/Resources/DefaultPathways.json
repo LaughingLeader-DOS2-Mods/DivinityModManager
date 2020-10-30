@@ -1,0 +1,16 @@
+{
+	"Steam": {
+		"AppID": "435150",
+		"Registry_32": "SOFTWARE\\Valve\\Steam\\Apps\\435150",
+		"Registry_64": "SOFTWARE\\Wow6432Node\\Valve\\Steam\\Apps\\435150",
+		"RootFolderName": "Divinity Original Sin 2",
+		"ExePath": "DefEd\\bin\\EoCApp.exe"
+	},
+	"GOG": {
+		"AppID": "1584823040",
+		"Registry_32": "SOFTWARE\\GOG.com\\Games\\1584823040",
+		"Registry_64": "SOFTWARE\\Wow6432Node\\GOG.com\\Games\\1584823040",
+		"RootFolderName": "Divinity Original Sin 2",
+		"ExePath": "DefEd\\bin\\EoCApp.exe"
+	},
+}

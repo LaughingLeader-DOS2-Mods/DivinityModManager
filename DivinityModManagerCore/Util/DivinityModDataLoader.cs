@@ -28,7 +28,7 @@ namespace DivinityModManager.Util
 
 		public static bool IgnoreModDependency(string modUUID)
 		{
-			return DivinityApp.IgnoredDependencyMods.Any(m => m.UUID == modUUID);
+			return DivinityApp.IgnoredDependencyMods.Any(m => m.UUID == modUUID) || IgnoreMod(modUUID);
 		}
 
 		public static bool IgnoreModByFolder(string folder)

@@ -98,7 +98,8 @@ namespace DivinityModManager.Models
 		public string MD5 { get; set; }
 		[JsonProperty] public string Type { get; set; }
 		[JsonProperty] public List<string> Modes { get; set; } = new List<string>();
-		public string Targets { get; set; }
+
+		[JsonProperty] public string Targets { get; set; }
 		public DateTime LastModified { get; set; }
 
 		private DateTime lastUpdated;

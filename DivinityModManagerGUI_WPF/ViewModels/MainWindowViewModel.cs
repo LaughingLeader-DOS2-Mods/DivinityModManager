@@ -672,6 +672,7 @@ namespace DivinityModManager.ViewModels
 
 			if (String.IsNullOrEmpty(Settings.WorkshopPath) || !Directory.Exists(Settings.WorkshopPath))
 			{
+				LoadAppConfig();
 				Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(DefaultPathways.Steam.AppID).Replace("\\", "/");
 				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 				{
@@ -3414,7 +3415,60 @@ Directory the zip will be extracted to:
 				ignoredModsData = DivinityJsonUtils.SafeDeserializeFromPath<IgnoredModsData>(DivinityApp.PATH_IGNORED_MODS);
 				if (ignoredModsData != null)
 				{
-					DivinityApp.IgnoredMods.UnionWith(ignoredModsData.Mods);
+					foreach(var dict in ignoredModsData.Mods)
+					{
+						var mod = new DivinityModData(true);
+						if (dict.TryGetValue("UUID", out var uuid))
+						{
+							mod.UUID = (string)uuid;
+
+							if (dict.TryGetValue("Name", out var name))
+							{
+								mod.Name = (string)name;
+							}
+							if (dict.TryGetValue("Description", out var desc))
+							{
+								mod.Description = (string)desc;
+							}
+							if (dict.TryGetValue("Folder", out var folder))
+							{
+								mod.Folder = (string)folder;
+							}
+							if (dict.TryGetValue("Type", out var modType))
+							{
+								mod.Type = (string)modType;
+							}
+							if (dict.TryGetValue("Author", out var author))
+							{
+								mod.Author = (string)author;
+							}
+							if (dict.TryGetValue("Targets", out var targets))
+							{
+								string tstr = (string)targets;
+								if (!String.IsNullOrEmpty(tstr))
+								{
+									mod.Modes.Clear();
+									var strTargets = tstr.Split(';');
+									foreach (var t in strTargets)
+									{
+										mod.Modes.Add(t);
+									}
+								}
+							}
+							DivinityApp.IgnoredMods.Add(mod);
+						}
+					}
+
+					foreach (var uuid in ignoredModsData.IgnoreDependencies)
+					{
+						var mod = DivinityApp.IgnoredMods.FirstOrDefault(x => x.UUID.ToLower() == uuid.ToLower());
+						if (mod != null)
+						{
+							DivinityApp.IgnoredDependencyMods.Add(mod);
+						}
+					}
+
+					//Trace.WriteLine("Ignored mods:\n" + String.Join("\n", DivinityApp.IgnoredMods.Select(x => x.Name)));
 				}
 			}
 		}

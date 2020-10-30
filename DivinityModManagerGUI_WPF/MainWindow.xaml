@@ -567,7 +567,7 @@
 									<ContextMenu>
 										<MenuItem
 											Command="{Binding CopyPathToClipboardCommand}"
-											CommandParameter="{Binding Settings.DOS2WorkshopPath}"
+											CommandParameter="{Binding Settings.WorkshopPath}"
 											Header="Copy Path to Clipboard" />
 									</ContextMenu>
 								</Button.ContextMenu>

@@ -191,7 +191,6 @@
     <Compile Include="Resources\DivinityColors.cs" />
     <Compile Include="Resources\Themes\ResourceAliasHelper.cs" />
     <Compile Include="Util\RxExceptionHandler.cs" />
-    <Compile Include="ViewModels\ConflictCheckerWindowViewModel.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModListDragHandler.cs" />
@@ -199,9 +198,6 @@
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="Views\ConflictCheckerWindow.xaml.cs">
-      <DependentUpon>ConflictCheckerWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HideWindowBase.cs" />
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
@@ -241,10 +237,6 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\AboutWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="Views\ConflictCheckerWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -303,6 +295,9 @@
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Include="Resources\DefaultPathways.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -471,6 +466,11 @@
     <Resource Include="Resources\Icons\Log_Normal_32x.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IgnoredMods.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

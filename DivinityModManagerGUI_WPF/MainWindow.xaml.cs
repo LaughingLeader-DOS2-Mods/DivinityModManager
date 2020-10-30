@@ -40,9 +40,6 @@ namespace DivinityModManager.Views
 		private static MainWindow self;
 		public static MainWindow Self => self;
 
-		private ConflictCheckerWindow conflictCheckerWindow;
-		public ConflictCheckerWindow ConflictCheckerWindow => conflictCheckerWindow;
-
 		private SettingsWindow settingsWindow;
 		public SettingsWindow SettingsWindow => settingsWindow;
 
@@ -263,31 +260,6 @@ namespace DivinityModManager.Views
 			if(lblMessage != null)
 			{
 				Trace.WriteLine(lblMessage.Text);
-			}
-		}
-
-		public void ToggleConflictChecker(bool openWindow)
-		{
-			if(openWindow)
-			{
-				if (ConflictCheckerWindow == null)
-				{
-					conflictCheckerWindow = new ConflictCheckerWindow();
-				}
-				
-				if(!conflictCheckerWindow.IsVisible)
-				{
-					conflictCheckerWindow.Init(ViewModel);
-					conflictCheckerWindow.Show();
-				}
-			}
-			else
-			{
-				if (conflictCheckerWindow != null)
-				{
-					conflictCheckerWindow.Close();
-					conflictCheckerWindow = null;
-				}
 			}
 		}
 

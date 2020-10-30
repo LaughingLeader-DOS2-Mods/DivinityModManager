@@ -186,6 +186,16 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref developerMode, value); }
 		}
 
+		private bool enableLuaDebugger = false;
+
+		[DataMember]
+		[DefaultValue(false)]
+		public bool EnableLuaDebugger
+		{
+			get => enableLuaDebugger;
+			set { this.RaiseAndSetIfChanged(ref enableLuaDebugger, value); }
+		}
+
 		public static OsiExtenderSettings DefaultSettings = new OsiExtenderSettings();
 
 		public void SetToDefault()
@@ -204,6 +214,7 @@ namespace DivinityModManager.Models
 			DebuggerPort = 9999;
 			DebuggerFlags = 0;
 			DeveloperMode = false;
+			EnableLuaDebugger = false;
 		}
 
 		public void Set(OsiExtenderSettings osirisExtenderSettings)

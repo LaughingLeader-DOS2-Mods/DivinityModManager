@@ -112,13 +112,13 @@
 							VerticalAlignment="Center"
 							Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
-						<TextBlock Text="DOS2 Workshop Path" ToolTip="The workshop folder for Divinity: Original Sin 2.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
+						<TextBlock Text="Workshop Path" ToolTip="The workshop folder.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 						<controls:UnfocusableTextBox
 							x:Name="WorkshopPathTextbox"
 							VerticalAlignment="Center"
 							GotFocus="WorkshopPathTextbox_GotFocus"
 							LostFocus="WorkshopPathTextbox_LostFocus"
-							Text="{Binding DOS2WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							Text="{Binding WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
 						<TextBlock Text="Saved Load Orders Path" ToolTip="The folder to save and load load orders to." />
 						<controls:UnfocusableTextBox
@@ -160,9 +160,9 @@
 							ChildMargin="4"
 							ColumnCount="2"
 							Columns="auto,*"
-							RowCount="17"
+							RowCount="18"
 							RowHeight="*"
-							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+							Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
 							<TextBlock
 								x:Name="EnableAchievementsTextBlock"
 								Text="Enable Achievements"
@@ -269,6 +269,16 @@
 								VerticalAlignment="Center"
 								IsChecked="{Binding ExtenderSettings.DumpNetworkStrings, UpdateSourceTrigger=PropertyChanged}"
 								ToolTip="{Binding ElementName=DumpNetworkStringsTextblock, Path=ToolTip}"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<TextBlock
+								x:Name="EnableLuaDebuggerTextblock"
+								Text="Enable Lua Debugger"
+								ToolTip="Enable the Divinity VSCode Extension Lua Debugger. Default: Disabled"
+								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
+							<CheckBox
+								VerticalAlignment="Center"
+								IsChecked="{Binding ExtenderSettings.EnableLuaDebugger, UpdateSourceTrigger=PropertyChanged}"
+								ToolTip="{Binding ElementName=EnableLuaDebuggerTextblock, Path=ToolTip}"
 								Visibility="{Binding DebugModeEnabled, Converter={StaticResource BoolToVisibilityConverter}}" />
 							<TextBlock
 								x:Name="EnableDebuggerTextblock"

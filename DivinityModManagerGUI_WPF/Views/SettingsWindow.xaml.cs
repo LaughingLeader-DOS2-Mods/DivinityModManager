@@ -51,7 +51,7 @@ namespace DivinityModManager.Views
 
 		private void WorkshopPathTextbox_GotFocus(object sender, RoutedEventArgs e)
 		{
-			lastWorkshopPath = ViewModel.DOS2WorkshopPath;
+			lastWorkshopPath = ViewModel.WorkshopPath;
 		}
 
 		private void WorkshopPathTextbox_LostFocus(object sender, RoutedEventArgs e)

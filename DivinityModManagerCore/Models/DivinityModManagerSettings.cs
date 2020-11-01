@@ -35,7 +35,7 @@ namespace DivinityModManager.Models
 		private string gameExecutable = "";
 
 		[DataMember]
-		public string DOS2DEGameExecutable
+		public string GameExecutablePath
 		{
 			get => gameExecutable;
 			set
@@ -44,6 +44,9 @@ namespace DivinityModManager.Models
 				this.RaiseAndSetIfChanged(ref gameExecutable, value);
 			}
 		}
+
+		//Old
+		public string DOS2DEGameExecutable { set => GameExecutablePath = value; }
 
 		private bool gameStoryLogEnabled = false;
 

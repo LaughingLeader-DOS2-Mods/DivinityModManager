@@ -537,7 +537,7 @@ namespace DivinityModManager.ViewModels
 				Trace.WriteLine($"Error loading extender settings: {ex.ToString()}");
 			}
 
-			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "DXGI.dll");
+			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "DXGI.dll");
 			Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
 			if (File.Exists(extenderUpdaterPath))
 			{
@@ -607,7 +607,7 @@ namespace DivinityModManager.ViewModels
 
 		private void LoadExtenderSettings()
 		{
-			if (File.Exists(Settings.DOS2DEGameExecutable))
+			if (File.Exists(Settings.GameExecutablePath))
 			{
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (c, t) =>
 				{
@@ -691,10 +691,10 @@ namespace DivinityModManager.ViewModels
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p)));
-			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
+			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
-			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
-			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.DOS2DEGameExecutable,
+			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile());
+			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.GameExecutablePath,
 			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
 
 			OpenExtenderLogDirectoryCommand = ReactiveCommand.Create(() =>
@@ -709,14 +709,14 @@ namespace DivinityModManager.ViewModels
 			{
 				try
 				{
-					System.IO.FileAttributes attr = File.GetAttributes(Settings.DOS2DEGameExecutable);
+					System.IO.FileAttributes attr = File.GetAttributes(Settings.GameExecutablePath);
 
 					if (attr.HasFlag(System.IO.FileAttributes.Directory))
 					{
-						var exe = Path.Combine(Settings.DOS2DEGameExecutable, "EoCApp.exe");
+						var exe = Path.Combine(Settings.GameExecutablePath, "EoCApp.exe");
 						if (File.Exists(exe))
 						{
-							Settings.DOS2DEGameExecutable = exe;
+							Settings.GameExecutablePath = exe;
 						}
 					}
 				}
@@ -734,7 +734,7 @@ namespace DivinityModManager.ViewModels
 
 			Settings.ExportExtenderSettingsCommand = ReactiveCommand.Create(() =>
 			{
-				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.DOS2DEGameExecutable), "OsirisExtenderSettings.json");
+				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "OsirisExtenderSettings.json");
 				try
 				{
 					var jsonSettings = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore, Formatting = Formatting.Indented };
@@ -1008,7 +1008,7 @@ namespace DivinityModManager.ViewModels
 					if (Directory.Exists(installPath))
 					{
 						PathwayData.InstallPath = installPath;
-						if (!File.Exists(Settings.DOS2DEGameExecutable))
+						if (!File.Exists(Settings.GameExecutablePath))
 						{
 							string exePath = "";
 							if (!DivinityRegistryHelper.IsGOG)
@@ -1021,7 +1021,7 @@ namespace DivinityModManager.ViewModels
 							}
 							if (File.Exists(exePath))
 							{
-								Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
+								Settings.GameExecutablePath = exePath.Replace("\\", "/");
 								Trace.WriteLine($"Exe path set to '{exePath}'.");
 							}
 						}
@@ -1036,7 +1036,7 @@ namespace DivinityModManager.ViewModels
 				{
 					string installPath = Path.GetFullPath(Path.Combine(Settings.GameDataPath, @"..\..\"));
 					PathwayData.InstallPath = installPath;
-					if (!File.Exists(Settings.DOS2DEGameExecutable))
+					if (!File.Exists(Settings.GameExecutablePath))
 					{
 						string exePath = "";
 						if (!DivinityRegistryHelper.IsGOG)
@@ -1049,7 +1049,7 @@ namespace DivinityModManager.ViewModels
 						}
 						if (File.Exists(exePath))
 						{
-							Settings.DOS2DEGameExecutable = exePath.Replace("\\", "/");
+							Settings.GameExecutablePath = exePath.Replace("\\", "/");
 							Trace.WriteLine($"Exe path set to '{exePath}'.");
 						}
 					}
@@ -3257,7 +3257,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if(!OpenRepoLinkToDownload)
 			{
-				string exeDir = Path.GetDirectoryName(Settings.DOS2DEGameExecutable);
+				string exeDir = Path.GetDirectoryName(Settings.GameExecutablePath);
 				string messageText = String.Format(@"Download and install the Osiris Extender?
 The Osiris Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
 The extenders needs to only be installed once, as it can auto-update itself automatically when you launch the game.
@@ -3599,11 +3599,11 @@ Directory the zip will be extracted to:
 			{
 				if (!Settings.GameStoryLogEnabled)
 				{
-					Process.Start(Settings.DOS2DEGameExecutable);
+					Process.Start(Settings.GameExecutablePath);
 				}
 				else
 				{
-					Process.Start(Settings.DOS2DEGameExecutable, "-storylog 1");
+					Process.Start(Settings.GameExecutablePath, "-storylog 1");
 				}
 
 				if (Settings.ActionOnGameLaunch != DivinityGameLaunchWindowAction.None)

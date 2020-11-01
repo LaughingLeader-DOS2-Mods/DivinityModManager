@@ -598,11 +598,11 @@
 									<ContextMenu>
 										<MenuItem
 											Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
-											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"
+											CommandParameter="{Binding Settings.GameExecutablePath}"
 											Header="Open Game Folder..." />
 										<MenuItem
 											Command="{Binding CopyPathToClipboardCommand}"
-											CommandParameter="{Binding Settings.DOS2DEGameExecutable}"
+											CommandParameter="{Binding Settings.GameExecutablePath}"
 											Header="Copy Path to Clipboard" />
 									</ContextMenu>
 								</Button.ContextMenu>

@@ -110,7 +110,7 @@
 						<TextBlock Text="Game Executable Path" ToolTip="The path to the DOS2DE exe, EoCApp.exe." />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
-							Text="{Binding DOS2DEGameExecutable, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							Text="{Binding GameExecutablePath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
 						<TextBlock Text="Workshop Path" ToolTip="The workshop folder.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
 						<controls:UnfocusableTextBox

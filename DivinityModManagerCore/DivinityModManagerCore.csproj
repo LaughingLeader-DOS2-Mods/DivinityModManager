@@ -16,7 +16,7 @@
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="LSLib">
-			<HintPath>..\LSLib\LSLib.dll</HintPath>
+		  <HintPath>D:\Projects\_Visual_Studio\lslib\ConverterApp\bin\Release\LSLib.dll</HintPath>
 		</Reference>
 		<Reference Include="Microsoft.CSharp" />
 		<Reference Include="Microsoft.VisualBasic" />

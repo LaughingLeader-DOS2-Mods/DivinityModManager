@@ -3585,11 +3585,6 @@ Directory the zip will be extracted to:
 				Process.Start(PathwayData.DocumentsModsPath);
 			}, canOpenModsFolder);
 
-			//canOpenWorkshopFolder.Subscribe((b) =>
-			//{
-			//	Trace.WriteLine($"Workshop folder exists: {b} | {Settings.WorkshopPath}");
-			//});
-
 			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
 			{
 				Process.Start(Settings.WorkshopPath);
@@ -3712,12 +3707,6 @@ Directory the zip will be extracted to:
 					}
 				}
 			});
-
-			//var selectedOrderObservable = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count, 
-			//	(index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true);
-
-			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex]).ToProperty(this, x => x.SelectedModOrder, out selectedModOrder).DisposeWith(this.Disposables);
-			//selectedOrderObservable.Select(x => ModOrderList[SelectedModOrderIndex].DisplayName).ToProperty(this, x => x.SelectedModOrderDisplayName, out selectedModOrderDisplayName);
 
 			//Throttle in case the index changes quickly in a short timespan
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
@@ -3843,11 +3832,6 @@ Directory the zip will be extracted to:
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable, 
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);
 
-			//this.WhenAnyValue(x => x.ModUpdatesAvailable).Subscribe((b) =>
-			//{
-			//	Trace.WriteLine("Updates available: " + b.ToString());
-			//});
-
 			ModUpdatesViewData.CloseView = new Action<bool>((bool refresh) =>
 			{
 				ModUpdatesViewData.Clear();
@@ -3855,16 +3839,6 @@ Directory the zip will be extracted to:
 				ModUpdatesViewVisible = false;
 				view.Activate();
 			});
-
-			//this.WhenAnyValue(x => x.ModUpdatesViewData.JustUpdated).Subscribe((b) =>
-			//{
-			//	if(b)
-			//	{
-			//		ModUpdatesViewVisible = false;
-			//		ModUpdatesViewData.Clear();
-			//		Refresh();
-			//	}
-			//});
 
 			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
 
@@ -3895,48 +3869,6 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			//.Buffer(TimeSpan.FromMilliseconds(50)).Distinct().SelectMany(x => x)
-			/*
-			activeModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
-			{
-				if (x != null && x.Current != null)
-				{
-					x.Current.IsActive = true;
-					//if (SelectedModOrder != null)
-					//{
-					//	SelectedModOrder.Add(x.Current);
-					//}
-				}
-				//x.Current.Index = x.CurrentIndex;
-			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
-			{
-				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
-				if (SelectedModOrder != null)
-				{
-					SelectedModOrder.SetOrder(ActiveMods.Select(x => x.ToOrderEntry()));
-				}
-			});
-
-			inactiveModsConnection.WhereReasonsAre(ListChangeReason.Add, ListChangeReason.AddRange).ForEachItemChange((x) =>
-			{
-				if (x != null && x.Current != null)
-				{
-					x.Current.IsActive = false;
-					if (SelectedModOrder != null)
-					{
-						//SelectedModOrder.Remove(x.Current);
-					}
-				}
-			}).Throttle(TimeSpan.FromMilliseconds(5)).Subscribe(_ =>
-			{
-				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
-				if (SelectedModOrder != null)
-				{
-					SelectedModOrder.SetOrder(ActiveMods.Select(x => x.ToOrderEntry()));
-				}
-			});
-			*/
-
 			activeModsConnection.AutoRefresh(x => x.IsSelected).
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, out activeSelected);
 
@@ -3944,17 +3876,6 @@ Directory the zip will be extracted to:
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
-
-#if DEBUG
-			//this.WhenAnyValue(x => x.ActiveSelected).Subscribe((x) =>
-			//{
-			//	Trace.WriteLine($"Total selected active mods: {x}");
-			//});
-			//this.WhenAnyValue(x => x.InactiveSelected).Subscribe((x) =>
-			//{
-			//	Trace.WriteLine($"Total selected inactive mods: {x}");
-			//});
-#endif
 		}
 	}
 }

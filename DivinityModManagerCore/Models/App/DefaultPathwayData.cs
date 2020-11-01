@@ -18,5 +18,8 @@ namespace DivinityModManager.Models.App
 	{
 		public AppPathwayData Steam { get; set; } = new AppPathwayData();
 		public AppPathwayData GOG { get; set; } = new AppPathwayData();
+
+		public string DocumentsGameFolder { get; set; } = "";
+		public string GameDataFolder { get; set; } = "";
 	}
 }

@@ -13,4 +13,6 @@
 		"RootFolderName": "Divinity Original Sin 2",
 		"ExePath": "DefEd\\bin\\EoCApp.exe"
 	},
+	"DocumentsGameFolder": "Larian Studios\\Divinity Original Sin 2 Definitive Edition",
+	"GameDataFolder": "DefEd\\Data"
 }

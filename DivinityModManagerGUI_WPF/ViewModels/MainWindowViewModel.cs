@@ -345,7 +345,7 @@ namespace DivinityModManager.ViewModels
 
 		private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
-		private IObservable<bool> canOpenDOS2DEGame;
+		private IObservable<bool> canOpenGameExe;
 		private IObservable<bool> canOpenDialogWindow;
 		private IObservable<bool> gameExeFoundObservable;
 		private IObservable<bool> canInstallOsiExtender;
@@ -691,7 +691,7 @@ namespace DivinityModManager.ViewModels
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p)));
-			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
+			canOpenGameExe = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile());
 			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.GameExecutablePath,
@@ -1200,7 +1200,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
+				Trace.WriteLine($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
 		}
 
@@ -1216,7 +1216,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"Larian DOS2DE profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
+				Trace.WriteLine($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
 			return null;
 		}
@@ -3619,7 +3619,7 @@ Directory the zip will be extracted to:
 					}
 				}
 				
-			}, canOpenDOS2DEGame);
+			}, canOpenGameExe);
 
 			OpenDonationPageCommand = ReactiveCommand.Create(() =>
 			{

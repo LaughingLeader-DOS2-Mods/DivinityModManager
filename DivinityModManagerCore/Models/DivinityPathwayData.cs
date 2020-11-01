@@ -69,14 +69,5 @@ namespace DivinityModManager.Models
 		}
 
 		public string OsirisExtenderLatestReleaseVersion { get; set; } = "";
-
-		//private string gameDOS2DEPath;
-
-		//public string GameDOS2DEPath
-		//{
-		//	get => gameDOS2DEPath;
-		//	set { this.RaiseAndSetIfChanged(ref gameDOS2DEPath, value); }
-		//}
-
 	}
 }

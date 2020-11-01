@@ -111,9 +111,9 @@ namespace DivinityModManager.ViewModels
 
 		public IgnoredModsData IgnoredMods => ignoredModsData;
 
-		private DefaultPathwayData defaultPathwayData;
+		private AppSettings appSettings = new AppSettings();
 
-		public DefaultPathwayData DefaultPathways => defaultPathwayData;
+		public AppSettings AppSettings => appSettings;
 
 		public DivinityModManagerSettings Settings { get; set; }
 
@@ -670,23 +670,27 @@ namespace DivinityModManager.ViewModels
 				SaveSettings();
 			}
 
-			if (String.IsNullOrEmpty(Settings.WorkshopPath) || !Directory.Exists(Settings.WorkshopPath))
+			LoadAppConfig();
+
+			if (AppSettings.FeatureEnabled("Workshop"))
 			{
-				LoadAppConfig();
-				Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(DefaultPathways.Steam.AppID).Replace("\\", "/");
-				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
+				if (String.IsNullOrEmpty(Settings.WorkshopPath) || !Directory.Exists(Settings.WorkshopPath))
 				{
-					Trace.WriteLine($"Invalid workshop path set in settings file. Found DOS2 workshop folder at: '{Settings.WorkshopPath}'.");
-					SaveSettings();
+					Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(AppSettings.DefaultPathways.Steam.AppID).Replace("\\", "/");
+					if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
+					{
+						Trace.WriteLine($"Invalid workshop path set in settings file. Found workshop folder at: '{Settings.WorkshopPath}'.");
+						SaveSettings();
+					}
 				}
-			}
-			else
-			{
-				Trace.WriteLine($"Found workshop folder at: '{Settings.WorkshopPath}'.");
+				else if (Directory.Exists(Settings.WorkshopPath))
+				{
+					Trace.WriteLine($"Found workshop folder at: '{Settings.WorkshopPath}'.");
+				}
 			}
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
-			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (!String.IsNullOrEmpty(p) && Directory.Exists(p)));
+			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p)));
 			canOpenDOS2DEGame = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.DOS2DEGameExecutable, (path) => path.IsExistingFile());
@@ -973,7 +977,7 @@ namespace DivinityModManager.ViewModels
 			try
 			{
 				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-				string larianDocumentsFolder = Path.Combine(documentsFolder, DefaultPathways.DocumentsGameFolder);
+				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
 				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
 				Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
 				if (!Directory.Exists(larianDocumentsFolder))
@@ -999,7 +1003,8 @@ namespace DivinityModManager.ViewModels
 
 				if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
 				{
-					string installPath = DivinityRegistryHelper.GetGameInstallPath(DefaultPathways.Steam.RootFolderName, DefaultPathways.GOG.Registry_32, DefaultPathways.GOG.Registry_64);
+					string installPath = DivinityRegistryHelper.GetGameInstallPath(AppSettings.DefaultPathways.Steam.RootFolderName, 
+						AppSettings.DefaultPathways.GOG.Registry_32, AppSettings.DefaultPathways.GOG.Registry_64);
 					if (Directory.Exists(installPath))
 					{
 						PathwayData.InstallPath = installPath;
@@ -1008,11 +1013,11 @@ namespace DivinityModManager.ViewModels
 							string exePath = "";
 							if (!DivinityRegistryHelper.IsGOG)
 							{
-								exePath = Path.Combine(installPath, DefaultPathways.Steam.ExePath);
+								exePath = Path.Combine(installPath, AppSettings.DefaultPathways.Steam.ExePath);
 							}
 							else
 							{
-								exePath = Path.Combine(installPath, DefaultPathways.GOG.ExePath);
+								exePath = Path.Combine(installPath, AppSettings.DefaultPathways.GOG.ExePath);
 							}
 							if (File.Exists(exePath))
 							{
@@ -1021,7 +1026,7 @@ namespace DivinityModManager.ViewModels
 							}
 						}
 
-						string gameDataPath = Path.Combine(installPath, DefaultPathways.GameDataFolder).Replace("\\", "/");
+						string gameDataPath = Path.Combine(installPath, AppSettings.DefaultPathways.GameDataFolder).Replace("\\", "/");
 						Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
 						Settings.GameDataPath = gameDataPath;
 						SaveSettings();
@@ -1036,11 +1041,11 @@ namespace DivinityModManager.ViewModels
 						string exePath = "";
 						if (!DivinityRegistryHelper.IsGOG)
 						{
-							exePath = Path.Combine(installPath, DefaultPathways.Steam.ExePath);
+							exePath = Path.Combine(installPath, AppSettings.DefaultPathways.Steam.ExePath);
 						}
 						else
 						{
-							exePath = Path.Combine(installPath, DefaultPathways.GOG.ExePath);
+							exePath = Path.Combine(installPath, AppSettings.DefaultPathways.GOG.ExePath);
 						}
 						if (File.Exists(exePath))
 						{
@@ -1050,7 +1055,10 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-				LoadExtenderSettings();
+				if (AppSettings.FeatureEnabled("ScriptExtender"))
+				{
+					LoadExtenderSettings();
+				}
 			}
 			catch(Exception ex)
 			{
@@ -1613,7 +1621,7 @@ namespace DivinityModManager.ViewModels
 							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
 						});
 						//totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
-						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, DefaultPathways.Steam.AppID);
+						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
 						if(success)
 						{
 							foreach(var mod in unknownWorkshopMods)
@@ -1669,7 +1677,7 @@ namespace DivinityModManager.ViewModels
 		{
 			Trace.WriteLine($"Refreshing data asynchronously...");
 
-			double taskStepAmount = 1.0 / 8;
+			double taskStepAmount = 1.0 / 7;
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
 			int lastOrderIndex = -1;
@@ -1692,10 +1700,6 @@ namespace DivinityModManager.ViewModels
 			{
 				await SetMainProgressTextAsync("Loading mods...");
 				var loadedMods = await LoadModsAsync();
-				await IncreaseMainProgressValueAsync(taskStepAmount);
-
-				//RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = "Loading workshop mods...");
-				//var loadedWorkshopMods = await LoadWorkshopModsAsync();
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				await SetMainProgressTextAsync("Loading profiles...");
@@ -1766,11 +1770,6 @@ namespace DivinityModManager.ViewModels
 						BuildModOrderList(0);
 					}
 					MainProgressValue += taskStepAmount;
-
-					//Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
-					//MainProgressWorkText = "Checking for mod updates...";
-					//CheckForModUpdates();
-					MainProgressValue += taskStepAmount;
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
 
@@ -1802,20 +1801,28 @@ namespace DivinityModManager.ViewModels
 				Refreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
-				if (this.IsInitialized)
+
+				if (AppSettings.FeatureEnabled("ScriptExtender"))
 				{
-					Trace.WriteLine($"Loading extender settings.");
-					LoadExtenderSettings();
+					if (this.IsInitialized)
+					{
+						Trace.WriteLine($"Loading extender settings.");
+						LoadExtenderSettings();
+					}
+					else
+					{
+						Trace.WriteLine($"Checking extender data.");
+						CheckExtenderData();
+					}
 				}
-				else
-				{
-					Trace.WriteLine($"Checking extender data.");
-					CheckExtenderData();
-				}
+				
 				return Unit.Default;
 			}, RxApp.MainThreadScheduler);
 
-			LoadWorkshopModDataBackground();
+			if (AppSettings.FeatureEnabled("Workshop"))
+			{
+				LoadWorkshopModDataBackground();
+			}
 
 			/*
 			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
@@ -2100,56 +2107,61 @@ namespace DivinityModManager.ViewModels
 				displayExtenderModWarning = true;
 			}
 
-			if(displayExtenderModWarning)
+			if (AppSettings.FeatureEnabled("ScriptExtender"))
 			{
-				//Trace.WriteLine($"Mod Order: {String.Join("\n", order.Order.Select(x => x.Name))}");
-				Trace.WriteLine("Checking mods for extender requirements.");
-				List<DivinityMissingModData> extenderRequiredMods = new List<DivinityMissingModData>();
-				for (int i = 0; i < order.Order.Count; i++)
+				if (displayExtenderModWarning)
 				{
-					var entry = order.Order[i];
-					var mod = ActiveMods.FirstOrDefault(m => m.UUID == entry.UUID);
-					if (mod != null)
+					//Trace.WriteLine($"Mod Order: {String.Join("\n", order.Order.Select(x => x.Name))}");
+					Trace.WriteLine("Checking mods for extender requirements.");
+					List<DivinityMissingModData> extenderRequiredMods = new List<DivinityMissingModData>();
+					for (int i = 0; i < order.Order.Count; i++)
 					{
-						Trace.WriteLine($"{mod.Name} | ExtenderModStatus: {mod.ExtenderModStatus}");
-
-						if (mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+						var entry = order.Order[i];
+						var mod = ActiveMods.FirstOrDefault(m => m.UUID == entry.UUID);
+						if (mod != null)
 						{
-							extenderRequiredMods.Add(new DivinityMissingModData{
-								Index = mod.Index,
-								Name = mod.DisplayName,
-								UUID = mod.UUID,
-								Dependency = false
-							});
+							Trace.WriteLine($"{mod.Name} | ExtenderModStatus: {mod.ExtenderModStatus}");
 
-							if (mod.Dependencies.Count > 0)
+							if (mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
 							{
-								foreach (var dependency in mod.Dependencies.Items)
+								extenderRequiredMods.Add(new DivinityMissingModData
 								{
-									var dependencyMod = mods.Items.FirstOrDefault(m => m.UUID == dependency.UUID);
-									// Dependencies not in the order that require the extender
-									if (dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+									Index = mod.Index,
+									Name = mod.DisplayName,
+									UUID = mod.UUID,
+									Dependency = false
+								});
+
+								if (mod.Dependencies.Count > 0)
+								{
+									foreach (var dependency in mod.Dependencies.Items)
 									{
-										extenderRequiredMods.Add(new DivinityMissingModData{
-											Index = mod.Index - 1,
-											Name = dependencyMod.DisplayName,
-											UUID = dependencyMod.UUID,
-											Dependency = true
-										});
+										var dependencyMod = mods.Items.FirstOrDefault(m => m.UUID == dependency.UUID);
+										// Dependencies not in the order that require the extender
+										if (dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+										{
+											extenderRequiredMods.Add(new DivinityMissingModData
+											{
+												Index = mod.Index - 1,
+												Name = dependencyMod.DisplayName,
+												UUID = dependencyMod.UUID,
+												Dependency = true
+											});
+										}
 									}
 								}
 							}
 						}
 					}
-				}
 
-				if (extenderRequiredMods.Count > 0)
-				{
-					Trace.WriteLine("Displaying mods that require the extender.");
-					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", extenderRequiredMods.OrderBy(x => x.Index)),
-						"Mods Require the Script Extender - Install it with the Tools menu!", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+					if (extenderRequiredMods.Count > 0)
+					{
+						Trace.WriteLine("Displaying mods that require the extender.");
+						view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+						view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+						view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", extenderRequiredMods.OrderBy(x => x.Index)),
+							"Mods Require the Script Extender - Install it with the Tools menu!", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK);
+					}
 				}
 			}
 		}
@@ -3404,9 +3416,21 @@ Directory the zip will be extracted to:
 
 		private void LoadAppConfig()
 		{
+			if (File.Exists(DivinityApp.PATH_APP_FEATURES))
+			{
+				var appFeaturesDict = DivinityJsonUtils.SafeDeserializeFromPath<Dictionary<string,bool>>(DivinityApp.PATH_APP_FEATURES);
+				if (appFeaturesDict != null)
+				{
+					foreach(var kvp in appFeaturesDict)
+					{
+						AppSettings.Features.Add(kvp.Key.ToLower(), kvp.Value);
+					}
+				}
+			}
+
 			if (File.Exists(DivinityApp.PATH_DEFAULT_PATHWAYS))
 			{
-				defaultPathwayData = DivinityJsonUtils.SafeDeserializeFromPath<DefaultPathwayData>(DivinityApp.PATH_DEFAULT_PATHWAYS);
+				AppSettings.DefaultPathways = DivinityJsonUtils.SafeDeserializeFromPath<DefaultPathwayData>(DivinityApp.PATH_DEFAULT_PATHWAYS);
 			}
 
 			if (File.Exists(DivinityApp.PATH_IGNORED_MODS))
@@ -3777,25 +3801,28 @@ Directory the zip will be extracted to:
 			modsConnecton.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 
 			// Blinky animation on the tools/download buttons if the extender is required by mods and is missing
-			modsConnecton.ObserveOn(RxApp.MainThreadScheduler).AutoRefresh(x => x.ExtenderModStatus).
-				Filter(x => x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING || x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED).
-				Select(x => x.Count).Subscribe(totalWithRequirements => {
-					if (totalWithRequirements > 0)
-					{
-						if (Settings.ExtenderSettings != null)
+			if (AppSettings.FeatureEnabled("ScriptExtender"))
+			{
+				modsConnecton.ObserveOn(RxApp.MainThreadScheduler).AutoRefresh(x => x.ExtenderModStatus).
+					Filter(x => x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING || x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED).
+					Select(x => x.Count).Subscribe(totalWithRequirements => {
+						if (totalWithRequirements > 0)
 						{
-							HighlightExtenderDownload = !Settings.ExtenderSettings.ExtenderUpdaterIsAvailable;
+							if (Settings.ExtenderSettings != null)
+							{
+								HighlightExtenderDownload = !Settings.ExtenderSettings.ExtenderUpdaterIsAvailable;
+							}
+							else
+							{
+								HighlightExtenderDownload = true;
+							}
 						}
 						else
 						{
-							HighlightExtenderDownload = true;
+							HighlightExtenderDownload = false;
 						}
-					}
-					else
-					{
-						HighlightExtenderDownload = false;
-					}
-			});
+					});
+			}
 
 			var anyPakModSelectedObservable = this.WhenAnyValue(x => x.SelectedPakMods.Count, (count) => count > 0);
 			ExtractSelectedModsCommand = ReactiveCommand.Create(ExtractSelectedMods_Start, anyPakModSelectedObservable);

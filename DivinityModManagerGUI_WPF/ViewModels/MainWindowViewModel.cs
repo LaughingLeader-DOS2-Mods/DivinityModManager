@@ -366,7 +366,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
 		public ICommand OpenExtenderLogDirectoryCommand { get; private set; }
-		public ICommand OpenDOS2GameCommand { get; private set; }
+		public ICommand OpenGameCommand { get; private set; }
 		public ICommand OpenDonationPageCommand { get; private set; }
 		public ICommand OpenRepoPageCommand { get; private set; }
 		public ICommand DebugCommand { get; private set; }
@@ -688,6 +688,10 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Found workshop folder at: '{Settings.WorkshopPath}'.");
 				}
 			}
+			else
+			{
+				Settings.WorkshopPath = "";
+			}
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
 			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p)));
@@ -832,7 +836,7 @@ namespace DivinityModManager.ViewModels
 				ToggleLogging(true);
 			}
 
-			SetDOS2Pathways(Settings.GameDataPath);
+			SetGamePathways(Settings.GameDataPath);
 
 			if (loaded)
 			{
@@ -972,7 +976,7 @@ namespace DivinityModManager.ViewModels
 			ModUpdatesViewData.OnLoaded?.Invoke();
 		}
 
-		private void SetDOS2Pathways(string currentGameDataPath)
+		private void SetGamePathways(string currentGameDataPath)
 		{
 			try
 			{
@@ -3590,7 +3594,7 @@ Directory the zip will be extracted to:
 				Process.Start(Settings.WorkshopPath);
 			}, canOpenWorkshopFolder);
 
-			OpenDOS2GameCommand = ReactiveCommand.Create(() =>
+			OpenGameCommand = ReactiveCommand.Create(() =>
 			{
 				if (!Settings.GameStoryLogEnabled)
 				{

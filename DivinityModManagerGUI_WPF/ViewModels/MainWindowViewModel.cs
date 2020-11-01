@@ -1730,6 +1730,8 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine("No saved orders found.");
 				}
 
+				await SetMainProgressTextAsync("Setting up mod lists...");
+
 				await Observable.Start(() => {
 					LoadAppConfig();
 					mods.AddRange(DivinityApp.IgnoredMods);
@@ -3423,7 +3425,18 @@ Directory the zip will be extracted to:
 				{
 					foreach(var kvp in appFeaturesDict)
 					{
-						AppSettings.Features.Add(kvp.Key.ToLower(), kvp.Value);
+						try
+						{
+							if (!String.IsNullOrEmpty(kvp.Key))
+							{
+								AppSettings.Features[kvp.Key.ToLower()] = kvp.Value;
+							}
+						}
+						catch(Exception ex)
+						{
+							Trace.WriteLine("Error setting feature key:");
+							Trace.WriteLine(ex.ToString());
+						}
 					}
 				}
 			}

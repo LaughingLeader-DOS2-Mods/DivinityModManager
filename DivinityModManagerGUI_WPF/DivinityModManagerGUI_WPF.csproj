@@ -296,6 +296,9 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <None Include="Resources\AppFeatures.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Resources\DefaultPathways.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

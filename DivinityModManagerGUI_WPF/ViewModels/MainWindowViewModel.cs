@@ -682,7 +682,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"Found DOS2 workshop folder at: '{Settings.WorkshopPath}'.");
+				Trace.WriteLine($"Found workshop folder at: '{Settings.WorkshopPath}'.");
 			}
 
 			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
@@ -1614,7 +1614,7 @@ namespace DivinityModManager.ViewModels
 							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
 						});
 						//totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
-						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData);
+						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, DefaultPathways.Steam.AppID);
 						if(success)
 						{
 							foreach(var mod in unknownWorkshopMods)

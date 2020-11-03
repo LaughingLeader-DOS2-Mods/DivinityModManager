@@ -693,11 +693,12 @@ namespace DivinityModManager.ViewModels
 				Settings.WorkshopPath = "";
 			}
 
-			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings);
-			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, (p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p)));
-			canOpenGameExe = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
-			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f));
-			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile());
+			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings).StartWith(false);
+			canOpenWorkshopFolder = this.WhenAnyValue(x => x.Settings.WorkshopPath, 
+				(p) => (AppSettings.FeatureEnabled("Workshop") && !String.IsNullOrEmpty(p) && Directory.Exists(p))).StartWith(false);
+			canOpenGameExe = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p)).StartWith(false);
+			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f)).StartWith(false);
+			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile()).StartWith(false);
 			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.GameExecutablePath,
 			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
 
@@ -756,7 +757,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
-			var canResetExtenderSettingsObservable = this.WhenAny(x => x.Settings.ExtenderSettings, (extenderSettings) => extenderSettings != null);
+			var canResetExtenderSettingsObservable = this.WhenAny(x => x.Settings.ExtenderSettings, (extenderSettings) => extenderSettings != null).StartWith(false);
 			Settings.ResetExtenderSettingsToDefaultCommand = ReactiveCommand.Create(() =>
 			{
 				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view.SettingsWindow, $"Reset Extender Settings to Default?\nCurrent Extender Settings will be lost.", "Confirm Extender Settings Reset",
@@ -3538,7 +3539,7 @@ Directory the zip will be extracted to:
 
 			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderAsync);
 
-			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null);
+			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
 			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
 			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
 
@@ -3557,7 +3558,7 @@ Directory the zip will be extracted to:
 
 			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
 
-			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress);
+			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress).StartWith(true);
 			CancelMainProgressCommand = ReactiveCommand.Create(() =>
 			{
 				if (MainProgressToken != null && MainProgressToken.Token.CanBeCanceled)
@@ -3567,7 +3568,7 @@ Directory the zip will be extracted to:
 				}
 			}, canCancelProgress);
 
-			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false);
+			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
 			RefreshCommand = ReactiveCommand.Create(() => RefreshAsync_Start(), canRefreshObservable);
 
 			CopyPathToClipboardCommand = ReactiveCommand.Create((string path) =>
@@ -3591,7 +3592,10 @@ Directory the zip will be extracted to:
 
 			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(Settings.WorkshopPath);
+				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
+				{
+					Process.Start(Settings.WorkshopPath);
+				}
 			}, canOpenWorkshopFolder);
 
 			OpenGameCommand = ReactiveCommand.Create(() =>

@@ -33,7 +33,7 @@
 	<Window.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/MainResourceDictionary.xaml" />
+				<ResourceDictionary Source="Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 			<DataTemplate x:Key="VerticalModLayout">
 				<local:VerticalModLayout />

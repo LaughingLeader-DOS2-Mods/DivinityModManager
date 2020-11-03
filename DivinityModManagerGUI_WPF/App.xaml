@@ -10,8 +10,8 @@
 	<Application.Resources>
 		<ResourceDictionary>
 			<ResourceDictionary.MergedDictionaries>
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/Light.xaml" />
-				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Resources/Themes/Dark.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Themes/Light.xaml" />
+				<ResourceDictionary Source="pack://application:,,,/DivinityModManager;component/Themes/Dark.xaml" />
 				<ResourceDictionary Source="pack://application:,,,/AdonisUI.ClassicTheme;component/Resources.xaml" />
 			</ResourceDictionary.MergedDictionaries>
 		</ResourceDictionary>

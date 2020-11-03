@@ -2,3 +2,6 @@
 
 # CS0168: Variable is declared but never used
 dotnet_diagnostic.CS0168.severity = silent
+
+# CS0618: Type or member is obsolete
+dotnet_diagnostic.CS0618.severity = silent

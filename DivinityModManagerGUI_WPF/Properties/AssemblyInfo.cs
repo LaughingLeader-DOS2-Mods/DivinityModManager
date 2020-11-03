@@ -12,7 +12,7 @@ using System.Windows;
 [assembly: AssemblyConfiguration("Release")]
 #endif
 [assembly: AssemblyCompany("LaughingLeader")]
-[assembly: AssemblyProduct("DivinityModManager")]
+[assembly: AssemblyProduct("Divinity Mod Manager")]
 [assembly: AssemblyCopyright("Copyright © 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: NeutralResourcesLanguageAttribute("en")]

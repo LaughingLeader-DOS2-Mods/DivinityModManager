@@ -190,7 +190,7 @@
 				</DataTemplate.Triggers>
 			</DataTemplate>
 			<local:ModUpdatesLayout x:Key="ModUpdaterPanel" Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
-			<Grid x:Key="ModOrderPanel">
+			<Grid x:Key="ModOrderPanel" Loaded="ModOrderPanel_Loaded">
 				<Grid.RowDefinitions>
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="Auto" />

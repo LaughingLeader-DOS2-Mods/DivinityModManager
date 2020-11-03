@@ -49,16 +49,13 @@ namespace DivinityModManager.Views
 		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
-		private void CreateButtonBinding(string name, string vmProperty)
+		private void CreateButtonBinding(Button button, string vmProperty, object source = null)
 		{
-			var element = FindName(name);
-			if (element != null && element is Button button)
-			{
-				Binding binding = new Binding(vmProperty);
-				binding.Source = ViewModel;
-				binding.Mode = BindingMode.OneWay;
-				button.SetBinding(Button.CommandProperty, binding);
-			}
+			if (source == null) source = ViewModel;
+			Binding binding = new Binding(vmProperty);
+			binding.Source = source;
+			binding.Mode = BindingMode.OneWay;
+			button.SetBinding(Button.CommandProperty, binding);
 		}
 
 		public MainWindow()
@@ -224,10 +221,13 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 
 				// Shortcut button bindings
-				CreateButtonBinding("OpenWorkshopFolderButton", "OpenWorkshopFolderCommand");
-				CreateButtonBinding("OpenModsFolderButton", "OpenModsFolderCommand");
-				CreateButtonBinding("OpenExtenderLogsFolderButton", "OpenExtenderLogDirectoryCommand");
-				CreateButtonBinding("OpenGameButton", "OpenGameCommand");
+
+
+
+				//this.Initialized += (o,e) =>
+				//{
+
+				//};
 
 				//this.WhenAnyValue(x => x.ViewModel.OpenExtenderLogDirectoryCommand).BindTo(this, view => view.OpenExtenderLogsFolderButton.Command);
 
@@ -359,6 +359,30 @@ namespace DivinityModManager.Views
 					tb.ContextMenu.DataContext = ViewModel;
 				}
 			}
+		}
+
+		private Dictionary<string, string> _buttonBindings = new Dictionary<string, string>()
+		{
+			["OpenWorkshopFolderButton"] = "OpenWorkshopFolderCommand",
+			["OpenModsFolderButton"] = "OpenModsFolderCommand",
+			["OpenExtenderLogsFolderButton"] = "OpenExtenderLogDirectoryCommand",
+			["OpenGameButton"] = "OpenGameCommand"
+		};
+
+		private void ModOrderPanel_Loaded(object sender, RoutedEventArgs e)
+		{
+			//var orderPanel = (Grid)this.FindResource("ModOrderPanel");
+			if(sender is Grid orderPanel)
+			{
+				var buttons = orderPanel.FindVisualChildren<Button>();
+				foreach(var button in buttons)
+				{
+					if(_buttonBindings.TryGetValue(button.Name, out string command))
+					{
+						CreateButtonBinding(button, command);
+					}
+				}
+			};
 		}
 	}
 }

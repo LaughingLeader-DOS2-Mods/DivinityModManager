@@ -590,10 +590,10 @@
 								</Button.ContextMenu>
 							</Button>
 							<Button
-								x:Name="OpenDOS2GameButton"
+								x:Name="OpenGameButton"
 								Command="{Binding OpenGameCommand}"
 								ToolTip="Launch Game">
-								<controls:AutoGrayableImage Source="{StaticResource OpenDOS2Image}" />
+								<controls:AutoGrayableImage Source="{StaticResource OpenGameImage}" />
 								<Button.ContextMenu>
 									<ContextMenu>
 										<MenuItem

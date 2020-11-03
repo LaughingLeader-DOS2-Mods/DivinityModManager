@@ -348,7 +348,7 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenGameExe;
 		private IObservable<bool> canOpenDialogWindow;
 		private IObservable<bool> gameExeFoundObservable;
-		private IObservable<bool> canInstallOsiExtender;
+		//private IObservable<bool> canInstallOsiExtender;
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;

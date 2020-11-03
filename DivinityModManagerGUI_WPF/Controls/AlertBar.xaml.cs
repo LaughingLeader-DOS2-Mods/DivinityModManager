@@ -34,7 +34,6 @@ namespace DivinityModManager.Controls
             _syncContext = SynchronizationContext.Current;
         }
 
-
         public static readonly RoutedEvent ShowEvent = EventManager.RegisterRoutedEvent("Show", RoutingStrategy.Bubble, typeof(RoutedEventHandler), typeof(AlertBar));
 
         public event RoutedEventHandler Show

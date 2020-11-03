@@ -119,7 +119,7 @@
 											Direction="330"
 											Opacity="0.5"
 											ShadowDepth="1"
-											Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+											Color="Black" />
 									</TextBlock.Effect>
 								</TextBlock>
 								<Image
@@ -446,7 +446,7 @@
 																Direction="330"
 																Opacity="0.5"
 																ShadowDepth="4"
-																Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+																Color="Black" />
 														</TextBlock.Effect>
 													</TextBlock>
 													<TextBlock
@@ -475,7 +475,7 @@
 															Direction="330"
 															Opacity="0.5"
 															ShadowDepth="4"
-															Color="{DynamicResource {x:Static adonisUI:Colors.Layer3BackgroundColor}}" />
+															Color="Black" />
 													</TextBlock.Effect>
 												</TextBlock>
 												<TextBlock

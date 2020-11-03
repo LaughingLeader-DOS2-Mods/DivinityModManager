@@ -9,7 +9,7 @@
 	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
 	xmlns:dd="urn:gong-wpf-dragdrop"
-	xmlns:divResources="clr-namespace:DivinityModManager.Resources"
+	xmlns:divThemes="clr-namespace:DivinityModManager.Themes"
 	xmlns:dmcore="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:sys="clr-namespace:System;assembly=mscorlib"
@@ -357,7 +357,7 @@
 	</Style>
 	<DataTemplate x:Key="TagTemplate">
 		<Border
-			Background="{DynamicResource {x:Static divResources:DivinityColors.TagBackgroundBrush}}"
+			Background="{DynamicResource {x:Static divThemes:DivinityColors.TagBackgroundBrush}}"
 			BorderThickness="2"
 			CornerRadius="12">
 			<TextBlock
@@ -385,7 +385,7 @@
 	</DataTemplate>
 	<DataTemplate x:Key="ModeTagTemplate">
 		<Border
-			Background="{DynamicResource {x:Static divResources:DivinityColors.ModeTagBackgroundBrush}}"
+			Background="{DynamicResource {x:Static divThemes:DivinityColors.ModeTagBackgroundBrush}}"
 			BorderThickness="2"
 			CornerRadius="12">
 			<TextBlock
@@ -413,7 +413,7 @@
 	</DataTemplate>
 	<DataTemplate x:Key="CustomTagTemplate">
 		<Border
-			Background="{DynamicResource {x:Static divResources:DivinityColors.CustomTagBackgroundBrush}}"
+			Background="{DynamicResource {x:Static divThemes:DivinityColors.CustomTagBackgroundBrush}}"
 			BorderThickness="2"
 			CornerRadius="12">
 			<TextBlock

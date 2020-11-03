@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace DivinityModManager.Resources
+namespace DivinityModManager.Themes
 {
 	public static class DivinityColors
 	{

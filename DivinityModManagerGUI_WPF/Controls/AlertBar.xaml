@@ -20,7 +20,7 @@
 		</ResourceDictionary>
 	</UserControl.Resources>
 	<UserControl.Triggers>
-		<EventTrigger RoutedEvent="local:AlertBar.Show">
+		<EventTrigger RoutedEvent="{x:Static local:AlertBar.ShowEvent}">
 			<BeginStoryboard>
 				<Storyboard>
 					<DoubleAnimationUsingKeyFrames

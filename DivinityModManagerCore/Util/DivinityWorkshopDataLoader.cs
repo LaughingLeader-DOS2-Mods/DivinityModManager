@@ -186,7 +186,7 @@ namespace DivinityModManager.Util
 					}
 					else
 					{
-						Trace.WriteLine($"Failed to get workshop data.");
+						Trace.WriteLine($"Failed to get workshop data from {url}");
 					}
 				}
 				else

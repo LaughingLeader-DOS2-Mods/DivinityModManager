@@ -145,7 +145,7 @@ namespace DivinityModManager.Util
 			return "";
 		}
 
-		public static string GetGameInstallPath(string defaultSteamInstallPath, string gogRegKey32, string gogRegKey64)
+		public static string GetGameInstallPath(string steamGameInstallPath, string gogRegKey32, string gogRegKey64)
 		{
 			try
 			{
@@ -155,7 +155,7 @@ namespace DivinityModManager.Util
 					{
 						return lastGamePath;
 					}
-					string folder = Path.Combine(LastSteamInstallPath, defaultSteamInstallPath);
+					string folder = Path.Combine(LastSteamInstallPath, steamGameInstallPath);
 					if (Directory.Exists(folder))
 					{
 						Trace.WriteLine($"Found game at '{folder}'.");
@@ -165,7 +165,7 @@ namespace DivinityModManager.Util
 					}
 					else
 					{
-						Trace.WriteLine($"game not found. Looking for Steam libraries.");
+						Trace.WriteLine($"Game not found. Looking for Steam libraries.");
 						string libraryFile = Path.Combine(LastSteamInstallPath, PATH_Steam_LibraryFile);
 						if (File.Exists(libraryFile))
 						{
@@ -196,7 +196,8 @@ namespace DivinityModManager.Util
 
 							foreach (var folderPath in libraryFolders)
 							{
-								string checkFolder = Path.Combine(folderPath, defaultSteamInstallPath);
+								string checkFolder = Path.Combine(folderPath, "steamapps", "common", steamGameInstallPath);
+								Trace.WriteLine(checkFolder);
 								if (!String.IsNullOrEmpty(checkFolder) && Directory.Exists(checkFolder))
 								{
 									Trace.WriteLine($"Found game at '{checkFolder}'.");

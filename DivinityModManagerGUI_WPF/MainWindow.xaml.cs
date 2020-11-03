@@ -49,6 +49,18 @@ namespace DivinityModManager.Views
 		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
+		private void CreateButtonBinding(string name, string vmProperty)
+		{
+			var element = FindName(name);
+			if (element != null && element is Button button)
+			{
+				Binding binding = new Binding(vmProperty);
+				binding.Source = ViewModel;
+				binding.Mode = BindingMode.OneWay;
+				button.SetBinding(Button.CommandProperty, binding);
+			}
+		}
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -210,6 +222,12 @@ namespace DivinityModManager.Views
 				this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
+
+				// Shortcut button bindings
+				CreateButtonBinding("OpenWorkshopFolderButton", "OpenWorkshopFolderCommand");
+				CreateButtonBinding("OpenModsFolderButton", "OpenModsFolderCommand");
+				CreateButtonBinding("OpenExtenderLogsFolderButton", "OpenExtenderLogDirectoryCommand");
+				CreateButtonBinding("OpenGameButton", "OpenGameCommand");
 
 				//this.WhenAnyValue(x => x.ViewModel.OpenExtenderLogDirectoryCommand).BindTo(this, view => view.OpenExtenderLogsFolderButton.Command);
 

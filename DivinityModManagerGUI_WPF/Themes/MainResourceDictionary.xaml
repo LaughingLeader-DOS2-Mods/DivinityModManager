@@ -123,13 +123,13 @@
 			</Setter.Value>
 		</Setter>
 	</Style>
-	<DataTemplate DataType="{x:Type data:DivinityProfileData}">
+	<DataTemplate DataType="data:DivinityProfileData">
 		<TextBlock Text="{Binding Name}" />
 	</DataTemplate>
-	<DataTemplate DataType="{x:Type data:DivinityLoadOrder}">
+	<DataTemplate DataType="data:DivinityLoadOrder">
 		<TextBlock Text="{Binding Name}" />
 	</DataTemplate>
-	<!--<DataTemplate DataType="{x:Type data:DivinityModSeparator}">
+	<!--<DataTemplate DataType="data:DivinityModSeparator">
 		<Grid>
 			<Grid.RowDefinitions>
 				<RowDefinition Height="*" />
@@ -140,7 +140,7 @@
 			<Separator BorderThickness="1" BorderBrush="Orange" Grid.Row="1" />
 		</Grid>
 	</DataTemplate>-->
-	<DataTemplate DataType="{x:Type data:DivinityModDependencyData}">
+	<DataTemplate DataType="data:DivinityModDependencyData">
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
@@ -575,7 +575,7 @@
 			</StackPanel>
 		</StackPanel>
 	</ToolTip>
-	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">
+	<DataTemplate x:Key="ModNameTemplate" DataType="data:DivinityModData">
 		<Grid>
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
@@ -830,7 +830,7 @@
 			</GridViewColumn>
 		</GridView.Columns>
 	</GridView>
-	<DataTemplate x:Key="ModUpdateNameTemplate" DataType="{x:Type data:DivinityModUpdateData}">
+	<DataTemplate x:Key="ModUpdateNameTemplate" DataType="data:DivinityModUpdateData">
 		<ContentControl Content="{Binding WorkshopMod}" ContentTemplate="{StaticResource ModNameTemplate}" />
 	</DataTemplate>
 	<GridView

@@ -1166,7 +1166,22 @@ namespace DivinityModManager.ViewModels
 
 			mods.Clear();
 			mods.AddRange(DivinityApp.IgnoredMods);
-			mods.AddRange(finalMods);
+			foreach (var m in finalMods)
+			{
+				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
+				if (existingMod == null)
+				{
+					mods.Add(m);
+				}
+				else
+				{
+					if (m.Version.VersionInt > existingMod.Version.VersionInt)
+					{
+						mods.Remove(existingMod);
+						mods.Add(m);
+					}
+				}
+			}
 			userMods.Clear();
 			userMods.AddRange(finalMods);
 
@@ -1794,7 +1809,22 @@ namespace DivinityModManager.ViewModels
 				await Observable.Start(() => {
 					LoadAppConfig();
 					mods.AddRange(DivinityApp.IgnoredMods);
-					mods.AddRange(loadedMods);
+					foreach (var m in loadedMods)
+					{
+						var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
+						if (existingMod == null)
+						{
+							mods.Add(m);
+						}
+						else
+						{
+							if (m.Version.VersionInt > existingMod.Version.VersionInt)
+							{
+								mods.Remove(existingMod);
+								mods.Add(m);
+							}
+						}
+					}
 					userMods.AddRange(loadedMods);
 
 					Profiles.AddRange(loadedProfiles);

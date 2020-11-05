@@ -772,7 +772,17 @@ namespace DivinityModManager.ViewModels
 
 					if (attr.HasFlag(System.IO.FileAttributes.Directory))
 					{
-						var exe = Path.Combine(Settings.GameExecutablePath, "EoCApp.exe");
+						string exeName = "";
+						if (!DivinityRegistryHelper.IsGOG)
+						{
+							exeName = Path.GetFileName(AppSettings.DefaultPathways.Steam.ExePath);
+						}
+						else
+						{
+							exeName = Path.GetFileName(AppSettings.DefaultPathways.GOG.ExePath);
+						}
+						
+						var exe = Path.Combine(Settings.GameExecutablePath, exeName);
 						if (File.Exists(exe))
 						{
 							Settings.GameExecutablePath = exe;

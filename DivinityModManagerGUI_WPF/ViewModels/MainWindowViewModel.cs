@@ -508,8 +508,8 @@ namespace DivinityModManager.ViewModels
 							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
 						}
 #if DEBUG
-					var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-					Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+						var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
+						Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
 #endif
 					}
 					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
@@ -1125,6 +1125,35 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private void SetLoadedMods(IEnumerable<DivinityModData> loadedMods)
+		{
+			mods.Clear();
+			foreach (var m in DivinityApp.IgnoredMods)
+			{
+				mods.Add(m);
+				Trace.WriteLine($"Added base mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+			}
+			foreach (var m in loadedMods)
+			{
+				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
+				if (existingMod == null)
+				{
+					mods.Add(m);
+				}
+				else
+				{
+					if (m.Version.VersionInt > existingMod.Version.VersionInt)
+					{
+						mods.Remove(existingMod);
+						mods.Add(m);
+						Trace.WriteLine($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+					}
+				}
+			}
+			userMods.Clear();
+			userMods.AddRange(loadedMods);
+		}
+
 		public void LoadMods()
 		{
 			List<DivinityModData> modPakData = null;
@@ -1163,27 +1192,7 @@ namespace DivinityModManager.ViewModels
 			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
 
 			LoadAppConfig();
-
-			mods.Clear();
-			mods.AddRange(DivinityApp.IgnoredMods);
-			foreach (var m in finalMods)
-			{
-				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
-				if (existingMod == null)
-				{
-					mods.Add(m);
-				}
-				else
-				{
-					if (m.Version.VersionInt > existingMod.Version.VersionInt)
-					{
-						mods.Remove(existingMod);
-						mods.Add(m);
-					}
-				}
-			}
-			userMods.Clear();
-			userMods.AddRange(finalMods);
+			SetLoadedMods(finalMods);
 
 			if (ignoredModsData != null)
 			{
@@ -1197,7 +1206,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			Trace.WriteLine($"Loaded '{finalMods.Count()}' mods.");
+			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
 			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
 
 			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
@@ -1808,24 +1817,7 @@ namespace DivinityModManager.ViewModels
 
 				await Observable.Start(() => {
 					LoadAppConfig();
-					mods.AddRange(DivinityApp.IgnoredMods);
-					foreach (var m in loadedMods)
-					{
-						var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
-						if (existingMod == null)
-						{
-							mods.Add(m);
-						}
-						else
-						{
-							if (m.Version.VersionInt > existingMod.Version.VersionInt)
-							{
-								mods.Remove(existingMod);
-								mods.Add(m);
-							}
-						}
-					}
-					userMods.AddRange(loadedMods);
+					SetLoadedMods(loadedMods);
 
 					Profiles.AddRange(loadedProfiles);
 
@@ -1922,7 +1914,14 @@ namespace DivinityModManager.ViewModels
 				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
 			});
 			*/
-
+#if DEBUG
+			Trace.WriteLine("Mods (" + mods.Count + ")");
+			Trace.WriteLine(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			Trace.WriteLine("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
+			Trace.WriteLine(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			Trace.WriteLine("Adventure Mods (" + AdventureMods.Count + ")");
+			Trace.WriteLine(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
+#endif
 			return Disposable.Empty;
 		}
 
@@ -3540,6 +3539,7 @@ Directory the zip will be extracted to:
 				ignoredModsData = DivinityJsonUtils.SafeDeserializeFromPath<IgnoredModsData>(DivinityApp.PATH_IGNORED_MODS);
 				if (ignoredModsData != null)
 				{
+					DivinityApp.IgnoredMods.Clear();
 					foreach (var dict in ignoredModsData.Mods)
 					{
 						var mod = new DivinityModData(true);
@@ -3580,7 +3580,29 @@ Directory the zip will be extracted to:
 									}
 								}
 							}
+							if (dict.TryGetValue("Version", out var vObj))
+							{
+								int version;
+								if (vObj is string vStr)
+								{
+									version = int.Parse(vStr);
+								}
+								else
+								{
+									version = Convert.ToInt32(vObj);
+								}
+								mod.Version = new DivinityModVersion(version);
+							}
+							if (dict.TryGetValue("Tags", out var tags))
+							{
+								mod.TagsText = (string)tags;
+								if(!String.IsNullOrEmpty(mod.TagsText))
+								{
+									mod.AddTags(mod.TagsText.Split(';'));
+								}
+							}
 							DivinityApp.IgnoredMods.Add(mod);
+							Trace.WriteLine($"Base mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
 						}
 					}
 
@@ -3772,7 +3794,7 @@ Directory the zip will be extracted to:
 
 			//Throttle in case the index changes quickly in a short timespan
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
-				if (SelectedModOrderIndex > -1)
+				if (!this.Refreshing && SelectedModOrderIndex > -1)
 				{
 					if (SelectedModOrder != null && !LoadingOrder)
 					{
@@ -3797,7 +3819,7 @@ Directory the zip will be extracted to:
 
 			this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
 			{
-				if (b)
+				if (!this.Refreshing && b)
 				{
 					if (SelectedModOrder != null)
 					{
@@ -3813,7 +3835,7 @@ Directory the zip will be extracted to:
 			var modsConnecton = mods.Connect();
 			modsConnecton.Filter(x => !x.IsLarianMod && x.Type != "Adventure").Bind(out allMods).DisposeMany().Subscribe();
 
-			modsConnecton.Filter(x => x.Type == "Adventure" && !x.IsHidden).Bind(out adventureMods).DisposeMany().Subscribe();
+			modsConnecton.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.IsLarianMod)).Bind(out adventureMods).DisposeMany().Subscribe();
 			this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod, out selectedAdventureMod).DisposeWith(this.Disposables);

@@ -1322,7 +1322,7 @@ namespace DivinityModManager.Util
 
 			/* The ModOrder node contains the load order. DOS2 by default stores all UUIDs, even if the mod no longer exists. */
 			string modulesText = "";
-			foreach(var uuid in orderList)
+			foreach (var uuid in orderList)
 			{
 				modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, uuid) + Environment.NewLine;
 			}

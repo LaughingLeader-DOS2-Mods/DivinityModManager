@@ -490,6 +490,11 @@ namespace DivinityModManager.Models
 					this.Dependencies.Connect().Filter(x => !DivinityModDataLoader.IgnoreModDependency(x.UUID)).Bind(out displayedDependencies).DisposeMany().Subscribe();
 				}
 			}
+			else
+			{
+				this.IsHidden = true;
+				this.IsLarianMod = true;
+			}
 		}
 	}
 }

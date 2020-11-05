@@ -159,7 +159,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref lastExtractOutputPath, value); }
 		}
 
-		private bool darkThemeEnabled = false;
+		private bool darkThemeEnabled = true;
 
 		[DataMember]
 		public bool DarkThemeEnabled

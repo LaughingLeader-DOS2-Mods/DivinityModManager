@@ -1145,6 +1145,15 @@ namespace DivinityModManager.ViewModels
 			}
 			foreach (var m in loadedMods)
 			{
+				if (m.IsLarianMod)
+				{
+					var existingIgnoredMod = DivinityApp.IgnoredMods.FirstOrDefault(x => x.UUID == m.UUID);
+					if (existingIgnoredMod != null)
+					{
+						DivinityApp.IgnoredMods.Remove(existingIgnoredMod);
+					}
+					DivinityApp.IgnoredMods.Add(m);
+				}
 				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
 				if (existingMod == null)
 				{
@@ -1921,12 +1930,12 @@ namespace DivinityModManager.ViewModels
 			});
 			*/
 #if DEBUG
-			DivinityApp.Log("Mods (" + mods.Count + ")");
-			DivinityApp.Log(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			DivinityApp.Log("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
-			DivinityApp.Log(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			DivinityApp.Log("Adventure Mods (" + AdventureMods.Count + ")");
-			DivinityApp.Log(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
+			//DivinityApp.Log("Mods (" + mods.Count + ")");
+			//DivinityApp.Log(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			//DivinityApp.Log("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
+			//DivinityApp.Log(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			//DivinityApp.Log("Adventure Mods (" + AdventureMods.Count + ")");
+			//DivinityApp.Log(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
 #endif
 			return Disposable.Empty;
 		}

@@ -34,7 +34,7 @@
 		<TextBlock
 			HorizontalAlignment="Center"
 			FontSize="18"
-			Text="{Binding Title, FallbackValue='Divinity Mod Manager v1.2.0.0'}"
+			Text="{Binding Title}"
 			TextAlignment="Center" />
 		<Separator Margin="0,4" />
 		<wpfautogrid:AutoGrid
@@ -95,8 +95,8 @@
 				<c:HyperlinkText
 					Margin="10,0,0,4"
 					HorizontalAlignment="Left"
-					DisplayText="CHANGELOG.md"
-					URL="{x:Static app:DivinityApp.URL_CHANGELOG}" />
+					URL="{x:Static app:DivinityApp.URL_CHANGELOG}"
+					UseUrlForDisplayText="True" />
 			</wpfautogrid:AutoGrid>
 		</StackPanel>
 	</wpfautogrid:AutoGrid>

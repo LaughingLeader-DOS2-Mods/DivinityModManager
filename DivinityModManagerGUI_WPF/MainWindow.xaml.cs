@@ -174,7 +174,6 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
 				{
-					DivinityApp.Log($"Main Progress is active: {b}");
 					if (b)
 					{
 						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;

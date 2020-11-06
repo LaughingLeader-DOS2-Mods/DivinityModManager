@@ -96,7 +96,7 @@
 			<TabItem Header="General">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<autogrid:AutoGrid
-						Margin="20"
+						Margin="10,0"
 						ChildMargin="4"
 						ColumnCount="2"
 						Columns="auto,*"
@@ -157,7 +157,7 @@
 					</Grid.RowDefinitions>
 					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 						<autogrid:AutoGrid
-							Margin="20"
+							Margin="10,0"
 							ChildMargin="4"
 							ColumnCount="2"
 							Columns="auto,*"
@@ -321,7 +321,7 @@
 			<TabItem Header="Advanced">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<autogrid:AutoGrid
-						Margin="20"
+						Margin="10,0"
 						ChildMargin="2"
 						ColumnCount="2"
 						Columns="auto,*"

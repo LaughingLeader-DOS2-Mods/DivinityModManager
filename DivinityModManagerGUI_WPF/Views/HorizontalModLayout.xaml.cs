@@ -314,6 +314,8 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		private int _FontSizeMeasurePadding = 36;
+
 		public void AutoSizeNameColumn_ActiveMods(object sender, EventArgs e)
 		{
 			if (ViewModel.ActiveMods.Count > 0 && ActiveModsListView.View is GridView gridView && gridView.Columns.Count >= 2)
@@ -331,7 +333,7 @@ namespace DivinityModManager.Views
 								ActiveModsListView.FontStyle,
 								ActiveModsListView.FontWeight,
 								ActiveModsListView.FontStretch,
-								ActiveModsListView.FontSize).Width + 12;
+								ActiveModsListView.FontSize).Width + _FontSizeMeasurePadding;
 							if (gridView.Columns[1].Width > targetWidth)
 							{
 								gridView.Columns[1].Width = targetWidth;
@@ -355,7 +357,7 @@ namespace DivinityModManager.Views
 						ActiveModsListView.FontStyle,
 						ActiveModsListView.FontWeight,
 						ActiveModsListView.FontStretch,
-						ActiveModsListView.FontSize).Width + 12;
+						ActiveModsListView.FontSize).Width + _FontSizeMeasurePadding;
 				}
 			}
 		}

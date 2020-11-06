@@ -3654,7 +3654,7 @@ Directory the zip will be extracted to:
 
 			var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			var productName = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;
-			Title = $"{productName} {assembly.GetName().Version.ToString()}";
+			Title = $"{productName} {assembly.GetName().Version}";
 
 			this.DropHandler = new ModListDropHandler(this);
 			this.DragHandler = new ModListDragHandler(this);

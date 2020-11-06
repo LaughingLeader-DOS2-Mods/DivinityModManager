@@ -25,7 +25,7 @@ namespace DivinityModManager.Converters
 				{
 					reverse = r;
 				}
-				System.Diagnostics.Trace.WriteLine($"BoolToVisibilityConverter param: {parameter} | {parameter.GetType()}");
+				DivinityApp.Log($"BoolToVisibilityConverter param: {parameter} | {parameter.GetType()}");
 			}
 			
 			if(value is bool b)

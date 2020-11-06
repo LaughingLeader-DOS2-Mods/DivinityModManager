@@ -39,7 +39,7 @@ namespace DivinityModManager.Util
 			}
 			else
 			{
-				Trace.WriteLine($"Error deserializing json:\n\n{text}\n\t" + String.Join("\n\t", errors));
+				DivinityApp.Log($"Error deserializing json:\n\n{text}\n\t" + String.Join("\n\t", errors));
 				return default(T);
 			}
 		}
@@ -55,12 +55,12 @@ namespace DivinityModManager.Util
 				}
 				else
 				{
-					Trace.WriteLine($"Error deserializing json: File '{path}' does not exist.");
+					DivinityApp.Log($"Error deserializing json: File '{path}' does not exist.");
 				}
 			}
 			catch(Exception ex)
 			{
-				Trace.WriteLine("Error deserializing json:\n" + ex.ToString());
+				DivinityApp.Log("Error deserializing json:\n" + ex.ToString());
 			}
 			return default(T);
 		}

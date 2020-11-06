@@ -30,7 +30,7 @@ namespace DivinityModManager.Util
 					{
 						saveScreenshotImage.Name = saveScreenshotImage.Name.Replace(Path.GetFileNameWithoutExtension(saveScreenshotImage.Name), baseNewName);
 
-						Trace.WriteLine($"Renamed internal screenshot '{saveScreenshotImage.Name}' in '{output}'.");
+						DivinityApp.Log($"Renamed internal screenshot '{saveScreenshotImage.Name}' in '{output}'.");
 					}
 
 					// Edit the saved date in the meta.lsf to avoid "corruption" messages
@@ -72,13 +72,13 @@ namespace DivinityModManager.Util
 
 										var time = DateTime.Now;
 
-										Trace.WriteLine($"Year: {yearAtt.Type}");
-										Trace.WriteLine($"Month: {monthAtt.Type}");
-										Trace.WriteLine($"Day: {dayAtt.Type}");
-										Trace.WriteLine($"Hours: {hoursAtt.Type}");
-										Trace.WriteLine($"Minutes: {minutesAtt.Type}");
-										Trace.WriteLine($"Seconds: {secondsAtt.Type}");
-										Trace.WriteLine($"Milliseconds: {millisecondsAtt.Type}");
+										DivinityApp.LogMessage($"Year: {yearAtt.Type}");
+										DivinityApp.LogMessage($"Month: {monthAtt.Type}");
+										DivinityApp.LogMessage($"Day: {dayAtt.Type}");
+										DivinityApp.LogMessage($"Hours: {hoursAtt.Type}");
+										DivinityApp.LogMessage($"Minutes: {minutesAtt.Type}");
+										DivinityApp.LogMessage($"Seconds: {secondsAtt.Type}");
+										DivinityApp.LogMessage($"Milliseconds: {millisecondsAtt.Type}");
 
 										yearAtt.Value = (Byte)time.Year;
 										monthAtt.Value = (Byte)time.Month;
@@ -88,11 +88,11 @@ namespace DivinityModManager.Util
 										secondsAtt.Value = (Byte)time.Second;
 										millisecondsAtt.Value = (UInt16)time.Millisecond;
 
-										Trace.WriteLine($"Updated SaveTime in save's meta.lsf.");
+										DivinityApp.LogMessage($"Updated SaveTime in save's meta.lsf.");
 									}
 									else
 									{
-										Trace.WriteLine($"Couldn't find SaveTime node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
+										DivinityApp.LogMessage($"Couldn't find SaveTime node '{String.Join(";", resource.Regions.Values.First().Children.Keys)}'.");
 									}
 
 									ms = new System.IO.MemoryStream(new byte[4096], true);
@@ -101,10 +101,10 @@ namespace DivinityModManager.Util
 									ms.Position = 0;
 									var data = ms.ToArray();
 
-									if (!ms.CanRead) Trace.WriteLine("MemoryStream is not readable!");
-									if(!ms.CanWrite) Trace.WriteLine("MemoryStream is not writable!");
-									if(!rsrcStream.CanRead) Trace.WriteLine("rsrcStream is not readable!");
-									if(!rsrcStream.CanWrite) Trace.WriteLine("rsrcStream is not writable!");
+									if (!ms.CanRead) DivinityApp.LogMessage("MemoryStream is not readable!");
+									if(!ms.CanWrite) DivinityApp.LogMessage("MemoryStream is not writable!");
+									if(!rsrcStream.CanRead) DivinityApp.LogMessage("rsrcStream is not readable!");
+									if(!rsrcStream.CanWrite) DivinityApp.LogMessage("rsrcStream is not writable!");
 
 									rsrcStream.Write(data, 0, data.Length);
 									ms.Close();
@@ -136,7 +136,7 @@ namespace DivinityModManager.Util
 			}
 			catch(Exception ex)
 			{
-				Trace.WriteLine($"Failed to rename save: {ex.ToString()}");
+				DivinityApp.Log($"Failed to rename save: {ex.ToString()}");
 			}
 
 			return false;

@@ -50,7 +50,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception e)
 			{
-				Trace.WriteLine($"Error reading registry subKey ({subKey}): {e.ToString()}");
+				DivinityApp.Log($"Error reading registry subKey ({subKey}): {e.ToString()}");
 			}
 			return null;
 		}
@@ -73,12 +73,12 @@ namespace DivinityModManager.Util
 				}
 				else
 				{
-					Trace.WriteLine($"Skipping junction check for path '{path}'. Drive type is '{driveType}'.");
+					DivinityApp.Log($"Skipping junction check for path '{path}'. Drive type is '{driveType}'.");
 				}
 			}
 			catch (Exception ex) 
 			{
-				Trace.WriteLine($"Error checking junction point '{path}': {ex.ToString()}");
+				DivinityApp.Log($"Error checking junction point '{path}': {ex.ToString()}");
 			}
 			return path;
 		}
@@ -103,7 +103,7 @@ namespace DivinityModManager.Util
 			if(LastSteamInstallPath != "")
 			{
 				string workshopFolder = Path.Combine(LastSteamInstallPath, PATH_Steam_WorkshopFolder);
-				Trace.WriteLine($"Looking for workshop folder at '{workshopFolder}'.");
+				DivinityApp.Log($"Looking for workshop folder at '{workshopFolder}'.");
 				if(Directory.Exists(workshopFolder))
 				{
 					return workshopFolder;
@@ -120,7 +120,7 @@ namespace DivinityModManager.Util
 				if(!String.IsNullOrEmpty(steamWorkshopPath))
 				{
 					string workshopFolder = Path.Combine(steamWorkshopPath, "content", appid);
-					Trace.WriteLine($"Looking for game workshop folder at '{workshopFolder}'.");
+					DivinityApp.Log($"Looking for game workshop folder at '{workshopFolder}'.");
 					if (Directory.Exists(workshopFolder))
 					{
 						return workshopFolder;
@@ -158,14 +158,14 @@ namespace DivinityModManager.Util
 					string folder = Path.Combine(LastSteamInstallPath, steamGameInstallPath);
 					if (Directory.Exists(folder))
 					{
-						Trace.WriteLine($"Found game at '{folder}'.");
+						DivinityApp.Log($"Found game at '{folder}'.");
 						lastGamePath = folder;
 						isGOG = false;
 						return lastGamePath;
 					}
 					else
 					{
-						Trace.WriteLine($"Game not found. Looking for Steam libraries.");
+						DivinityApp.Log($"Game not found. Looking for Steam libraries.");
 						string libraryFile = Path.Combine(LastSteamInstallPath, PATH_Steam_LibraryFile);
 						if (File.Exists(libraryFile))
 						{
@@ -182,7 +182,7 @@ namespace DivinityModManager.Util
 											var p = innerValue.Value<string>();
 											if (Directory.Exists(p))
 											{
-												Trace.WriteLine($"Found steam library folder at '{p}'.");
+												DivinityApp.Log($"Found steam library folder at '{p}'.");
 												libraryFolders.Add(p);
 											}
 										}
@@ -191,16 +191,16 @@ namespace DivinityModManager.Util
 							}
 							catch (Exception ex)
 							{
-								Trace.WriteLine($"Error parsing steam library file at '{libraryFile}': {ex.ToString()}");
+								DivinityApp.Log($"Error parsing steam library file at '{libraryFile}': {ex.ToString()}");
 							}
 
 							foreach (var folderPath in libraryFolders)
 							{
 								string checkFolder = Path.Combine(folderPath, "steamapps", "common", steamGameInstallPath);
-								Trace.WriteLine(checkFolder);
+								DivinityApp.Log(checkFolder);
 								if (!String.IsNullOrEmpty(checkFolder) && Directory.Exists(checkFolder))
 								{
-									Trace.WriteLine($"Found game at '{checkFolder}'.");
+									DivinityApp.Log($"Found game at '{checkFolder}'.");
 									lastGamePath = checkFolder;
 									isGOG = false;
 									return lastGamePath;
@@ -215,13 +215,13 @@ namespace DivinityModManager.Util
 				{
 					isGOG = true;
 					lastGamePath = gogGamePath;
-					Trace.WriteLine($"Found game (GoG) install at '{lastGamePath}'.");
+					DivinityApp.Log($"Found game (GoG) install at '{lastGamePath}'.");
 					return lastGamePath;
 				}
 			}
 			catch(Exception ex)
 			{
-				Trace.WriteLine($"[*ERROR*] Error finding game path: {ex.ToString()}");
+				DivinityApp.Log($"[*ERROR*] Error finding game path: {ex.ToString()}");
 			}
 
 			return "";

@@ -97,7 +97,7 @@ namespace DivinityModManager.Controls
 			catch (Exception e)
 			{
 				//Debug.Fail("The Image used cannot be grayed out.", "Use BitmapImage or URI as a Source in order to allow gray scaling. Make sure the absolute Uri is used as relative Uri may sometimes resolve incorrectly.\n\nException: " + e.Message);
-				Trace.WriteLine($"Error greying out image '{uri}'({Source}).\n\nException: {e.Message}");
+				DivinityApp.Log($"Error greying out image '{uri}'({Source}).\n\nException: {e.Message}");
 			}
 		}
 	}

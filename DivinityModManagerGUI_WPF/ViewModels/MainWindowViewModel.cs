@@ -419,7 +419,7 @@ namespace DivinityModManager.ViewModels
 		{
 			foreach (var mod in mods)
 			{
-				Trace.WriteLine($"Found mod. Name({mod.Name}) Author({mod.Author}) Version({mod.Version}) UUID({mod.UUID}) Description({mod.Description})");
+				DivinityApp.Log($"Found mod. Name({mod.Name}) Author({mod.Author}) Version({mod.Version}) UUID({mod.UUID}) Description({mod.Description})");
 				foreach (var dependency in mod.Dependencies.Items)
 				{
 					Console.WriteLine($"  {dependency.ToString()}");
@@ -429,21 +429,21 @@ namespace DivinityModManager.ViewModels
 
 		private void Debug_TraceProfileModOrder(DivinityProfileData p)
 		{
-			Trace.WriteLine($"Mod Order for Profile {p.Name}");
-			Trace.WriteLine("========================================");
+			DivinityApp.Log($"Mod Order for Profile {p.Name}");
+			DivinityApp.Log("========================================");
 			foreach (var uuid in p.ModOrder)
 			{
 				var modData = Mods.FirstOrDefault(m => m.UUID == uuid);
 				if (modData != null)
 				{
-					Trace.WriteLine($"  {modData.Name}({modData.UUID})");
+					DivinityApp.Log($"  {modData.Name}({modData.UUID})");
 				}
 				else
 				{
-					Trace.WriteLine($"  NOT FOUND {uuid}");
+					DivinityApp.Log($"  NOT FOUND {uuid}");
 				}
 			}
-			Trace.WriteLine("========================================");
+			DivinityApp.Log("========================================");
 		}
 
 		public bool DebugMode { get; set; } = false;
@@ -462,7 +462,7 @@ namespace DivinityModManager.ViewModels
 					if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
 					{
 						Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
-						Trace.WriteLine($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
+						DivinityApp.Log($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
 					}
 
 					string logFileName = Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
@@ -485,7 +485,7 @@ namespace DivinityModManager.ViewModels
 			try
 			{
 				string latestReleaseZipUrl = "";
-				Trace.WriteLine($"Checking for latest DXGI.dll release at 'Norbyte/ositools'.");
+				DivinityApp.Log($"Checking for latest DXGI.dll release at 'Norbyte/ositools'.");
 				var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
 				if (!String.IsNullOrEmpty(latestReleaseData))
 				{
@@ -509,18 +509,18 @@ namespace DivinityModManager.ViewModels
 						}
 #if DEBUG
 						//var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-						//Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+						//DivinityApp.LogMessage($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
 #endif
 					}
 					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
 					{
 						OpenRepoLinkToDownload = false;
 						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
-						Trace.WriteLine($"OsiTools latest release url found: {latestReleaseZipUrl}");
+						DivinityApp.Log($"OsiTools latest release url found: {latestReleaseZipUrl}");
 					}
 					else
 					{
-						Trace.WriteLine($"OsiTools latest release not found.");
+						DivinityApp.Log($"OsiTools latest release not found.");
 					}
 				}
 				else
@@ -530,7 +530,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error checking for latest OsiExtender release: {ex.ToString()}");
+				DivinityApp.Log($"Error checking for latest OsiExtender release: {ex.ToString()}");
 
 				OpenRepoLinkToDownload = true;
 			}
@@ -543,21 +543,21 @@ namespace DivinityModManager.ViewModels
 					var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
 					if (osirisExtenderSettings != null)
 					{
-						Trace.WriteLine($"Loaded extender settings from '{extenderSettingsJson}'.");
+						DivinityApp.Log($"Loaded extender settings from '{extenderSettingsJson}'.");
 						Settings.ExtenderSettings.Set(osirisExtenderSettings);
 					}
 				}
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error loading extender settings: {ex.ToString()}");
+				DivinityApp.Log($"Error loading extender settings: {ex.ToString()}");
 			}
 
 			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "DXGI.dll");
-			Trace.WriteLine($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
+			DivinityApp.Log($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
 			if (File.Exists(extenderUpdaterPath))
 			{
-				Trace.WriteLine($"Checking DXGI.dll for Osiris ASCII bytes.");
+				DivinityApp.Log($"Checking DXGI.dll for Osiris ASCII bytes.");
 				try
 				{
 					using (var stream = new FileStream(extenderUpdaterPath, FileMode.Open, FileAccess.Read, FileShare.Read))
@@ -566,11 +566,11 @@ namespace DivinityModManager.ViewModels
 						if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
 						{
 							Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
-							Trace.WriteLine($"Found the OsiExtender at '{extenderUpdaterPath}'.");
+							DivinityApp.Log($"Found the OsiExtender at '{extenderUpdaterPath}'.");
 						}
 						else
 						{
-							Trace.WriteLine($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
+							DivinityApp.Log($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
 						}
 					}
 				}
@@ -579,17 +579,17 @@ namespace DivinityModManager.ViewModels
 					// This can happen if the game locks up the dll.
 					// Assume it's the extender for now.
 					Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
-					Trace.WriteLine($"WARNING: {extenderUpdaterPath} is locked by a process.");
+					DivinityApp.Log($"WARNING: {extenderUpdaterPath} is locked by a process.");
 				}
 				catch (Exception ex)
 				{
-					Trace.WriteLine($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
+					DivinityApp.Log($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
 				}
 			}
 			else
 			{
 				Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = false;
-				Trace.WriteLine($"Extender DXGI.dll not found.");
+				DivinityApp.Log($"Extender DXGI.dll not found.");
 			}
 
 			string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
@@ -605,7 +605,7 @@ namespace DivinityModManager.ViewModels
 						if (int.TryParse(version, out int intVersion))
 						{
 							Settings.ExtenderSettings.ExtenderVersion = intVersion;
-							Trace.WriteLine($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+							DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
 						}
 						else
 						{
@@ -615,7 +615,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					Trace.WriteLine($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
+					DivinityApp.Log($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
 				}
 			}
 			return Unit.Default;
@@ -698,13 +698,13 @@ namespace DivinityModManager.ViewModels
 					Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(AppSettings.DefaultPathways.Steam.AppID).Replace("\\", "/");
 					if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 					{
-						Trace.WriteLine($"Invalid workshop path set in settings file. Found workshop folder at: '{Settings.WorkshopPath}'.");
+						DivinityApp.Log($"Invalid workshop path set in settings file. Found workshop folder at: '{Settings.WorkshopPath}'.");
 						SaveSettings();
 					}
 				}
 				else if (Directory.Exists(Settings.WorkshopPath))
 				{
-					Trace.WriteLine($"Found workshop folder at: '{Settings.WorkshopPath}'.");
+					DivinityApp.Log($"Found workshop folder at: '{Settings.WorkshopPath}'.");
 				}
 				WorkshopSupportEnabled = true;
 			}
@@ -731,7 +731,7 @@ namespace DivinityModManager.ViewModels
 
 			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
 			{
-				Trace.WriteLine($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
+				DivinityApp.Log($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
 				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 				{
 					Process.Start(Settings.WorkshopPath);
@@ -960,7 +960,7 @@ namespace DivinityModManager.ViewModels
 					workshopMods.Clear();
 					workshopMods.AddRange(sortedWorkshopMods);
 
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
+					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 				}
 			}
 		}
@@ -1010,7 +1010,7 @@ namespace DivinityModManager.ViewModels
 					pakMod.WorkshopData.ID = workshopMod.WorkshopData.ID;
 					if (!pakMod.IsEditorMod)
 					{
-						//Trace.WriteLine($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
+						//DivinityApp.LogMessage($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
 						if (workshopMod.Version.VersionInt > pakMod.Version.VersionInt || workshopMod.LastModified > pakMod.LastModified)
 						{
 							ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
@@ -1023,8 +1023,8 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						Trace.WriteLine($"[***WARNING***] An editor mod has a local workshop pak! ({pakMod.Name}):");
-						Trace.WriteLine($"--- Editor Version({pakMod.Version.Version}) | Workshop Version({workshopMod.Version.Version})");
+						DivinityApp.Log($"[***WARNING***] An editor mod has a local workshop pak! ({pakMod.Name}):");
+						DivinityApp.Log($"--- Editor Version({pakMod.Version.Version}) | Workshop Version({workshopMod.Version.Version})");
 					}
 				}
 				else
@@ -1036,7 +1036,7 @@ namespace DivinityModManager.ViewModels
 			if (count > 0)
 			{
 				ModUpdatesViewData.SelectAll(true);
-				Trace.WriteLine($"'{count}' mod updates pending.");
+				DivinityApp.Log($"'{count}' mod updates pending.");
 			}
 			ModUpdatesViewData.OnLoaded?.Invoke();
 		}
@@ -1048,7 +1048,7 @@ namespace DivinityModManager.ViewModels
 				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
 				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
 				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
-				Trace.WriteLine($"Larian documents folder set to '{larianDocumentsFolder}'.");
+				DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");
 				if (!Directory.Exists(larianDocumentsFolder))
 				{
 					Directory.CreateDirectory(larianDocumentsFolder);
@@ -1058,7 +1058,7 @@ namespace DivinityModManager.ViewModels
 				PathwayData.DocumentsModsPath = modPakFolder;
 				if (!Directory.Exists(modPakFolder))
 				{
-					Trace.WriteLine($"No mods folder found at '{modPakFolder}'. Creating folder.");
+					DivinityApp.Log($"No mods folder found at '{modPakFolder}'. Creating folder.");
 					Directory.CreateDirectory(modPakFolder);
 				}
 
@@ -1066,7 +1066,7 @@ namespace DivinityModManager.ViewModels
 				PathwayData.DocumentsProfilesPath = profileFolder;
 				if (!Directory.Exists(profileFolder))
 				{
-					Trace.WriteLine($"Creating profile folder at '{profileFolder}'.");
+					DivinityApp.Log($"Creating profile folder at '{profileFolder}'.");
 					Directory.CreateDirectory(profileFolder);
 				}
 
@@ -1091,12 +1091,12 @@ namespace DivinityModManager.ViewModels
 							if (File.Exists(exePath))
 							{
 								Settings.GameExecutablePath = exePath.Replace("\\", "/");
-								Trace.WriteLine($"Exe path set to '{exePath}'.");
+								DivinityApp.Log($"Exe path set to '{exePath}'.");
 							}
 						}
 
 						string gameDataPath = Path.Combine(installPath, AppSettings.DefaultPathways.GameDataFolder).Replace("\\", "/");
-						Trace.WriteLine($"Set game data path to '{gameDataPath}'.");
+						DivinityApp.Log($"Set game data path to '{gameDataPath}'.");
 						Settings.GameDataPath = gameDataPath;
 						SaveSettings();
 					}
@@ -1119,7 +1119,7 @@ namespace DivinityModManager.ViewModels
 						if (File.Exists(exePath))
 						{
 							Settings.GameExecutablePath = exePath.Replace("\\", "/");
-							Trace.WriteLine($"Exe path set to '{exePath}'.");
+							DivinityApp.Log($"Exe path set to '{exePath}'.");
 						}
 					}
 				}
@@ -1131,7 +1131,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error setting up game pathways: {ex.ToString()}");
+				DivinityApp.Log($"Error setting up game pathways: {ex.ToString()}");
 			}
 		}
 
@@ -1141,7 +1141,7 @@ namespace DivinityModManager.ViewModels
 			foreach (var m in DivinityApp.IgnoredMods)
 			{
 				mods.Add(m);
-				Trace.WriteLine($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+				DivinityApp.Log($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
 			}
 			foreach (var m in loadedMods)
 			{
@@ -1156,7 +1156,7 @@ namespace DivinityModManager.ViewModels
 					{
 						mods.Remove(existingMod);
 						mods.Add(m);
-						Trace.WriteLine($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+						DivinityApp.Log($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
 					}
 				}
 			}
@@ -1173,7 +1173,7 @@ namespace DivinityModManager.ViewModels
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
-				Trace.WriteLine($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
+				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
 				modPakData = DivinityModDataLoader.LoadModPackageData(PathwayData.DocumentsModsPath);
 			}
 
@@ -1185,7 +1185,7 @@ namespace DivinityModManager.ViewModels
 				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
 				if (Directory.Exists(modsDirectory))
 				{
-					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
+					DivinityApp.Log($"Loading mod projects from '{modsDirectory}'.");
 					projects = DivinityModDataLoader.LoadEditorProjects(modsDirectory);
 				}
 
@@ -1197,7 +1197,7 @@ namespace DivinityModManager.ViewModels
 			if (projects != null) MergeModLists(finalMods, projects);
 
 			finalMods = finalMods.OrderBy(m => m.Name).ToList();
-			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
+			DivinityApp.Log($"Loaded '{finalMods.Count}' mods.");
 			return finalMods;
 		}
 
@@ -1230,7 +1230,7 @@ namespace DivinityModManager.ViewModels
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
-				Trace.WriteLine($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
+				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
 				modPakData = await DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath);
 			}
 
@@ -1242,7 +1242,7 @@ namespace DivinityModManager.ViewModels
 				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
 				if (Directory.Exists(modsDirectory))
 				{
-					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
+					DivinityApp.Log($"Loading mod projects from '{modsDirectory}'.");
 					projects = await DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory);
 				}
 
@@ -1254,7 +1254,7 @@ namespace DivinityModManager.ViewModels
 			if (projects != null) MergeModLists(finalMods, projects);
 
 			finalMods = finalMods.OrderBy(m => m.Name).ToList();
-			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
+			DivinityApp.Log($"Loaded '{finalMods.Count}' mods.");
 			return finalMods;
 		}
 
@@ -1267,12 +1267,12 @@ namespace DivinityModManager.ViewModels
 		{
 			if (Directory.Exists(PathwayData.DocumentsProfilesPath))
 			{
-				Trace.WriteLine($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
+				DivinityApp.Log($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
 
 				var profiles = DivinityModDataLoader.LoadProfileData(PathwayData.DocumentsProfilesPath);
 				Profiles.AddRange(profiles);
 
-				Trace.WriteLine($"Loaded '{Profiles.Count}' profiles.");
+				DivinityApp.Log($"Loaded '{Profiles.Count}' profiles.");
 
 				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(PathwayData.DocumentsProfilesPath);
 				if (!String.IsNullOrWhiteSpace(selectedUUID))
@@ -1285,11 +1285,11 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-				Trace.WriteLine($"Last selected UUID: {selectedUUID}");
+				DivinityApp.Log($"Last selected UUID: {selectedUUID}");
 			}
 			else
 			{
-				Trace.WriteLine($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
+				DivinityApp.Log($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
 		}
 
@@ -1297,15 +1297,15 @@ namespace DivinityModManager.ViewModels
 		{
 			if (Directory.Exists(PathwayData.DocumentsProfilesPath))
 			{
-				Trace.WriteLine($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
+				DivinityApp.Log($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
 
 				var profiles = await DivinityModDataLoader.LoadProfileDataAsync(PathwayData.DocumentsProfilesPath);
-				Trace.WriteLine($"Loaded '{profiles.Count}' profiles.");
+				DivinityApp.Log($"Loaded '{profiles.Count}' profiles.");
 				return profiles;
 			}
 			else
 			{
-				Trace.WriteLine($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
+				DivinityApp.Log($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
 			}
 			return null;
 		}
@@ -1345,14 +1345,14 @@ namespace DivinityModManager.ViewModels
 						}
 						else
 						{
-							Trace.WriteLine($"UUID {uuid} is missing from the profile's active mod list.");
+							DivinityApp.Log($"UUID {uuid} is missing from the profile's active mod list.");
 						}
 					}
 
 					SelectedProfile.SavedLoadOrder = currentOrder;
 				}
 
-				Trace.WriteLine($"Profile order: {String.Join(";", SelectedProfile.SavedLoadOrder.Order.Select(x => x.Name))}");
+				DivinityApp.Log($"Profile order: {String.Join(";", SelectedProfile.SavedLoadOrder.Order.Select(x => x.Name))}");
 
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
@@ -1363,7 +1363,7 @@ namespace DivinityModManager.ViewModels
 					if (selectIndex != -1)
 					{
 						if (selectIndex >= ModOrderList.Count) selectIndex = ModOrderList.Count - 1;
-						Trace.WriteLine($"Setting next order index to [{selectIndex}/{ModOrderList.Count - 1}].");
+						DivinityApp.Log($"Setting next order index to [{selectIndex}/{ModOrderList.Count - 1}].");
 						try
 						{
 							SelectedModOrderIndex = selectIndex;
@@ -1373,7 +1373,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine($"Error setting next load order:\n{ex.ToString()}");
+							DivinityApp.Log($"Error setting next load order:\n{ex.ToString()}");
 						}
 					}
 					LoadingOrder = false;
@@ -1438,12 +1438,12 @@ namespace DivinityModManager.ViewModels
 
 			var loadFrom = order.Order;
 
-			Trace.WriteLine($"Loading mod order '{order.Name}'.");
+			DivinityApp.Log($"Loading mod order '{order.Name}'.");
 			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 			if (missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
 			{
 				missingMods.AddRange(missingModsFromProfileOrder);
-				Trace.WriteLine($"Missing mods (from profile): {String.Join(";", missingModsFromProfileOrder)}");
+				DivinityApp.Log($"Missing mods (from profile): {String.Join(";", missingModsFromProfileOrder)}");
 			}
 
 			for (int i = 0; i < loadFrom.Count; i++)
@@ -1511,10 +1511,10 @@ namespace DivinityModManager.ViewModels
 
 			if (missingMods.Count > 0)
 			{
-				Trace.WriteLine($"Missing mods: {String.Join(";", missingMods)}");
+				DivinityApp.Log($"Missing mods: {String.Join(";", missingMods)}");
 				if (Settings?.DisableMissingModWarnings == true)
 				{
-					Trace.WriteLine("Skipping missing mod display.");
+					DivinityApp.Log("Skipping missing mod display.");
 				}
 				else
 				{
@@ -1560,7 +1560,7 @@ namespace DivinityModManager.ViewModels
 				loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
 			}
 
-			Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+			DivinityApp.Log($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
 			var savedOrderList = DivinityModDataLoader.FindLoadOrderFilesInDirectory(loadOrderDirectory);
 			return savedOrderList;
 		}
@@ -1646,7 +1646,7 @@ namespace DivinityModManager.ViewModels
 				var loadedWorkshopMods = await LoadWorkshopModsAsync(workshopModLoadingCancelToken);
 				await Observable.Start(() => {
 					workshopMods.AddRange(loadedWorkshopMods);
-					Trace.WriteLine($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
+					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 					if (!workshopModLoadingCancelToken.Value.IsCancellationRequested)
 					{
 						CheckForModUpdates(workshopModLoadingCancelToken);
@@ -1703,8 +1703,8 @@ namespace DivinityModManager.ViewModels
 					var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) && !CachedWorkshopData.NonWorkshopMods.Contains(x.UUID)).ToList();
 					if (unknownWorkshopMods.Count > 0)
 					{
-						//Trace.WriteLine("Mods:");
-						//Trace.WriteLine(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
+						//DivinityApp.LogMessage("Mods:");
+						//DivinityApp.LogMessage(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
 						RxApp.MainThreadScheduler.Schedule(() =>
 						{
 							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
@@ -1731,7 +1731,7 @@ namespace DivinityModManager.ViewModels
 								else
 								{
 									CachedWorkshopData.AddNonWorkshopMod(mod.UUID);
-									Trace.WriteLine($"Adding mod {mod.Name} to NonWorkshop mods");
+									DivinityApp.Log($"Adding mod {mod.Name} to NonWorkshop mods");
 								}
 							}
 						}
@@ -1764,7 +1764,7 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<IDisposable> RefreshAsync(IScheduler ctrl, CancellationToken t)
 		{
-			Trace.WriteLine($"Refreshing data asynchronously...");
+			DivinityApp.Log($"Refreshing data asynchronously...");
 
 			double taskStepAmount = 1.0 / 7;
 
@@ -1812,11 +1812,11 @@ namespace DivinityModManager.ViewModels
 
 				if (savedModOrderList.Count > 0)
 				{
-					Trace.WriteLine($"{savedModOrderList.Count} saved load orders found.");
+					DivinityApp.Log($"{savedModOrderList.Count} saved load orders found.");
 				}
 				else
 				{
-					Trace.WriteLine("No saved orders found.");
+					DivinityApp.Log("No saved orders found.");
 				}
 
 				await SetMainProgressTextAsync("Setting up mod lists...");
@@ -1839,7 +1839,7 @@ namespace DivinityModManager.ViewModels
 						else
 						{
 							SelectedProfileIndex = 0;
-							Trace.WriteLine($"Profile '{selectedProfileUUID}' not found {Profiles.Count}/{loadedProfiles.Count}.");
+							DivinityApp.Log($"Profile '{selectedProfileUUID}' not found {Profiles.Count}/{loadedProfiles.Count}.");
 						}
 					}
 					else
@@ -1866,13 +1866,13 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"[*ERROR*] Larian documents folder not found!");
+				DivinityApp.Log($"[*ERROR*] Larian documents folder not found!");
 			}
 
 			await Observable.Start(() => {
 				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
 				{
-					Trace.WriteLine($"Setting selected adventure mod.");
+					DivinityApp.Log($"Setting selected adventure mod.");
 					var nextAdventureMod = AdventureMods.FirstOrDefault(x => x.UUID == lastAdventureMod);
 					if (nextAdventureMod != null)
 					{
@@ -1885,7 +1885,7 @@ namespace DivinityModManager.ViewModels
 					SelectedAdventureModIndex = 0;
 				}
 
-				Trace.WriteLine($"Finishing up refresh.");
+				DivinityApp.Log($"Finishing up refresh.");
 
 				Refreshing = false;
 				OnMainProgressComplete();
@@ -1895,12 +1895,12 @@ namespace DivinityModManager.ViewModels
 				{
 					if (this.IsInitialized)
 					{
-						Trace.WriteLine($"Loading extender settings.");
+						DivinityApp.Log($"Loading extender settings.");
 						LoadExtenderSettings();
 					}
 					else
 					{
-						Trace.WriteLine($"Checking extender data.");
+						DivinityApp.Log($"Checking extender data.");
 						CheckExtenderData();
 					}
 				}
@@ -1921,12 +1921,12 @@ namespace DivinityModManager.ViewModels
 			});
 			*/
 #if DEBUG
-			Trace.WriteLine("Mods (" + mods.Count + ")");
-			Trace.WriteLine(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			Trace.WriteLine("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
-			Trace.WriteLine(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			Trace.WriteLine("Adventure Mods (" + AdventureMods.Count + ")");
-			Trace.WriteLine(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
+			DivinityApp.Log("Mods (" + mods.Count + ")");
+			DivinityApp.Log(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			DivinityApp.Log("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
+			DivinityApp.Log(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
+			DivinityApp.Log("Adventure Mods (" + AdventureMods.Count + ")");
+			DivinityApp.Log(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
 #endif
 			return Disposable.Empty;
 		}
@@ -1966,12 +1966,12 @@ namespace DivinityModManager.ViewModels
 					loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
 				}
 
-				Trace.WriteLine($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
+				DivinityApp.Log($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
 				return await DivinityModDataLoader.FindLoadOrderFilesInDirectoryAsync(loadOrderDirectory);
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error loading external load orders: {ex.ToString()}.");
+				DivinityApp.Log($"Error loading external load orders: {ex.ToString()}.");
 				return null;
 			}
 
@@ -2031,19 +2031,19 @@ namespace DivinityModManager.ViewModels
 											MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel, view.MainWindowMessageBox_OK.Style);
 										if (messageBoxResult == MessageBoxResult.OK)
 										{
-											Trace.WriteLine($"Renaming load order file '{lastPath}' to '{outputPath}'.");
+											DivinityApp.Log($"Renaming load order file '{lastPath}' to '{outputPath}'.");
 											File.Move(lastPath, outputPath);
 										}
 									}
 									else
 									{
-										Trace.WriteLine($"Renaming load order file '{lastPath}' to '{outputPath}'.");
+										DivinityApp.Log($"Renaming load order file '{lastPath}' to '{outputPath}'.");
 										File.Move(lastPath, outputPath);
 									}
 								}
 								catch (Exception ex)
 								{
-									Trace.WriteLine($"Error renaming file:\n{ex.ToString()}");
+									DivinityApp.Log($"Error renaming file:\n{ex.ToString()}");
 								}
 							}
 						}
@@ -2128,7 +2128,7 @@ namespace DivinityModManager.ViewModels
 						if (order.FilePath == dialog.FileName)
 						{
 							order.SetOrder(tempOrder);
-							Trace.WriteLine($"Updated saved order '{order.Name}' from '{dialog.FileName}'.");
+							DivinityApp.Log($"Updated saved order '{order.Name}' from '{dialog.FileName}'.");
 						}
 					}
 				}
@@ -2207,8 +2207,8 @@ namespace DivinityModManager.ViewModels
 			{
 				if (displayExtenderModWarning)
 				{
-					//Trace.WriteLine($"Mod Order: {String.Join("\n", order.Order.Select(x => x.Name))}");
-					Trace.WriteLine("Checking mods for extender requirements.");
+					//DivinityApp.LogMessage($"Mod Order: {String.Join("\n", order.Order.Select(x => x.Name))}");
+					DivinityApp.Log("Checking mods for extender requirements.");
 					List<DivinityMissingModData> extenderRequiredMods = new List<DivinityMissingModData>();
 					for (int i = 0; i < order.Order.Count; i++)
 					{
@@ -2216,7 +2216,7 @@ namespace DivinityModManager.ViewModels
 						var mod = ActiveMods.FirstOrDefault(m => m.UUID == entry.UUID);
 						if (mod != null)
 						{
-							Trace.WriteLine($"{mod.Name} | ExtenderModStatus: {mod.ExtenderModStatus}");
+							DivinityApp.Log($"{mod.Name} | ExtenderModStatus: {mod.ExtenderModStatus}");
 
 							if (mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || mod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
 							{
@@ -2252,7 +2252,7 @@ namespace DivinityModManager.ViewModels
 
 					if (extenderRequiredMods.Count > 0)
 					{
-						Trace.WriteLine("Displaying mods that require the extender.");
+						DivinityApp.Log("Displaying mods that require the extender.");
 						view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
 						view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
 						view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", extenderRequiredMods.OrderBy(x => x.Index)),
@@ -2289,11 +2289,11 @@ namespace DivinityModManager.ViewModels
 
 					if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
 					{
-						Trace.WriteLine($"Set active profile to '{SelectedProfile.Name}'.");
+						DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
 					}
 					else
 					{
-						Trace.WriteLine($"Could not set active profile to '{SelectedProfile.Name}'.");
+						DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
 					}
 
 					//Update "Current" order
@@ -2339,7 +2339,7 @@ namespace DivinityModManager.ViewModels
 
 		private void OnMainProgressComplete(double delay = 0)
 		{
-			Trace.WriteLine($"Main progress is complete.");
+			DivinityApp.Log($"Main progress is complete.");
 			TimeSpan delaySpan = TimeSpan.Zero;
 			if (delay > 0) delaySpan = TimeSpan.FromMilliseconds(delay);
 
@@ -2365,7 +2365,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine($"Error running AutoUpdater:\n{ex.ToString()}");
+							DivinityApp.Log($"Error running AutoUpdater:\n{ex.ToString()}");
 						}
 					}
 				}
@@ -2456,7 +2456,7 @@ namespace DivinityModManager.ViewModels
 								if (Directory.Exists(modsFolder)) sourceFolders.Add(modsFolder);
 								if (Directory.Exists(publicFolder)) sourceFolders.Add(publicFolder);
 
-								Trace.WriteLine($"Creating package for editor mod '{mod.Name}' - '{outputPackage}'.");
+								DivinityApp.Log($"Creating package for editor mod '{mod.Name}' - '{outputPackage}'.");
 
 								if (await DivinityFileUtils.CreatePackageAsync(gameDataFolder, sourceFolders, outputPackage, DivinityFileUtils.IgnoredPackageFiles, t))
 								{
@@ -2484,7 +2484,7 @@ namespace DivinityModManager.ViewModels
 					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						string msg = $"Error writing load order archive '{outputPath}': {ex.ToString()}";
-						Trace.WriteLine(msg);
+						DivinityApp.Log(msg);
 						view.AlertBar.SetDangerAlert(msg);
 					});
 				}
@@ -2647,7 +2647,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				Trace.WriteLine($"SelectedProfile({SelectedProfile}) SelectedModOrder({SelectedModOrder})");
+				DivinityApp.Log($"SelectedProfile({SelectedProfile}) SelectedModOrder({SelectedModOrder})");
 				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
 			}
 		}
@@ -2689,16 +2689,16 @@ namespace DivinityModManager.ViewModels
 			if (dialog.ShowDialog(view) == true)
 			{
 				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
-				Trace.WriteLine($"Loading order from '{dialog.FileName}'.");
+				DivinityApp.Log($"Loading order from '{dialog.FileName}'.");
 				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName);
 				if (newOrder != null)
 				{
-					Trace.WriteLine($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
+					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
 					return newOrder;
 				}
 				else
 				{
-					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+					DivinityApp.Log($"Failed to load order from '{dialog.FileName}'.");
 					ShowAlert($"No mod order found in save \"{Path.GetFileNameWithoutExtension(dialog.FileName)}\".", -1, 30);
 				}
 			}
@@ -2724,11 +2724,11 @@ namespace DivinityModManager.ViewModels
 					SelectedModOrder.SetOrder(order);
 					if (LoadModOrder(SelectedModOrder))
 					{
-						Trace.WriteLine($"Successfully re-loaded order {SelectedModOrder.Name} with save order.");
+						DivinityApp.Log($"Successfully re-loaded order {SelectedModOrder.Name} with save order.");
 					}
 					else
 					{
-						Trace.WriteLine($"Failed to load order {SelectedModOrder.Name}.");
+						DivinityApp.Log($"Failed to load order {SelectedModOrder.Name}.");
 					}
 				}
 				else
@@ -2774,16 +2774,16 @@ namespace DivinityModManager.ViewModels
 			{
 				Settings.LastLoadedOrderFilePath = Path.GetDirectoryName(dialog.FileName);
 				SaveSettings();
-				Trace.WriteLine($"Loading order from '{dialog.FileName}'.");
+				DivinityApp.Log($"Loading order from '{dialog.FileName}'.");
 				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName);
 				if (newOrder != null)
 				{
-					Trace.WriteLine($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
+					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
 					AddNewModOrder(newOrder);
 				}
 				else
 				{
-					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+					DivinityApp.Log($"Failed to load order from '{dialog.FileName}'.");
 				}
 			}
 		}
@@ -2842,11 +2842,11 @@ namespace DivinityModManager.ViewModels
 				{
 					rootFolder = Path.GetDirectoryName(renameDialog.FileName);
 					PathwayData.LastSaveFilePath = rootFolder;
-					Trace.WriteLine($"Renaming '{dialog.FileName}' to '{renameDialog.FileName}'.");
+					DivinityApp.Log($"Renaming '{dialog.FileName}' to '{renameDialog.FileName}'.");
 
 					if (DivinitySaveTools.RenameSave(dialog.FileName, renameDialog.FileName))
 					{
-						//Trace.WriteLine($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
+						//DivinityApp.LogMessage($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.");
 
 						try
 						{
@@ -2855,7 +2855,7 @@ namespace DivinityModManager.ViewModels
 							if (File.Exists(previewImage))
 							{
 								File.Move(previewImage, renamedImage);
-								Trace.WriteLine($"Renamed save screenshot '{previewImage}' to '{renamedImage}'.");
+								DivinityApp.Log($"Renamed save screenshot '{previewImage}' to '{renamedImage}'.");
 							}
 
 							string originalDirectory = Path.GetDirectoryName(dialog.FileName);
@@ -2871,7 +2871,7 @@ namespace DivinityModManager.ViewModels
 										desiredDirectory = Path.Combine(dirInfo.Parent.FullName, Path.GetFileNameWithoutExtension(renameDialog.FileName));
 										RecycleBinHelper.DeleteFile(dialog.FileName, false, false);
 										Directory.Move(originalDirectory, desiredDirectory);
-										Trace.WriteLine($"Renamed save folder '{originalDirectory}' to '{desiredDirectory}'.");
+										DivinityApp.Log($"Renamed save folder '{originalDirectory}' to '{desiredDirectory}'.");
 									}
 								}
 							}
@@ -2880,12 +2880,12 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}':\n" + ex.ToString());
+							DivinityApp.Log($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}':\n" + ex.ToString());
 						}
 					}
 					else
 					{
-						Trace.WriteLine($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}'.");
+						DivinityApp.Log($"Failed to rename '{dialog.FileName}' to '{renameDialog.FileName}'.");
 					}
 				}
 			}
@@ -2901,7 +2901,7 @@ namespace DivinityModManager.ViewModels
 			{
 				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
 				{
-					Trace.WriteLine($"Progress: {MainProgressValue} - {MainProgressWorkText}");
+					DivinityApp.Log($"Progress: {MainProgressValue} - {MainProgressWorkText}");
 				});
 			}
 
@@ -2937,7 +2937,7 @@ namespace DivinityModManager.ViewModels
 		public void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
 		{
 			int totalHidden = 0;
-			//Trace.WriteLine("Filtering mod list with search term " + searchText);
+			//DivinityApp.LogMessage("Filtering mod list with search term " + searchText);
 			if (String.IsNullOrWhiteSpace(searchText))
 			{
 				foreach (var m in modDataList)
@@ -3116,7 +3116,7 @@ namespace DivinityModManager.ViewModels
 				SaveSettings();
 
 				string outputDirectory = dialog.SelectedPath;
-				Trace.WriteLine($"Extracting selected mods to '{outputDirectory}'.");
+				DivinityApp.Log($"Extracting selected mods to '{outputDirectory}'.");
 
 				int totalWork = SelectedPakMods.Count;
 				double taskStepAmount = 1.0 / totalWork;
@@ -3149,7 +3149,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+							DivinityApp.Log($"Error extracting package: {ex.ToString()}");
 						}
 						IncreaseMainProgressValue(taskStepAmount);
 					}
@@ -3296,7 +3296,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					Trace.WriteLine($"Error extracting package: {ex.ToString()}");
+					DivinityApp.Log($"Error extracting package: {ex.ToString()}");
 				}
 				finally
 				{
@@ -3327,7 +3327,7 @@ namespace DivinityModManager.ViewModels
 									if (int.TryParse(m.Groups[1].Value, out int version))
 									{
 										Settings.ExtenderSettings.ExtenderVersion = version;
-										Trace.WriteLine($"Set extender version to v{version},");
+										DivinityApp.Log($"Set extender version to v{version},");
 									}
 								}
 							}
@@ -3340,7 +3340,7 @@ namespace DivinityModManager.ViewModels
 									if (int.TryParse(m.Groups[1].Value, out int version))
 									{
 										Settings.ExtenderSettings.ExtenderVersion = version;
-										Trace.WriteLine($"Set extender version to v{version},");
+										DivinityApp.Log($"Set extender version to v{version},");
 									}
 								}
 							}
@@ -3379,7 +3379,7 @@ Directory the zip will be extracted to:
 			}
 			else
 			{
-				Trace.WriteLine($"Getting a release download link failed for some reason. Opening repo url: https://github.com/Norbyte/ositools/releases/latest");
+				DivinityApp.Log($"Getting a release download link failed for some reason. Opening repo url: https://github.com/Norbyte/ositools/releases/latest");
 				Process.Start("https://github.com/Norbyte/ositools/releases/latest");
 			}
 		}
@@ -3475,7 +3475,7 @@ Directory the zip will be extracted to:
 				}
 				else
 				{
-					Trace.WriteLine("Can't find OrdersComboBox!");
+					DivinityApp.Log("Can't find OrdersComboBox!");
 				}
 			});
 			return Unit.Default;
@@ -3538,8 +3538,8 @@ Directory the zip will be extracted to:
 						}
 						catch (Exception ex)
 						{
-							Trace.WriteLine("Error setting feature key:");
-							Trace.WriteLine(ex.ToString());
+							DivinityApp.Log("Error setting feature key:");
+							DivinityApp.Log(ex.ToString());
 						}
 					}
 				}
@@ -3618,7 +3618,7 @@ Directory the zip will be extracted to:
 								}
 							}
 							DivinityApp.IgnoredMods.Add(mod);
-							//Trace.WriteLine($"Ignored mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
+							//DivinityApp.LogMessage($"Ignored mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
 						}
 					}
 
@@ -3631,7 +3631,7 @@ Directory the zip will be extracted to:
 						}
 					}
 
-					//Trace.WriteLine("Ignored mods:\n" + String.Join("\n", DivinityApp.IgnoredMods.Select(x => x.Name)));
+					//DivinityApp.LogMessage("Ignored mods:\n" + String.Join("\n", DivinityApp.IgnoredMods.Select(x => x.Name)));
 				}
 			}
 		}
@@ -3801,7 +3801,7 @@ Directory the zip will be extracted to:
 					if (adventureModData != null)
 					{
 						var nextAdventure = AdventureMods.IndexOf(adventureModData);
-						Trace.WriteLine($"Found adventure mod in profile: {adventureModData.Name} | {nextAdventure}");
+						DivinityApp.Log($"Found adventure mod in profile: {adventureModData.Name} | {nextAdventure}");
 						if (nextAdventure > -1)
 						{
 							SelectedAdventureModIndex = nextAdventure;
@@ -3820,16 +3820,16 @@ Directory the zip will be extracted to:
 						{
 							if (LoadModOrder(SelectedModOrder))
 							{
-								Trace.WriteLine($"Successfully loaded order {SelectedModOrder.Name}.");
+								DivinityApp.Log($"Successfully loaded order {SelectedModOrder.Name}.");
 							}
 							else
 							{
-								Trace.WriteLine($"Failed to load order {SelectedModOrder.Name}.");
+								DivinityApp.Log($"Failed to load order {SelectedModOrder.Name}.");
 							}
 						}
 						else
 						{
-							Trace.WriteLine($"Order changed to {SelectedModOrder.Name}. Skipping list loading since the orders match.");
+							DivinityApp.Log($"Order changed to {SelectedModOrder.Name}. Skipping list loading since the orders match.");
 						}
 					}
 				}

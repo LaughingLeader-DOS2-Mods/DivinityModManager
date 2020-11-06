@@ -93,7 +93,7 @@ namespace DivinityModManager.Views
 			{
 				ViewModel.DebugMode = true;
 				ViewModel.ToggleLogging(true);
-				Trace.WriteLine("Enable logging due to the debug file next to the exe.");
+				DivinityApp.Log("Enable logging due to the debug file next to the exe.");
 			}
 
 			this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
@@ -149,7 +149,7 @@ namespace DivinityModManager.Views
 				});
 				c.ThrownExceptions.Subscribe((ex) =>
 				{
-					Trace.WriteLine("Error opening settings window: " + ex.ToString());
+					DivinityApp.Log("Error opening settings window: " + ex.ToString());
 				});
 				ViewModel.OpenPreferencesCommand = c;
 
@@ -174,7 +174,7 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
 				{
-					Trace.WriteLine($"Main Progress is active: {b}");
+					DivinityApp.Log($"Main Progress is active: {b}");
 					if (b)
 					{
 						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
@@ -277,7 +277,7 @@ namespace DivinityModManager.Views
 			TextBlock lblMessage = grdParent.FindVisualChildren<TextBlock>().FirstOrDefault();
 			if(lblMessage != null)
 			{
-				Trace.WriteLine(lblMessage.Text);
+				DivinityApp.Log(lblMessage.Text);
 			}
 		}
 

@@ -21,7 +21,7 @@ namespace DivinityModManager.Models
 			{
 				var vals = val.Split(separators, StringSplitOptions.RemoveEmptyEntries);
 				var findVals = FilterValue.Split(separators, StringSplitOptions.RemoveEmptyEntries);
-				Trace.WriteLine($"Searching for '{String.Join("; ", findVals)}' in ({String.Join("; ", vals)}");
+				DivinityApp.Log($"Searching for '{String.Join("; ", findVals)}' in ({String.Join("; ", vals)}");
 				return vals.Any(x => findVals.Any(x2 => CultureInfo.CurrentCulture.CompareInfo.IndexOf(x, x2, CompareOptions.IgnoreCase) >= 0));
 			}
 			else
@@ -73,7 +73,7 @@ namespace DivinityModManager.Models
 
 			if (PropertyContains("Name"))
 			{
-				//Trace.WriteLine($"Searching for '{FilterValue}' in '{mod.Name}' | {mod.Name.IndexOf(FilterValue)}");
+				//DivinityApp.LogMessage($"Searching for '{FilterValue}' in '{mod.Name}' | {mod.Name.IndexOf(FilterValue)}");
 				if (ValueContains(mod.Name)) return true;
 			}
 

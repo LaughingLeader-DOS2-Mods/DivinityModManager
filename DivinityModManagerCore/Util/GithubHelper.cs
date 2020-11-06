@@ -39,7 +39,7 @@ namespace DivinityModManager.Util
 				}
 #if DEBUG
 				var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-				Trace.WriteLine($"Can't find 'browser_download_url' in:\n{String.Join(Environment.NewLine, lines)}");
+				DivinityApp.Log($"Can't find 'browser_download_url' in:\n{String.Join(Environment.NewLine, lines)}");
 #endif
 			}
 			return "";

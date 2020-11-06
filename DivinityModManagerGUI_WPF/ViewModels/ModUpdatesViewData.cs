@@ -206,7 +206,7 @@ namespace DivinityModManager.ViewModels
 		private void CopyFilesProgress_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
 		{
 			Unlocked = true;
-			Trace.WriteLine("Workshop mod copying complete.");
+			DivinityApp.Log("Workshop mod copying complete.");
 			try
 			{
 				if (e.Result is CopyModUpdatesTask args)
@@ -217,7 +217,7 @@ namespace DivinityModManager.ViewModels
 			catch(Exception ex)
 			{
 				string message = $"Error copying workshop mods: {ex.ToString()}";
-				Trace.WriteLine(message);
+				DivinityApp.Log(message);
 				MainWindow.Self.AlertBar.SetDangerAlert(message);
 			}
 			CloseView?.Invoke(true);
@@ -231,7 +231,7 @@ namespace DivinityModManager.ViewModels
 				var totalWork = args.NewFilesToMove.Count + args.UpdatesToMove.Count;
 				if (args.NewFilesToMove.Count > 0)
 				{
-					Trace.WriteLine($"Copying '{args.NewFilesToMove.Count}' new workshop mod(s) to the local mods folder.");
+					DivinityApp.Log($"Copying '{args.NewFilesToMove.Count}' new workshop mod(s) to the local mods folder.");
 
 					foreach (string file in args.NewFilesToMove)
 					{
@@ -245,14 +245,14 @@ namespace DivinityModManager.ViewModels
 						catch(Alphaleonis.Win32.Filesystem.FileReadOnlyException ex)
 						{
 							string message = $"Error copying '{fileName}' - File is read only!{Environment.NewLine}{ex.ToString()}";
-							Trace.WriteLine(message);
+							DivinityApp.Log(message);
 							MainWindow.Self.AlertBar.SetDangerAlert(message);
 							dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
 						}
 						catch (Exception ex)
 						{
 							string message = $"Error copying '{fileName}':{Environment.NewLine}{ex.ToString()}";
-							Trace.WriteLine(message);
+							DivinityApp.Log(message);
 							MainWindow.Self.AlertBar.SetDangerAlert(message);
 							dialog.ReportProgress(args.TotalMoved / totalWork, message, null);
 						}
@@ -264,19 +264,19 @@ namespace DivinityModManager.ViewModels
 				{
 					string backupFolder = Path.Combine(args.DocumentsFolder, _mainWindowViewModel.AppSettings.DefaultPathways.DocumentsGameFolder, "Mods_Old_ModManager");
 					Directory.CreateDirectory(backupFolder);
-					Trace.WriteLine($"Copying '{args.UpdatesToMove.Count}' workshop mod update(s) to the local mods folder.");
+					DivinityApp.Log($"Copying '{args.UpdatesToMove.Count}' workshop mod update(s) to the local mods folder.");
 					foreach (string file in args.UpdatesToMove)
 					{
 						if (e.Cancel) return;
 						string baseName = Path.GetFileName(file);
 						try
 						{
-							Trace.WriteLine($"Moving workshop mod into mods folder: '{file}'.");
+							DivinityApp.Log($"Moving workshop mod into mods folder: '{file}'.");
 							File.Copy(file, Path.Combine(args.ModPakFolder, Path.GetFileName(file)), true);
 						}
 						catch(Exception ex)
 						{
-							Trace.WriteLine($"Error copying workshop mod:\n{ex.ToString()}");
+							DivinityApp.Log($"Error copying workshop mod:\n{ex.ToString()}");
 						}
 						dialog.ReportProgress(args.TotalMoved / totalWork, $"Copying '{baseName}'...", null);
 						args.TotalMoved++;

@@ -117,8 +117,8 @@ namespace DivinityModManager.Models
 				}
 				catch(Exception ex)
 				{
-					Trace.WriteLine("Error serializing CachedWorkshopData:");
-					Trace.WriteLine(ex.ToString());
+					DivinityApp.Log("Error serializing CachedWorkshopData:");
+					DivinityApp.Log(ex.ToString());
 				}
 			}
 

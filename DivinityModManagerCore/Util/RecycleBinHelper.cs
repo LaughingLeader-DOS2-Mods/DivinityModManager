@@ -63,7 +63,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine("Error deleting file.\n" + ex.ToString());
+				DivinityApp.Log("Error deleting file.\n" + ex.ToString());
 			}
 		}
 
@@ -92,7 +92,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine("Error emptying wastebasket.\n" + ex.ToString());
+				DivinityApp.Log("Error emptying wastebasket.\n" + ex.ToString());
 			}
 		}
 	}

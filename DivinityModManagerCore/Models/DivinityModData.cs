@@ -122,7 +122,7 @@ namespace DivinityModManager.Models
 					IsClassicMod = headerVersion.Minor == 1;
 					if (IsClassicMod)
 					{
-						System.Diagnostics.Trace.WriteLine($"Found a Classic mod: {Name}");
+						DivinityApp.Log($"Found a Classic mod: {Name}");
 					}
 				}
 			}

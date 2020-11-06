@@ -309,8 +309,8 @@ namespace DivinityModManager.Views
 			}
 			catch(Exception ex)
 			{
-				Trace.WriteLine("Error sorting mods:");
-				Trace.WriteLine(ex.ToString());
+				DivinityApp.Log("Error sorting mods:");
+				DivinityApp.Log(ex.ToString());
 			}
 		}
 
@@ -327,7 +327,7 @@ namespace DivinityModManager.Views
 						var longestName = ViewModel.ActiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
 						if (!String.IsNullOrEmpty(longestName))
 						{
-							//Trace.WriteLine($"Autosizing active mods grid for name {longestName}");
+							//DivinityApp.LogMessage($"Autosizing active mods grid for name {longestName}");
 							var targetWidth = MeasureText(longestName,
 								ActiveModsListView.FontFamily,
 								ActiveModsListView.FontStyle,
@@ -351,7 +351,7 @@ namespace DivinityModManager.Views
 				var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
 				if (!String.IsNullOrEmpty(longestName))
 				{
-					//Trace.WriteLine($"Autosizing inactive mods grid for name {longestName}");
+					//DivinityApp.LogMessage($"Autosizing inactive mods grid for name {longestName}");
 					gridView.Columns[0].Width = MeasureText(longestName,
 						ActiveModsListView.FontFamily,
 						ActiveModsListView.FontStyle,

@@ -1,4 +1,5 @@
-﻿using DivinityModManager.Models;
+﻿using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.Models;
 using DivinityModManager.Util;
 using ReactiveUI;
 using System;
@@ -60,5 +61,10 @@ namespace DivinityModManager
 
 		public static string DateTimeColumnFormat { get; set; } = "MM/dd/yyyy";
 		public static string DateTimeTooltipFormat { get; set; } = "MMMM dd, yyyy";
+
+		public static void Log(string msg, [CallerMemberName] string mName = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
+		{
+			System.Diagnostics.Trace.WriteLine($"[{Path.GetFileName(path)}:{mName}({line})] {msg}");
+		}
 	}
 }

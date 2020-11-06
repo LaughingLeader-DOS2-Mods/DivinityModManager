@@ -106,7 +106,7 @@ namespace DivinityModManager.Views
 				}
 				catch (Exception ex)
 				{
-					Trace.WriteLine("Error sorting grid: " + ex.ToString());
+					DivinityApp.Log("Error sorting grid: " + ex.ToString());
 				}
 			}
 		}

@@ -38,7 +38,7 @@ namespace DivinityModManager.Models
 			UUID = GetAttribute<string>(attributes, "UUID", "");
 			Version = GetAttribute<int>(attributes, "Version", -1);
 
-			//Trace.WriteLine($"[DivinityProfileActiveModData] Name({Name}) UUID({UUID})");
+			//DivinityApp.LogMessage($"[DivinityProfileActiveModData] Name({Name}) UUID({UUID})");
 		}
     }
 }

@@ -197,7 +197,7 @@ namespace DivinityModManager.Models
 		public DivinityGameLaunchWindowAction ActionOnGameLaunch
 		{
 			get => actionOnGameLaunch;
-			set { Trace.WriteLine(value); this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
+			set { this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
 		}
 
 		private bool disableMissingModWarnings = false;

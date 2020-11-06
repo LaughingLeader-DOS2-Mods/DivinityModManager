@@ -107,7 +107,7 @@ namespace DivinityModManager.Models
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error adding mod to order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error adding mod to order:\n{ex.ToString()}");
 			}
 		}
 
@@ -139,7 +139,7 @@ namespace DivinityModManager.Models
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Error removing mod from order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error removing mod from order:\n{ex.ToString()}");
 			}
 		}
 
@@ -165,7 +165,7 @@ namespace DivinityModManager.Models
 			}
 			catch(Exception ex)
 			{
-				Trace.WriteLine($"Error sorting order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error sorting order:\n{ex.ToString()}");
 			}
 		}
 
@@ -211,10 +211,10 @@ namespace DivinityModManager.Models
 					{
 						//newOrder.Order = c.ToList();
 
-						Trace.WriteLine($"Load order {Name} changed.");
-						Trace.WriteLine("=========================");
-						Trace.WriteLine($"{String.Join(Environment.NewLine + "	", Order.Select(e => e.Name))}");
-						Trace.WriteLine("=========================");
+						DivinityApp.LogMessage($"Load order {Name} changed.");
+						DivinityApp.LogMessage("=========================");
+						DivinityApp.LogMessage($"{String.Join(Environment.NewLine + "	", Order.Select(e => e.Name))}");
+						DivinityApp.LogMessage("=========================");
 					});
 			*/
 		}

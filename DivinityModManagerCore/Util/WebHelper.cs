@@ -138,7 +138,7 @@ namespace DivinityModManager.Util
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Error reading stream:\n{ex.ToString()}");
+                DivinityApp.LogMessage($"Error reading stream:\n{ex.ToString()}");
             }
 
             return "";
@@ -173,7 +173,7 @@ namespace DivinityModManager.Util
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Error reading stream:\n{ex.ToString()}");
+                DivinityApp.LogMessage($"Error reading stream:\n{ex.ToString()}");
             }
 
             return "";

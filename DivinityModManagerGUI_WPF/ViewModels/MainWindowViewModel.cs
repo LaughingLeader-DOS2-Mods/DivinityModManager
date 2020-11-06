@@ -113,7 +113,7 @@ namespace DivinityModManager.ViewModels
 
 		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
 
-		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData(this);
+		public ModUpdatesViewData ModUpdatesViewData { get; private set; }
 
 		private IgnoredModsData ignoredModsData;
 
@@ -3644,6 +3644,8 @@ Directory the zip will be extracted to:
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
 			RxApp.DefaultExceptionHandler = exceptionHandler;
+
+			this.ModUpdatesViewData = new ModUpdatesViewData(this);
 
 			var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			var productName = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;

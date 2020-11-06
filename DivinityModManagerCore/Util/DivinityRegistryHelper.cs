@@ -155,7 +155,7 @@ namespace DivinityModManager.Util
 					{
 						return lastGamePath;
 					}
-					string folder = Path.Combine(LastSteamInstallPath, steamGameInstallPath);
+					string folder = Path.Combine(LastSteamInstallPath, "steamapps", "common", steamGameInstallPath);
 					if (Directory.Exists(folder))
 					{
 						DivinityApp.Log($"Found game at '{folder}'.");

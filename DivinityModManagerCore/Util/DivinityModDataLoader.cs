@@ -309,9 +309,9 @@ namespace DivinityModManager.Util
 											modData.OsiExtenderData = osiToolsConfig;
 											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
-											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
-											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+											//Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
+											//Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+											//if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
 #endif
 										}
 										else
@@ -391,9 +391,9 @@ namespace DivinityModManager.Util
 												modData.OsiExtenderData = osiToolsConfig;
 												if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
-												Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
-												Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-												if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+												//Trace.WriteLine($"Loaded OsiToolsConfig.json for '{folder}':");
+												//Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+												//if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
 #endif
 											}
 											else
@@ -548,9 +548,9 @@ namespace DivinityModManager.Util
 														modData.OsiExtenderData = osiConfig;
 														if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
-														Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
-														Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-														if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+														//Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+														//Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+														//if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
 #endif
 													}
 													else
@@ -564,16 +564,16 @@ namespace DivinityModManager.Util
 
 															if(modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
-															Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
-															Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-															if (modData.OsiExtenderData.FeatureFlags != null)
-															{
-																Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
-															}
-															else
-															{
-																Trace.WriteLine("\tFeatureFlags: null");
-															}
+															//Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+															//Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+															//if (modData.OsiExtenderData.FeatureFlags != null)
+															//{
+															//	Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+															//}
+															//else
+															//{
+															//	Trace.WriteLine("\tFeatureFlags: null");
+															//}
 #endif
 														}
 														else
@@ -700,9 +700,9 @@ namespace DivinityModManager.Util
 											modData.OsiExtenderData = osiToolsConfig;
 											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
-											Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
-											Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
+											//Trace.WriteLine($"Loaded OsiToolsConfig.json for '{pakPath}':");
+											//Trace.WriteLine($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
+											//if (modData.OsiExtenderData.FeatureFlags != null) Trace.WriteLine($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
 #endif
 										}
 										else
@@ -1619,6 +1619,94 @@ namespace DivinityModManager.Util
 				Trace.WriteLine($"Error reading 'OsiToolsConfig.json': {ex.ToString()}");
 			}
 			return null;
+		}
+
+		public static List<DivinityModData> LoadBuiltinMods(string gameDataPath)
+		{
+			List<DivinityModData> baseMods = new List<DivinityModData>();
+
+			var modResources = new ModResources();
+			var modHelper = new ModPathVisitor(modResources);
+			modHelper.CollectGlobals = false;
+			modHelper.CollectLevels = false;
+			modHelper.CollectStoryGoals = false;
+			modHelper.Discover(gameDataPath);
+
+			foreach (var modInfo in modResources.Mods.Values)
+			{
+				var metaFile = modInfo.Meta;
+				if (metaFile != null)
+				{
+					using (var stream = metaFile.MakeStream())
+					{
+						using (var sr = new System.IO.StreamReader(stream))
+						{
+							string text = sr.ReadToEnd();
+							var modData = ParseMetaFile(text);
+							if (modData != null)
+							{
+								modData.IsLarianMod = true;
+								modData.IsHidden = true;
+
+								var last = baseMods.FirstOrDefault(x => x.UUID == modData.UUID);
+
+								if (last == null)
+								{
+									baseMods.Add(modData);
+								}
+								else
+								{
+
+									if (modData.Version.VersionInt > last.Version.VersionInt)
+									{
+										baseMods.Remove(last);
+										baseMods.Add(modData);
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+
+			return baseMods;
+		}
+
+		public static async Task<List<DivinityModData>> LoadBuiltinModsAsync(string gameDataPath)
+		{
+			List<DivinityModData> baseMods = new List<DivinityModData>();
+
+			var modResources = new ModResources();
+			var modHelper = new ModPathVisitor(modResources);
+			modHelper.CollectGlobals = false;
+			modHelper.CollectLevels = false;
+			modHelper.CollectStoryGoals = false;
+			modHelper.Discover(gameDataPath);
+
+			foreach(var modInfo in modResources.Mods.Values)
+			{
+				var metaFile = modInfo.Meta;
+				if (metaFile != null)
+				{
+					using (var stream = metaFile.MakeStream())
+					{
+						using (var sr = new System.IO.StreamReader(stream))
+						{
+							string text = await sr.ReadToEndAsync();
+							var modData = ParseMetaFile(text);
+							if (modData != null)
+							{
+								Trace.WriteLine($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
+								modData.IsLarianMod = true;
+								modData.IsHidden = true;
+								baseMods.Add(modData);
+							}
+						}
+					}
+				}
+			}
+
+			return baseMods;
 		}
 	}
 }

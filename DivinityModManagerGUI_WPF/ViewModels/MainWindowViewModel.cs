@@ -508,8 +508,8 @@ namespace DivinityModManager.ViewModels
 							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
 						}
 #if DEBUG
-						var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
-						Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
+						//var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
+						//Trace.WriteLine($"Releases Data:\n{String.Join(Environment.NewLine, lines)}");
 #endif
 					}
 					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
@@ -1141,7 +1141,7 @@ namespace DivinityModManager.ViewModels
 			foreach (var m in DivinityApp.IgnoredMods)
 			{
 				mods.Add(m);
-				Trace.WriteLine($"Added base mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+				Trace.WriteLine($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
 			}
 			foreach (var m in loadedMods)
 			{
@@ -1164,10 +1164,12 @@ namespace DivinityModManager.ViewModels
 			userMods.AddRange(loadedMods);
 		}
 
-		public void LoadMods()
+		public List<DivinityModData> LoadMods()
 		{
+			List<DivinityModData> finalMods = new List<DivinityModData>();
 			List<DivinityModData> modPakData = null;
 			List<DivinityModData> projects = null;
+			List<DivinityModData> baseMods = null;
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
@@ -1186,53 +1188,45 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
 					projects = DivinityModDataLoader.LoadEditorProjects(modsDirectory);
 				}
+
+				baseMods = DivinityModDataLoader.LoadBuiltinMods(Settings.GameDataPath);
 			}
 
-			if (modPakData == null)
+			if (baseMods != null) MergeModLists(finalMods, baseMods);
+			if (modPakData != null) MergeModLists(finalMods, modPakData);
+			if (projects != null) MergeModLists(finalMods, projects);
+
+			finalMods = finalMods.OrderBy(m => m.Name).ToList();
+			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
+			return finalMods;
+		}
+
+		private void MergeModLists(List<DivinityModData> finalMods, List<DivinityModData> newMods)
+		{
+			foreach (var mod in newMods)
 			{
-				modPakData = new List<DivinityModData>();
-			}
-
-			if (projects == null)
-			{
-				projects = new List<DivinityModData>();
-			}
-
-			//var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).Concat(DivinityModDataLoader.Larian_Mods).OrderBy(m => m.Name);
-			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).OrderBy(m => m.Name);
-
-			LoadAppConfig();
-			SetLoadedMods(finalMods);
-
-			if (ignoredModsData != null)
-			{
-				foreach (var uuid in ignoredModsData.IgnoreDependencies)
+				var existing = finalMods.FirstOrDefault(x => x.UUID == mod.UUID);
+				if (existing != null)
 				{
-					var mod = Mods.FirstOrDefault(x => x.UUID == uuid);
-					if (mod != null)
+					if (existing.Version.VersionInt < mod.Version.VersionInt)
 					{
-						DivinityApp.IgnoredDependencyMods.Add(mod);
+						finalMods.Remove(existing);
+						finalMods.Add(existing);
 					}
 				}
+				else
+				{
+					finalMods.Add(mod);
+				}
 			}
-
-			Trace.WriteLine($"Loaded '{mods.Count}' mods.");
-			//Trace.WriteLine($"Mods: {String.Join("\n\t", mods.Items.Select(x => x.Name))}");
-
-			//foreach(var mod in mods.Items.Where(m => m.HasDependencies))
-			//{
-			//	for(var i = 0; i < mod.Dependencies.Count;i++)
-			//	{
-			//		DivinityModDependencyData dependencyData = mod.Dependencies[i];
-			//		dependencyData.IsAvailable = mods.Keys.Any(k => k == dependencyData.UUID) || DivinityModDataLoader.IgnoredMods.Any(im => im.UUID == dependencyData.UUID);
-			//	}
-			//}
 		}
 
 		public async Task<List<DivinityModData>> LoadModsAsync()
 		{
+			List<DivinityModData> finalMods = new List<DivinityModData>();
 			List<DivinityModData> modPakData = null;
 			List<DivinityModData> projects = null;
+			List<DivinityModData> baseMods = null;
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
@@ -1251,13 +1245,15 @@ namespace DivinityModManager.ViewModels
 					Trace.WriteLine($"Loading mod projects from '{modsDirectory}'.");
 					projects = await DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory);
 				}
+
+				baseMods = await DivinityModDataLoader.LoadBuiltinModsAsync(Settings.GameDataPath);
 			}
 
-			if (modPakData == null) modPakData = new List<DivinityModData>();
-			if (projects == null) projects = new List<DivinityModData>();
+			if (baseMods != null) MergeModLists(finalMods, baseMods);
+			if (modPakData != null) MergeModLists(finalMods, modPakData);
+			if (projects != null) MergeModLists(finalMods, projects);
 
-			var finalMods = projects.Concat(modPakData.Where(m => !projects.Any(p => p.UUID == m.UUID))).
-				OrderBy(m => m.Name).ToList();
+			finalMods = finalMods.OrderBy(m => m.Name).ToList();
 			Trace.WriteLine($"Loaded '{finalMods.Count}' mods.");
 			return finalMods;
 		}
@@ -3622,7 +3618,7 @@ Directory the zip will be extracted to:
 								}
 							}
 							DivinityApp.IgnoredMods.Add(mod);
-							Trace.WriteLine($"Base mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
+							//Trace.WriteLine($"Ignored mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
 						}
 					}
 

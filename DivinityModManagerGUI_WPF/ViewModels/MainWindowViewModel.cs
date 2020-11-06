@@ -2673,7 +2673,16 @@ namespace DivinityModManager.ViewModels
 			{
 				if (SelectedProfile != null)
 				{
-					dialog.InitialDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+					string profilePath = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
+					string storyPath = Path.Combine(profilePath, "Story");
+					if (Directory.Exists(storyPath))
+					{
+						dialog.InitialDirectory = storyPath;
+					}
+					else
+					{
+						dialog.InitialDirectory = profilePath;
+					}
 				}
 				else
 				{
@@ -2694,6 +2703,7 @@ namespace DivinityModManager.ViewModels
 				else
 				{
 					Trace.WriteLine($"Failed to load order from '{dialog.FileName}'.");
+					ShowAlert($"No mod order found in save \"{Path.GetFileNameWithoutExtension(dialog.FileName)}\".", -1, 30);
 				}
 			}
 			return null;

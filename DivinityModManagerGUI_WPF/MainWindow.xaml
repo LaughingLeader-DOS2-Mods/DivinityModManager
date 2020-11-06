@@ -856,7 +856,7 @@
 							<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
 							<MenuItem
 								x:Name="HelpOpenAboutWindowMenuItem"
-								Header="About Divinity Mod Manager"
+								Header="About"
 								InputGestureText="F1" />
 						</MenuItem>
 					</Menu>

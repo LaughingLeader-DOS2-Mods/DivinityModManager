@@ -9,7 +9,7 @@
 	xmlns:local="clr-namespace:DivinityModManager.Views"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 	xmlns:wpfautogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
-	Title="About Divinity Mod Manager"
+	Title="About"
 	Width="600"
 	Height="300"
 	mc:Ignorable="d">

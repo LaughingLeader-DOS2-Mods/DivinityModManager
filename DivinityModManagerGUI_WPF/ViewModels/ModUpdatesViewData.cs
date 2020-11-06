@@ -102,6 +102,8 @@ namespace DivinityModManager.ViewModels
 
 		public Action<bool> CloseView { get; set; }
 
+		private MainWindowViewModel _mainWindowViewModel;
+
 		public void Clear()
 		{
 			Updates.Clear();
@@ -127,7 +129,7 @@ namespace DivinityModManager.ViewModels
 		private void CopySelectedMods_Run()
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string modPakFolder = Path.Combine(documentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods");
+			string modPakFolder = Path.Combine(documentsFolder, _mainWindowViewModel.AppSettings.DefaultPathways.DocumentsGameFolder, "Mods");
 
 			if (Directory.Exists(modPakFolder))
 			{
@@ -260,7 +262,7 @@ namespace DivinityModManager.ViewModels
 
 				if (args.UpdatesToMove.Count > 0)
 				{
-					string backupFolder = Path.Combine(args.DocumentsFolder, @"Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods_Old_ModManager");
+					string backupFolder = Path.Combine(args.DocumentsFolder, _mainWindowViewModel.AppSettings.DefaultPathways.DocumentsGameFolder, "Mods_Old_ModManager");
 					Directory.CreateDirectory(backupFolder);
 					Trace.WriteLine($"Copying '{args.UpdatesToMove.Count}' workshop mod update(s) to the local mods folder.");
 					foreach (string file in args.UpdatesToMove)
@@ -284,8 +286,10 @@ namespace DivinityModManager.ViewModels
 			
 		}
 
-		public ModUpdatesViewData()
+		public ModUpdatesViewData(MainWindowViewModel mainWindowViewModel)
 		{
+			_mainWindowViewModel = mainWindowViewModel;
+
 			NewMods.CollectionChanged += delegate
 			{
 				NewAvailable = NewMods.Count > 0;

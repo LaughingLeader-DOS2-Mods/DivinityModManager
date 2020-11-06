@@ -113,7 +113,7 @@ namespace DivinityModManager.ViewModels
 
 		public DivinityPathwayData PathwayData { get; private set; } = new DivinityPathwayData();
 
-		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData();
+		public ModUpdatesViewData ModUpdatesViewData { get; private set; } = new ModUpdatesViewData(this);
 
 		private IgnoredModsData ignoredModsData;
 

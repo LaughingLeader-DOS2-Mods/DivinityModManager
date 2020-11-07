@@ -342,3 +342,4 @@ ASALocalRun/
 .mfractor/
 *.zip
 *.psd
+PublishRelease.py

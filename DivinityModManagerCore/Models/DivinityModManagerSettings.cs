@@ -255,6 +255,15 @@ namespace DivinityModManager.Models
 
 		}
 
+		private string gameLaunchParams = "";
+
+		[DataMember]
+		public string GameLaunchParams
+		{
+			get => gameLaunchParams;
+			set { this.RaiseAndSetIfChanged(ref gameLaunchParams, value); }
+		}
+
 		private bool extenderTabIsVisible = false;
 
 		public bool ExtenderTabIsVisible
@@ -268,6 +277,8 @@ namespace DivinityModManager.Models
 		public ICommand ExportExtenderSettingsCommand { get; set; }
 		public ICommand ResetExtenderSettingsToDefaultCommand { get; set; }
 		public ICommand ClearWorkshopCacheCommand { get; set; }
+		public ICommand AddLaunchParamCommand { get; set; }
+		public ICommand ClearLaunchParamsCommand { get; set; }
 
 		public CompositeDisposable Disposables { get; internal set; }
 

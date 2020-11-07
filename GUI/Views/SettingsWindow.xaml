@@ -325,9 +325,9 @@
 						ChildMargin="2"
 						ColumnCount="2"
 						Columns="auto,*"
-						RowCount="3"
+						RowCount="4"
 						RowHeight="*"
-						Rows="auto,auto,auto">
+						Rows="auto,auto,auto,auto">
 						<TextBlock
 							x:Name="DebugModeTextBlock"
 							Text="Enable Developer Mode"
@@ -336,8 +336,34 @@
 							VerticalAlignment="Center"
 							IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"
 							ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
-						<TextBlock Text="Enable Logging" ToolTip="Automatically save logs to _Logs." />
+						<TextBlock Text="Enable Mod Manager Logs" ToolTip="Automatically save logs to _Logs." />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
+						<Menu>
+							<Menu.Resources>
+								<Style BasedOn="{StaticResource {x:Type MenuItem}}" TargetType="MenuItem">
+									<Setter Property="Command" Value="{Binding AddLaunchParamCommand}" />
+									<Setter Property="CommandParameter" Value="{Binding Path=Header, RelativeSource={RelativeSource Self}}" />
+								</Style>
+							</Menu.Resources>
+							<MenuItem
+								Command="{x:Null}"
+								CommandParameter="{x:Null}"
+								Header="Game Launch Params"
+								ToolTip="Parameters to pass to the game executable when launching the game through the mod manager.">
+								<MenuItem Header="-storylog 1" ToolTip="Enables the story log." />
+								<MenuItem Header="--logPath &quot;&quot;" ToolTip="A directory to write story logs to." />
+								<MenuItem
+									Command="{Binding ClearLaunchParamsCommand}"
+									CommandParameter="{x:Null}"
+									Header="Clear"
+									ToolTip="Clear current params." />
+							</MenuItem>
+						</Menu>
+						<TextBox
+							VerticalAlignment="Center"
+							Text="{Binding GameLaunchParams, UpdateSourceTrigger=PropertyChanged}"
+							TextWrapping="Wrap"
+							ToolTip="{Binding ElementName=LaunchParamsTextBox, Path=ToolTip}" />
 						<TextBlock
 							x:Name="ClearCacheTextBlock"
 							Text="Clear Workshop Cache"

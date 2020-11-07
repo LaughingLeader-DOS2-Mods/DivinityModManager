@@ -740,13 +740,28 @@ namespace DivinityModManager.ViewModels
 
 			OpenGameCommand = ReactiveCommand.Create(() =>
 			{
-				if (!Settings.GameStoryLogEnabled)
+				string launchParams = Settings.GameLaunchParams;
+				if (String.IsNullOrEmpty(launchParams)) launchParams = "";
+
+				if (Settings.GameStoryLogEnabled && launchParams.IndexOf("storylog") < 0)
+				{
+					if(String.IsNullOrWhiteSpace(launchParams))
+					{
+						launchParams = "-storylog 1";
+					}
+					else
+					{
+						launchParams = launchParams + " " + "-storylog 1";
+					}
+				}
+
+				if (String.IsNullOrWhiteSpace(launchParams))
 				{
 					Process.Start(Settings.GameExecutablePath);
 				}
 				else
 				{
-					Process.Start(Settings.GameExecutablePath, "-storylog 1");
+					Process.Start(Settings.GameExecutablePath, launchParams);
 				}
 
 				if (Settings.ActionOnGameLaunch != DivinityGameLaunchWindowAction.None)
@@ -853,6 +868,27 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 				}
+			}).DisposeWith(Settings.Disposables);
+
+			Settings.AddLaunchParamCommand = ReactiveCommand.Create((string param) =>
+			{
+				if (Settings.GameLaunchParams == null) Settings.GameLaunchParams = "";
+				if (Settings.GameLaunchParams.IndexOf(param) < 0)
+				{
+					if(String.IsNullOrWhiteSpace(Settings.GameLaunchParams))
+					{
+						Settings.GameLaunchParams = param;
+					}
+					else
+					{
+						Settings.GameLaunchParams = Settings.GameLaunchParams + " " + param;
+					}
+				}
+			}).DisposeWith(Settings.Disposables);
+
+			Settings.ClearLaunchParamsCommand = ReactiveCommand.Create(() =>
+			{
+				Settings.GameLaunchParams = "";
 			}).DisposeWith(Settings.Disposables);
 
 			this.WhenAnyValue(x => x.Settings.LogEnabled).Subscribe((logEnabled) =>

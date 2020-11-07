@@ -24,25 +24,10 @@ export_file = "DivinityModManager_Latest.zip"
 print("Writing release zip:{}".format(file_name))
 
 def zipdir(src, zip_name):
-    """
-    Function creates zip archive from src in dst location. The name of archive is zip_name.
-    :param src: Path to directory to be archived.
-    :param dst: Path where archived dir will be stored.
-    :param zip_name: The name of the archive.
-    :return: None
-    """
-    ### zipfile handler
     ziph = zipfile.ZipFile(zip_name, 'w')
-    ### writing content of src directory to the archive
     for root, dirs, files in os.walk(src):
         for file in files:
-            ### In this case the structure of zip archive will be:
-            ###       C:\Users\BO\Desktop\20200307.zip\Audacity\<content of Audacity dir>
-            # ziph.write(os.path.join(root, file), arcname=os.path.join(root.replace(os.path.split(src)[0], ""), file))
-
-            ### In this case the structure of zip archive will be:
-            ###       C:\Users\BO\Desktop\20200307.zip\<content of Audacity dir>
-            ziph.write(os.path.join(root, file), arcname=os.path.join(root.replace(src, ""), file))
+            ziph.write(os.path.join(root, file), arcname=os.path.join(root.replace(src, ""), file), compress_type=zipfile.ZIP_DEFLATED)
     ziph.close()
 
 def SilentRemove(f):

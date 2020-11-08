@@ -1288,6 +1288,7 @@ namespace DivinityModManager.ViewModels
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
 				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
+				await SetMainProgressTextAsync("Loading mods from documents folder...");
 				modPakData = await DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath);
 			}
 
@@ -1300,9 +1301,11 @@ namespace DivinityModManager.ViewModels
 				if (Directory.Exists(modsDirectory))
 				{
 					DivinityApp.Log($"Loading mod projects from '{modsDirectory}'.");
+					await SetMainProgressTextAsync("Loading editor project mods...");
 					projects = await DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory);
 				}
 
+				await SetMainProgressTextAsync("Loading base game mods from data folder...");
 				baseMods = await DivinityModDataLoader.LoadBuiltinModsAsync(Settings.GameDataPath);
 			}
 

@@ -768,14 +768,12 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-				if (String.IsNullOrWhiteSpace(launchParams))
-				{
-					Process.Start(Settings.GameExecutablePath);
-				}
-				else
-				{
-					Process.Start(Settings.GameExecutablePath, launchParams);
-				}
+				DivinityApp.Log($"Opening game exe at: {Settings.GameExecutablePath} with args {launchParams}");
+				Process proc = new Process();
+				proc.StartInfo.FileName = Settings.GameExecutablePath;
+				proc.StartInfo.Arguments = launchParams;
+				proc.StartInfo.WorkingDirectory = Path.GetDirectoryName(Settings.GameExecutablePath);
+				proc.Start();
 
 				if (Settings.ActionOnGameLaunch != DivinityGameLaunchWindowAction.None)
 				{

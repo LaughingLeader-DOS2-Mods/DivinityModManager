@@ -363,7 +363,7 @@
 							VerticalAlignment="Center"
 							Text="{Binding GameLaunchParams, UpdateSourceTrigger=PropertyChanged}"
 							TextWrapping="Wrap"
-							ToolTip="{Binding ElementName=LaunchParamsTextBox, Path=ToolTip}" />
+							ToolTip="Parameters to pass to the game executable when launching the game through the mod manager." />
 						<TextBlock
 							x:Name="ClearCacheTextBlock"
 							Text="Clear Workshop Cache"

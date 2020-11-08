@@ -71,7 +71,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private int versionInt = -1;
+		private int versionInt = 0;
 
 		[JsonProperty]
 		public int VersionInt
@@ -79,13 +79,24 @@ namespace DivinityModManager.Models
 			get { return versionInt; }
 			set
 			{
-				this.RaiseAndSetIfChanged(ref versionInt, value);
+				value = Math.Max(Int32.MinValue, Math.Min(value, Int32.MaxValue));
+				if(versionInt != value)
+				{
+					ParseInt(versionInt);
+					this.RaisePropertyChanged("VersionInt");
+				}
 			}
 		}
 
 		private void UpdateVersion()
 		{
 			Version = String.Format("{0}.{1}.{2}.{3}", Major, Minor, Revision, Build);
+			var nextVersion = ToInt();
+			if(nextVersion != versionInt)
+			{
+				versionInt = ToInt();
+				this.RaisePropertyChanged("VersionInt");
+			}
 		}
 
 		public int ToInt()
@@ -98,14 +109,25 @@ namespace DivinityModManager.Models
 			return String.Format("{0}.{1}.{2}.{3}", Major, Minor, Revision, Build);
 		}
 
-		public void ParseInt(int vInt)
+		public void ParseInt(int vInt, bool update=true)
 		{
-			VersionInt = vInt;
-			major = (VersionInt >> 28);
-			minor = (VersionInt >> 24) & 0x0F;
-			revision = (VersionInt >> 16) & 0xFF;
-			build = (VersionInt & 0xFFFF);
-			UpdateVersion();
+			if(versionInt != vInt)
+			{
+				versionInt = vInt;
+				this.RaisePropertyChanged("VersionInt");
+			}
+			major = (versionInt >> 28);
+			minor = (versionInt >> 24) & 0x0F;
+			revision = (versionInt >> 16) & 0xFF;
+			build = (versionInt & 0xFFFF);
+			if (update)
+			{
+				UpdateVersion();
+			}
+			this.RaisePropertyChanged("Major");
+			this.RaisePropertyChanged("Minor");
+			this.RaisePropertyChanged("Revision");
+			this.RaisePropertyChanged("Build");
 		}
 
 		public static DivinityModVersion FromInt(int vInt)

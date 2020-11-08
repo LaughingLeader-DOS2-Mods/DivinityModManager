@@ -12,6 +12,7 @@
 	Title="About"
 	Width="600"
 	Height="300"
+	WindowStartupLocation="CenterOwner"
 	mc:Ignorable="d">
 	<Window.Style>
 		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />

@@ -41,11 +41,11 @@
 			<DataTemplate x:Key="HorizontalModLayout">
 				<local:HorizontalModLayout ViewModel="{Binding}" />
 			</DataTemplate>
-			<Style x:Key="UpdateButtonStyle" TargetType="{x:Type Button}">
+			<Style x:Key="UpdateButtonStyle" TargetType="Button">
 				<Setter Property="Background" Value="Transparent" />
 				<Setter Property="Template">
 					<Setter.Value>
-						<ControlTemplate TargetType="{x:Type Button}">
+						<ControlTemplate TargetType="Button">
 							<Border Background="{TemplateBinding Background}">
 								<ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
 							</Border>
@@ -843,6 +843,11 @@
 								x:Name="ToolsExtractSelectedModsMenuItem"
 								Command="{Binding ExtractSelectedModsCommand}"
 								Header="Extract Selected Mods To..." />
+							<MenuItem
+								x:Name="ToolsToggleVersionGeneratorWindowMenuItem"
+								Command="{Binding ToggleVersionGeneratorWindowCommand}"
+								Header="Toggle Version Generator Window"
+								ToolTip="A tool for mod authors to generate version numbers for a mod's meta.lsx." />
 							<!--  Disabled for now  -->
 							<MenuItem
 								x:Name="ToolsRenameSaveMenuItem"

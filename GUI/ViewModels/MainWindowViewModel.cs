@@ -398,6 +398,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand CopyPathToClipboardCommand { get; set; }
 		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
 		public ICommand ExtractSelectedModsCommand { get; private set; }
+		public ICommand ToggleVersionGeneratorWindowCommand { get; set; }
 		public ICommand RenameSaveCommand { get; private set; }
 		public ICommand ExportOrderAsListCommand { get; private set; }
 		public ICommand CopyOrderToClipboardCommand { get; private set; }

@@ -46,6 +46,9 @@ namespace DivinityModManager.Views
 		private AboutWindow aboutWindow;
 		public AboutWindow AboutWindow => aboutWindow;
 
+		private VersionGeneratorWindow versionGeneratorWindow;
+		public VersionGeneratorWindow VersionGeneratorWindow => versionGeneratorWindow;
+
 		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
@@ -184,6 +187,24 @@ namespace DivinityModManager.Views
 					}
 				});
 
+				ViewModel.ToggleVersionGeneratorWindowCommand = ReactiveCommand.Create(() =>
+				{
+					if (VersionGeneratorWindow == null)
+					{
+						versionGeneratorWindow = new VersionGeneratorWindow();
+					}
+
+					if (!VersionGeneratorWindow.IsVisible)
+					{
+						VersionGeneratorWindow.Show();
+						VersionGeneratorWindow.Owner = this;
+					}
+					else
+					{
+						VersionGeneratorWindow.Hide();
+					}
+				});
+
 				//this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
 
 				this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
@@ -212,6 +233,7 @@ namespace DivinityModManager.Views
 
 				this.WhenAnyValue(x => x.ViewModel.DownloadAndInstallOsiExtenderCommand).BindTo(this, view => view.ToolsInstallOsiExtenderMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.ExtractSelectedModsCommand).BindTo(this, view => view.ToolsExtractSelectedModsMenuItem.Command);
+				this.WhenAnyValue(x => x.ViewModel.ToggleVersionGeneratorWindowCommand).BindTo(this, view => view.ToolsToggleVersionGeneratorWindowMenuItem.Command);
 				this.WhenAnyValue(x => x.ViewModel.RenameSaveCommand).BindTo(this, view => view.ToolsRenameSaveMenuItem.Command);
 
 				this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);

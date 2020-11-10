@@ -1964,6 +1964,7 @@ namespace DivinityModManager.ViewModels
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
 
+				await SetMainProgressTextAsync("Finishing up...");
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
 			else
@@ -3007,9 +3008,18 @@ namespace DivinityModManager.ViewModels
 
 			if (DebugMode)
 			{
+				string lastMessage = "";
 				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
 				{
-					DivinityApp.Log($"Loading({MainProgressValue*100}%): {MainProgressWorkText}");
+					if(lastMessage != ob.Item1)
+					{
+						DivinityApp.Log($"Loading({ob.Item2 * 100}%): {ob.Item1}");
+						lastMessage = ob.Item1;
+					}
+					else
+					{
+						DivinityApp.Log($"Loading({ob.Item2 * 100}%)");
+					}
 				});
 			}
 

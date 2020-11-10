@@ -1277,18 +1277,55 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public async Task<List<DivinityModData>> LoadModsAsync()
+		private CancellationTokenSource GetCancellationToken(int delay, CancellationTokenSource last=null)
+		{
+			CancellationTokenSource token = new CancellationTokenSource();
+			if (last != null && last.IsCancellationRequested)
+			{
+				last.Dispose();
+			}
+			token.CancelAfter(delay);
+			return token;
+		}
+
+		private async Task<TResult> RunTask<TResult>(Task<TResult> task, TResult defaultValue)
+		{
+			try
+			{
+				return await task;
+			}
+			catch (OperationCanceledException ex)
+			{
+				DivinityApp.Log("Operation timed out/canceled.");
+			}
+			catch (TimeoutException ex)
+			{
+				DivinityApp.Log("Operation timed out.");
+			}
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error awaiting task:\n{ex.ToString()}");
+			}
+			return defaultValue;
+		}
+
+		public async Task<List<DivinityModData>> LoadModsAsync(double taskStepAmount = 0.1d)
 		{
 			List<DivinityModData> finalMods = new List<DivinityModData>();
 			List<DivinityModData> modPakData = null;
 			List<DivinityModData> projects = null;
 			List<DivinityModData> baseMods = null;
 
+			var cancelTokenSource = GetCancellationToken(int.MaxValue);
+
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
 				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
 				await SetMainProgressTextAsync("Loading mods from documents folder...");
-				modPakData = await DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath);
+				cancelTokenSource.CancelAfter(60000);
+				modPakData = await RunTask(DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath, false, cancelTokenSource.Token), null);
+				cancelTokenSource = GetCancellationToken(int.MaxValue);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
 
 			GameDirectoryFound = Directory.Exists(Settings.GameDataPath);
@@ -1301,11 +1338,17 @@ namespace DivinityModManager.ViewModels
 				{
 					DivinityApp.Log($"Loading mod projects from '{modsDirectory}'.");
 					await SetMainProgressTextAsync("Loading editor project mods...");
-					projects = await DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory);
+					cancelTokenSource = GetCancellationToken(30000);
+					projects = await RunTask(DivinityModDataLoader.LoadEditorProjectsAsync(modsDirectory, cancelTokenSource.Token), null);
+					cancelTokenSource = GetCancellationToken(int.MaxValue);
+					await IncreaseMainProgressValueAsync(taskStepAmount);
 				}
 
 				await SetMainProgressTextAsync("Loading base game mods from data folder...");
-				baseMods = await DivinityModDataLoader.LoadBuiltinModsAsync(Settings.GameDataPath);
+				cancelTokenSource = GetCancellationToken(30000);
+				baseMods = await RunTask(DivinityModDataLoader.LoadBuiltinModsAsync(Settings.GameDataPath, cancelTokenSource.Token), null);
+				cancelTokenSource = GetCancellationToken(int.MaxValue);
+				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
 
 			if (baseMods != null) MergeModLists(finalMods, baseMods);
@@ -1825,7 +1868,7 @@ namespace DivinityModManager.ViewModels
 		{
 			DivinityApp.Log($"Refreshing data asynchronously...");
 
-			double taskStepAmount = 1.0 / 7;
+			double taskStepAmount = 1.0 / 10;
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
 			int lastOrderIndex = -1;
@@ -1847,7 +1890,7 @@ namespace DivinityModManager.ViewModels
 			if (Directory.Exists(PathwayData.LarianDocumentsFolder))
 			{
 				await SetMainProgressTextAsync("Loading mods...");
-				var loadedMods = await LoadModsAsync();
+				var loadedMods = await LoadModsAsync(taskStepAmount);
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				await SetMainProgressTextAsync("Loading profiles...");
@@ -2961,14 +3004,13 @@ namespace DivinityModManager.ViewModels
 		public void OnViewActivated(MainWindow parentView)
 		{
 			view = parentView;
-
 			DivinityApp.Commands.SetViewModel(this);
 
 			if (DebugMode)
 			{
 				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
 				{
-					DivinityApp.Log($"Progress: {MainProgressValue} - {MainProgressWorkText}");
+					DivinityApp.Log($"Loading({MainProgressValue*100}%): {MainProgressWorkText}");
 				});
 			}
 

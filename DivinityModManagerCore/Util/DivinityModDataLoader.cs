@@ -332,7 +332,7 @@ namespace DivinityModManager.Util
 			return projects;
 		}
 
-		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath)
+		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath, CancellationToken? token = null)
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
 
@@ -345,6 +345,10 @@ namespace DivinityModManager.Util
 					Console.WriteLine($"Project Folders: {filteredFolders.Count()} / {projectDirectories.Count()}");
 					foreach (var folder in filteredFolders)
 					{
+						if (token != null && token.Value.IsCancellationRequested)
+						{
+							return projects;
+						}
 						//DivinityApp.LogMessage($"Reading meta file from folder: {folder}");
 						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
 						var metaFile = Path.Combine(folder, "meta.lsx");
@@ -1625,41 +1629,98 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> baseMods = new List<DivinityModData>();
 
-			var modResources = new ModResources();
-			var modHelper = new ModPathVisitor(modResources);
-			modHelper.CollectGlobals = false;
-			modHelper.CollectLevels = false;
-			modHelper.CollectStoryGoals = false;
-			modHelper.Discover(gameDataPath);
-
-			foreach (var modInfo in modResources.Mods.Values)
+			try
 			{
-				var metaFile = modInfo.Meta;
-				if (metaFile != null)
+				var modResources = new ModResources();
+				var modHelper = new ModPathVisitor(modResources);
+				modHelper.CollectGlobals = false;
+				modHelper.CollectLevels = false;
+				modHelper.CollectStoryGoals = false;
+				modHelper.Discover(gameDataPath);
+
+				if (modResources.Mods != null && modResources.Mods.Values != null)
 				{
-					using (var stream = metaFile.MakeStream())
+					foreach (var modInfo in modResources.Mods.Values)
 					{
-						using (var sr = new System.IO.StreamReader(stream))
+						var metaFile = modInfo.Meta;
+						if (metaFile != null)
 						{
-							string text = sr.ReadToEnd();
-							var modData = ParseMetaFile(text);
-							if (modData != null)
+							using (var stream = metaFile.MakeStream())
 							{
-								modData.IsLarianMod = true;
-								modData.IsHidden = true;
-
-								var last = baseMods.FirstOrDefault(x => x.UUID == modData.UUID);
-
-								if (last == null)
+								using (var sr = new System.IO.StreamReader(stream))
 								{
-									baseMods.Add(modData);
-								}
-								else
-								{
-
-									if (modData.Version.VersionInt > last.Version.VersionInt)
+									string text = sr.ReadToEnd();
+									var modData = ParseMetaFile(text);
+									if (modData != null)
 									{
-										baseMods.Remove(last);
+										modData.IsLarianMod = true;
+										modData.IsHidden = true;
+
+										var last = baseMods.FirstOrDefault(x => x.UUID == modData.UUID);
+
+										if (last == null)
+										{
+											baseMods.Add(modData);
+										}
+										else
+										{
+
+											if (modData.Version.VersionInt > last.Version.VersionInt)
+											{
+												baseMods.Remove(last);
+												baseMods.Add(modData);
+											}
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			catch(Exception ex)
+			{
+				DivinityApp.Log("Error parsing base game mods:\n" + ex.ToString());
+			}
+
+			return baseMods;
+		}
+
+		public static async Task<List<DivinityModData>> LoadBuiltinModsAsync(string gameDataPath, CancellationToken? token = null)
+		{
+			List<DivinityModData> baseMods = new List<DivinityModData>();
+
+			try
+			{
+				var modResources = new ModResources();
+				var modHelper = new ModPathVisitor(modResources);
+				modHelper.CollectGlobals = false;
+				modHelper.CollectLevels = false;
+				modHelper.CollectStoryGoals = false;
+				modHelper.Discover(gameDataPath);
+
+				if (modResources.Mods != null && modResources.Mods.Values != null)
+				{
+					foreach (var modInfo in modResources.Mods.Values)
+					{
+						if (token != null && token.Value.IsCancellationRequested)
+						{
+							return baseMods;
+						}
+						var metaFile = modInfo.Meta;
+						if (metaFile != null)
+						{
+							using (var stream = metaFile.MakeStream())
+							{
+								using (var sr = new System.IO.StreamReader(stream))
+								{
+									string text = await sr.ReadToEndAsync();
+									var modData = ParseMetaFile(text);
+									if (modData != null)
+									{
+										DivinityApp.Log($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
+										modData.IsLarianMod = true;
+										modData.IsHidden = true;
 										baseMods.Add(modData);
 									}
 								}
@@ -1668,42 +1729,9 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-
-			return baseMods;
-		}
-
-		public static async Task<List<DivinityModData>> LoadBuiltinModsAsync(string gameDataPath)
-		{
-			List<DivinityModData> baseMods = new List<DivinityModData>();
-
-			var modResources = new ModResources();
-			var modHelper = new ModPathVisitor(modResources);
-			modHelper.CollectGlobals = false;
-			modHelper.CollectLevels = false;
-			modHelper.CollectStoryGoals = false;
-			modHelper.Discover(gameDataPath);
-
-			foreach(var modInfo in modResources.Mods.Values)
+			catch (Exception ex)
 			{
-				var metaFile = modInfo.Meta;
-				if (metaFile != null)
-				{
-					using (var stream = metaFile.MakeStream())
-					{
-						using (var sr = new System.IO.StreamReader(stream))
-						{
-							string text = await sr.ReadToEndAsync();
-							var modData = ParseMetaFile(text);
-							if (modData != null)
-							{
-								DivinityApp.Log($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
-								modData.IsLarianMod = true;
-								modData.IsHidden = true;
-								baseMods.Add(modData);
-							}
-						}
-					}
-				}
+				DivinityApp.Log("Error parsing base game mods:\n" + ex.ToString());
 			}
 
 			return baseMods;

@@ -1909,7 +1909,7 @@ namespace DivinityModManager.ViewModels
 				}
 
 				await SetMainProgressTextAsync("Loading external load orders...");
-				var savedModOrderList = await LoadExternalLoadOrdersAsync();
+				var savedModOrderList = await RunTask(LoadExternalLoadOrdersAsync(), new List<DivinityLoadOrder>());
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 
 				if (savedModOrderList.Count > 0)
@@ -2074,9 +2074,8 @@ namespace DivinityModManager.ViewModels
 			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error loading external load orders: {ex.ToString()}.");
-				return null;
+				return new List<DivinityLoadOrder>();
 			}
-
 		}
 
 		private void SaveLoadOrder()

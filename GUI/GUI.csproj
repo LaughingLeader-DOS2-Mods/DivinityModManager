@@ -204,6 +204,7 @@
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="Themes\DivinityColors.cs" />
     <Compile Include="Themes\ResourceAliasHelper.cs" />
+    <Compile Include="Util\CustomPropertyResolver.cs" />
     <Compile Include="Util\RxExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />

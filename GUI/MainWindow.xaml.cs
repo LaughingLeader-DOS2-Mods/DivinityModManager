@@ -29,28 +29,42 @@ using AdonisUI.Controls;
 using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.WinForms;
 using AdonisUI;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace DivinityModManager.Views
 {
 	/// <summary>
 	/// Interaction logic for MainWindow.xaml
 	/// </summary>
-	public partial class MainWindow : AdonisWindow, IViewFor<MainWindowViewModel>
+	public partial class MainWindow : AdonisWindow, IViewFor<MainWindowViewModel>, INotifyPropertyChanged
 	{
 		private static MainWindow self;
 		public static MainWindow Self => self;
 
-		private SettingsWindow settingsWindow;
-		public SettingsWindow SettingsWindow => settingsWindow;
+		public SettingsWindow SettingsWindow { get; set; }
+		public AboutWindow AboutWindow { get; set; }
+		public VersionGeneratorWindow VersionGeneratorWindow { get; set; }
 
-		private AboutWindow aboutWindow;
-		public AboutWindow AboutWindow => aboutWindow;
+		public event PropertyChangedEventHandler PropertyChanged;
 
-		private VersionGeneratorWindow versionGeneratorWindow;
-		public VersionGeneratorWindow VersionGeneratorWindow => versionGeneratorWindow;
+		private MainWindowViewModel viewModel;
+		public MainWindowViewModel ViewModel
+		{
+			get => viewModel;
+			set
+			{
+				viewModel = value;
+				// ViewModel is POCO type warning suppression
+				PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("ViewModel"));
+			}
+		}
 
-		public MainWindowViewModel ViewModel { get; set; }
-		object IViewFor.ViewModel { get; set; }
+		object IViewFor.ViewModel
+		{
+			get => ViewModel;
+			set => ViewModel = (MainWindowViewModel)value;
+		}
 
 		private void CreateButtonBinding(Button button, string vmProperty, object source = null)
 		{
@@ -76,19 +90,19 @@ namespace DivinityModManager.Views
 
 			//Wrapper = new WindowWrapper(this);
 
-			settingsWindow = new SettingsWindow();
-			settingsWindow.OnWorkshopPathChanged += delegate
+			SettingsWindow = new SettingsWindow();
+			SettingsWindow.OnWorkshopPathChanged += delegate
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ => ViewModel.LoadWorkshopMods());
 			};
-			settingsWindow.Closed += delegate
+			SettingsWindow.Closed += delegate
 			{
 				if(ViewModel?.Settings != null)
 				{
 					ViewModel.Settings.SettingsWindowIsOpen = false;
 				}
 			};
-			settingsWindow.Hide();
+			SettingsWindow.Hide();
 
 			ViewModel = new MainWindowViewModel();
 
@@ -119,141 +133,132 @@ namespace DivinityModManager.Views
 			this.WhenActivated(d =>
 			{
 				ViewModel.OnViewActivated(this);
-
-				this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
-
-				var canCheckForUpdates = this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive, b => b == false);
-				ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
-				{
-					AutoUpdater.ReportErrors = true;
-					AutoUpdater.Start(DivinityApp.URL_UPDATE);
-					ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
-					ViewModel.SaveSettings();
-					Task.Delay(1000).ContinueWith(_ =>
-					{
-						AutoUpdater.ReportErrors = false;
-					});
-				}, canCheckForUpdates);
-
-				var c = ReactiveCommand.Create(() =>
-				{
-					if (!SettingsWindow.IsVisible)
-					{
-						SettingsWindow.Init(this.ViewModel.Settings);
-						SettingsWindow.Show();
-						settingsWindow.Owner = this;
-						ViewModel.Settings.SettingsWindowIsOpen = true;
-					}
-					else
-					{
-						SettingsWindow.Hide();
-						ViewModel.Settings.SettingsWindowIsOpen = false;
-					}
-				});
-				c.ThrownExceptions.Subscribe((ex) =>
-				{
-					DivinityApp.Log("Error opening settings window: " + ex.ToString());
-				});
-				ViewModel.OpenPreferencesCommand = c;
-
-				ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
-				{
-					if (AboutWindow == null)
-					{
-						aboutWindow = new AboutWindow();
-					}
-
-					if (!AboutWindow.IsVisible)
-					{
-						AboutWindow.DataContext = ViewModel;
-						AboutWindow.Show();
-						AboutWindow.Owner = this;
-					}
-					else
-					{
-						AboutWindow.Hide();
-					}
-				});
-
-				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
-				{
-					if (b)
-					{
-						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
-					}
-					else
-					{
-						this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
-					}
-				});
-
-				ViewModel.ToggleVersionGeneratorWindowCommand = ReactiveCommand.Create(() =>
-				{
-					if (VersionGeneratorWindow == null)
-					{
-						versionGeneratorWindow = new VersionGeneratorWindow();
-					}
-
-					if (!VersionGeneratorWindow.IsVisible)
-					{
-						VersionGeneratorWindow.Show();
-						VersionGeneratorWindow.Owner = this;
-					}
-					else
-					{
-						VersionGeneratorWindow.Hide();
-					}
-				});
-
-				//this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
-
-				this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
-
-				this.WhenAnyValue(x => x.ViewModel.AddOrderConfigCommand).BindTo(this, view => view.FileAddNewOrderMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.SaveOrderCommand).BindTo(this, view => view.FileSaveOrderMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.SaveOrderAsCommand).BindTo(this, view => view.FileSaveOrderAsMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveCommand).BindTo(this, view => view.FileImportOrderFromSave.Command);
-				this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveAsNewCommand).BindTo(this, view => view.FileImportOrderFromSaveAsNew.Command);
-				this.WhenAnyValue(x => x.ViewModel.ImportOrderFromFileCommand).BindTo(this, view => view.FileImportOrderFromFile.Command);
-				this.WhenAnyValue(x => x.ViewModel.ImportOrderZipFileCommand).BindTo(this, view => view.FileImportOrderZip.Command);
-				this.FileImportOrderZip.Visibility = Visibility.Collapsed; // Disabled for now
-
-				this.WhenAnyValue(x => x.ViewModel.ExportOrderCommand).BindTo(this, view => view.FileExportOrderToGameMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsTextFileCommand).BindTo(this, view => view.FileExportOrderToTextListMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.ToggleDisplayNameCommand).BindTo(this, view => view.EditToggleFileNameDisplayMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.DownloadAndInstallOsiExtenderCommand).BindTo(this, view => view.ToolsInstallOsiExtenderMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ExtractSelectedModsCommand).BindTo(this, view => view.ToolsExtractSelectedModsMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.ToggleVersionGeneratorWindowCommand).BindTo(this, view => view.ToolsToggleVersionGeneratorWindowMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.RenameSaveCommand).BindTo(this, view => view.ToolsRenameSaveMenuItem.Command);
-
-				this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
-				this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
-
-				// Shortcut button bindings
-
-
-
-				//this.Initialized += (o,e) =>
-				//{
-
-				//};
-
-				//this.WhenAnyValue(x => x.ViewModel.OpenExtenderLogDirectoryCommand).BindTo(this, view => view.OpenExtenderLogsFolderButton.Command);
-
-				//this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
+				RegisterBindings();
 			});
+		}
+
+		private void RegisterBindings()
+		{
+			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
+
+			var canCheckForUpdates = this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive, b => b == false);
+			ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
+			{
+				AutoUpdater.ReportErrors = true;
+				AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
+				ViewModel.SaveSettings();
+				Task.Delay(1000).ContinueWith(_ =>
+				{
+					AutoUpdater.ReportErrors = false;
+				});
+			}, canCheckForUpdates);
+
+			var c = ReactiveCommand.Create(() =>
+			{
+				if (!SettingsWindow.IsVisible)
+				{
+					SettingsWindow.Init(this.ViewModel.Settings);
+					SettingsWindow.Show();
+					SettingsWindow.Owner = this;
+					ViewModel.Settings.SettingsWindowIsOpen = true;
+				}
+				else
+				{
+					SettingsWindow.Hide();
+					ViewModel.Settings.SettingsWindowIsOpen = false;
+				}
+			});
+			c.ThrownExceptions.Subscribe((ex) =>
+			{
+				DivinityApp.Log("Error opening settings window: " + ex.ToString());
+			});
+			ViewModel.OpenPreferencesCommand = c;
+
+			ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
+			{
+				if (AboutWindow == null)
+				{
+					AboutWindow = new AboutWindow();
+				}
+
+				if (!AboutWindow.IsVisible)
+				{
+					AboutWindow.DataContext = ViewModel;
+					AboutWindow.Show();
+					AboutWindow.Owner = this;
+				}
+				else
+				{
+					AboutWindow.Hide();
+				}
+			});
+
+			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
+			{
+				if (b)
+				{
+					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+				}
+				else
+				{
+					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
+				}
+			});
+
+			ViewModel.ToggleVersionGeneratorWindowCommand = ReactiveCommand.Create(() =>
+			{
+				if (VersionGeneratorWindow == null)
+				{
+					VersionGeneratorWindow = new VersionGeneratorWindow();
+				}
+
+				if (!VersionGeneratorWindow.IsVisible)
+				{
+					VersionGeneratorWindow.Show();
+					VersionGeneratorWindow.Owner = this;
+				}
+				else
+				{
+					VersionGeneratorWindow.Hide();
+				}
+			});
+
+			//this.OneWayBind(ViewModel, vm => vm.MainProgressValue, view => view.TaskbarItemInfo.ProgressValue).DisposeWith(ViewModel.Disposables);
+
+			this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
+
+			this.WhenAnyValue(x => x.ViewModel.AddOrderConfigCommand).BindTo(this, view => view.FileAddNewOrderMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.SaveOrderCommand).BindTo(this, view => view.FileSaveOrderMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.SaveOrderAsCommand).BindTo(this, view => view.FileSaveOrderAsMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveCommand).BindTo(this, view => view.FileImportOrderFromSave.Command);
+			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveAsNewCommand).BindTo(this, view => view.FileImportOrderFromSaveAsNew.Command);
+			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromFileCommand).BindTo(this, view => view.FileImportOrderFromFile.Command);
+			this.WhenAnyValue(x => x.ViewModel.ImportOrderZipFileCommand).BindTo(this, view => view.FileImportOrderZip.Command);
+			this.FileImportOrderZip.Visibility = Visibility.Collapsed; // Disabled for now
+
+			this.WhenAnyValue(x => x.ViewModel.ExportOrderCommand).BindTo(this, view => view.FileExportOrderToGameMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsTextFileCommand).BindTo(this, view => view.FileExportOrderToTextListMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.ToggleDisplayNameCommand).BindTo(this, view => view.EditToggleFileNameDisplayMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.DownloadAndInstallOsiExtenderCommand).BindTo(this, view => view.ToolsInstallOsiExtenderMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ExtractSelectedModsCommand).BindTo(this, view => view.ToolsExtractSelectedModsMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.ToggleVersionGeneratorWindowCommand).BindTo(this, view => view.ToolsToggleVersionGeneratorWindowMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.RenameSaveCommand).BindTo(this, view => view.ToolsRenameSaveMenuItem.Command);
+
+			this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
+			this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 		}
 
 		public void UpdateColorTheme(bool darkMode)

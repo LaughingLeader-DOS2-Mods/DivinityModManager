@@ -20,6 +20,9 @@ namespace DivinityModManager
 	{
 		public App()
 		{
+			// POCO type warning suppression
+			Splat.Locator.CurrentMutable.Register(() => new DivinityModManager.Util.CustomPropertyResolver(), typeof(ICreatesObservableForProperty));
+
 			WebHelper.SetupClient();
 #if DEBUG
 			RxApp.SuppressViewCommandBindingMessage = false;

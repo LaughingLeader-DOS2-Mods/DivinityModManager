@@ -2456,21 +2456,6 @@ namespace DivinityModManager.ViewModels
 			RxApp.MainThreadScheduler.Schedule(delaySpan, _ => {
 				MainProgressIsActive = false;
 				CanCancelProgress = true;
-
-				if (Settings.CheckForUpdates)
-				{
-					if (Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - Settings.LastUpdateCheck >= 43200))
-					{
-						try
-						{
-							AutoUpdater.Start(DivinityApp.URL_UPDATE);
-						}
-						catch (Exception ex)
-						{
-							DivinityApp.Log($"Error running AutoUpdater:\n{ex.ToString()}");
-						}
-					}
-				}
 			});
 		}
 
@@ -3001,6 +2986,35 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		public void CheckForUpdates(bool force = false)
+		{
+			if (!force)
+			{
+				if (Settings.LastUpdateCheck == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - Settings.LastUpdateCheck >= 43200))
+				{
+					try
+					{
+						AutoUpdater.Start(DivinityApp.URL_UPDATE);
+					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error running AutoUpdater:\n{ex.ToString()}");
+					}
+				}
+			}
+			else
+			{
+				AutoUpdater.ReportErrors = true;
+				AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
+				SaveSettings();
+				Task.Delay(1000).ContinueWith(_ =>
+				{
+					AutoUpdater.ReportErrors = false;
+				});
+			}
+		}
+
 		public void OnViewActivated(MainWindow parentView)
 		{
 			view = parentView;
@@ -3024,6 +3038,10 @@ namespace DivinityModManager.ViewModels
 			}
 
 			LoadSettings();
+			if (Settings.CheckForUpdates)
+			{
+				CheckForUpdates();
+			}
 			RefreshAsync_Start("Loading...");
 			//Refresh();
 			SaveSettings(); // New values
@@ -4008,6 +4026,9 @@ Directory the zip will be extracted to:
 					ShowAlert($"Path not found.", -1, 30);
 				}
 			}, adventureModCanOpenObservable);
+
+			var canCheckForUpdates = this.WhenAnyValue(x => x.MainProgressIsActive, b => b == false);
+			CheckForAppUpdatesCommand = ReactiveCommand.Create(() => CheckForUpdates(true), canCheckForUpdates);
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 

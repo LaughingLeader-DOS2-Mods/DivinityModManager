@@ -141,19 +141,6 @@ namespace DivinityModManager.Views
 		{
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
-			var canCheckForUpdates = this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive, b => b == false);
-			ViewModel.CheckForAppUpdatesCommand = ReactiveCommand.Create(() =>
-			{
-				AutoUpdater.ReportErrors = true;
-				AutoUpdater.Start(DivinityApp.URL_UPDATE);
-				ViewModel.Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
-				ViewModel.SaveSettings();
-				Task.Delay(1000).ContinueWith(_ =>
-				{
-					AutoUpdater.ReportErrors = false;
-				});
-			}, canCheckForUpdates);
-
 			var c = ReactiveCommand.Create(() =>
 			{
 				if (!SettingsWindow.IsVisible)

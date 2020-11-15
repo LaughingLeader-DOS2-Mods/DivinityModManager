@@ -1975,6 +1975,8 @@ namespace DivinityModManager.ViewModels
 			}
 
 			await Observable.Start(() => {
+				int defaultAdventureIndex = AdventureMods.IndexOf(AdventureMods.FirstOrDefault(x => x.UUID == DivinityApp.ORIGINS_UUID));
+				if (defaultAdventureIndex == -1) defaultAdventureIndex = 0;
 				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
 				{
 					DivinityApp.Log($"Setting selected adventure mod.");
@@ -1983,11 +1985,15 @@ namespace DivinityModManager.ViewModels
 					{
 						SelectedAdventureModIndex = AdventureMods.IndexOf(nextAdventureMod);
 					}
-					SelectedAdventureModIndex = 0;
+					else
+					{
+
+						SelectedAdventureModIndex = defaultAdventureIndex;
+					}
 				}
 				else
 				{
-					SelectedAdventureModIndex = 0;
+					SelectedAdventureModIndex = defaultAdventureIndex;
 				}
 
 				DivinityApp.Log($"Finishing up refresh.");
@@ -3991,7 +3997,7 @@ Directory the zip will be extracted to:
 			var modsConnecton = mods.Connect();
 			modsConnecton.Filter(x => !x.IsLarianMod && x.Type != "Adventure").Bind(out allMods).DisposeMany().Subscribe();
 
-			modsConnecton.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.IsLarianMod)).Bind(out adventureMods).DisposeMany().Subscribe();
+			modsConnecton.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.UUID == DivinityApp.ORIGINS_UUID)).Bind(out adventureMods).DisposeMany().Subscribe();
 			this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod, out selectedAdventureMod).DisposeWith(this.Disposables);

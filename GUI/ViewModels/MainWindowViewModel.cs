@@ -1362,7 +1362,9 @@ namespace DivinityModManager.ViewModels
 
 		public bool ModIsAvailable(IDivinityModData divinityModData)
 		{
-			return mods.Items.Any(k => k.UUID == divinityModData.UUID) || DivinityApp.IgnoredMods.Any(im => im.UUID == divinityModData.UUID);
+			return mods.Items.Any(k => k.UUID == divinityModData.UUID) 
+				|| DivinityApp.IgnoredMods.Any(im => im.UUID == divinityModData.UUID) 
+				|| DivinityApp.IgnoredDependencyMods.Any(d => d.UUID == divinityModData.UUID);
 		}
 
 		public void LoadProfiles()

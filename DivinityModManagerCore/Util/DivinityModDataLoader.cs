@@ -217,7 +217,7 @@ namespace DivinityModManager.Util
 							}
 						}
 					}
-					modData.UpdateDependencyText();
+					modData.UpdateDependencyInfo();
 
 					var publishVersionNode = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "PublishVersion").FirstOrDefault();
 					if (publishVersionNode != null)

@@ -44,7 +44,7 @@ namespace DivinityModManager.Models
 				if (ValueContains(mod.Author)) return true;
 			}
 
-			if (PropertyContains("version"))
+			if (PropertyContains("Version"))
 			{
 				if (ValueContains(mod.Version.Version)) return true;
 			}
@@ -64,7 +64,7 @@ namespace DivinityModManager.Models
 			{
 				foreach(var dependency in mod.Dependencies.Items)
 				{
-					if (ValueContains(dependency.Name))
+					if (ValueContains(dependency.Name) || FilterValue == dependency.UUID || ValueContains(dependency.Folder))
 					{
 						return true;
 					}

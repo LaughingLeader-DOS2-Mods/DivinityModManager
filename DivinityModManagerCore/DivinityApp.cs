@@ -16,8 +16,7 @@ namespace DivinityModManager
 	{
 		public const string DIR_DATA = "Data\\";
 		public const string URL_REPO = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager";
-		public const string URL_CHANGELOG = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/blob/master/CHANGELOG.md";
-		public const string URL_CHANGELOG_RAW = @"https://raw.githubusercontent.com/LaughingLeader-DOS2-Mods/DivinityModManager/master/CHANGELOG.md";
+		public const string URL_CHANGELOG = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/wiki/Changelog";
 		public const string URL_UPDATE = @"https://raw.githubusercontent.com/LaughingLeader-DOS2-Mods/DivinityModManager/master/Update.xml";
 		public const string URL_AUTHOR = @"https://github.com/LaughingLeader";
 		public const string URL_ISSUES = @"https://github.com/LaughingLeader-DOS2-Mods/DivinityModManager/issues";

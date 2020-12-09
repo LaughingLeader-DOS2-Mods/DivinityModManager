@@ -1650,7 +1650,7 @@ namespace DivinityModManager.Util
 								using (var sr = new System.IO.StreamReader(stream))
 								{
 									string text = sr.ReadToEnd();
-									var modData = ParseMetaFile(text);
+									var modData = ParseMetaFile(text, true);
 									if (modData != null)
 									{
 										modData.IsLarianMod = true;

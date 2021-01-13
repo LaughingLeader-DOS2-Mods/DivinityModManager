@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Markup;
 
 namespace DivinityModManager
@@ -31,6 +32,7 @@ namespace DivinityModManager
 			RxApp.SuppressViewCommandBindingMessage = true;
 #endif
 		}
+
 		private void Application_Startup(object sender, StartupEventArgs e)
 		{
 			//For making date display use the current system's culture

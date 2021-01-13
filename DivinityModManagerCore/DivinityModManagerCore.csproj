@@ -23,9 +23,9 @@
 		<PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
 		<PackageReference Include="ReactiveHistory" Version="0.9.4" />
-		<PackageReference Include="ReactiveProperty" Version="7.5.1" />
-		<PackageReference Include="ReactiveUI" Version="12.1.5" />
-		<PackageReference Include="System.Reactive" Version="4.4.1" />
+		<PackageReference Include="ReactiveProperty" Version="7.6.0" />
+		<PackageReference Include="ReactiveUI" Version="13.0.38" />
+		<PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>
 		<Reference Include="LSLib">

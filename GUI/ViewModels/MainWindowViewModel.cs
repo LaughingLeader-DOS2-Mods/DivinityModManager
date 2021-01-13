@@ -404,6 +404,9 @@ namespace DivinityModManager.ViewModels
 		public ICommand CopyOrderToClipboardCommand { get; private set; }
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
 		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
+		public ICommand MoveLeftCommand { get; set; }
+		public ICommand MoveRightCommand { get; set; }
+		public ICommand ConfirmCommand { get; set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 		public ReactiveCommand<object, Unit> ToggleOrderRenamingCommand { get; set; }
 

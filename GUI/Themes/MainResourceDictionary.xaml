@@ -583,6 +583,7 @@
 			</Grid.ColumnDefinitions>
 			<TextBlock
 				HorizontalAlignment="Stretch"
+				AutomationProperties.Name="{Binding DisplayName}"
 				Tag="{Binding}"
 				Text="{Binding DisplayName}"
 				ToolTip="{StaticResource ModToolTip}" />
@@ -658,6 +659,8 @@
 		<GridView.Columns>
 			<GridViewColumn
 				Width="40"
+				AutomationProperties.HelpText="Index"
+				AutomationProperties.Name="Index"
 				Header="#"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>

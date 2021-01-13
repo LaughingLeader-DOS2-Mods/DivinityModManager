@@ -135,6 +135,13 @@ namespace DivinityModManager.Views
 				ViewModel.OnViewActivated(this);
 				RegisterBindings();
 			});
+
+			AddHandler(UIElement.GotFocusEvent, new RoutedEventHandler(OnGotFocus));
+		}
+
+		void OnGotFocus(object sender, RoutedEventArgs e)
+		{
+			Trace.WriteLine($"[OnGotFocus] {sender} {e.Source}");
 		}
 
 		private void RegisterBindings()

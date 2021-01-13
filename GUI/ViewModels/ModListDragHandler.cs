@@ -2,14 +2,38 @@
 
 using GongSolutions.Wpf.DragDrop;
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Data;
+using System.Windows.Input;
 
 namespace DivinityModManager.ViewModels
 {
+	public class ManualDragInfo : IDragInfo
+	{
+		public DataFormat DataFormat { get; set; }
+		public object Data { get; set; }
+		public Point DragStartPosition { get; }
+		public Point PositionInDraggedItem { get; }
+		public DragDropEffects Effects { get; set; }
+		public MouseButton MouseButton { get; set; }
+		public System.Collections.IEnumerable SourceCollection { get; set; }
+		public int SourceIndex { get; set; }
+		public object SourceItem { get; set; }
+		public System.Collections.IEnumerable SourceItems { get; set; }
+		public CollectionViewGroup SourceGroup { get; set; }
+		public UIElement VisualSource { get; set; }
+		public UIElement VisualSourceItem { get; set; }
+		public FlowDirection VisualSourceFlowDirection { get; set; }
+		public object DataObject { get; set; }
+		public Func<DependencyObject, object, DragDropEffects, DragDropEffects> DragDropHandler { get; set; }
+		public DragDropKeyStates DragDropCopyKeyState { get; set; }
+	}
+
 	public class ModListDragHandler : DefaultDragHandler
 	{
 		private MainWindowViewModel _viewModel;

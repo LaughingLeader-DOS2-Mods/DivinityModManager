@@ -23,6 +23,7 @@ using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using DivinityModManager.Models;
 using DynamicData.Binding;
+using GongSolutions.Wpf.DragDrop;
 
 namespace DivinityModManager.Views
 {
@@ -49,6 +50,21 @@ namespace DivinityModManager.Views
 		object IViewFor.ViewModel { get; set; }
 
 		private MainWindowViewModel _lastVM;
+
+		private object _focusedList = null;
+
+		private bool ListHasFocus(ListView listView)
+		{
+			if (_focusedList == listView || listView.IsFocused || listView.IsKeyboardFocused)
+			{
+				return true;
+			}
+			if(listView.SelectedItem is ListViewItem item && (item.IsFocused || item.IsKeyboardFocused))
+			{
+				return true;
+			}
+			return false;
+		}
 
 		private void SetupListView(ListView listView)
 		{
@@ -89,6 +105,10 @@ namespace DivinityModManager.Views
 			//};
 
 			listView.ItemContainerStyle = this.FindResource("ListViewItemMouseEvents") as Style;
+			listView.GotFocus += (object sender, RoutedEventArgs e) =>
+			{
+				_focusedList = sender;
+			};
 		}
 
 		public void FixActiveModsScrollbar()
@@ -225,6 +245,61 @@ namespace DivinityModManager.Views
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 					ViewModel.Layout = this;
+
+					ViewModel.ConfirmCommand = ReactiveCommand.Create(() =>
+					{
+						Trace.WriteLine($"this.InactiveModsListView.IsFocused:{ListHasFocus(InactiveModsListView)}");
+						Trace.WriteLine($"this.ActiveModsListView.IsFocused:{ListHasFocus(ActiveModsListView)}");
+						if (ListHasFocus(InactiveModsListView))
+						{
+							//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+							//for (int i = 0; i < selectedMods.Count; i++)
+							//{
+							//	ViewModel.InactiveMods.Remove(selectedMods[i]);
+							//	ViewModel.ActiveMods.Add(selectedMods[i]);
+							//}
+							var dropInfo = new ManualDropInfo(ViewModel.InactiveMods.Where(x => x.IsSelected).ToList(), InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
+							ViewModel.DropHandler.Drop(dropInfo);
+							ActiveModsListView.Focus();
+						}
+						else if (ListHasFocus(ActiveModsListView))
+						{
+							//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
+							//for (int i = 0; i < selectedMods.Count; i++)
+							//{
+							//	ViewModel.ActiveMods.Remove(selectedMods[i]);
+							//	ViewModel.InactiveMods.Add(selectedMods[i]);
+							//}
+							var dropInfo = new ManualDropInfo(ViewModel.ActiveMods.Where(x=>x.IsSelected).ToList(), ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
+							ViewModel.DropHandler.Drop(dropInfo);
+							InactiveModsListView.Focus();
+						}
+					}).DisposeWith(d);
+
+					var confirmKB = new KeyBinding(ViewModel.ConfirmCommand, new KeyGesture(Key.Return));
+					ActiveModsListView.InputBindings.Add(confirmKB);
+					InactiveModsListView.InputBindings.Add(confirmKB);
+
+
+					ViewModel.MoveLeftCommand = ReactiveCommand.Create(() =>
+					{
+						if(ListHasFocus(InactiveModsListView))
+						{
+							this.ActiveModsListView.Focus();
+						}
+					}).DisposeWith(d);
+
+					InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
+
+					ViewModel.MoveRightCommand = ReactiveCommand.Create(() =>
+					{
+						if (ListHasFocus(ActiveModsListView))
+						{
+							this.InactiveModsListView.Focus();
+						}
+					}).DisposeWith(d);
+
+					ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
 				}
 
 				// when the ViewModel gets deactivated

@@ -68,6 +68,7 @@
 					VerticalAlignment="Center"
 					AcceptsReturn="False"
 					AcceptsTab="False"
+					AutomationProperties.Name="Active Mods Filter"
 					CanUndoTextOnEscape="True"
 					Text="{Binding ActiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
@@ -115,6 +116,7 @@
 				MaxHeight="99999"
 				dd:DragDrop.DragHandler="{Binding DragHandler}"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
+				AutomationProperties.Name="Active Mods"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
 				ItemsSource="{Binding ActiveMods}"
@@ -152,6 +154,7 @@
 					VerticalAlignment="Center"
 					AcceptsReturn="False"
 					AcceptsTab="False"
+					AutomationProperties.Name="Inactive Mods Filter"
 					CanUndoTextOnEscape="True"
 					Text="{Binding InactiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
@@ -182,6 +185,7 @@
 					Margin="4,0,0,0"
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
+					AutomationProperties.Name="Total Hidden Inactive Mods"
 					Visibility="{Binding TotalInactiveModsHidden, Converter={StaticResource IntToVisibilityConverter}}">
 					<Run Text="{Binding TotalInactiveModsHidden, Mode=OneWay}" />
 					<Run Text="Hidden" /></TextBlock>
@@ -190,6 +194,7 @@
 					Margin="4,0,0,0"
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
+					AutomationProperties.Name="Total Inactive Mods Selected"
 					Visibility="{Binding InactiveSelected, Converter={StaticResource IntToVisibilityConverter}}">
 					<Run Text="{Binding InactiveSelected, Mode=OneWay}" />
 					<Run Text="Selected" /></TextBlock>
@@ -200,6 +205,7 @@
 				MaxHeight="99999"
 				dd:DragDrop.DragHandler="{Binding DragHandler}"
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
+				AutomationProperties.Name="Inactive Mods"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
 				ItemsSource="{Binding InactiveMods}"

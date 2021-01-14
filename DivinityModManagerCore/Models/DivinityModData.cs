@@ -25,6 +25,7 @@ namespace DivinityModManager.Models
 	}
 
 	[JsonObject(MemberSerialization.OptIn)]
+	[ScreenReaderHelper(Name="DisplayName", HelpText = "HelpText")]
 	public class DivinityModData : ReactiveObject, IDivinityModData, ISelectable
 	{
 		private int index = -1;
@@ -431,7 +432,15 @@ namespace DivinityModManager.Models
 
 		public override string ToString()
 		{
-			return $"Mod|Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
+			return $"Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
+		}
+
+		public string HelpText
+		{
+			get
+			{
+				return $"Author {Author} Version {Version?.Version} Last Updated {LastUpdated.ToLongDateString()}";
+			}
 		}
 
 		public DivinityLoadOrderEntry ToOrderEntry()

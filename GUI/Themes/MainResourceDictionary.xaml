@@ -173,6 +173,7 @@
 		x:Key="DivinityModDataListItem"
 		BasedOn="{StaticResource {x:Type ListViewItem}}"
 		TargetType="{x:Type ListViewItem}">
+		<Setter Property="behavior:ScreenReaderHelperBehavior.Automatic" Value="True" />
 		<!--<Style.Resources>
 			<LinearGradientBrush x:Key="ListItemHoverFill_Selected" StartPoint="0,0" EndPoint="0,1">
 				<GradientStop Offset="0" Color="#FFD1FFD1" />
@@ -583,7 +584,6 @@
 			</Grid.ColumnDefinitions>
 			<TextBlock
 				HorizontalAlignment="Stretch"
-				AutomationProperties.Name="{Binding DisplayName}"
 				Tag="{Binding}"
 				Text="{Binding DisplayName}"
 				ToolTip="{StaticResource ModToolTip}" />
@@ -659,8 +659,8 @@
 		<GridView.Columns>
 			<GridViewColumn
 				Width="40"
-				AutomationProperties.HelpText="Index"
-				AutomationProperties.Name="Index"
+				behavior:ScreenReaderHelperBehavior.HelpText="The mod order index column"
+				behavior:ScreenReaderHelperBehavior.Name="Index"
 				Header="#"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>

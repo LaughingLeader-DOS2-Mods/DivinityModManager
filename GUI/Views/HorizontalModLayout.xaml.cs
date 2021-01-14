@@ -258,9 +258,11 @@ namespace DivinityModManager.Views
 							//	ViewModel.InactiveMods.Remove(selectedMods[i]);
 							//	ViewModel.ActiveMods.Add(selectedMods[i]);
 							//}
-							var dropInfo = new ManualDropInfo(ViewModel.InactiveMods.Where(x => x.IsSelected).ToList(), InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
+							var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+							var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 							ViewModel.DropHandler.Drop(dropInfo);
 							ActiveModsListView.Focus();
+							//screenReader.SayString($"Moved {selectedMods.Count} mods to the active mods list.");
 						}
 						else if (ListHasFocus(ActiveModsListView))
 						{
@@ -270,9 +272,12 @@ namespace DivinityModManager.Views
 							//	ViewModel.ActiveMods.Remove(selectedMods[i]);
 							//	ViewModel.InactiveMods.Add(selectedMods[i]);
 							//}
-							var dropInfo = new ManualDropInfo(ViewModel.ActiveMods.Where(x=>x.IsSelected).ToList(), ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
+							var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
+							var message = $"Moved {selectedMods.Count} mods to the inactive mods list.";
+							var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
 							ViewModel.DropHandler.Drop(dropInfo);
 							InactiveModsListView.Focus();
+							//screenReader.SayString(message);
 						}
 					}).DisposeWith(d);
 

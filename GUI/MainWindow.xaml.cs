@@ -31,6 +31,7 @@ using DivinityModManager.WinForms;
 using AdonisUI;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using DivinityModManager.Util.ScreenReader;
 
 namespace DivinityModManager.Views
 {
@@ -253,6 +254,12 @@ namespace DivinityModManager.Views
 			this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
+			
+		}
+
+		protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer()
+		{
+			return new CachedAutomationPeer(this);
 		}
 
 		public void UpdateColorTheme(bool darkMode)

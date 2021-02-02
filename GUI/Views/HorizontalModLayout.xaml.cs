@@ -24,6 +24,9 @@ using System.Reactive.Linq;
 using DivinityModManager.Models;
 using DynamicData.Binding;
 using GongSolutions.Wpf.DragDrop;
+using System.Windows.Automation.Peers;
+using DivinityModManager.Util;
+using System.Timers;
 
 namespace DivinityModManager.Views
 {
@@ -214,6 +217,44 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		private bool canMoveSelectedMods = true;
+
+		private void MoveSelectedMods()
+		{
+			//Making selected mods active
+			if (ListHasFocus(InactiveModsListView))
+			{
+				//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+				//for (int i = 0; i < selectedMods.Count; i++)
+				//{
+				//	ViewModel.InactiveMods.Remove(selectedMods[i]);
+				//	ViewModel.ActiveMods.Add(selectedMods[i]);
+				//}
+				var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
+				ViewModel.DropHandler.Drop(dropInfo);
+				ActiveModsListView.Focus();
+				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} selected mods to the active mods list.");
+				canMoveSelectedMods = false;
+			}
+			//Making selected mods inactive
+			else if (ListHasFocus(ActiveModsListView))
+			{
+				//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
+				//for (int i = 0; i < selectedMods.Count; i++)
+				//{
+				//	ViewModel.ActiveMods.Remove(selectedMods[i]);
+				//	ViewModel.InactiveMods.Add(selectedMods[i]);
+				//}
+				var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
+				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
+				ViewModel.DropHandler.Drop(dropInfo);
+				InactiveModsListView.Focus();
+				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} mods to the inactive mods list.");
+				canMoveSelectedMods = false;
+			}
+		}
+
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
@@ -236,6 +277,13 @@ namespace DivinityModManager.Views
 			ActiveModsListView.ItemContainerGenerator.StatusChanged += ActiveModListView_ItemContainerStatusChanged;
 			InactiveModsListView.ItemContainerGenerator.StatusChanged += InactiveModListView_ItemContainerStatusChanged;
 
+			this.KeyDown += HorizontalModLayout_KeyDown;
+			this.KeyUp += HorizontalModLayout_KeyUp;
+			this.LostFocus += (o, e) =>
+			{
+				canMoveSelectedMods = true;
+			};
+
 			this.WhenActivated((d) =>
 			{
 				_lastVM = ViewModel;
@@ -246,44 +294,11 @@ namespace DivinityModManager.Views
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 					ViewModel.Layout = this;
 
-					ViewModel.ConfirmCommand = ReactiveCommand.Create(() =>
-					{
-						Trace.WriteLine($"this.InactiveModsListView.IsFocused:{ListHasFocus(InactiveModsListView)}");
-						Trace.WriteLine($"this.ActiveModsListView.IsFocused:{ListHasFocus(ActiveModsListView)}");
-						if (ListHasFocus(InactiveModsListView))
-						{
-							//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-							//for (int i = 0; i < selectedMods.Count; i++)
-							//{
-							//	ViewModel.InactiveMods.Remove(selectedMods[i]);
-							//	ViewModel.ActiveMods.Add(selectedMods[i]);
-							//}
-							var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-							var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
-							ViewModel.DropHandler.Drop(dropInfo);
-							ActiveModsListView.Focus();
-							//screenReader.SayString($"Moved {selectedMods.Count} mods to the active mods list.");
-						}
-						else if (ListHasFocus(ActiveModsListView))
-						{
-							//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
-							//for (int i = 0; i < selectedMods.Count; i++)
-							//{
-							//	ViewModel.ActiveMods.Remove(selectedMods[i]);
-							//	ViewModel.InactiveMods.Add(selectedMods[i]);
-							//}
-							var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
-							var message = $"Moved {selectedMods.Count} mods to the inactive mods list.";
-							var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
-							ViewModel.DropHandler.Drop(dropInfo);
-							InactiveModsListView.Focus();
-							//screenReader.SayString(message);
-						}
-					}).DisposeWith(d);
+					ViewModel.ConfirmCommand = ReactiveCommand.Create(MoveSelectedMods).DisposeWith(d);
 
-					var confirmKB = new KeyBinding(ViewModel.ConfirmCommand, new KeyGesture(Key.Return));
-					ActiveModsListView.InputBindings.Add(confirmKB);
-					InactiveModsListView.InputBindings.Add(confirmKB);
+					//var confirmKB = new KeyBinding(ViewModel.ConfirmCommand, new KeyGesture(Key.Return));
+					//ActiveModsListView.InputBindings.Add(confirmKB);
+					//InactiveModsListView.InputBindings.Add(confirmKB);
 
 
 					ViewModel.MoveLeftCommand = ReactiveCommand.Create(() =>
@@ -305,6 +320,32 @@ namespace DivinityModManager.Views
 					}).DisposeWith(d);
 
 					ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
+
+					ViewModel.WhenAnyValue(x => x.ActiveSelected).Subscribe((c) =>
+					{
+						if (c > 1 && DivinityApp.IsScreenReaderActive())
+						{
+							var peer = UIElementAutomationPeer.FromElement(this.ActiveSelectedText);
+							if(peer == null)
+							{
+								peer = UIElementAutomationPeer.CreatePeerForElement(this.ActiveSelectedText);
+							}
+							peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+						}
+					}).DisposeWith(d);
+
+					ViewModel.WhenAnyValue(x => x.InactiveSelected).Subscribe((c) =>
+					{
+						if (c > 1 && DivinityApp.IsScreenReaderActive())
+						{
+							var peer = UIElementAutomationPeer.FromElement(this.InactiveSelectedText);
+							if (peer == null)
+							{
+								peer = UIElementAutomationPeer.CreatePeerForElement(this.InactiveSelectedText);
+							}
+							peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
+						}
+					}).DisposeWith(d);
 				}
 
 				// when the ViewModel gets deactivated
@@ -319,6 +360,22 @@ namespace DivinityModManager.Views
 					}
 				}).DisposeWith(d);
 			});
+		}
+
+		private void HorizontalModLayout_KeyDown(object sender, KeyEventArgs e)
+		{
+			if(canMoveSelectedMods && e.Key == Key.Enter)
+			{
+				MoveSelectedMods();
+			}
+		}
+
+		private void HorizontalModLayout_KeyUp(object sender, KeyEventArgs e)
+		{
+			if(e.Key == Key.Enter)
+			{
+				canMoveSelectedMods = true;
+			}
 		}
 
 		GridViewColumnHeader _lastHeaderClicked = null;
@@ -470,18 +527,25 @@ namespace DivinityModManager.Views
 
 			for (int n = 0; n < text.Length; n++)
 			{
-				ushort glyphIndex = glyphTypeface.CharacterToGlyphMap[text[n]];
-
-				double width = glyphTypeface.AdvanceWidths[glyphIndex] * fontSize;
-
-				double glyphHeight = glyphTypeface.AdvanceHeights[glyphIndex] * fontSize;
-
-				if (glyphHeight > height)
+				try
 				{
-					height = glyphHeight;
-				}
+					ushort glyphIndex = glyphTypeface.CharacterToGlyphMap[text[n]];
 
-				totalWidth += width;
+					double width = glyphTypeface.AdvanceWidths[glyphIndex] * fontSize;
+
+					double glyphHeight = glyphTypeface.AdvanceHeights[glyphIndex] * fontSize;
+
+					if (glyphHeight > height)
+					{
+						height = glyphHeight;
+					}
+
+					totalWidth += width;
+				}
+				catch(Exception ex)
+				{
+					DivinityApp.Log($"Error measuring text:\n{ex}");
+				}
 			}
 
 			return new Size(totalWidth, height);

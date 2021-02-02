@@ -29,6 +29,9 @@
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
@@ -85,26 +88,32 @@
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
       <HintPath>..\packages\gong-wpf-dragdrop.2.3.2\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="NvdaTestingDriver, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NvdaTestingDriver.0.2.0-beta\lib\netstandard2.0\NvdaTestingDriver.dll</HintPath>
     </Reference>
     <Reference Include="Ookii.Dialogs.Wpf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.Wpf.3.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=13.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.13.0.38\lib\net472\ReactiveUI.dll</HintPath>
+    <Reference Include="ReactiveUI, Version=13.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.13.1.1\lib\net472\ReactiveUI.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI.Wpf, Version=13.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\ReactiveUI.WPF.13.0.38\lib\net472\ReactiveUI.Wpf.dll</HintPath>
+    <Reference Include="ReactiveUI.Wpf, Version=13.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.WPF.13.1.1\lib\net472\ReactiveUI.Wpf.dll</HintPath>
     </Reference>
     <Reference Include="SharpCompress, Version=0.27.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
       <HintPath>..\packages\SharpCompress.0.27.1\lib\netstandard2.0\SharpCompress.dll</HintPath>
     </Reference>
-    <Reference Include="Splat, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.9.8.1\lib\net461\Splat.dll</HintPath>
+    <Reference Include="Splat, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.10.0.1\lib\net461\Splat.dll</HintPath>
     </Reference>
-    <Reference Include="Splat.Drawing, Version=9.8.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.Drawing.9.8.1\lib\net461\Splat.Drawing.dll</HintPath>
+    <Reference Include="Splat.Drawing, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.Drawing.10.0.1\lib\net461\Splat.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -133,8 +142,19 @@
     <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Extensions, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Extensions.4.3.1\lib\net462\System.Runtime.Extensions.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.5.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
     <Reference Include="System.Text.Encoding.CodePages, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Text.Encoding.CodePages.5.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
     </Reference>
@@ -187,7 +207,9 @@
       <DependentUpon>AlertBar.xaml</DependentUpon>
     </Compile>
     <Compile Include="Controls\AutoGrayableImage.cs" />
+    <Compile Include="Controls\AutomationTooltip.cs" />
     <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
+    <Compile Include="Controls\Behavior\ScreenReaderHelperBehavior.cs" />
     <Compile Include="Controls\BusyIndicator.xaml.cs">
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>
@@ -197,6 +219,8 @@
     <Compile Include="Controls\HyperlinkText.xaml.cs">
       <DependentUpon>HyperlinkText.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ModEntryGrid.cs" />
+    <Compile Include="Controls\ModListView.cs" />
     <Compile Include="Controls\SelectableTextBlock.cs" />
     <Compile Include="Controls\TemplateSelectors\TagTemplateSelector.cs" />
     <Compile Include="Controls\UnfocusableTextBox.cs" />
@@ -207,8 +231,15 @@
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="Themes\DivinityColors.cs" />
     <Compile Include="Themes\ResourceAliasHelper.cs" />
+    <Compile Include="Util\AutomationTooltipPeer.cs" />
     <Compile Include="Util\CustomPropertyResolver.cs" />
+    <Compile Include="Util\ElementHelper.cs" />
+    <Compile Include="Util\ScreenReader\MainWindowAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\CachedAutomationPeer.cs" />
     <Compile Include="Util\RxExceptionHandler.cs" />
+    <Compile Include="Util\ScreenReader\AlertBarAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\ModEntryGridAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\ModListViewAutomationPeer.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModListDragHandler.cs" />
@@ -525,4 +556,13 @@
     </ItemGroup>
     <Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
   </Target>
+  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets'))" />
+  </Target>
+  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />
 </Project>

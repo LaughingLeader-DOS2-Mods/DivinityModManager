@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Input;
 
 namespace DivinityModManager.Models
@@ -279,11 +280,19 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref hasDescription, value); }
 		}
 
-		private bool hasToolTip = false;
+		private bool hasToolTip = true;
 
 		public bool HasToolTip
 		{
-			get => hasToolTip;
+			get
+			{
+				// If a screen reader is active, don't bother making tooltips for the mod item entry
+				if(DivinityApp.IsScreenReaderActive())
+				{
+					return false;
+				}
+				return hasToolTip;
+			}
 			set { this.RaiseAndSetIfChanged(ref hasToolTip, value); }
 		}
 
@@ -420,6 +429,10 @@ namespace DivinityModManager.Models
 
 		public void AddTags(IEnumerable<string> tags)
 		{
+			if(tags == null)
+			{
+				return;
+			}
 			foreach(var tag in tags)
 			{
 				if (!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
@@ -439,7 +452,8 @@ namespace DivinityModManager.Models
 		{
 			get
 			{
-				return $"Author {Author} Version {Version?.Version} Last Updated {LastUpdated.ToLongDateString()}";
+				//return $"by {Author} Version {Version?.Version} Last Updated {LastUpdated.ToLongDateString()}";
+				return $"by {Author} Version {Version?.Version}";
 			}
 		}
 

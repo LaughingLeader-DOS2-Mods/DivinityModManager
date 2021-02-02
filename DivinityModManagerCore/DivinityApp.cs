@@ -9,6 +9,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Automation.Peers;
 
 namespace DivinityModManager
 {
@@ -66,6 +67,15 @@ namespace DivinityModManager
 		public static void Log(string msg, [CallerMemberName] string mName = "", [CallerFilePath] string path = "", [CallerLineNumber] int line = 0)
 		{
 			System.Diagnostics.Trace.WriteLine($"[{Path.GetFileName(path)}:{mName}({line})] {msg}");
+		}
+
+		public static bool IsScreenReaderActive()
+		{
+			if (AutomationPeer.ListenerExists(AutomationEvents.AutomationFocusChanged) || AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
+			{
+				return true;
+			}
+			return false;
 		}
 	}
 }

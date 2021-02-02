@@ -85,7 +85,7 @@ namespace DivinityModManager.Controls.Behavior
 					if (enabled)
 					{
 						element.DataContextChanged += Element_DataContextChanged;
-						if(element.DataContext != null)
+						if (element.DataContext != null)
 						{
 							Element_DataContextChanged(element, new DependencyPropertyChangedEventArgs(FrameworkElement.DataContextProperty, null, element.DataContext));
 						}
@@ -100,6 +100,10 @@ namespace DivinityModManager.Controls.Behavior
 
 		private static void Element_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
+			if(sender is null)
+			{
+				return;
+			}
 			DependencyObject depObj = sender as DependencyObject;
 			var t = e.NewValue.GetType();
 			var attributes = t.GetCustomAttributes(typeof(ScreenReaderHelperAttribute), true);

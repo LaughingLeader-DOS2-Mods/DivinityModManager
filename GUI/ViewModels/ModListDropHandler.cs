@@ -110,7 +110,15 @@ namespace DivinityModManager.ViewModels
 				{
 					var obj2Insert = o;
 					objects2Insert.Add(obj2Insert);
-					destinationList.Insert(insertIndex++, obj2Insert);
+					try
+					{
+						destinationList.Insert(insertIndex++, obj2Insert);
+					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error adding drop operation item to destinationList:\n{ex}");
+						destinationList.Add(obj2Insert);
+					}
 				}
 
 				var selectDroppedItems = itemsControl is TabControl || (itemsControl != null && GongSolutions.Wpf.DragDrop.DragDrop.GetSelectDroppedItems(itemsControl));

@@ -440,12 +440,12 @@
 			</Border.Effect>
 		</Border>
 	</DataTemplate>
-	<ToolTip x:Key="ModToolTip" DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
-		<ToolTip.Style>
-			<Style BasedOn="{StaticResource {x:Type ToolTip}}" TargetType="ToolTip">
+	<controls:AutomationTooltip x:Key="ModToolTip" DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
+		<controls:AutomationTooltip.Style>
+			<Style BasedOn="{StaticResource {x:Type ToolTip}}" TargetType="controls:AutomationTooltip">
 				<Setter Property="Template">
 					<Setter.Value>
-						<ControlTemplate TargetType="ToolTip">
+						<ControlTemplate TargetType="controls:AutomationTooltip">
 							<Border
 								Padding="8"
 								Background="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}"
@@ -457,7 +457,7 @@
 					</Setter.Value>
 				</Setter>
 			</Style>
-		</ToolTip.Style>
+		</controls:AutomationTooltip.Style>
 		<StackPanel
 			x:Name="DescTooltipStackPanel"
 			MaxWidth="700"
@@ -575,18 +575,20 @@
 				</TextBlock>
 			</StackPanel>
 		</StackPanel>
-	</ToolTip>
+	</controls:AutomationTooltip>
 	<DataTemplate x:Key="ModNameTemplate" DataType="{x:Type data:DivinityModData}">
-		<Grid>
-			<Grid.ColumnDefinitions>
+		<controls:ModEntryGrid>
+			<controls:ModEntryGrid.ColumnDefinitions>
 				<ColumnDefinition Width="*" />
 				<ColumnDefinition Width="Auto" />
-			</Grid.ColumnDefinitions>
+			</controls:ModEntryGrid.ColumnDefinitions>
 			<TextBlock
+				x:Name="ModNameText"
 				HorizontalAlignment="Stretch"
 				Tag="{Binding}"
 				Text="{Binding DisplayName}"
-				ToolTip="{StaticResource ModToolTip}" />
+				ToolTip="{StaticResource ModToolTip}"
+				ToolTipService.IsEnabled="{Binding HasToolTip}" />
 			<StackPanel Grid.Column="1" Orientation="Horizontal">
 				<Image
 					x:Name="ExtenderStatusImage"
@@ -631,7 +633,7 @@
 					</Image.Style>
 				</Image>
 			</StackPanel>
-		</Grid>
+		</controls:ModEntryGrid>
 	</DataTemplate>
 	<Style
 		x:Key="GridViewLeftContainerStyle"

@@ -37,6 +37,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -748,11 +749,11 @@ namespace DivinityModManager.ViewModels
 				{
 					if(String.IsNullOrWhiteSpace(Settings.GameExecutablePath))
 					{
-						ShowAlert("No game executable path set.", -1, 30);
+						ShowAlert("No game executable path set.", AlertType.Danger, 30);
 					}
 					else
 					{
-						ShowAlert($"Failed to find game exe at, \"{Settings.GameExecutablePath}\"", -1, 90);
+						ShowAlert($"Failed to find game exe at, \"{Settings.GameExecutablePath}\"", AlertType.Danger, 90);
 					}
 					return;
 				}
@@ -1743,10 +1744,12 @@ namespace DivinityModManager.ViewModels
 			{
 				return false;
 			}
-			return String.IsNullOrEmpty(mod.WorkshopData.ID);
+			return String.IsNullOrEmpty(mod.WorkshopData.ID) || !CachedWorkshopData.NonWorkshopMods.Contains(mod.WorkshopData.ID) || mod.WorkshopData.Tags == null;
 		}
 		private void LoadWorkshopModDataBackground()
 		{
+			bool workshopCacheFound = false;
+
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
 			{
 				workshopModLoadingCancelToken = token;
@@ -1774,20 +1777,28 @@ namespace DivinityModManager.ViewModels
 								var mod = Mods.FirstOrDefault(x => x.UUID == entry.UUID);
 								if (mod != null)
 								{
-									mod.WorkshopData.ID = entry.WorkshopID;
-									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(entry.Created);
-									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
-									mod.WorkshopData.Tags = entry.Tags;
-									mod.AddTags(mod.WorkshopData.Tags);
-									if (entry.LastUpdated > 0)
+									if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == entry.WorkshopID)
 									{
-										mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+										mod.WorkshopData.ID = entry.WorkshopID;
+										mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(entry.Created);
+										mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
+										mod.WorkshopData.Tags = entry.Tags;
+										mod.AddTags(mod.WorkshopData.Tags);
+										if (entry.LastUpdated > 0)
+										{
+											mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+										}
+									}
+									else
+									{
+										DivinityApp.Log($"Found cached workshop entry for mod {mod.DisplayName}, but it has a different workshop ID? Current({mod.WorkshopData.ID}) Cached({entry.WorkshopID})");
 									}
 								}
 							}
 						}
+						workshopCacheFound = true;
 					}
-				}
+				} 
 
 				if (!Settings.DisableWorkshopTagCheck)
 				{
@@ -1807,33 +1818,49 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 
-					var unknownWorkshopMods = userMods.Where(x => CanFetchWorkshopData(x) && !CachedWorkshopData.NonWorkshopMods.Contains(x.UUID)).ToList();
-					if (unknownWorkshopMods.Count > 0)
+					var targetMods = userMods;
+					if(workshopCacheFound)
+					{
+						targetMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
+					}
+
+					if (targetMods.Count > 0)
 					{
 						//DivinityApp.LogMessage("Mods:");
 						//DivinityApp.LogMessage(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
 						RxApp.MainThreadScheduler.Schedule(() =>
 						{
-							StatusBarRightText = $"Downloading workshop data for {unknownWorkshopMods.Count} mods...";
+							StatusBarRightText = $"Downloading workshop data for {targetMods.Count} mods...";
 						});
 						//totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
 						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
 						if (success)
 						{
-							foreach (var mod in unknownWorkshopMods)
+							foreach (var mod in targetMods)
 							{
-								var cachedMod = CachedWorkshopData.Mods.FirstOrDefault(x => x.UUID == mod.UUID);
-								if (cachedMod != null)
+								var cachedMods = CachedWorkshopData.Mods.Where(x => x.UUID == mod.UUID);
+								if (cachedMods != null)
 								{
-									mod.WorkshopData.ID = cachedMod.WorkshopID;
-									mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
-									mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
-									mod.AddTags(cachedMod.Tags);
-									if (cachedMod.LastUpdated > 0)
+									foreach (var cachedMod in cachedMods)
 									{
-										mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+										if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == cachedMod.WorkshopID)
+										{
+											mod.WorkshopData.ID = cachedMod.WorkshopID;
+											mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
+											mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
+											mod.AddTags(cachedMod.Tags);
+											if (cachedMod.LastUpdated > 0)
+											{
+												mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+											}
+											totalSuccess++;
+										}
+										else
+										{
+											DivinityApp.Log($"Downloaded workshop entry for mod {mod.DisplayName} has a different workshop ID than what was found locally? Current({mod.WorkshopData.ID}) Downloaded({cachedMod.WorkshopID})");
+										}
 									}
-									totalSuccess++;
+
 								}
 								else
 								{
@@ -2805,7 +2832,7 @@ namespace DivinityModManager.ViewModels
 				else
 				{
 					DivinityApp.Log($"Failed to load order from '{dialog.FileName}'.");
-					ShowAlert($"No mod order found in save \"{Path.GetFileNameWithoutExtension(dialog.FileName)}\".", -1, 30);
+					ShowAlert($"No mod order found in save \"{Path.GetFileNameWithoutExtension(dialog.FileName)}\".", AlertType.Danger, 30);
 				}
 			}
 			return null;
@@ -3199,21 +3226,21 @@ namespace DivinityModManager.ViewModels
 
 		private MainWindowExceptionHandler exceptionHandler;
 
-		public void ShowAlert(string message, int alertType = 0, int timeout = 0)
+		public void ShowAlert(string message, AlertType alertType = AlertType.Info, int timeout = 0)
 		{
 			if (timeout < 0) timeout = 0;
 			switch (alertType)
 			{
-				case -1:
+				case AlertType.Danger:
 					view.AlertBar.SetDangerAlert(message, timeout);
 					break;
-				case 2:
+				case AlertType.Warning:
 					view.AlertBar.SetWarningAlert(message, timeout);
 					break;
-				case 1:
+				case AlertType.Success:
 					view.AlertBar.SetSuccessAlert(message, timeout);
 					break;
-				case 0:
+				case AlertType.Info:
 				default:
 					view.AlertBar.SetInformationAlert(message, timeout);
 					break;
@@ -3663,7 +3690,7 @@ Directory the zip will be extracted to:
 
 			if (totalRemoved > 0)
 			{
-				ShowAlert($"Removed {totalRemoved} missing mods from the current order. Save to confirm.", 2);
+				ShowAlert($"Removed {totalRemoved} missing mods from the current order. Save to confirm.", AlertType.Warning);
 			}
 		}
 
@@ -3855,7 +3882,7 @@ Directory the zip will be extracted to:
 				}
 				else
 				{
-					ShowAlert($"Path not found.", -1, 30);
+					ShowAlert($"Path not found.", AlertType.Danger, 30);
 				}
 			});
 
@@ -4034,7 +4061,7 @@ Directory the zip will be extracted to:
 				}
 				else
 				{
-					ShowAlert($"Path not found.", -1, 30);
+					ShowAlert($"Path not found.", AlertType.Danger, 30);
 				}
 			}, adventureModCanOpenObservable);
 

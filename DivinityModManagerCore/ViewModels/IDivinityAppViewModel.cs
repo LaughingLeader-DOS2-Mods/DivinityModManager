@@ -17,7 +17,7 @@ namespace DivinityModManager.ViewModels
 		int ActiveSelected { get; }
 		int InactiveSelected { get; }
 
-		void ShowAlert(string message, int alertType = 0, int timeout = 0);
+		void ShowAlert(string message, AlertType alertType = AlertType.Info, int timeout = 0);
 		void ClearMissingMods();
 	}
 }

@@ -48,7 +48,7 @@ namespace DivinityModManager.Util
 			}
 			else
 			{
-				_viewModel.ShowAlert($"Error opening '{path}': File does not exist!", -1, 10);
+				_viewModel.ShowAlert($"Error opening '{path}': File does not exist!", AlertType.Danger, 10);
 			}
 		}
 
@@ -64,7 +64,7 @@ namespace DivinityModManager.Util
 			}
 			else
 			{
-				_viewModel.ShowAlert($"Error opening '{path}': File does not exist!", -1, 10);
+				_viewModel.ShowAlert($"Error opening '{path}': File does not exist!", AlertType.Danger, 10);
 			}
 		}
 
@@ -77,7 +77,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				_viewModel.ShowAlert($"Error copying text to clipboard: {ex.ToString()}", -1, 10);
+				_viewModel.ShowAlert($"Error copying text to clipboard: {ex.ToString()}", AlertType.Danger, 10);
 			}
 		}
 

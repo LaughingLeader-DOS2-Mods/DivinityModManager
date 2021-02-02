@@ -397,7 +397,6 @@
 					x:Name="SaveSettingsButton"
 					Padding="30,0"
 					HorizontalAlignment="Center"
-					Command="{Binding SaveSettingsCommand}"
 					Content="Save" />
 			</Grid>
 		</Grid>

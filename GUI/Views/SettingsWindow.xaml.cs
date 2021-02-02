@@ -37,12 +37,25 @@ namespace DivinityModManager.Views
 		public DivinityModManagerSettings ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
+		private void CreateButtonBinding(Button button, string vmProperty, object source = null)
+		{
+			if (source == null) source = ViewModel;
+			Binding binding = new Binding(vmProperty);
+			binding.Source = source;
+			binding.Mode = BindingMode.OneWay;
+			button.SetBinding(Button.CommandProperty, binding);
+		}
+
 		public void Init(DivinityModManagerSettings vm)
 		{
 			ViewModel = vm;
 			DataContext = ViewModel;
 
-			this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
+			CreateButtonBinding(this.ExportExtenderSettingsButton, "ExportExtenderSettingsCommand", ViewModel);
+			CreateButtonBinding(this.SaveSettingsButton, "SaveSettingsCommand", ViewModel);
+
+			//this.WhenAnyValue(x => x.ViewModel.ExportExtenderSettingsCommand).BindTo(this, view => view.ExportExtenderSettingsButton.Command);
+			//this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
 		}
 
 		private string lastWorkshopPath = "";

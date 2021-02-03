@@ -15,6 +15,7 @@ namespace DivinityModManager.Models
 	public class DivinityModManagerCachedWorkshopData
 	{
 		[DataMember] public long LastUpdated { get; set; } = -1;
+		[DataMember] public string LastVersion { get; set; } = "";
 
 		[DataMember] public List<DivinityModWorkshopCachedData> Mods { get; set; } = new List<DivinityModWorkshopCachedData>();
 		[DataMember] public List<string> NonWorkshopMods { get; set; } = new List<string>();
@@ -23,7 +24,8 @@ namespace DivinityModManager.Models
 
 		public void AddOrUpdate(string uuid, IWorkshopPublishFileDetails d, List<string> tags)
 		{
-			var cachedData = Mods.FirstOrDefault(x => x.UUID == uuid);
+			// Mods may have the same UUID, so use the WorkshopID instead.
+			var cachedData = Mods.FirstOrDefault(x => x.WorkshopID == d.publishedfileid);
 			if(cachedData != null)
 			{
 				cachedData.LastUpdated = d.time_updated;
@@ -67,6 +69,9 @@ namespace DivinityModManager.Models
 
 					writer.WritePropertyName("LastUpdated");
 					writer.WriteValue(LastUpdated);
+
+					writer.WritePropertyName("LastVersion");
+					writer.WriteValue(LastVersion);
 
 					writer.WritePropertyName("Mods");
 					writer.WriteStartArray();

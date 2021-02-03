@@ -75,6 +75,8 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref title, value); }
 		}
 
+		public string Version { get; set; } = "";
+
 		private bool IsInitialized { get; set; } = false;
 
 		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
@@ -736,7 +738,7 @@ namespace DivinityModManager.ViewModels
 
 			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
 			{
-				DivinityApp.Log($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
+				//DivinityApp.Log($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
 				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 				{
 					Process.Start(Settings.WorkshopPath);
@@ -1735,6 +1737,10 @@ namespace DivinityModManager.ViewModels
 		private List<string> ignoredModProjectNames = new List<string> { "Test", "Debug" };
 		private bool CanFetchWorkshopData(DivinityModData mod)
 		{
+			if (CachedWorkshopData.NonWorkshopMods.Contains(mod.UUID))
+			{
+				return false;
+			}
 			if (mod.IsEditorMod && (ignoredModProjectNames.Any(x => mod.Folder.IndexOf(x, StringComparison.OrdinalIgnoreCase) > -1) ||
 				String.IsNullOrEmpty(mod.Author) || String.IsNullOrEmpty(mod.Description)))
 			{
@@ -1744,8 +1750,56 @@ namespace DivinityModManager.ViewModels
 			{
 				return false;
 			}
-			return String.IsNullOrEmpty(mod.WorkshopData.ID) || !CachedWorkshopData.NonWorkshopMods.Contains(mod.WorkshopData.ID) || mod.WorkshopData.Tags == null;
+			return String.IsNullOrEmpty(mod.WorkshopData.ID) || !CachedWorkshopData.Mods.Any(x => x.UUID == mod.UUID);
 		}
+
+		private async Task<bool> CacheAllWorkshopModsAsync()
+		{
+			var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
+			if (success)
+			{
+				var nonWorkshopMods = userMods.Where(x => !CachedWorkshopData.Mods.Any(y => y.UUID == x.UUID)).ToList();
+				if(nonWorkshopMods.Count > 0)
+				{
+					foreach(var m in nonWorkshopMods)
+					{
+						CachedWorkshopData.AddNonWorkshopMod(m.UUID);
+					}
+				}
+			}
+			return success;
+		}
+
+		private void UpdateModDataWithCachedData()
+		{
+			foreach (var mod in userMods.Where(x => CanFetchWorkshopData(x)))
+			{
+				var cachedMods = CachedWorkshopData.Mods.Where(x => x.UUID == mod.UUID);
+				if (cachedMods != null)
+				{
+					foreach (var cachedMod in cachedMods)
+					{
+						if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == cachedMod.WorkshopID)
+						{
+							mod.WorkshopData.ID = cachedMod.WorkshopID;
+							mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
+							mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
+							mod.AddTags(cachedMod.Tags);
+							if (cachedMod.LastUpdated > 0)
+							{
+								mod.LastUpdated = mod.WorkshopData.UpdatedDate;
+							}
+						}
+						else
+						{
+							DivinityApp.Log($"Downloaded workshop entry for mod {mod.DisplayName} has a different workshop ID than what was found locally? Current({mod.WorkshopData.ID}) Downloaded({cachedMod.WorkshopID})");
+						}
+					}
+
+				}
+			}
+		}
+
 		private void LoadWorkshopModDataBackground()
 		{
 			bool workshopCacheFound = false;
@@ -1770,6 +1824,10 @@ namespace DivinityModManager.ViewModels
 					if (cachedData != null)
 					{
 						CachedWorkshopData = cachedData;
+						if(String.IsNullOrEmpty(CachedWorkshopData.LastVersion) || CachedWorkshopData.LastVersion != this.Version)
+						{
+							CachedWorkshopData.LastUpdated = -1;
+						}
 						foreach (var entry in cachedData.Mods)
 						{
 							if (!String.IsNullOrEmpty(entry.UUID))
@@ -1802,82 +1860,46 @@ namespace DivinityModManager.ViewModels
 
 				if (!Settings.DisableWorkshopTagCheck)
 				{
-					var totalSuccess = 0;
-
-					if (CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
+					if (!workshopCacheFound || CachedWorkshopData.LastUpdated == -1 || (DateTimeOffset.Now.ToUnixTimeSeconds() - CachedWorkshopData.LastUpdated >= 3600))
 					{
 						RxApp.MainThreadScheduler.Schedule(() =>
 						{
-							StatusBarRightText = "Checking for workshop tags...";
+							StatusBarRightText = "Downloading workshop data...";
 							StatusBarBusyIndicatorVisibility = Visibility.Visible;
 						});
-						var foundWorkshopMods = userMods.Where(x => !String.IsNullOrEmpty(x.WorkshopData.ID)).ToList();
-						if (foundWorkshopMods.Count > 0)
+						bool success = await CacheAllWorkshopModsAsync();
+						if(success)
 						{
-							totalSuccess += await DivinityWorkshopDataLoader.LoadAllWorkshopDataAsync(foundWorkshopMods, CachedWorkshopData);
+							UpdateModDataWithCachedData();
+							CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
 						}
 					}
-
-					var targetMods = userMods;
-					if(workshopCacheFound)
+					else
 					{
-						targetMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
-					}
-
-					if (targetMods.Count > 0)
-					{
-						//DivinityApp.LogMessage("Mods:");
-						//DivinityApp.LogMessage(String.Join("\n", unknownWorkshopMods.Select(x => x.Name)));
-						RxApp.MainThreadScheduler.Schedule(() =>
+						DivinityApp.Log("Checking for mods missing workshop data.");
+						var targetMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
+						if (targetMods.Count > 0)
 						{
-							StatusBarRightText = $"Downloading workshop data for {targetMods.Count} mods...";
-						});
-						//totalSuccess += await DivinityWorkshopDataLoader.FindWorkshopDataAsync(unknownWorkshopMods, CachedWorkshopData);
-						var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
-						if (success)
-						{
-							foreach (var mod in targetMods)
+							RxApp.MainThreadScheduler.Schedule(() =>
 							{
-								var cachedMods = CachedWorkshopData.Mods.Where(x => x.UUID == mod.UUID);
-								if (cachedMods != null)
-								{
-									foreach (var cachedMod in cachedMods)
-									{
-										if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == cachedMod.WorkshopID)
-										{
-											mod.WorkshopData.ID = cachedMod.WorkshopID;
-											mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
-											mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
-											mod.AddTags(cachedMod.Tags);
-											if (cachedMod.LastUpdated > 0)
-											{
-												mod.LastUpdated = mod.WorkshopData.UpdatedDate;
-											}
-											totalSuccess++;
-										}
-										else
-										{
-											DivinityApp.Log($"Downloaded workshop entry for mod {mod.DisplayName} has a different workshop ID than what was found locally? Current({mod.WorkshopData.ID}) Downloaded({cachedMod.WorkshopID})");
-										}
-									}
-
-								}
-								else
-								{
-									CachedWorkshopData.AddNonWorkshopMod(mod.UUID);
-									DivinityApp.Log($"Adding mod {mod.Name} to NonWorkshop mods");
-								}
+								StatusBarRightText = $"Downloading workshop data for {targetMods.Count} mods...";
+								StatusBarBusyIndicatorVisibility = Visibility.Visible;
+							});
+							var totalSuccesses = await DivinityWorkshopDataLoader.FindWorkshopDataAsync(targetMods, CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
+							if(totalSuccesses > 0)
+							{
+								UpdateModDataWithCachedData();
 							}
 						}
 					}
 
-					CachedWorkshopData.LastUpdated = DateTimeOffset.Now.ToUnixTimeSeconds();
+					CachedWorkshopData.LastVersion = this.Version;
 
 					if (CachedWorkshopData.CacheUpdated)
 					{
 						RxApp.MainThreadScheduler.Schedule(() =>
 						{
-							StatusBarRightText = $"Caching workshop tags...";
+							StatusBarRightText = $"Caching workshop data...";
 						});
 						await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
 						CachedWorkshopData.CacheUpdated = false;
@@ -1887,10 +1909,8 @@ namespace DivinityModManager.ViewModels
 					{
 						StatusBarRightText = "";
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
-						if (totalSuccess > 0)
-						{
-							view.AlertBar.SetSuccessAlert($"Loaded workshop tags for {totalSuccess} mods.", 60);
-						}
+						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
+						view.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data for {CachedWorkshopData.Mods.Count} mods.", 60);
 					});
 				}
 			});
@@ -3819,7 +3839,8 @@ Directory the zip will be extracted to:
 
 			var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 			var productName = ((AssemblyProductAttribute)Attribute.GetCustomAttribute(assembly, typeof(AssemblyProductAttribute), false)).Product;
-			Title = $"{productName} {assembly.GetName().Version}";
+			Version = assembly.GetName().Version.ToString();
+			Title = $"{productName} {this.Version}";
 
 			this.DropHandler = new ModListDropHandler(this);
 			this.DragHandler = new ModListDragHandler(this);
@@ -3957,7 +3978,7 @@ Directory the zip will be extracted to:
 				}
 				catch (Exception ex)
 				{
-					view.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex.ToString()}", 15);
+					view.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex}", 15);
 				}
 			});
 

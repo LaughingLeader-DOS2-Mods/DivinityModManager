@@ -96,10 +96,10 @@ namespace DivinityModManager.Util
 									mod.WorkshopData.Tags = GetWorkshopTags(d);
 									mod.AddTags(mod.WorkshopData.Tags);
 								}
-								cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
 								//DivinityApp.LogMessage($"Loaded workshop details for mod {mod.Name}:");
 								totalLoaded++;
 							}
+							cachedData.AddOrUpdate(d.publishedfileid, d, mod.WorkshopData.Tags);
 						}
 						catch(Exception ex)
 						{
@@ -215,7 +215,7 @@ namespace DivinityModManager.Util
 				DivinityApp.Log($"Skipping FindWorkshopDataAsync");
 				return 0;
 			}
-			DivinityApp.Log($"Attempting to get workshop data for mods missing workshop folders.");
+			DivinityApp.Log($"Attempting to get workshop data for {mods.Count} mods.");
 			int totalFound = 0;
 			foreach (var mod in mods)
 			{
@@ -229,7 +229,7 @@ namespace DivinityModManager.Util
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+					DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex}");
 				}
 
 				//DivinityApp.LogMessage(responseData);
@@ -255,28 +255,32 @@ namespace DivinityModManager.Util
 							try
 							{
 								d.DeserializeMetadata();
-								if (d.GetGuid() == mod.UUID)
+								string dUUID = d.GetGuid();
+								if(!String.IsNullOrEmpty(dUUID))
 								{
-									if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == d.publishedfileid)
+									var modTags = GetWorkshopTags(d);
+									cachedData.AddOrUpdate(dUUID, d, modTags);
+
+									if (dUUID == mod.UUID)
 									{
-										mod.WorkshopData.ID = d.publishedfileid;
-										mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(d.time_created);
-										mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(d.time_updated);
-										if (d.tags != null && d.tags.Count > 0)
+										if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == d.publishedfileid)
 										{
-											mod.WorkshopData.Tags = GetWorkshopTags(d);
-											mod.AddTags(mod.WorkshopData.Tags);
+											mod.WorkshopData.ID = d.publishedfileid;
+											mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(d.time_created);
+											mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(d.time_updated);
+											if (d.tags != null && d.tags.Count > 0)
+											{
+												mod.WorkshopData.Tags = modTags;
+												mod.AddTags(mod.WorkshopData.Tags);
+											}
+											DivinityApp.Log($"Found workshop ID {mod.WorkshopData.ID} for mod {mod.DisplayName}.");
+											totalFound++;
 										}
-										cachedData.AddOrUpdate(mod.UUID, d, mod.WorkshopData.Tags);
-										DivinityApp.Log($"Found workshop ID {mod.WorkshopData.ID} for mod {mod.DisplayName}.");
-										totalFound++;
-										break;
+										else
+										{
+											DivinityApp.Log($"Found workshop entry for mod {mod.DisplayName}, but it has a different workshop ID? Current({mod.WorkshopData.ID}) Found({d.publishedfileid})");
+										}
 									}
-									else
-									{
-										DivinityApp.Log($"Found workshop entry for mod {mod.DisplayName}, but it has a different workshop ID? Current({mod.WorkshopData.ID}) Found({d.publishedfileid})");
-									}
-									
 								}
 							}
 							catch (Exception ex)

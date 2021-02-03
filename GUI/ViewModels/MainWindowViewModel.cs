@@ -1770,9 +1770,10 @@ namespace DivinityModManager.ViewModels
 			return success;
 		}
 
+
 		private void UpdateModDataWithCachedData()
 		{
-			foreach (var mod in userMods.Where(x => CanFetchWorkshopData(x)))
+			foreach (var mod in userMods)
 			{
 				var cachedMods = CachedWorkshopData.Mods.Where(x => x.UUID == mod.UUID);
 				if (cachedMods != null)
@@ -1784,18 +1785,14 @@ namespace DivinityModManager.ViewModels
 							mod.WorkshopData.ID = cachedMod.WorkshopID;
 							mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.Created);
 							mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(cachedMod.LastUpdated);
+							mod.WorkshopData.Tags = cachedMod.Tags;
 							mod.AddTags(cachedMod.Tags);
 							if (cachedMod.LastUpdated > 0)
 							{
 								mod.LastUpdated = mod.WorkshopData.UpdatedDate;
 							}
 						}
-						else
-						{
-							DivinityApp.Log($"Downloaded workshop entry for mod {mod.DisplayName} has a different workshop ID than what was found locally? Current({mod.WorkshopData.ID}) Downloaded({cachedMod.WorkshopID})");
-						}
 					}
-
 				}
 			}
 		}
@@ -1828,32 +1825,7 @@ namespace DivinityModManager.ViewModels
 						{
 							CachedWorkshopData.LastUpdated = -1;
 						}
-						foreach (var entry in cachedData.Mods)
-						{
-							if (!String.IsNullOrEmpty(entry.UUID))
-							{
-								var mod = Mods.FirstOrDefault(x => x.UUID == entry.UUID);
-								if (mod != null)
-								{
-									if (String.IsNullOrEmpty(mod.WorkshopData.ID) || mod.WorkshopData.ID == entry.WorkshopID)
-									{
-										mod.WorkshopData.ID = entry.WorkshopID;
-										mod.WorkshopData.CreatedDate = DateUtils.UnixTimeStampToDateTime(entry.Created);
-										mod.WorkshopData.UpdatedDate = DateUtils.UnixTimeStampToDateTime(entry.LastUpdated);
-										mod.WorkshopData.Tags = entry.Tags;
-										mod.AddTags(mod.WorkshopData.Tags);
-										if (entry.LastUpdated > 0)
-										{
-											mod.LastUpdated = mod.WorkshopData.UpdatedDate;
-										}
-									}
-									else
-									{
-										DivinityApp.Log($"Found cached workshop entry for mod {mod.DisplayName}, but it has a different workshop ID? Current({mod.WorkshopData.ID}) Cached({entry.WorkshopID})");
-									}
-								}
-							}
-						}
+						UpdateModDataWithCachedData();
 						workshopCacheFound = true;
 					}
 				} 
@@ -1895,23 +1867,19 @@ namespace DivinityModManager.ViewModels
 
 					CachedWorkshopData.LastVersion = this.Version;
 
-					if (CachedWorkshopData.CacheUpdated)
-					{
-						RxApp.MainThreadScheduler.Schedule(() =>
-						{
-							StatusBarRightText = $"Caching workshop data...";
-						});
-						await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
-						CachedWorkshopData.CacheUpdated = false;
-					}
-
 					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						StatusBarRightText = "";
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
-						view.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data for {CachedWorkshopData.Mods.Count} mods.", 60);
+						view.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
 					});
+
+					if (CachedWorkshopData.CacheUpdated)
+					{
+						await DivinityFileUtils.WriteFileAsync("Data\\workshopdata.json", CachedWorkshopData.Serialize());
+						CachedWorkshopData.CacheUpdated = false;
+					}
 				}
 			});
 		}

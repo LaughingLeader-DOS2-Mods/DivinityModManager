@@ -433,14 +433,20 @@ namespace DivinityModManager.Models
 			{
 				return;
 			}
+			bool addedTags = false;
 			foreach(var tag in tags)
 			{
 				if (!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
 				{
 					Tags.Add(tag);
+					addedTags = true;
 				}
 			}
 			Tags.Sort((x, y) => string.Compare(x, y, true));
+			if(addedTags)
+			{
+				this.RaisePropertyChanged("Tags");
+			}
 		}
 
 		public override string ToString()

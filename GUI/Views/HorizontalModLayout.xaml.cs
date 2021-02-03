@@ -255,6 +255,12 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		private void FocusSelectedItem(ListView lv)
+		{
+			var listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.SelectedItem);
+			listBoxItem?.Focus();
+		}
+
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
@@ -284,6 +290,20 @@ namespace DivinityModManager.Views
 				canMoveSelectedMods = true;
 			};
 
+			bool setInitialFocus = true;
+			this.Loaded += (o, e) =>
+			{
+				if (setInitialFocus)
+				{
+					this.ActiveModsListView.Focus();
+					if (ViewModel.ActiveSelected <= 0)
+					{
+						ActiveModsListView.SelectedIndex = 0;
+					}
+					setInitialFocus = false;
+				}
+			};
+
 			this.WhenActivated((d) =>
 			{
 				_lastVM = ViewModel;
@@ -295,7 +315,7 @@ namespace DivinityModManager.Views
 					ViewModel.Layout = this;
 
 					ViewModel.ConfirmCommand = ReactiveCommand.Create(MoveSelectedMods).DisposeWith(d);
-
+					ViewModel.RaisePropertyChanged("ConfirmCommand");
 					//var confirmKB = new KeyBinding(ViewModel.ConfirmCommand, new KeyGesture(Key.Return));
 					//ActiveModsListView.InputBindings.Add(confirmKB);
 					//InactiveModsListView.InputBindings.Add(confirmKB);
@@ -303,23 +323,64 @@ namespace DivinityModManager.Views
 
 					ViewModel.MoveLeftCommand = ReactiveCommand.Create(() =>
 					{
-						if(ListHasFocus(InactiveModsListView))
+						this.ActiveModsListView.Focus();
+						if(ViewModel.ActiveSelected <= 0)
 						{
-							this.ActiveModsListView.Focus();
+							ActiveModsListView.SelectedIndex = 0;
 						}
+						this.InactiveModsListView.UnselectAll();
+						FocusSelectedItem(ActiveModsListView);
+
 					}).DisposeWith(d);
 
-					InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
+					ViewModel.RaisePropertyChanged("MoveLeftCommand");
+
+					//InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
 
 					ViewModel.MoveRightCommand = ReactiveCommand.Create(() =>
 					{
+						InactiveModsListView.Focus();
+						if (ViewModel.InactiveSelected <= 0)
+						{
+							InactiveModsListView.SelectedIndex = 0;
+						}
+						ActiveModsListView.UnselectAll();
+						FocusSelectedItem(InactiveModsListView);
+					}).DisposeWith(d);
+
+					
+					ViewModel.RaisePropertyChanged("MoveRightCommand");
+
+					ViewModel.FocusFilterCommand = ReactiveCommand.Create(() =>
+					{
 						if (ListHasFocus(ActiveModsListView))
 						{
-							this.InactiveModsListView.Focus();
+							if(!this.ActiveModsFilterTextBox.IsFocused)
+							{
+								this.ActiveModsFilterTextBox.Focus();
+							}
+							else
+							{
+								FocusSelectedItem(ActiveModsListView);
+							}
+						}
+						else
+						{
+							if (!this.InactiveModsFilterTextBox.IsFocused)
+							{
+								this.InactiveModsFilterTextBox.Focus();
+							}
+							else
+							{
+								FocusSelectedItem(InactiveModsListView);
+							}
 						}
 					}).DisposeWith(d);
 
-					ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
+					
+					ViewModel.RaisePropertyChanged("FocusFilterCommand");
+
+					//ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
 
 					ViewModel.WhenAnyValue(x => x.ActiveSelected).Subscribe((c) =>
 					{
@@ -347,6 +408,8 @@ namespace DivinityModManager.Views
 						}
 					}).DisposeWith(d);
 				}
+				//BindingHelper.CreateCommandBinding(ViewModel.View.EditFocusActiveListMenuItem, "MoveLeftCommand", ViewModel);
+				
 
 				// when the ViewModel gets deactivated
 				Disposable.Create(() =>

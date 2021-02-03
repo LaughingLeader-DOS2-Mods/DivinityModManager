@@ -67,15 +67,6 @@ namespace DivinityModManager.Views
 			set => ViewModel = (MainWindowViewModel)value;
 		}
 
-		private void CreateButtonBinding(Button button, string vmProperty, object source = null)
-		{
-			if (source == null) source = ViewModel;
-			Binding binding = new Binding(vmProperty);
-			binding.Source = source;
-			binding.Mode = BindingMode.OneWay;
-			button.SetBinding(Button.CommandProperty, binding);
-		}
-
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -142,7 +133,7 @@ namespace DivinityModManager.Views
 
 		void OnGotFocus(object sender, RoutedEventArgs e)
 		{
-			Trace.WriteLine($"[OnGotFocus] {sender} {e.Source}");
+			//Trace.WriteLine($"[OnGotFocus] {sender} {e.Source}");
 		}
 
 		private void RegisterBindings()
@@ -254,7 +245,11 @@ namespace DivinityModManager.Views
 			this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
-			
+
+			BindingHelper.CreateCommandBinding(this.ViewToggleUpdatesViewMenuItem, "ToggleUpdatesViewCommand", ViewModel);
+			BindingHelper.CreateCommandBinding(this.EditFocusActiveListMenuItem, "MoveLeftCommand", ViewModel);
+			BindingHelper.CreateCommandBinding(this.EditFocusInactiveListMenuItem, "MoveRightCommand", ViewModel);
+			BindingHelper.CreateCommandBinding(this.EditFocusFilterMenuItem, "FocusFilterCommand", ViewModel);
 		}
 
 		protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer()
@@ -406,7 +401,7 @@ namespace DivinityModManager.Views
 				{
 					if(_buttonBindings.TryGetValue(button.Name, out string command))
 					{
-						CreateButtonBinding(button, command);
+						BindingHelper.CreateCommandBinding(button, command, ViewModel);
 					}
 				}
 			};

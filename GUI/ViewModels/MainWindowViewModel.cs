@@ -244,6 +244,14 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
 		}
 
+		private bool checkingForWorkshopUpdates = false;
+
+		public bool CheckingForWorkshopUpdates
+		{
+			get => checkingForWorkshopUpdates;
+			set { this.RaiseAndSetIfChanged(ref checkingForWorkshopUpdates, value); }
+		}
+
 		private bool highlightExtenderDownload = false;
 
 		public bool HighlightExtenderDownload
@@ -410,6 +418,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand MoveLeftCommand { get; set; }
 		public ICommand MoveRightCommand { get; set; }
 		public ICommand ConfirmCommand { get; set; }
+		public ICommand FocusFilterCommand { get; set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 		public ReactiveCommand<object, Unit> ToggleOrderRenamingCommand { get; set; }
 
@@ -1092,6 +1101,7 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"'{count}' mod updates pending.");
 			}
 			ModUpdatesViewData.OnLoaded?.Invoke();
+			CheckingForWorkshopUpdates = false;
 		}
 
 		private void SetGamePathways(string currentGameDataPath)
@@ -1800,6 +1810,7 @@ namespace DivinityModManager.ViewModels
 		private void LoadWorkshopModDataBackground()
 		{
 			bool workshopCacheFound = false;
+			CheckingForWorkshopUpdates = true;
 
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (s, token) =>
 			{
@@ -3847,7 +3858,8 @@ Directory the zip will be extracted to:
 
 			DeleteOrderCommand = ReactiveCommand.Create<DivinityLoadOrder, Unit>(DeleteOrder, canOpenDialogWindow);
 
-			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; });
+			var canToggleUpdatesView = this.WhenAnyValue(x => x.ModUpdatesViewVisible, x => x.ModUpdatesAvailable, (isVisible, hasUpdates) => isVisible || hasUpdates);
+			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; }, canToggleUpdatesView);
 
 			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress).StartWith(true);
 			CancelMainProgressCommand = ReactiveCommand.Create(() =>

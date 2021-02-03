@@ -233,6 +233,7 @@
     <Compile Include="Themes\DivinityColors.cs" />
     <Compile Include="Themes\ResourceAliasHelper.cs" />
     <Compile Include="Util\AutomationTooltipPeer.cs" />
+    <Compile Include="Util\BindingHelper.cs" />
     <Compile Include="Util\CustomPropertyResolver.cs" />
     <Compile Include="Util\ElementHelper.cs" />
     <Compile Include="Util\ScreenReader\MainWindowAutomationPeer.cs" />

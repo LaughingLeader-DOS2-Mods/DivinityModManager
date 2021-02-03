@@ -21,8 +21,9 @@
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	x:Name="Main"
 	Title="{Binding Title}"
-	Width="1400"
+	Width="1600"
 	Height="800"
+	FocusManager.FocusedElement="{Binding ElementName=MainContentPresenter}"
 	TitleBarBackground="#4e38c9"
 	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
 	mc:Ignorable="d">
@@ -85,25 +86,12 @@
 									Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
 									Text="Updates:"
 									TextAlignment="Center" />
-								<!--<controls:CircleDecorator
-									x:Name="RedUpdateBackground"
+								<controls:BusyIndicator
 									Grid.Column="1"
-									Width="{Binding ActualHeight, RelativeSource={RelativeSource Self}}"
+									Width="16"
 									Height="16"
-									BorderBrush="DarkGray"
-									BorderThickness="1">
-									<controls:CircleDecorator.Background>
-										<LinearGradientBrush>
-											<GradientStop Offset="0.0" Color="{DynamicResource {x:Static adonisUI:Colors.WindowButtonHighlightColor}}" />
-											<GradientStop Offset="1.0" Color="{DynamicResource {x:Static adonisUI:Colors.WindowButtonInteractionColor}}" />
-										</LinearGradientBrush>
-									</controls:CircleDecorator.Background>
-									<controls:CircleDecorator.ToolTip>
-										<TextBlock>
-											<Run Text="Total Pending Updates:" />
-											<Run Text="{Binding ModUpdatesViewData.TotalUpdates}" /></TextBlock>
-									</controls:CircleDecorator.ToolTip>
-								</controls:CircleDecorator>-->
+									Margin="2"
+									Visibility="{Binding CheckingForWorkshopUpdates, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
 								<TextBlock
 									x:Name="UpdateCountTextBlock"
 									Grid.Column="1"
@@ -112,7 +100,8 @@
 									VerticalAlignment="Center"
 									Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
 									Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
-									TextAlignment="Center">
+									TextAlignment="Center"
+									Visibility="{Binding CheckingForWorkshopUpdates, FallbackValue=Visible, Converter={StaticResource BoolToVisibilityConverterReversed}}">
 									<TextBlock.Effect>
 										<DropShadowEffect
 											BlurRadius="4"
@@ -696,6 +685,22 @@
 			Key="P"
 			Command="{Binding OpenPreferencesCommand}"
 			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="U"
+			Command="{Binding ToggleUpdatesViewCommand}"
+			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="Left"
+			Command="{Binding MoveLeftCommand}"
+			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="Right"
+			Command="{Binding MoveRightCommand}"
+			Modifiers="Ctrl" />
+		<KeyBinding
+			Key="F"
+			Command="{Binding FocusFilterCommand}"
+			Modifiers="Ctrl" />
 		<KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
 		<KeyBinding Key="F1" Command="{Binding OpenAboutWindowCommand}" />
 	</Window.InputBindings>
@@ -822,6 +827,20 @@
 						</MenuItem>
 						<MenuItem Header="Edit">
 							<MenuItem x:Name="EditToggleFileNameDisplayMenuItem" Header="Toggle Display Names / File Names" />
+							<MenuItem
+								x:Name="EditFocusFilterMenuItem"
+								Command="{Binding FocusFilterCommand}"
+								Header="Focus Filter for Current List" />
+							<MenuItem
+								x:Name="EditFocusActiveListMenuItem"
+								Command="{Binding MoveLeftCommand}"
+								Header="Set Focus to Active Mods List"
+								InputGestureText="CTRL+Left" />
+							<MenuItem
+								x:Name="EditFocusInactiveListMenuItem"
+								Command="{Binding MoveRightCommand}"
+								Header="Set Focus to Inactive Mods List"
+								InputGestureText="CTRL+Right" />
 						</MenuItem>
 						<MenuItem Header="Settings">
 							<MenuItem
@@ -832,6 +851,13 @@
 								x:Name="SettingsDarkModeMenuItem"
 								Command="{Binding ToggleDarkModeCommand}"
 								Header="Toggle Dark/Light Mode" />
+						</MenuItem>
+						<MenuItem Header="View">
+							<MenuItem
+								x:Name="ViewToggleUpdatesViewMenuItem"
+								Command="{Binding ToggleUpdatesViewCommand}"
+								Header="Toggle Updates View"
+								InputGestureText="CTRL+U" />
 						</MenuItem>
 						<MenuItem Header="Tools" Style="{StaticResource MenuItemHightlightBlink}">
 							<MenuItem

@@ -1,9 +1,14 @@
-﻿using ReactiveUI;
+﻿using DynamicData;
+using DynamicData.Binding;
+
+using ReactiveUI;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
@@ -12,14 +17,7 @@ using System.Windows.Input;
 
 namespace DivinityModManager.Models.App
 {
-	public interface IHotkey
-	{
-		Key Key { get; set; }
-		ModifierKeys Modifiers { get; set; }
-		ICommand Command { get; set; }
-		bool Enabled { get; set; }
-	}
-	public class Hotkey : ReactiveObject, IHotkey
+	public class MultiReactiveCommandHotkey : ReactiveObject, IHotkey
 	{
 		private Key key;
 		public Key Key
@@ -65,27 +63,24 @@ namespace DivinityModManager.Models.App
 			set { this.RaiseAndSetIfChanged(ref canExecute, value); }
 		}
 
-		private List<Action> actions = new List<Action>();
-		private List<IObservable<bool>> canExecuteList = new List<IObservable<bool>>();
+		private ObservableCollection<ReactiveCommand<Unit, Unit>> commands = new ObservableCollection<ReactiveCommand<Unit, Unit>>();
 
-		public void AddAction(Action action, IObservable<bool> actionCanExecute = null)
+		public ObservableCollection<ReactiveCommand<Unit, Unit>> Commands
 		{
-			if(!actions.Contains(action))
-			{
-				actions.Add(action);
-			}
-			
-			if(actionCanExecute != null && !canExecuteList.Contains(actionCanExecute))
-			{
-				canExecuteList.Add(actionCanExecute);
-				CanExecute = Observable.Merge(canExecuteList);
-				Command = ReactiveCommand.Create(Invoke, CanExecute);
-			}
+			get => commands;
+		}
+
+		public void Add(ReactiveCommand<Unit, Unit> command)
+		{
+			Commands.Add(command);
 		}
 
 		public void Invoke()
 		{
-			actions.ForEach(a => a.Invoke());
+			foreach (var cmd in Commands)
+			{
+				Observable.Start(() => { }).InvokeCommand(cmd);
+			}
 		}
 
 		private void Init(Key key, ModifierKeys modifiers)
@@ -94,19 +89,18 @@ namespace DivinityModManager.Models.App
 			Modifiers = modifiers;
 
 			var canExecuteInitial = this.WhenAnyValue(x => x.Enabled, (b) => b == true);
-			canExecuteList.Add(canExecuteInitial);
-			CanExecute = Observable.Merge(canExecuteList);
-			//var canExecute = this.WhenAnyValue(x => x.canExecuteList, (list) => list.Count == 0 || list.All(b => b.Latest().All(b2 => b2 == true)));
+			var anyCommandsCanExecute = Commands.ToObservableChangeSet().AutoRefreshOnObservable(c => c.CanExecute).ToCollection().Select(x => x.Any());
+			CanExecute = Observable.Merge(new IObservable<bool>[2] { canExecuteInitial, anyCommandsCanExecute });
 			Command = ReactiveCommand.Create(Invoke, CanExecute);
 		}
 
 
-		public Hotkey(Key key)
+		public MultiReactiveCommandHotkey(Key key)
 		{
 			Init(key, ModifierKeys.None);
 		}
 
-		public Hotkey(Key key, ModifierKeys modifiers)
+		public MultiReactiveCommandHotkey(Key key, ModifierKeys modifiers)
 		{
 			Init(key, modifiers);
 		}

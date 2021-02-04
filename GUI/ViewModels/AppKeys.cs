@@ -51,7 +51,7 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("File", "Reload All")]
 		[Reactive] public Hotkey Refresh { get; set; } = new Hotkey(Key.F5);
 
-		[MenuSettings("Edit", "Moved Selected Mods in Focused List to Opposite List", true)]
+		[MenuSettings("Edit", "Moved Selected Mods to Opposite List", true)]
 		[Reactive] public Hotkey Confirm { get; set; } = new Hotkey(Key.Enter);
 
 		[MenuSettings("Edit", "Focus Active Mods List")]
@@ -69,7 +69,7 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Edit", "Toggle Focus Filter for Current List", AddSeparator = true)]
 		[Reactive] public Hotkey ToggleFilterFocus { get; set; } = new Hotkey(Key.F, ModifierKeys.Control);
 
-		[MenuSettings("Edit", "Toggle File Name Display")]
+		[MenuSettings("Edit", "Show File Names for Mods")]
 		[Reactive] public Hotkey ToggleFileNameDisplay { get; set; } = new Hotkey(Key.None);
 
 		[MenuSettings("Settings", "Open Preferences")]

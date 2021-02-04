@@ -3844,7 +3844,6 @@ Directory the zip will be extracted to:
 			Keys.SaveAs.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
 			Keys.NewOrder.AddAction(() => AddNewModOrder());
 			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
-			Keys.ExportOrderToList.AddAction(ExportOrderToListAs);
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
 			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
@@ -3908,7 +3907,11 @@ Directory the zip will be extracted to:
 			DeleteOrderCommand = ReactiveCommand.Create<DivinityLoadOrder, Unit>(DeleteOrder, canOpenDialogWindow);
 
 			var canToggleUpdatesView = this.WhenAnyValue(x => x.ModUpdatesViewVisible, x => x.ModUpdatesAvailable, (isVisible, hasUpdates) => isVisible || hasUpdates);
-			ToggleUpdatesViewCommand = ReactiveCommand.Create(() => { ModUpdatesViewVisible = !ModUpdatesViewVisible; }, canToggleUpdatesView);
+			void toggleUpdatesView(){
+				ModUpdatesViewVisible = !ModUpdatesViewVisible;
+			};
+			Keys.ToggleUpdatesView.AddAction(toggleUpdatesView, canToggleUpdatesView);
+			ToggleUpdatesViewCommand = ReactiveCommand.Create(toggleUpdatesView, canToggleUpdatesView);
 
 			IObservable<bool> canCancelProgress = this.WhenAnyValue(x => x.CanCancelProgress).StartWith(true);
 			CancelMainProgressCommand = ReactiveCommand.Create(() =>
@@ -4072,8 +4075,12 @@ Directory the zip will be extracted to:
 			}, adventureModCanOpenObservable);
 
 			var canCheckForUpdates = this.WhenAnyValue(x => x.MainProgressIsActive, b => b == false);
-			CheckForAppUpdatesCommand = ReactiveCommand.Create(() => CheckForUpdates(true), canCheckForUpdates);
-			Keys.ToggleUpdatesView.AddAction(() => CheckForUpdates(true), canCheckForUpdates);
+			void checkForUpdatesAction()
+			{
+				CheckForUpdates(true);
+			}
+			CheckForAppUpdatesCommand = ReactiveCommand.Create(checkForUpdatesAction, canCheckForUpdates);
+			Keys.CheckForUpdates.AddAction(checkForUpdatesAction, canCheckForUpdates);
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 

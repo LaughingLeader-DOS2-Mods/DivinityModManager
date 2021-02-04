@@ -69,6 +69,9 @@ namespace DivinityModManager.Views
 			set => ViewModel = (MainWindowViewModel)value;
 		}
 
+		private Dictionary<string, MenuItem> menuItems = new Dictionary<string, MenuItem>();
+		public Dictionary<string, MenuItem> MenuItems => menuItems;
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -220,36 +223,7 @@ namespace DivinityModManager.Views
 
 			this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
 
-			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveCommand).BindTo(this, view => view.FileImportOrderFromSave.Command);
-			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveAsNewCommand).BindTo(this, view => view.FileImportOrderFromSaveAsNew.Command);
-			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromFileCommand).BindTo(this, view => view.FileImportOrderFromFile.Command);
-			this.WhenAnyValue(x => x.ViewModel.ImportOrderZipFileCommand).BindTo(this, view => view.FileImportOrderZip.Command);
-			this.FileImportOrderZip.Visibility = Visibility.Collapsed; // Disabled for now
-
-			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsTextFileCommand).BindTo(this, view => view.FileExportOrderToTextListMenuItem.Command);
-
-			this.WhenAnyValue(x => x.ViewModel.ToggleDisplayNameCommand).BindTo(this, view => view.EditToggleFileNameDisplayMenuItem.Command);
-
-			this.WhenAnyValue(x => x.ViewModel.OpenPreferencesCommand).BindTo(this, view => view.SettingsPreferencesMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.ToggleDarkModeCommand).BindTo(this, view => view.SettingsDarkModeMenuItem.Command);
-
-			this.WhenAnyValue(x => x.ViewModel.DownloadAndInstallOsiExtenderCommand).BindTo(this, view => view.ToolsInstallOsiExtenderMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.ExtractSelectedModsCommand).BindTo(this, view => view.ToolsExtractSelectedModsMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.ToggleVersionGeneratorWindowCommand).BindTo(this, view => view.ToolsToggleVersionGeneratorWindowMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.RenameSaveCommand).BindTo(this, view => view.ToolsRenameSaveMenuItem.Command);
-
-			this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
-
-			BindingHelper.CreateCommandBinding(this.ViewToggleUpdatesViewMenuItem, "ToggleUpdatesViewCommand", ViewModel);
-			BindingHelper.CreateCommandBinding(this.EditFocusActiveListMenuItem, "MoveLeftCommand", ViewModel);
-			BindingHelper.CreateCommandBinding(this.EditFocusInactiveListMenuItem, "MoveRightCommand", ViewModel);
-			BindingHelper.CreateCommandBinding(this.EditFocusFilterMenuItem, "FocusFilterCommand", ViewModel);
-
-			foreach(var key in ViewModel.Keys.All)
+			foreach (var key in ViewModel.Keys.All)
 			{
 				var keyBinding = new KeyBinding(key.Command, key.Key, key.Modifiers);
 				BindingOperations.SetBinding(keyBinding, InputBinding.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source=key });
@@ -257,8 +231,6 @@ namespace DivinityModManager.Views
 				BindingOperations.SetBinding(keyBinding, KeyBinding.ModifiersProperty, new Binding { Path = new PropertyPath("Modifiers"), Source=key });
 				this.InputBindings.Add(keyBinding);
 			}
-
-			Dictionary<string, MenuItem> menuItems = new Dictionary<string, MenuItem>();
 
 			foreach (var entry in TopMenuBar.Items.Cast<MenuItem>())
 			{
@@ -289,6 +261,25 @@ namespace DivinityModManager.Views
 				newEntry.Command = key.Command;
 				BindingOperations.SetBinding(newEntry, MenuItem.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source = key });
 				parentMenuItem.Items.Add(newEntry);
+				if(!String.IsNullOrWhiteSpace(menuSettings.Tooltip))
+				{
+					newEntry.ToolTip = menuSettings.Tooltip;
+				}
+				if(!String.IsNullOrWhiteSpace(menuSettings.Style))
+				{
+					Style style = (Style)TryFindResource(menuSettings.Style);
+					if(style != null)
+					{
+						newEntry.Style = style;
+					}
+				}
+
+				if(menuSettings.AddSeparator)
+				{
+					parentMenuItem.Items.Add(new Separator());
+				}
+
+				menuItems.Add(prop.Name, newEntry);
 			}
 		}
 

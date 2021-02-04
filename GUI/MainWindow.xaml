@@ -303,7 +303,7 @@
 						<StackPanel Orientation="Horizontal">
 							<Button
 								x:Name="SaveButton"
-								Command="{Binding SaveOrderCommand}"
+								Command="{Binding Keys.Save.Command}"
 								ToolTip="Save Load Order to File">
 								<Button.Resources>
 									<Style BasedOn="{StaticResource {x:Type controls:AutoGrayableImage}}" TargetType="{x:Type controls:AutoGrayableImage}">
@@ -321,13 +321,13 @@
 							</Button>
 							<Button
 								x:Name="SaveAsButton"
-								Command="{Binding SaveOrderAsCommand}"
+								Command="{Binding Keys.SaveAs.Command}"
 								ToolTip="Save Order As...">
 								<controls:AutoGrayableImage Source="{StaticResource SaveAsImage}" />
 							</Button>
 							<Button
 								x:Name="AddNewOrderButton"
-								Command="{Binding AddOrderConfigCommand}"
+								Command="{Binding Keys.NewOrder.Command}"
 								ToolTip="Add New Load Order">
 								<controls:AutoGrayableImage Source="{StaticResource AddItemImage}" />
 							</Button>
@@ -341,7 +341,7 @@
 							<TextBlock Text="Export" />
 							<Button
 								x:Name="ExportToModSettingsButton"
-								Command="{Binding ExportOrderCommand}"
+								Command="{Binding Keys.ExportOrderToGame.Command}"
 								ToolTip="Export Order to Game">
 								<controls:AutoGrayableImage Source="{StaticResource ExportScriptImage}" />
 								<Button.ContextMenu>
@@ -365,13 +365,13 @@
 							</Button>
 							<Button
 								x:Name="ExportOrderToArchiveButton"
-								Command="{Binding ExportLoadOrderAsArchiveCommand}"
+								Command="{Binding Keys.ExportOrderToZip.Command}"
 								ToolTip="Export Active Mods to Zip">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileImage}" />
 							</Button>
 							<Button
 								x:Name="ExportOrderToArchiveAsButton"
-								Command="{Binding ExportLoadOrderAsArchiveToFileCommand}"
+								Command="{Binding Keys.ExportOrderToArchiveAs.Command}"
 								ToolTip="Export Active Mods to Zip As...">
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
@@ -527,7 +527,7 @@
 							<TextBlock Text="Refresh" />
 							<Button
 								x:Name="RefreshButton"
-								Command="{Binding RefreshCommand}"
+								Command="{Binding Keys.Refresh.Command}"
 								ToolTip="Refresh Mods and Workshop Updates">
 								<controls:AutoGrayableImage Source="{StaticResource RefreshImage}" />
 							</Button>
@@ -607,13 +607,13 @@
 							<TextBlock Text="Support" />
 							<Button
 								x:Name="OpenDonationPageButton"
-								Command="{Binding OpenDonationPageCommand}"
+								Command="{Binding Keys.OpenDonationLink.Command}"
 								ToolTip="Donate a Coffee to the Developer (LaughingLeader)">
 								<controls:AutoGrayableImage Source="{StaticResource OpenDonationLinkImage}" />
 							</Button>
 							<Button
 								x:Name="OpenRepoPageButton"
-								Command="{Binding OpenRepoPageCommand}"
+								Command="{Binding Keys.OpenRepositoryPage.Command}"
 								ToolTip="Open Project Page (Github)">
 								<controls:AutoGrayableImage Source="{StaticResource OpenRepoLinkImage}" />
 							</Button>
@@ -745,111 +745,15 @@
 						<ColumnDefinition Width="*" />
 					</Grid.ColumnDefinitions>
 					<Menu x:Name="TopMenuBar" Padding="2">
-						<MenuItem Header="File">
-							<MenuItem
-								x:Name="FileAddNewOrderMenuItem"
-								Header="Add New Order"
-								InputGestureText="CTRL+N" />
-							<Separator />
-							<MenuItem
-								x:Name="FileSaveOrderMenuItem"
-								Header="Save Order"
-								InputGestureText="CTRL+S" />
-							<MenuItem
-								x:Name="FileSaveOrderAsMenuItem"
-								Header="Save Order As..."
-								InputGestureText="CTRL+Alt+S" />
-							<Separator />
-							<MenuItem
-								x:Name="FileImportOrderFromSave"
-								Header="Import Order from Save..."
-								InputGestureText="CTRL+O" />
-							<MenuItem x:Name="FileImportOrderFromSaveAsNew" Header="Import Save as New Order..." />
-							<MenuItem
-								x:Name="FileImportOrderFromFile"
-								Header="Import Order from File..."
-								InputGestureText="CTRL+Shift+O" />
-							<MenuItem x:Name="FileImportOrderZip" Header="Import Mod Order Zip..." />
-							<Separator />
-							<MenuItem
-								x:Name="FileExportOrderToGameMenuItem"
-								Header="Export Order to Game"
-								InputGestureText="CTRL+Shift+E" />
-							<Separator />
-							<MenuItem x:Name="FileExportOrderToArchiveMenuItem" Header="Export Active Mods to Archive (.zip)" />
-							<MenuItem x:Name="FileExportOrderToArchiveAsMenuItem" Header="Export Active Mods to Archive As..." />
-							<MenuItem x:Name="FileExportOrderToTextListMenuItem" Header="Export Active Mods to Text File..." />
-							<Separator />
-							<MenuItem
-								x:Name="FileRefreshMenuItem"
-								Header="Reload All"
-								InputGestureText="F5" />
-						</MenuItem>
-						<MenuItem Header="Edit">
-							<MenuItem x:Name="EditToggleFileNameDisplayMenuItem" Header="Toggle Display Names / File Names" />
-							<MenuItem
-								x:Name="EditFocusFilterMenuItem"
-								Command="{Binding FocusFilterCommand}"
-								Header="Focus Filter for Current List" />
-							<MenuItem
-								x:Name="EditFocusActiveListMenuItem"
-								Command="{Binding MoveLeftCommand}"
-								Header="Set Focus to Active Mods List"
-								InputGestureText="CTRL+Left" />
-							<MenuItem
-								x:Name="EditFocusInactiveListMenuItem"
-								Command="{Binding MoveRightCommand}"
-								Header="Set Focus to Inactive Mods List"
-								InputGestureText="CTRL+Right" />
-						</MenuItem>
-						<MenuItem Header="Settings">
-							<MenuItem
-								x:Name="SettingsPreferencesMenuItem"
-								Header="Preferences..."
-								InputGestureText="CTRL+P" />
-							<MenuItem
-								x:Name="SettingsDarkModeMenuItem"
-								Command="{Binding ToggleDarkModeCommand}"
-								Header="Toggle Dark/Light Mode" />
-						</MenuItem>
-						<MenuItem Header="View">
-							<MenuItem
-								x:Name="ViewToggleUpdatesViewMenuItem"
-								Command="{Binding ToggleUpdatesViewCommand}"
-								Header="Toggle Updates View"
-								InputGestureText="CTRL+U" />
-						</MenuItem>
-						<MenuItem Header="Tools" Style="{StaticResource MenuItemHightlightBlink}">
-							<MenuItem
-								x:Name="ToolsInstallOsiExtenderMenuItem"
-								Command="{Binding DownloadAndInstallOsiExtenderCommand}"
-								Header="Download &amp; Install the Script Extender..."
-								Style="{StaticResource MenuItemHightlightBlink}" />
-							<MenuItem
-								x:Name="ToolsExtractSelectedModsMenuItem"
-								Command="{Binding ExtractSelectedModsCommand}"
-								Header="Extract Selected Mods To..." />
-							<MenuItem
-								x:Name="ToolsToggleVersionGeneratorWindowMenuItem"
-								Command="{Binding ToggleVersionGeneratorWindowCommand}"
-								Header="Toggle Version Generator Window"
-								ToolTip="A tool for mod authors to generate version numbers for a mod's meta.lsx." />
-							<!--  Disabled for now  -->
-							<MenuItem
-								x:Name="ToolsRenameSaveMenuItem"
-								Header="Rename Save..."
-								Visibility="Collapsed" />
-						</MenuItem>
-						<MenuItem Header="Help">
-							<MenuItem x:Name="HelpCheckForUpdateMenuItem" Header="Check for Updates" />
-							<Separator />
-							<MenuItem x:Name="HelpDonationMenuItem" Header="Donate a Coffee..." />
-							<MenuItem x:Name="HelpOpenRepoPageMenuItem" Header="Open Repostory Page..." />
-							<MenuItem
-								x:Name="HelpOpenAboutWindowMenuItem"
-								Header="About"
-								InputGestureText="F1" />
-						</MenuItem>
+						<MenuItem x:Name="FileMenuItem" Header="File" />
+						<MenuItem x:Name="EditMenuItem" Header="Edit" />
+						<MenuItem x:Name="SettingsMenuItem" Header="Settings" />
+						<MenuItem x:Name="ViewMenuItem" Header="View" />
+						<MenuItem
+							x:Name="ToolsMenuItem"
+							Header="Tools"
+							Style="{StaticResource MenuItemHightlightBlink}" />
+						<MenuItem x:Name="HelpMenuItem" Header="Help" />
 					</Menu>
 					<StackPanel
 						Grid.Column="3"

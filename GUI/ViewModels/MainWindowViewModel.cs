@@ -77,7 +77,7 @@ namespace DivinityModManager.ViewModels
 
 		public string Version { get; set; } = "";
 
-		public AppKeys Keys = new AppKeys();
+		public AppKeys Keys { get; private set; } = new AppKeys();
 
 		private bool IsInitialized { get; set; } = false;
 
@@ -381,26 +381,15 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
-		public ICommand ImportOrderFromSaveCommand { get; private set; }
-		public ICommand ImportOrderFromSaveAsNewCommand { get; private set; }
-		public ICommand ImportOrderFromFileCommand { get; private set; }
-		public ICommand ImportOrderZipFileCommand { get; private set; }
 		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
 		public ICommand OpenExtenderLogDirectoryCommand { get; private set; }
 		public ICommand OpenGameCommand { get; private set; }
-		public ICommand OpenDonationPageCommand { get; private set; }
-		public ICommand OpenRepoPageCommand { get; private set; }
 		public ICommand DebugCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
-		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
-		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
-		public ICommand ExportLoadOrderAsTextFileCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
-		public ICommand ToggleDisplayNameCommand { get; set; }
-		public ICommand ToggleDarkModeCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
 		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
 		public ICommand ExtractSelectedModsCommand { get; private set; }
@@ -937,13 +926,16 @@ namespace DivinityModManager.ViewModels
 
 			this.WhenAnyValue(x => x.Settings.DisplayFileNames).Subscribe((b) =>
 			{
-				if (b)
+				if (view.MenuItems.TryGetValue("ToggleFileNameDisplay", out var menuItem))
 				{
-					view.EditToggleFileNameDisplayMenuItem.Header = "Show Display Names for Mods";
-				}
-				else
-				{
-					view.EditToggleFileNameDisplayMenuItem.Header = "Show File Names for Mods";
+					if (b)
+					{
+						menuItem.Header = "Show Display Names for Mods";
+					}
+					else
+					{
+						menuItem.Header = "Show File Names for Mods";
+					}
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -3819,21 +3811,6 @@ Directory the zip will be extracted to:
 			}
 		}
 
-		private void RegisterKeys()
-		{
-			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			Keys.Save.AddAction(SaveLoadOrder, canExecuteSaveCommand);
-
-			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
-			Keys.Save.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
-			Keys.NewOrder.AddAction(() => AddNewModOrder());
-			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
-			Keys.ExportOrderToList.AddAction(ExportOrderToListAs);
-
-			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
-			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
-		}
-
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -3858,20 +3835,75 @@ Directory the zip will be extracted to:
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
 
-			RegisterKeys();
+			#region Keys Setup
+
+			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
+			Keys.Save.AddAction(SaveLoadOrder, canExecuteSaveCommand);
+
+			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
+			Keys.SaveAs.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
+			Keys.NewOrder.AddAction(() => AddNewModOrder());
+			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
+			Keys.ExportOrderToList.AddAction(ExportOrderToListAs);
+
+			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
+			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
-			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
-			ExportLoadOrderAsArchiveToFileCommand = ReactiveCommand.Create(ExportLoadOrderToArchiveAs, canStartExport);
+			Keys.ExportOrderToZip.AddAction(ExportLoadOrderToArchive_Start, canStartExport);
+			Keys.ExportOrderToArchiveAs.AddAction(ExportLoadOrderToArchiveAs, canStartExport);
 
 			var anyActiveObservable = this.WhenAnyValue(x => x.ActiveMods.Count, (c) => c > 0);
-			ExportLoadOrderAsTextFileCommand = ReactiveCommand.Create(ExportLoadOrderToTextFileAs, anyActiveObservable);
+			Keys.ExportOrderToList.AddAction(ExportLoadOrderToTextFileAs, anyActiveObservable);
 
 			canOpenDialogWindow = this.WhenAnyValue(x => x.MainProgressIsActive, (b) => !b);
-			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSaveToCurrent, canOpenDialogWindow);
-			ImportOrderFromSaveAsNewCommand = ReactiveCommand.Create(ImportOrderFromSaveAsNew, canOpenDialogWindow);
-			ImportOrderFromFileCommand = ReactiveCommand.Create(ImportOrderFromFile, canOpenDialogWindow);
-			ImportOrderZipFileCommand = ReactiveCommand.Create(ImportOrderZipFile, canOpenDialogWindow);
+			Keys.ImportOrderFromSave.AddAction(ImportOrderFromSaveToCurrent, canOpenDialogWindow);
+			Keys.ImportOrderFromSaveAsNew.AddAction(ImportOrderFromSaveAsNew, canOpenDialogWindow);
+			Keys.ImportOrderFromFile.AddAction(ImportOrderFromFile, canOpenDialogWindow);
+			Keys.ImportOrderFromZipFile.AddAction(ImportOrderZipFile, canOpenDialogWindow);
+
+
+			Keys.OpenDonationLink.AddAction(() =>
+			{
+				Process.Start(DivinityApp.URL_DONATION);
+			});
+
+			Keys.OpenRepositoryPage.AddAction(() =>
+			{
+				Process.Start(DivinityApp.URL_REPO);
+			});
+
+			Keys.ToggleViewTheme.AddAction(() =>
+			{
+				if (Settings != null)
+				{
+					Settings.DarkThemeEnabled = !Settings.DarkThemeEnabled;
+				}
+			});
+
+			Keys.ToggleFileNameDisplay.AddAction(() =>
+			{
+				if (Settings != null)
+				{
+					Settings.DisplayFileNames = !Settings.DisplayFileNames;
+
+					foreach (var m in Mods)
+					{
+						m.DisplayFileForName = Settings.DisplayFileNames;
+						m.UpdateDisplayName();
+					}
+				}
+				else
+				{
+					foreach (var m in Mods)
+					{
+						m.DisplayFileForName = !m.DisplayFileForName;
+						m.UpdateDisplayName();
+					}
+				}
+			});
+
+			#endregion
 
 			DeleteOrderCommand = ReactiveCommand.Create<DivinityLoadOrder, Unit>(DeleteOrder, canOpenDialogWindow);
 
@@ -3907,46 +3939,6 @@ Directory the zip will be extracted to:
 			{
 				Process.Start(PathwayData.DocumentsModsPath);
 			}, canOpenModsFolder);
-
-			OpenDonationPageCommand = ReactiveCommand.Create(() =>
-			{
-				Process.Start(DivinityApp.URL_DONATION);
-			});
-
-			OpenRepoPageCommand = ReactiveCommand.Create(() =>
-			{
-				Process.Start(DivinityApp.URL_REPO);
-			});
-
-			ToggleDarkModeCommand = ReactiveCommand.Create(() =>
-			{
-				if (Settings != null)
-				{
-					Settings.DarkThemeEnabled = !Settings.DarkThemeEnabled;
-				}
-			});
-
-			ToggleDisplayNameCommand = ReactiveCommand.Create(() =>
-			{
-				if (Settings != null)
-				{
-					Settings.DisplayFileNames = !Settings.DisplayFileNames;
-
-					foreach (var m in Mods)
-					{
-						m.DisplayFileForName = Settings.DisplayFileNames;
-						m.UpdateDisplayName();
-					}
-				}
-				else
-				{
-					foreach (var m in Mods)
-					{
-						m.DisplayFileForName = !m.DisplayFileForName;
-						m.UpdateDisplayName();
-					}
-				}
-			});
 
 			RenameSaveCommand = ReactiveCommand.Create(RenameSave_Start, canOpenDialogWindow);
 

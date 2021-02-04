@@ -664,46 +664,6 @@
 			</Style>
 		</ResourceDictionary>
 	</Window.Resources>
-	<Window.InputBindings>
-		<KeyBinding
-			Key="S"
-			Command="{Binding SaveOrderCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="S"
-			Command="{Binding SaveOrderAsCommand}"
-			Modifiers="Ctrl+Alt" />
-		<KeyBinding
-			Key="E"
-			Command="{Binding ExportOrderCommand}"
-			Modifiers="Ctrl+Shift" />
-		<KeyBinding
-			Key="N"
-			Command="{Binding AddOrderConfigCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="P"
-			Command="{Binding OpenPreferencesCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="U"
-			Command="{Binding ToggleUpdatesViewCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="Left"
-			Command="{Binding MoveLeftCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="Right"
-			Command="{Binding MoveRightCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding
-			Key="F"
-			Command="{Binding FocusFilterCommand}"
-			Modifiers="Ctrl" />
-		<KeyBinding Key="F5" Command="{Binding RefreshCommand}" />
-		<KeyBinding Key="F1" Command="{Binding OpenAboutWindowCommand}" />
-	</Window.InputBindings>
 	<Window.TaskbarItemInfo>
 		<TaskbarItemInfo />
 	</Window.TaskbarItemInfo>

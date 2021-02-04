@@ -112,6 +112,13 @@ namespace DivinityModManager.Views
 			{
 				_focusedList = sender;
 			};
+			listView.LostFocus += (object sender, RoutedEventArgs e) =>
+			{
+				if(_focusedList == sender)
+				{
+					_focusedList = null;
+				}
+			};
 		}
 
 		public void FixActiveModsScrollbar()
@@ -221,24 +228,8 @@ namespace DivinityModManager.Views
 
 		private void MoveSelectedMods()
 		{
-			//Making selected mods active
-			if (ListHasFocus(InactiveModsListView))
-			{
-				//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-				//for (int i = 0; i < selectedMods.Count; i++)
-				//{
-				//	ViewModel.InactiveMods.Remove(selectedMods[i]);
-				//	ViewModel.ActiveMods.Add(selectedMods[i]);
-				//}
-				var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
-				ViewModel.DropHandler.Drop(dropInfo);
-				ActiveModsListView.Focus();
-				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} selected mods to the active mods list.");
-				canMoveSelectedMods = false;
-			}
-			//Making selected mods inactive
-			else if (ListHasFocus(ActiveModsListView))
+			DivinityApp.Log($"ListHasFocus(ActiveModsListView) = {ListHasFocus(ActiveModsListView)} | ListHasFocus(InactiveModsListView) = {ListHasFocus(InactiveModsListView)}");
+			if (ListHasFocus(ActiveModsListView))
 			{
 				//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
 				//for (int i = 0; i < selectedMods.Count; i++)
@@ -251,6 +242,21 @@ namespace DivinityModManager.Views
 				ViewModel.DropHandler.Drop(dropInfo);
 				InactiveModsListView.Focus();
 				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} mods to the inactive mods list.");
+				canMoveSelectedMods = false;
+			}
+			else if (ListHasFocus(InactiveModsListView))
+			{
+				//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+				//for (int i = 0; i < selectedMods.Count; i++)
+				//{
+				//	ViewModel.InactiveMods.Remove(selectedMods[i]);
+				//	ViewModel.ActiveMods.Add(selectedMods[i]);
+				//}
+				var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
+				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
+				ViewModel.DropHandler.Drop(dropInfo);
+				ActiveModsListView.Focus();
+				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} selected mods to the active mods list.");
 				canMoveSelectedMods = false;
 			}
 		}
@@ -314,48 +320,42 @@ namespace DivinityModManager.Views
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
 					ViewModel.Layout = this;
 
-					ViewModel.ConfirmCommand = ReactiveCommand.Create(MoveSelectedMods).DisposeWith(d);
-					ViewModel.RaisePropertyChanged("ConfirmCommand");
-					//var confirmKB = new KeyBinding(ViewModel.ConfirmCommand, new KeyGesture(Key.Return));
-					//ActiveModsListView.InputBindings.Add(confirmKB);
-					//InactiveModsListView.InputBindings.Add(confirmKB);
+					//ViewModel.Keys.Confirm.AddAction(() =>
+					//{
+					//	if(ListHasFocus(ActiveModsListView) || ListHasFocus(InactiveModsListView))
+					//	{
+					//		//MoveSelectedMods();
+					//	}
+					//});
 
-
-					ViewModel.MoveLeftCommand = ReactiveCommand.Create(() =>
+					ViewModel.Keys.MoveFocusLeft.AddAction(() =>
 					{
 						this.ActiveModsListView.Focus();
-						if(ViewModel.ActiveSelected <= 0)
+						if (ViewModel.ActiveSelected <= 0)
 						{
 							ActiveModsListView.SelectedIndex = 0;
 						}
-						this.InactiveModsListView.UnselectAll();
+						//InactiveModsListView.UnselectAll();
 						FocusSelectedItem(ActiveModsListView);
+					});
 
-					}).DisposeWith(d);
-
-					ViewModel.RaisePropertyChanged("MoveLeftCommand");
-
-					//InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
-
-					ViewModel.MoveRightCommand = ReactiveCommand.Create(() =>
+					ViewModel.Keys.MoveFocusRight.AddAction(() =>
 					{
 						InactiveModsListView.Focus();
 						if (ViewModel.InactiveSelected <= 0)
 						{
 							InactiveModsListView.SelectedIndex = 0;
 						}
-						ActiveModsListView.UnselectAll();
+						//ActiveModsListView.UnselectAll();
 						FocusSelectedItem(InactiveModsListView);
-					}).DisposeWith(d);
+					});
 
-					
-					ViewModel.RaisePropertyChanged("MoveRightCommand");
-
-					ViewModel.FocusFilterCommand = ReactiveCommand.Create(() =>
+					//InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
+					ViewModel.Keys.ToggleFilterFocus.AddAction(() =>
 					{
 						if (ListHasFocus(ActiveModsListView))
 						{
-							if(!this.ActiveModsFilterTextBox.IsFocused)
+							if (!this.ActiveModsFilterTextBox.IsFocused)
 							{
 								this.ActiveModsFilterTextBox.Focus();
 							}
@@ -375,10 +375,7 @@ namespace DivinityModManager.Views
 								FocusSelectedItem(InactiveModsListView);
 							}
 						}
-					}).DisposeWith(d);
-
-					
-					ViewModel.RaisePropertyChanged("FocusFilterCommand");
+					});
 
 					//ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
 
@@ -427,7 +424,8 @@ namespace DivinityModManager.Views
 
 		private void HorizontalModLayout_KeyDown(object sender, KeyEventArgs e)
 		{
-			if(canMoveSelectedMods && e.Key == Key.Enter)
+			if(canMoveSelectedMods && e.Key == ViewModel.Keys.Confirm.Key && (ViewModel.Keys.Confirm.Modifiers == ModifierKeys.None || 
+				Keyboard.Modifiers.HasFlag(ViewModel.Keys.Confirm.Modifiers)))
 			{
 				MoveSelectedMods();
 			}
@@ -435,7 +433,7 @@ namespace DivinityModManager.Views
 
 		private void HorizontalModLayout_KeyUp(object sender, KeyEventArgs e)
 		{
-			if(e.Key == Key.Enter)
+			if(e.Key == ViewModel.Keys.Confirm.Key)
 			{
 				canMoveSelectedMods = true;
 			}

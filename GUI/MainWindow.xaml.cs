@@ -32,6 +32,8 @@ using AdonisUI;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using DivinityModManager.Util.ScreenReader;
+using System.Reflection;
+using DivinityModManager.Models.App;
 
 namespace DivinityModManager.Views
 {
@@ -136,49 +138,53 @@ namespace DivinityModManager.Views
 			//Trace.WriteLine($"[OnGotFocus] {sender} {e.Source}");
 		}
 
+		private void OpenPreferences()
+		{
+			if (!SettingsWindow.IsVisible)
+			{
+				SettingsWindow.Init(this.ViewModel.Settings);
+				SettingsWindow.Show();
+				SettingsWindow.Owner = this;
+				ViewModel.Settings.SettingsWindowIsOpen = true;
+			}
+			else
+			{
+				SettingsWindow.Hide();
+				ViewModel.Settings.SettingsWindowIsOpen = false;
+			}
+		}
+
+		private void ToggleAboutWindow()
+		{
+			if (AboutWindow == null)
+			{
+				AboutWindow = new AboutWindow();
+			}
+
+			if (!AboutWindow.IsVisible)
+			{
+				AboutWindow.DataContext = ViewModel;
+				AboutWindow.Show();
+				AboutWindow.Owner = this;
+			}
+			else
+			{
+				AboutWindow.Hide();
+			}
+		}
+
 		private void RegisterBindings()
 		{
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
-			var c = ReactiveCommand.Create(() =>
-			{
-				if (!SettingsWindow.IsVisible)
-				{
-					SettingsWindow.Init(this.ViewModel.Settings);
-					SettingsWindow.Show();
-					SettingsWindow.Owner = this;
-					ViewModel.Settings.SettingsWindowIsOpen = true;
-				}
-				else
-				{
-					SettingsWindow.Hide();
-					ViewModel.Settings.SettingsWindowIsOpen = false;
-				}
-			});
+			var c = ReactiveCommand.Create(OpenPreferences);
 			c.ThrownExceptions.Subscribe((ex) =>
 			{
 				DivinityApp.Log("Error opening settings window: " + ex.ToString());
 			});
 			ViewModel.OpenPreferencesCommand = c;
-
-			ViewModel.OpenAboutWindowCommand = ReactiveCommand.Create(() =>
-			{
-				if (AboutWindow == null)
-				{
-					AboutWindow = new AboutWindow();
-				}
-
-				if (!AboutWindow.IsVisible)
-				{
-					AboutWindow.DataContext = ViewModel;
-					AboutWindow.Show();
-					AboutWindow.Owner = this;
-				}
-				else
-				{
-					AboutWindow.Hide();
-				}
-			});
+			ViewModel.Keys.OpenPreferences.AddAction(OpenPreferences);
+			ViewModel.Keys.OpenAboutWindow.AddAction(ToggleAboutWindow);
 
 			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
 			{
@@ -214,22 +220,15 @@ namespace DivinityModManager.Views
 
 			this.WhenAnyValue(x => x.ViewModel.MainProgressValue).BindTo(this, view => view.TaskbarItemInfo.ProgressValue);
 
-			this.WhenAnyValue(x => x.ViewModel.AddOrderConfigCommand).BindTo(this, view => view.FileAddNewOrderMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.SaveOrderCommand).BindTo(this, view => view.FileSaveOrderMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.SaveOrderAsCommand).BindTo(this, view => view.FileSaveOrderAsMenuItem.Command);
-
 			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveCommand).BindTo(this, view => view.FileImportOrderFromSave.Command);
 			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromSaveAsNewCommand).BindTo(this, view => view.FileImportOrderFromSaveAsNew.Command);
 			this.WhenAnyValue(x => x.ViewModel.ImportOrderFromFileCommand).BindTo(this, view => view.FileImportOrderFromFile.Command);
 			this.WhenAnyValue(x => x.ViewModel.ImportOrderZipFileCommand).BindTo(this, view => view.FileImportOrderZip.Command);
 			this.FileImportOrderZip.Visibility = Visibility.Collapsed; // Disabled for now
 
-			this.WhenAnyValue(x => x.ViewModel.ExportOrderCommand).BindTo(this, view => view.FileExportOrderToGameMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveCommand).BindTo(this, view => view.FileExportOrderToArchiveMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsArchiveToFileCommand).BindTo(this, view => view.FileExportOrderToArchiveAsMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.ExportLoadOrderAsTextFileCommand).BindTo(this, view => view.FileExportOrderToTextListMenuItem.Command);
-
-			this.WhenAnyValue(x => x.ViewModel.RefreshCommand).BindTo(this, view => view.FileRefreshMenuItem.Command);
 
 			this.WhenAnyValue(x => x.ViewModel.ToggleDisplayNameCommand).BindTo(this, view => view.EditToggleFileNameDisplayMenuItem.Command);
 
@@ -244,12 +243,53 @@ namespace DivinityModManager.Views
 			this.WhenAnyValue(x => x.ViewModel.CheckForAppUpdatesCommand).BindTo(this, view => view.HelpCheckForUpdateMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenDonationPageCommand).BindTo(this, view => view.HelpDonationMenuItem.Command);
 			this.WhenAnyValue(x => x.ViewModel.OpenRepoPageCommand).BindTo(this, view => view.HelpOpenRepoPageMenuItem.Command);
-			this.WhenAnyValue(x => x.ViewModel.OpenAboutWindowCommand).BindTo(this, view => view.HelpOpenAboutWindowMenuItem.Command);
 
 			BindingHelper.CreateCommandBinding(this.ViewToggleUpdatesViewMenuItem, "ToggleUpdatesViewCommand", ViewModel);
 			BindingHelper.CreateCommandBinding(this.EditFocusActiveListMenuItem, "MoveLeftCommand", ViewModel);
 			BindingHelper.CreateCommandBinding(this.EditFocusInactiveListMenuItem, "MoveRightCommand", ViewModel);
 			BindingHelper.CreateCommandBinding(this.EditFocusFilterMenuItem, "FocusFilterCommand", ViewModel);
+
+			foreach(var key in ViewModel.Keys.All)
+			{
+				var keyBinding = new KeyBinding(key.Command, key.Key, key.Modifiers);
+				BindingOperations.SetBinding(keyBinding, InputBinding.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source=key });
+				BindingOperations.SetBinding(keyBinding, KeyBinding.KeyProperty, new Binding { Path = new PropertyPath("Key"), Source=key });
+				BindingOperations.SetBinding(keyBinding, KeyBinding.ModifiersProperty, new Binding { Path = new PropertyPath("Modifiers"), Source=key });
+				this.InputBindings.Add(keyBinding);
+			}
+
+			Dictionary<string, MenuItem> menuItems = new Dictionary<string, MenuItem>();
+
+			foreach (var entry in TopMenuBar.Items.Cast<MenuItem>())
+			{
+				menuItems.Add((string)entry.Header, entry);
+			}
+
+			//Generating menu items
+			var menuKeyProperties = typeof(AppKeys)
+			.GetRuntimeProperties()
+			.Where(prop => Attribute.IsDefined(prop, typeof(MenuSettingsAttribute)))
+			.Select(prop => typeof(AppKeys).GetProperty(prop.Name));
+			foreach(var prop in menuKeyProperties)
+			{
+				Hotkey key = (Hotkey)prop.GetValue(ViewModel.Keys);
+				MenuSettingsAttribute menuSettings = prop.GetCustomAttribute<MenuSettingsAttribute>();
+				MenuItem parentMenuItem;
+				if (!menuItems.TryGetValue(menuSettings.Parent, out parentMenuItem))
+				{
+					parentMenuItem = new MenuItem();
+					parentMenuItem.Header = menuSettings.Parent;
+					TopMenuBar.Items.Add(parentMenuItem);
+					menuItems.Add(menuSettings.Parent, parentMenuItem);
+				}
+
+				MenuItem newEntry = new MenuItem();
+				newEntry.Header = menuSettings.DisplayName;
+				newEntry.InputGestureText = key.ToString();
+				newEntry.Command = key.Command;
+				BindingOperations.SetBinding(newEntry, MenuItem.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source = key });
+				parentMenuItem.Items.Add(newEntry);
+			}
 		}
 
 		protected override System.Windows.Automation.Peers.AutomationPeer OnCreateAutomationPeer()

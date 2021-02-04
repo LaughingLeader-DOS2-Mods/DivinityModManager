@@ -77,6 +77,8 @@ namespace DivinityModManager.ViewModels
 
 		public string Version { get; set; } = "";
 
+		public AppKeys Keys = new AppKeys();
+
 		private bool IsInitialized { get; set; } = false;
 
 		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
@@ -379,12 +381,6 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
-
-		public ICommand SaveOrderCommand { get; private set; }
-		public ICommand SaveOrderAsCommand { get; private set; }
-		public ICommand ExportOrderCommand { get; private set; }
-		public ICommand AddOrderConfigCommand { get; private set; }
-		public ICommand RefreshCommand { get; private set; }
 		public ICommand ImportOrderFromSaveCommand { get; private set; }
 		public ICommand ImportOrderFromSaveAsNewCommand { get; private set; }
 		public ICommand ImportOrderFromFileCommand { get; private set; }
@@ -399,7 +395,6 @@ namespace DivinityModManager.ViewModels
 		public ICommand DebugCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
-		public ICommand OpenAboutWindowCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveCommand { get; set; }
 		public ICommand ExportLoadOrderAsArchiveToFileCommand { get; set; }
 		public ICommand ExportLoadOrderAsTextFileCommand { get; set; }
@@ -411,12 +406,9 @@ namespace DivinityModManager.ViewModels
 		public ICommand ExtractSelectedModsCommand { get; private set; }
 		public ICommand ToggleVersionGeneratorWindowCommand { get; set; }
 		public ICommand RenameSaveCommand { get; private set; }
-		public ICommand ExportOrderAsListCommand { get; private set; }
 		public ICommand CopyOrderToClipboardCommand { get; private set; }
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
 		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
-		public ICommand MoveLeftCommand { get; set; }
-		public ICommand MoveRightCommand { get; set; }
 		public ICommand ConfirmCommand { get; set; }
 		public ICommand FocusFilterCommand { get; set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
@@ -2414,6 +2406,15 @@ namespace DivinityModManager.ViewModels
 			};
 		}
 
+		private void ExportLoadOrder()
+		{
+			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+			{
+				await ExportLoadOrderAsync();
+				return Disposable.Empty;
+			});
+		}
+
 		private async Task<bool> ExportLoadOrderAsync()
 		{
 			if (SelectedProfile != null && SelectedModOrder != null)
@@ -2424,48 +2425,57 @@ namespace DivinityModManager.ViewModels
 
 				if (result)
 				{
-					view.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'", 15);
+					await Observable.Start(() => {
+						ShowAlert($"Exported load order to '{outputPath}'", AlertType.Success, 15);
 
-					if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
-					{
-						DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
-					}
-					else
-					{
-						DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
-					}
+						if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+						{
+							DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
+						}
+						else
+						{
+							DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
+						}
 
-					//Update "Current" order
-					if (SelectedModOrder.Name != "Current")
-					{
-						var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
-						currentOrder.SetOrder(SelectedModOrder.Order);
-					}
+						//Update "Current" order
+						if (SelectedModOrder.Name != "Current")
+						{
+							var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
+							currentOrder.SetOrder(SelectedModOrder.Order);
+						}
 
-					List<string> orderList = new List<string>();
-					if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
-					orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
+						List<string> orderList = new List<string>();
+						if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
+						orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
 
-					SelectedProfile.ModOrder.Clear();
-					SelectedProfile.ModOrder.AddRange(orderList);
-					SelectedProfile.ActiveMods.Clear();
-					SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
+						SelectedProfile.ModOrder.Clear();
+						SelectedProfile.ModOrder.AddRange(orderList);
+						SelectedProfile.ActiveMods.Clear();
+						SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
+						DisplayMissingMods(SelectedModOrder);
 
-					RxApp.MainThreadScheduler.Schedule(_ => DisplayMissingMods(SelectedModOrder));
+						return Unit.Default;
+					}, RxApp.MainThreadScheduler);
 					return true;
 				}
 				else
 				{
-					string msg = $"Problem exporting load order to '{outputPath}'";
-					view.AlertBar.SetDangerAlert(msg);
-					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-					view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+					await Observable.Start(() => {
+						string msg = $"Problem exporting load order to '{outputPath}'";
+						ShowAlert(msg, AlertType.Danger);
+						view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+						view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+						view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+						return Unit.Default;
+					}, RxApp.MainThreadScheduler);
 				}
 			}
 			else
 			{
-				view.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				await Observable.Start(() => {
+					ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
+					return Unit.Default;
+				}, RxApp.MainThreadScheduler);
 			}
 			return false;
 		}
@@ -3809,6 +3819,21 @@ Directory the zip will be extracted to:
 			}
 		}
 
+		private void RegisterKeys()
+		{
+			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
+			Keys.Save.AddAction(SaveLoadOrder, canExecuteSaveCommand);
+
+			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
+			Keys.Save.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
+			Keys.NewOrder.AddAction(() => AddNewModOrder());
+			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
+			Keys.ExportOrderToList.AddAction(ExportOrderToListAs);
+
+			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
+			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
+		}
+
 		public MainWindowViewModel() : base()
 		{
 			exceptionHandler = new MainWindowExceptionHandler(this);
@@ -3833,13 +3858,7 @@ Directory the zip will be extracted to:
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
 
-			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			SaveOrderCommand = ReactiveCommand.Create(SaveLoadOrder, canExecuteSaveCommand);
-
-			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
-			SaveOrderAsCommand = ReactiveCommand.Create(SaveLoadOrderAs, canExecuteSaveAsCommand);
-
-			ExportOrderCommand = ReactiveCommand.CreateFromTask(ExportLoadOrderAsync);
+			RegisterKeys();
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
 			ExportLoadOrderAsArchiveCommand = ReactiveCommand.Create(ExportLoadOrderToArchive_Start, canStartExport);
@@ -3847,8 +3866,6 @@ Directory the zip will be extracted to:
 
 			var anyActiveObservable = this.WhenAnyValue(x => x.ActiveMods.Count, (c) => c > 0);
 			ExportLoadOrderAsTextFileCommand = ReactiveCommand.Create(ExportLoadOrderToTextFileAs, anyActiveObservable);
-
-			AddOrderConfigCommand = ReactiveCommand.Create(new Action(() => { AddNewModOrder(); }));
 
 			canOpenDialogWindow = this.WhenAnyValue(x => x.MainProgressIsActive, (b) => !b);
 			ImportOrderFromSaveCommand = ReactiveCommand.Create(ImportOrderFromSaveToCurrent, canOpenDialogWindow);
@@ -3871,8 +3888,6 @@ Directory the zip will be extracted to:
 				}
 			}, canCancelProgress);
 
-			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
-			RefreshCommand = ReactiveCommand.Create(() => RefreshAsync_Start(), canRefreshObservable);
 
 			CopyPathToClipboardCommand = ReactiveCommand.Create((string path) =>
 			{
@@ -3961,8 +3976,6 @@ Directory the zip will be extracted to:
 					view.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex}", 15);
 				}
 			});
-
-			ExportOrderAsListCommand = ReactiveCommand.Create(ExportOrderToListAs, canExecuteSaveAsCommand);
 
 			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
 				Select(x => Profiles.ElementAtOrDefault(SelectedProfileIndex));
@@ -4068,6 +4081,7 @@ Directory the zip will be extracted to:
 
 			var canCheckForUpdates = this.WhenAnyValue(x => x.MainProgressIsActive, b => b == false);
 			CheckForAppUpdatesCommand = ReactiveCommand.Create(() => CheckForUpdates(true), canCheckForUpdates);
+			Keys.ToggleUpdatesView.AddAction(() => CheckForUpdates(true), canCheckForUpdates);
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 

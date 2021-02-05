@@ -3,6 +3,7 @@
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
 	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
+	xmlns:appdata="clr-namespace:DivinityModManager.Models.App;assembly=DivinityModManagerCore"
 	xmlns:behavior="clr-namespace:DivinityModManager.Controls.Behavior"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
@@ -1375,4 +1376,7 @@
 			</VisualStateManager.VisualStateGroups>
 		</Grid>
 	</ControlTemplate>
+	<DataTemplate x:Key="HotkeyTemplate" DataType="{x:Type appdata:IHotkey}">
+		<controls:HotkeyEditorControl Hotkey="{Binding}" />
+	</DataTemplate>
 </ResourceDictionary>

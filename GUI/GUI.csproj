@@ -237,6 +237,7 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="Util\FocusHelper.cs" />
     <Compile Include="ViewModels\AppKeys.cs" />
     <Compile Include="Themes\DivinityColors.cs" />
     <Compile Include="Themes\ResourceAliasHelper.cs" />

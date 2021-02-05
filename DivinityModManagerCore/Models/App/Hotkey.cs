@@ -1,4 +1,5 @@
 ﻿using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -18,52 +19,22 @@ namespace DivinityModManager.Models.App
 		ModifierKeys Modifiers { get; set; }
 		ICommand Command { get; set; }
 		bool Enabled { get; set; }
+		string DisplayName { get; set; }
 	}
 	public class Hotkey : ReactiveObject, IHotkey
 	{
-		private Key key;
-		public Key Key
-		{
-			get => key;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref key, value);
-			}
-		}
+		[Reactive] public string DisplayName { get; set; }
+		[Reactive] public string DisplayBindingText { get; private set; }
+		[Reactive] public Key Key { get; set; }
 
-		private ModifierKeys modifiers;
-		public ModifierKeys Modifiers
-		{
-			get => modifiers;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref modifiers, value);
-			}
-		}
+		[Reactive] public ModifierKeys Modifiers { get; set; }
 
-		private ICommand command;
+		[Reactive] public ICommand Command { get; set; }
 
-		public ICommand Command
-		{
-			get => command;
-			set { this.RaiseAndSetIfChanged(ref command, value); }
-		}
+		[Reactive] public bool Enabled { get; set; } = true;
+		[Reactive] public bool CanEdit { get; set; } = true;
 
-		private bool enabled = true;
-
-		public bool Enabled
-		{
-			get => enabled;
-			set { this.RaiseAndSetIfChanged(ref enabled, value); }
-		}
-
-		private IObservable<bool> canExecute;
-
-		public IObservable<bool> CanExecute
-		{
-			get => canExecute;
-			set { this.RaiseAndSetIfChanged(ref canExecute, value); }
-		}
+		[Reactive] public IObservable<bool> CanExecute { get; private set; }
 
 		private List<Action> actions = new List<Action>();
 		private List<IObservable<bool>> canExecuteList = new List<IObservable<bool>>();
@@ -98,6 +69,8 @@ namespace DivinityModManager.Models.App
 			CanExecute = Observable.Merge(canExecuteList);
 			//var canExecute = this.WhenAnyValue(x => x.canExecuteList, (list) => list.Count == 0 || list.All(b => b.Latest().All(b2 => b2 == true)));
 			Command = ReactiveCommand.Create(Invoke, CanExecute);
+
+			DisplayBindingText = ToString();
 		}
 
 
@@ -109,6 +82,11 @@ namespace DivinityModManager.Models.App
 		public Hotkey(Key key, ModifierKeys modifiers)
 		{
 			Init(key, modifiers);
+		}
+
+		public void UpdateDisplayBindingText()
+		{
+			DisplayBindingText = ToString();
 		}
 
 		public override string ToString()

@@ -5,18 +5,31 @@
 	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 	xmlns:local="clr-namespace:DivinityModManager.Controls"
 	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	d:DesignHeight="450"
-	d:DesignWidth="800"
+	x:Name="HotkeyUserControl"
+	d:DesignHeight="75"
+	d:DesignWidth="200"
 	mc:Ignorable="d">
+	<UserControl.Style>
+		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
+	</UserControl.Style>
+	<UserControl.Resources>
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="../Themes/MainResourceDictionary.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
 	<TextBox
 		x:Name="HotkeyTextBox"
+		Grid.Column="1"
 		HorizontalContentAlignment="Center"
 		VerticalContentAlignment="Center"
+		Focusable="{Binding Path=Hotkey.CanEdit, ElementName=HotkeyUserControl, FallbackValue=True}"
 		IsReadOnly="True"
 		IsReadOnlyCaretVisible="False"
 		IsUndoEnabled="False"
 		PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
-		Text="{Binding Hotkey, ElementName=UserControl, Mode=OneWay, TargetNullValue=&lt; not set &gt;}">
+		Text="{Binding Path=Hotkey.DisplayBindingText, ElementName=HotkeyUserControl, Mode=OneWay}">
 		<TextBox.ContextMenu>
 			<ContextMenu Visibility="Collapsed" />
 		</TextBox.ContextMenu>

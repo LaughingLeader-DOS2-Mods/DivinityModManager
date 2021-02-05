@@ -381,7 +381,6 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
-		public ICommand OpenPreferencesCommand { get; set; }
 		public ICommand OpenModsFolderCommand { get; private set; }
 		public ICommand OpenWorkshopFolderCommand { get; private set; }
 		public ICommand OpenExtenderLogDirectoryCommand { get; private set; }
@@ -392,8 +391,6 @@ namespace DivinityModManager.ViewModels
 		public ICommand CancelMainProgressCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
 		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
-		public ICommand ExtractSelectedModsCommand { get; private set; }
-		public ICommand ToggleVersionGeneratorWindowCommand { get; set; }
 		public ICommand RenameSaveCommand { get; private set; }
 		public ICommand CopyOrderToClipboardCommand { get; private set; }
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
@@ -4120,7 +4117,7 @@ Directory the zip will be extracted to:
 			}
 
 			var anyPakModSelectedObservable = this.WhenAnyValue(x => x.SelectedPakMods.Count, (count) => count > 0);
-			ExtractSelectedModsCommand = ReactiveCommand.Create(ExtractSelectedMods_Start, anyPakModSelectedObservable);
+			Keys.ExtractSelectedMods.AddAction(ExtractSelectedMods_Start, anyPakModSelectedObservable);
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable,
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);

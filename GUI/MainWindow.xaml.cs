@@ -141,14 +141,18 @@ namespace DivinityModManager.Views
 			//Trace.WriteLine($"[OnGotFocus] {sender} {e.Source}");
 		}
 
-		private void OpenPreferences()
+		private void OpenPreferences(bool switchToKeybindings = false)
 		{
 			if (!SettingsWindow.IsVisible)
 			{
-				SettingsWindow.Init(this.ViewModel.Settings);
+				SettingsWindow.Init(this.ViewModel);
 				SettingsWindow.Show();
 				SettingsWindow.Owner = this;
 				ViewModel.Settings.SettingsWindowIsOpen = true;
+				if(switchToKeybindings == true)
+				{
+					SettingsWindow.KeybindingsTabItem.Focus();
+				}
 			}
 			else
 			{
@@ -180,13 +184,8 @@ namespace DivinityModManager.Views
 		{
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
-			var c = ReactiveCommand.Create(OpenPreferences);
-			c.ThrownExceptions.Subscribe((ex) =>
-			{
-				DivinityApp.Log("Error opening settings window: " + ex.ToString());
-			});
-			ViewModel.OpenPreferencesCommand = c;
-			ViewModel.Keys.OpenPreferences.AddAction(OpenPreferences);
+			ViewModel.Keys.OpenPreferences.AddAction(() => OpenPreferences(false));
+			ViewModel.Keys.OpenKeybindings.AddAction(() => OpenPreferences(true));
 			ViewModel.Keys.OpenAboutWindow.AddAction(ToggleAboutWindow);
 
 			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
@@ -201,7 +200,7 @@ namespace DivinityModManager.Views
 				}
 			});
 
-			ViewModel.ToggleVersionGeneratorWindowCommand = ReactiveCommand.Create(() =>
+			ViewModel.Keys.ToggleVersionGeneratorWindow.AddAction(() =>
 			{
 				if (VersionGeneratorWindow == null)
 				{
@@ -246,6 +245,9 @@ namespace DivinityModManager.Views
 			{
 				Hotkey key = (Hotkey)prop.GetValue(ViewModel.Keys);
 				MenuSettingsAttribute menuSettings = prop.GetCustomAttribute<MenuSettingsAttribute>();
+				if (String.IsNullOrEmpty(key.DisplayName))
+					key.DisplayName = menuSettings.DisplayName;
+
 				MenuItem parentMenuItem;
 				if (!menuItems.TryGetValue(menuSettings.Parent, out parentMenuItem))
 				{

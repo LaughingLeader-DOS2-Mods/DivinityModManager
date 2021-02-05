@@ -2,6 +2,7 @@
 using DynamicData.Binding;
 
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
 
 using System;
 using System.Collections.Generic;
@@ -19,49 +20,16 @@ namespace DivinityModManager.Models.App
 {
 	public class MultiReactiveCommandHotkey : ReactiveObject, IHotkey
 	{
-		private Key key;
-		public Key Key
-		{
-			get => key;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref key, value);
-			}
-		}
+		[Reactive] public string DisplayName { get; set; }
+		[Reactive] public Key Key { get; set; }
 
-		private ModifierKeys modifiers;
-		public ModifierKeys Modifiers
-		{
-			get => modifiers;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref modifiers, value);
-			}
-		}
+		[Reactive] public ModifierKeys Modifiers { get; set; }
 
-		private ICommand command;
+		[Reactive] public ICommand Command { get; set; }
 
-		public ICommand Command
-		{
-			get => command;
-			set { this.RaiseAndSetIfChanged(ref command, value); }
-		}
+		[Reactive] public bool Enabled { get; set; }
 
-		private bool enabled = true;
-
-		public bool Enabled
-		{
-			get => enabled;
-			set { this.RaiseAndSetIfChanged(ref enabled, value); }
-		}
-
-		private IObservable<bool> canExecute;
-
-		public IObservable<bool> CanExecute
-		{
-			get => canExecute;
-			set { this.RaiseAndSetIfChanged(ref canExecute, value); }
-		}
+		[Reactive] public IObservable<bool> CanExecute { get; private set; }
 
 		private ObservableCollection<ReactiveCommand<Unit, Unit>> commands = new ObservableCollection<ReactiveCommand<Unit, Unit>>();
 

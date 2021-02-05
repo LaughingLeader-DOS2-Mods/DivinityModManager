@@ -17,20 +17,39 @@ using DivinityModManager.Models.App;
 namespace DivinityModManager.Controls
 {
 	/// <summary>
-	/// Interaction logic for HotKeyEditorControl.xaml
+	/// Interaction logic for HotkeyEditorControl.xaml
 	/// </summary>
 	public partial class HotkeyEditorControl : UserControl
 	{
 		public static readonly DependencyProperty HotkeyProperty =
-		DependencyProperty.Register(nameof(Hotkey), typeof(Hotkey),
-			typeof(HotkeyEditorControl),
-			new FrameworkPropertyMetadata(default(Hotkey),
-				FrameworkPropertyMetadataOptions.BindsTwoWayByDefault));
+		DependencyProperty.Register("Hotkey", typeof(Hotkey),
+			typeof(HotkeyEditorControl));
 
 		public Hotkey Hotkey
 		{
 			get => (Hotkey)GetValue(HotkeyProperty);
 			set => SetValue(HotkeyProperty, value);
+		}
+
+		public static readonly DependencyProperty FocusReturnTargetProperty =
+		DependencyProperty.Register("FocusReturnTarget", typeof(IInputElement),
+			typeof(HotkeyEditorControl));
+
+		public IInputElement FocusReturnTarget
+		{
+			get => (IInputElement)GetValue(FocusReturnTargetProperty);
+			set => SetValue(FocusReturnTargetProperty, value);
+		}
+
+		private void SetKeybind(Key key = Key.None, ModifierKeys modifierKeys = ModifierKeys.None)
+		{
+			Hotkey.Key = key;
+			Hotkey.Modifiers = modifierKeys;
+			Hotkey.UpdateDisplayBindingText();
+			Keyboard.ClearFocus();
+			//FocusManager.SetFocusedElement(this, FocusReturnTarget);
+			//FocusReturnTarget?.Focus();
+			Keyboard.Focus(FocusReturnTarget);
 		}
 
 		private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -53,7 +72,7 @@ namespace DivinityModManager.Controls
 			if (modifiers == ModifierKeys.None &&
 				(key == Key.Delete || key == Key.Back || key == Key.Escape))
 			{
-				Hotkey = null;
+				SetKeybind();
 				return;
 			}
 
@@ -74,7 +93,7 @@ namespace DivinityModManager.Controls
 			}
 
 			// Update the value
-			Hotkey = new Hotkey(key, modifiers);
+			SetKeybind(key, modifiers);
 		}
 
 		public HotkeyEditorControl()

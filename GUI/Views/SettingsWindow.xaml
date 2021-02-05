@@ -19,8 +19,8 @@
 	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	Title="Preferences"
-	Width="600"
-	Height="450"
+	Width="800"
+	Height="900"
 	TitleBarBackground="#4e38c9"
 	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
 	mc:Ignorable="d">
@@ -93,9 +93,10 @@
 			x:Name="PreferencesTabControl"
 			Grid.Row="1"
 			SelectionChanged="PreferencesTabControl_SelectionChanged">
-			<TabItem Header="General">
+			<TabItem FocusManager.FocusedElement="{Binding ElementName=SettingsAutoGrid}" Header="General">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<autogrid:AutoGrid
+						x:Name="SettingsAutoGrid"
 						Margin="10,0"
 						ChildMargin="4"
 						ColumnCount="2"
@@ -148,6 +149,7 @@
 			</TabItem>
 			<TabItem
 				x:Name="OsirisExtenderTab"
+				FocusManager.FocusedElement="{Binding ElementName=ExtenderSettingsAutoGrid}"
 				Header="Script Extender"
 				Visibility="{Binding ExtenderSettings.ExtenderIsAvailable, Converter={StaticResource BoolToVisibilityConverter}}">
 				<Grid>
@@ -157,6 +159,7 @@
 					</Grid.RowDefinitions>
 					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 						<autogrid:AutoGrid
+							x:Name="ExtenderSettingsAutoGrid"
 							Margin="10,0"
 							ChildMargin="4"
 							ColumnCount="2"
@@ -318,9 +321,49 @@
 					</ScrollViewer>
 				</Grid>
 			</TabItem>
-			<TabItem Header="Advanced">
+			<TabItem
+				x:Name="KeybindingsTabItem"
+				FocusManager.FocusedElement="{Binding ElementName=KeybindingsListView}"
+				Header="Keyboard Shortcuts">
+				<ListView x:Name="KeybindingsListView" ScrollViewer.VerticalScrollBarVisibility="Auto">
+					<ListView.View>
+						<GridView
+							x:Shared="True"
+							AllowsColumnReorder="False"
+							ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
+							<GridView.Columns>
+								<GridViewColumn
+									Width="300"
+									Header="Command"
+									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+									<GridViewColumn.CellTemplate>
+										<DataTemplate>
+											<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" />
+										</DataTemplate>
+									</GridViewColumn.CellTemplate>
+								</GridViewColumn>
+								<GridViewColumn
+									Width="400"
+									Header="Keybinding"
+									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+									<GridViewColumn.CellTemplate>
+										<DataTemplate>
+											<controls:HotkeyEditorControl
+												FocusReturnTarget="{Binding ElementName=KeybindingsListView}"
+												Hotkey="{Binding}"
+												IsTabStop="False" />
+										</DataTemplate>
+									</GridViewColumn.CellTemplate>
+								</GridViewColumn>
+							</GridView.Columns>
+						</GridView>
+					</ListView.View>
+				</ListView>
+			</TabItem>
+			<TabItem FocusManager.FocusedElement="{Binding ElementName=AdvancedSettingsAutoGrid}" Header="Advanced">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<autogrid:AutoGrid
+						x:Name="AdvancedSettingsAutoGrid"
 						Margin="10,0"
 						ChildMargin="2"
 						ColumnCount="2"

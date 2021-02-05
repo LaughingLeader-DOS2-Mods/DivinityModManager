@@ -21,6 +21,7 @@ using DynamicData;
 using DynamicData.Binding;
 using System.Diagnostics;
 using System.Globalization;
+using DivinityModManager.Controls;
 
 namespace DivinityModManager.Views
 {
@@ -46,16 +47,86 @@ namespace DivinityModManager.Views
 			button.SetBinding(Button.CommandProperty, binding);
 		}
 
-		public void Init(DivinityModManagerSettings vm)
+		public void Init(MainWindowViewModel vm)
 		{
-			ViewModel = vm;
+			ViewModel = vm.Settings;
 			DataContext = ViewModel;
 
-			CreateButtonBinding(this.ExportExtenderSettingsButton, "ExportExtenderSettingsCommand", ViewModel);
-			CreateButtonBinding(this.SaveSettingsButton, "SaveSettingsCommand", ViewModel);
+			BindingHelper.CreateCommandBinding(this.ExportExtenderSettingsButton, "ExportExtenderSettingsCommand", ViewModel);
+			BindingHelper.CreateCommandBinding(this.SaveSettingsButton, "SaveSettingsCommand", ViewModel);
 
+			KeybindingsListView.ItemsSource = vm.Keys.All;
+			Binding binding = new Binding("All");
+			binding.Source = vm.Keys;
+			KeybindingsListView.SetBinding(ListView.ItemsSourceProperty, binding);
+
+			this.KeyDown += SettingsWindow_KeyDown;
+			KeybindingsListView.KeyDown += KeybindingsListView_KeyDown;
+			KeybindingsListView.GotKeyboardFocus += (o, e) =>
+			{
+				if(KeybindingsListView.SelectedIndex < 0)
+				{
+					KeybindingsListView.SelectedIndex = 0;
+				}
+				ListViewItem row = (ListViewItem)KeybindingsListView.ItemContainerGenerator.ContainerFromIndex(KeybindingsListView.SelectedIndex);
+				if(!FocusHelper.HasKeyboardFocus(row))
+				{
+					Keyboard.Focus(row);
+				}
+			};
 			//this.WhenAnyValue(x => x.ViewModel.ExportExtenderSettingsCommand).BindTo(this, view => view.ExportExtenderSettingsButton.Command);
 			//this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
+		}
+
+		private void KeybindingsListView_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (KeybindingsListView.SelectedIndex >= 0 && e.Key == Key.Enter)
+			{
+				//if(KeybindingsListView.View is GridView grid)
+				//{
+					
+				//	grid.Columns[KeybindingsListView.SelectedIndex]
+				//}
+				ListViewItem row = (ListViewItem)KeybindingsListView.ItemContainerGenerator.ContainerFromIndex(KeybindingsListView.SelectedIndex);
+				var hotkeyControls = row.FindVisualChildren<HotkeyEditorControl>();
+				foreach(var c in hotkeyControls)
+				{
+					c.HotkeyTextBox.Focus();
+				}
+			}
+		}
+
+		private void SettingsWindow_KeyDown(object sender, KeyEventArgs e)
+		{
+			if (e.Key == Key.Escape)
+			{
+				Hide();
+				ViewModel.SettingsWindowIsOpen = false;
+			}
+			else if(e.Key == Key.Left && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			{
+				int current = PreferencesTabControl.SelectedIndex;
+				int nextIndex = current - 1;
+				if(nextIndex < 0)
+				{
+					nextIndex = PreferencesTabControl.Items.Count - 1;
+				}
+				PreferencesTabControl.SelectedIndex = nextIndex;
+				Keyboard.Focus((FrameworkElement)PreferencesTabControl.SelectedContent);
+				MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+			}
+			else if(e.Key == Key.Right && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			{
+				int current = PreferencesTabControl.SelectedIndex;
+				int nextIndex = current + 1;
+				if(nextIndex >= PreferencesTabControl.Items.Count)
+				{
+					nextIndex = 0;
+				}
+				PreferencesTabControl.SelectedIndex = nextIndex;
+				//Keyboard.Focus((FrameworkElement)PreferencesTabControl.SelectedContent);
+				//MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+			}
 		}
 
 		private string lastWorkshopPath = "";

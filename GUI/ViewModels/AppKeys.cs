@@ -75,6 +75,9 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Settings", "Open Preferences")]
 		[Reactive] public Hotkey OpenPreferences { get; set; } = new Hotkey(Key.P, ModifierKeys.Control);
 
+		[MenuSettings("Settings", "Open Keyboard Shortcuts")]
+		[Reactive] public Hotkey OpenKeybindings { get; set; } = new Hotkey(Key.K, ModifierKeys.Control);
+
 		[MenuSettings("Settings", "Toggle Light/Dark Mode")]
 		[Reactive] public Hotkey ToggleViewTheme { get; set; } = new Hotkey(Key.L, ModifierKeys.Control);
 
@@ -82,7 +85,7 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public Hotkey ToggleUpdatesView { get; set; } = new Hotkey(Key.U, ModifierKeys.Control);
 
 		[MenuSettings("Tools", "Extract Selected Mods To...")]
-		[Reactive] public Hotkey ExtractSelectedMods { get; set; } = new Hotkey(Key.K, ModifierKeys.Control);
+		[Reactive] public Hotkey ExtractSelectedMods { get; set; } = new Hotkey(Key.M, ModifierKeys.Control);
 
 		[MenuSettings("Tools", "Toggle Version Generator Window", Tooltip = "A tool for mod authors to generate version numbers for a mod's meta.lsx.")]
 		[Reactive] public Hotkey ToggleVersionGeneratorWindow { get; set; } = new Hotkey(Key.G, ModifierKeys.Control);
@@ -114,6 +117,7 @@ namespace DivinityModManager.ViewModels
 			allKeys.AddRange(t.GetRuntimeProperties()
 			.Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)))
 			.Select(prop => t.GetProperty(prop.Name).GetValue(this)).Cast<Hotkey>());
+			this.RaisePropertyChanged("All");
 		}
 	}
 }

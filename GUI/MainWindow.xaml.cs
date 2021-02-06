@@ -292,11 +292,11 @@ namespace DivinityModManager.Views
 
 		public void UpdateColorTheme(bool darkMode)
 		{
-			ResourceLocator.SetColorScheme(this.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
-			ResourceLocator.SetColorScheme(SettingsWindow.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+			ResourceLocator.SetColorScheme(this.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
+			ResourceLocator.SetColorScheme(SettingsWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			if(AboutWindow != null)
 			{
-				ResourceLocator.SetColorScheme(AboutWindow.Resources, !darkMode ? ResourceLocator.LightColorScheme : ResourceLocator.DarkColorScheme);
+				ResourceLocator.SetColorScheme(AboutWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
 		}
 

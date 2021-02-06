@@ -11,6 +11,7 @@ namespace DivinityModManager.Util
 	{
 		public static bool HasKeyboardFocus(FrameworkElement element)
 		{
+			if (element == null) return false;
 			if(element.IsKeyboardFocused || element.IsKeyboardFocusWithin)
 			{
 				return true;

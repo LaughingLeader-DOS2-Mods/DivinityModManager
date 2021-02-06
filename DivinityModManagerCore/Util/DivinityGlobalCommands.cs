@@ -1,5 +1,6 @@
 ﻿using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Models;
+using DivinityModManager.Models.App;
 using DivinityModManager.ViewModels;
 using ReactiveUI;
 using System;

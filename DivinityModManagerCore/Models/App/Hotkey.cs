@@ -30,9 +30,17 @@ namespace DivinityModManager.Models.App
 		[Reactive] public ModifierKeys Modifiers { get; set; }
 
 		[Reactive] public ICommand Command { get; set; }
+		[Reactive] public ICommand ResetCommand { get; private set; }
+		[Reactive] public ICommand ClearCommand { get; private set; }
 
 		[Reactive] public bool Enabled { get; set; } = true;
 		[Reactive] public bool CanEdit { get; set; } = true;
+
+		private Key _defaultKey;
+		private ModifierKeys _defaultModifiers;
+
+		public Key DefaultKey => _defaultKey;
+		public ModifierKeys DefaultModifiers => _defaultModifiers;
 
 		[Reactive] public IObservable<bool> CanExecute { get; private set; }
 
@@ -59,10 +67,31 @@ namespace DivinityModManager.Models.App
 			actions.ForEach(a => a.Invoke());
 		}
 
+		public void ResetToDefault()
+		{
+			Key = _defaultKey;
+			Modifiers = _defaultModifiers;
+			UpdateDisplayBindingText();
+		}
+
+		public void Clear()
+		{
+			Key = Key.None;
+			Modifiers = ModifierKeys.None;
+			UpdateDisplayBindingText();
+		}
+
+		public bool IsDefault()
+		{
+			return Key == _defaultKey && Modifiers == _defaultModifiers;
+		}
+
 		private void Init(Key key, ModifierKeys modifiers)
 		{
 			Key = key;
 			Modifiers = modifiers;
+			_defaultKey = key;
+			_defaultModifiers = modifiers;
 
 			var canExecuteInitial = this.WhenAnyValue(x => x.Enabled, (b) => b == true);
 			canExecuteList.Add(canExecuteInitial);
@@ -71,6 +100,11 @@ namespace DivinityModManager.Models.App
 			Command = ReactiveCommand.Create(Invoke, CanExecute);
 
 			DisplayBindingText = ToString();
+
+			var canReset = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k,m) => k != _defaultKey || m != _defaultModifiers).StartWith(false);
+			ResetCommand = ReactiveCommand.Create(ResetToDefault, canReset);
+			var canClear = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != Key.None).StartWith(false);
+			ClearCommand = ReactiveCommand.Create(Clear, canClear);
 		}
 
 

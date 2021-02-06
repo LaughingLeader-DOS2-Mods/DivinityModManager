@@ -8,6 +8,7 @@
 	x:Name="HotkeyUserControl"
 	d:DesignHeight="75"
 	d:DesignWidth="200"
+	KeyboardNavigation.IsTabStop="False"
 	mc:Ignorable="d">
 	<UserControl.Style>
 		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
@@ -25,13 +26,25 @@
 		HorizontalContentAlignment="Center"
 		VerticalContentAlignment="Center"
 		Focusable="{Binding Path=Hotkey.CanEdit, ElementName=HotkeyUserControl, FallbackValue=True}"
+		IsHitTestVisible="False"
 		IsReadOnly="True"
 		IsReadOnlyCaretVisible="False"
 		IsUndoEnabled="False"
+		KeyboardNavigation.IsTabStop="False"
 		PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+		PreviewMouseRightButtonDown="HotkeyTextBox_PreviewMouseRightButtonDown"
 		Text="{Binding Path=Hotkey.DisplayBindingText, ElementName=HotkeyUserControl, Mode=OneWay}">
 		<TextBox.ContextMenu>
-			<ContextMenu Visibility="Collapsed" />
+			<ContextMenu IsHitTestVisible="False" Visibility="Collapsed" />
 		</TextBox.ContextMenu>
+		<TextBox.Style>
+			<Style BasedOn="{StaticResource {x:Type TextBox}}" TargetType="TextBox">
+				<Style.Triggers>
+					<Trigger Property="IsFocused" Value="True">
+						<Setter Property="Background" Value="OrangeRed" />
+					</Trigger>
+				</Style.Triggers>
+			</Style>
+		</TextBox.Style>
 	</TextBox>
 </UserControl>

@@ -14,6 +14,9 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using DivinityModManager.Models.App;
 
+using ReactiveUI;
+using ReactiveUI.Wpf;
+
 namespace DivinityModManager.Controls
 {
 	/// <summary>
@@ -22,8 +25,7 @@ namespace DivinityModManager.Controls
 	public partial class HotkeyEditorControl : UserControl
 	{
 		public static readonly DependencyProperty HotkeyProperty =
-		DependencyProperty.Register("Hotkey", typeof(Hotkey),
-			typeof(HotkeyEditorControl));
+		DependencyProperty.Register("Hotkey", typeof(Hotkey), typeof(HotkeyEditorControl));
 
 		public Hotkey Hotkey
 		{
@@ -32,8 +34,7 @@ namespace DivinityModManager.Controls
 		}
 
 		public static readonly DependencyProperty FocusReturnTargetProperty =
-		DependencyProperty.Register("FocusReturnTarget", typeof(IInputElement),
-			typeof(HotkeyEditorControl));
+		DependencyProperty.Register("FocusReturnTarget", typeof(IInputElement), typeof(HotkeyEditorControl));
 
 		public IInputElement FocusReturnTarget
 		{
@@ -41,15 +42,18 @@ namespace DivinityModManager.Controls
 			set => SetValue(FocusReturnTargetProperty, value);
 		}
 
+		public void StopEditing()
+		{
+			Keyboard.ClearFocus();
+			Keyboard.Focus(FocusReturnTarget);
+		}
+
 		private void SetKeybind(Key key = Key.None, ModifierKeys modifierKeys = ModifierKeys.None)
 		{
 			Hotkey.Key = key;
 			Hotkey.Modifiers = modifierKeys;
 			Hotkey.UpdateDisplayBindingText();
-			Keyboard.ClearFocus();
-			//FocusManager.SetFocusedElement(this, FocusReturnTarget);
-			//FocusReturnTarget?.Focus();
-			Keyboard.Focus(FocusReturnTarget);
+			StopEditing();
 		}
 
 		private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
@@ -68,11 +72,25 @@ namespace DivinityModManager.Controls
 				key = e.SystemKey;
 			}
 
-			// Pressing delete, backspace or escape without modifiers clears the current value
-			if (modifiers == ModifierKeys.None &&
-				(key == Key.Delete || key == Key.Back || key == Key.Escape))
+			// Shortcut for resetting
+			if(modifiers == ModifierKeys.Shift && key == Key.Back)
+			{
+				Hotkey.ResetToDefault();
+				StopEditing();
+				return;
+			}
+
+			// Pressing escape without modifiers clears the current value
+			if (modifiers == ModifierKeys.None && key == Key.Escape)
 			{
 				SetKeybind();
+				return;
+			}
+			// Pressing enter without modifiers removes focus
+			// If the hotkey's default key is Return, and it's set to Return, stop editing as well.
+			if (modifiers == ModifierKeys.None && key == Key.Return && (key != Hotkey.DefaultKey || Hotkey.Key == Hotkey.DefaultKey))
+			{
+				StopEditing();
 				return;
 			}
 
@@ -99,6 +117,12 @@ namespace DivinityModManager.Controls
 		public HotkeyEditorControl()
 		{
 			InitializeComponent();
+		}
+
+		private void HotkeyTextBox_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+		{
+			// Disables focusing on right click;
+			e.Handled = true;
 		}
 	}
 }

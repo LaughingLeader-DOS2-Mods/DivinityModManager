@@ -325,12 +325,33 @@
 				x:Name="KeybindingsTabItem"
 				FocusManager.FocusedElement="{Binding ElementName=KeybindingsListView}"
 				Header="Keyboard Shortcuts">
-				<ListView x:Name="KeybindingsListView" ScrollViewer.VerticalScrollBarVisibility="Auto">
+				<ListView
+					x:Name="KeybindingsListView"
+					GridViewColumnHeader.Click="KeybindingsListView_Click"
+					KeyboardNavigation.TabNavigation="Continue"
+					MouseDoubleClick="HotkeyListViewItem_MouseDoubleClick"
+					ScrollViewer.VerticalScrollBarVisibility="Auto">
+					<ListView.ItemContainerStyle>
+						<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+							<Setter Property="Tag" Value="{Binding}" />
+							<Setter Property="ContextMenu">
+								<Setter.Value>
+									<ContextMenu>
+										<MenuItem
+											x:Name="ResetHotkeyMenuItem"
+											Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ResetCommand}"
+											Header="Reset Keybinding" />
+										<MenuItem
+											x:Name="ClearHotkeyMenuItem"
+											Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ClearCommand}"
+											Header="Remove Keybinding" />
+									</ContextMenu>
+								</Setter.Value>
+							</Setter>
+						</Style>
+					</ListView.ItemContainerStyle>
 					<ListView.View>
-						<GridView
-							x:Shared="True"
-							AllowsColumnReorder="False"
-							ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
+						<GridView AllowsColumnReorder="False" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 							<GridView.Columns>
 								<GridViewColumn
 									Width="300"
@@ -338,7 +359,12 @@
 									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 									<GridViewColumn.CellTemplate>
 										<DataTemplate>
-											<TextBlock Text="{Binding DisplayName}" ToolTip="{Binding DisplayName}" />
+											<TextBlock
+												HorizontalAlignment="Left"
+												VerticalAlignment="Center"
+												IsHitTestVisible="False"
+												Text="{Binding DisplayName}"
+												ToolTip="{Binding DisplayName}" />
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>
@@ -350,8 +376,9 @@
 										<DataTemplate>
 											<controls:HotkeyEditorControl
 												FocusReturnTarget="{Binding ElementName=KeybindingsListView}"
+												GotFocus="HotkeyEditorControl_GotFocus"
 												Hotkey="{Binding}"
-												IsTabStop="False" />
+												LostFocus="HotkeyEditorControl_LostFocus" />
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>

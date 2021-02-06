@@ -56,48 +56,62 @@ namespace DivinityModManager.Views
 			BindingHelper.CreateCommandBinding(this.SaveSettingsButton, "SaveSettingsCommand", ViewModel);
 
 			KeybindingsListView.ItemsSource = vm.Keys.All;
-			Binding binding = new Binding("All");
-			binding.Source = vm.Keys;
-			KeybindingsListView.SetBinding(ListView.ItemsSourceProperty, binding);
+			KeybindingsListView.SetBinding(ListView.ItemsSourceProperty, new Binding("All")
+			{
+				Source = vm.Keys,
+				Mode = BindingMode.OneWay
+			});
+			KeybindingsListView.SetBinding(ListView.SelectedItemProperty, new Binding("SelectedHotkey")
+			{
+				Source = ViewModel,
+				Mode = BindingMode.OneWayToSource
+			});
 
 			this.KeyDown += SettingsWindow_KeyDown;
-			KeybindingsListView.KeyDown += KeybindingsListView_KeyDown;
-			KeybindingsListView.GotKeyboardFocus += (o, e) =>
+			KeybindingsListView.Loaded += (o, e) =>
 			{
-				if(KeybindingsListView.SelectedIndex < 0)
+				if (KeybindingsListView.SelectedIndex < 0)
 				{
 					KeybindingsListView.SelectedIndex = 0;
 				}
 				ListViewItem row = (ListViewItem)KeybindingsListView.ItemContainerGenerator.ContainerFromIndex(KeybindingsListView.SelectedIndex);
-				if(!FocusHelper.HasKeyboardFocus(row))
+				if (row != null && !FocusHelper.HasKeyboardFocus(row))
 				{
 					Keyboard.Focus(row);
 				}
 			};
+			KeybindingsListView.KeyDown += KeybindingsListView_KeyDown;
 			//this.WhenAnyValue(x => x.ViewModel.ExportExtenderSettingsCommand).BindTo(this, view => view.ExportExtenderSettingsButton.Command);
 			//this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
+		}
+
+		private bool isSettingKeybinding = false;
+
+		private void FocusSelectedHotkey()
+		{
+			ListViewItem row = (ListViewItem)KeybindingsListView.ItemContainerGenerator.ContainerFromIndex(KeybindingsListView.SelectedIndex);
+			var hotkeyControls = row.FindVisualChildren<HotkeyEditorControl>();
+			foreach (var c in hotkeyControls)
+			{
+				c.HotkeyTextBox.Focus();
+				isSettingKeybinding = true;
+			}
 		}
 
 		private void KeybindingsListView_KeyDown(object sender, KeyEventArgs e)
 		{
 			if (KeybindingsListView.SelectedIndex >= 0 && e.Key == Key.Enter)
 			{
-				//if(KeybindingsListView.View is GridView grid)
-				//{
-					
-				//	grid.Columns[KeybindingsListView.SelectedIndex]
-				//}
-				ListViewItem row = (ListViewItem)KeybindingsListView.ItemContainerGenerator.ContainerFromIndex(KeybindingsListView.SelectedIndex);
-				var hotkeyControls = row.FindVisualChildren<HotkeyEditorControl>();
-				foreach(var c in hotkeyControls)
-				{
-					c.HotkeyTextBox.Focus();
-				}
+				FocusSelectedHotkey();
 			}
 		}
 
 		private void SettingsWindow_KeyDown(object sender, KeyEventArgs e)
 		{
+			if(isSettingKeybinding)
+			{
+				return;
+			}
 			if (e.Key == Key.Escape)
 			{
 				Hide();
@@ -157,6 +171,26 @@ namespace DivinityModManager.Views
 		private void PreferencesTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
 		{
 			ViewModel.ExtenderTabIsVisible = PreferencesTabControl.SelectedItem == this.OsirisExtenderTab;
+		}
+
+		private void KeybindingsListView_Click(object sender, RoutedEventArgs e)
+		{
+
+		}
+
+		private void HotkeyEditorControl_GotFocus(object sender, RoutedEventArgs e)
+		{
+			isSettingKeybinding = true;
+		}
+
+		private void HotkeyEditorControl_LostFocus(object sender, RoutedEventArgs e)
+		{
+			isSettingKeybinding = false;
+		}
+
+		private void HotkeyListViewItem_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+		{
+			FocusSelectedHotkey();
 		}
 	}
 }

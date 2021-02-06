@@ -13,6 +13,8 @@ using DivinityModManager.Util;
 using System.Reactive.Disposables;
 using System.Reflection;
 using Alphaleonis.Win32.Filesystem;
+using DivinityModManager.Models.App;
+using System.Reactive;
 
 namespace DivinityModManager.Models
 {
@@ -270,6 +272,14 @@ namespace DivinityModManager.Models
 		{
 			get => extenderTabIsVisible;
 			set { this.RaiseAndSetIfChanged(ref extenderTabIsVisible, value); }
+		}
+
+		private Hotkey selectedHotkey;
+
+		public Hotkey SelectedHotkey
+		{
+			get => selectedHotkey;
+			set { this.RaiseAndSetIfChanged(ref selectedHotkey, value); }
 		}
 
 		public ICommand SaveSettingsCommand { get; set; }

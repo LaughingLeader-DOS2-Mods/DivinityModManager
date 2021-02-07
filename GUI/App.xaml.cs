@@ -23,7 +23,6 @@ namespace DivinityModManager
 		{
 			// POCO type warning suppression
 			Splat.Locator.CurrentMutable.Register(() => new DivinityModManager.Util.CustomPropertyResolver(), typeof(ICreatesObservableForProperty));
-
 			WebHelper.SetupClient();
 #if DEBUG
 			RxApp.SuppressViewCommandBindingMessage = false;
@@ -39,6 +38,13 @@ namespace DivinityModManager
 			FrameworkElement.LanguageProperty.OverrideMetadata(
 				typeof(FrameworkElement),
 				new FrameworkPropertyMetadata(XmlLanguage.GetLanguage(CultureInfo.CurrentCulture.IetfLanguageTag)));
+
+			EventManager.RegisterClassHandler(typeof(Window), Window.PreviewMouseDownEvent, new MouseButtonEventHandler(OnPreviewMouseDown));
+		}
+
+		private static void OnPreviewMouseDown(object sender, MouseButtonEventArgs e)
+		{
+			DivinityApp.IsKeyboardNavigating = false;
 		}
 	}
 }

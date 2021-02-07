@@ -60,6 +60,9 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Edit", "Focus Inactive Mods List")]
 		[Reactive] public Hotkey MoveFocusRight { get; set; } = new Hotkey(Key.Right);
 
+		[MenuSettings("Edit", "Go to Other List")]
+		[Reactive] public Hotkey SwapListFocus { get; set; } = new Hotkey(Key.Tab);
+
 		[MenuSettings("Edit", "Move to Top of Active List")]
 		[Reactive] public Hotkey MoveToTop { get; set; } = new Hotkey(Key.PageUp, ModifierKeys.Control);
 

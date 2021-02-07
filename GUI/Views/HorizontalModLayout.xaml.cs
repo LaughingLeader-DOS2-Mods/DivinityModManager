@@ -69,6 +69,42 @@ namespace DivinityModManager.Views
 			return false;
 		}
 
+		private bool FocusSelectedItem(ListView lv)
+		{
+			var listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.SelectedItem);
+			if(listBoxItem == null)
+			{
+				listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.Items.GetItemAt(0));
+			}
+			if(listBoxItem != null)
+			{
+				listBoxItem.Focus();
+				Keyboard.Focus(listBoxItem);
+				return true;
+			}
+			return false;
+		}
+
+		private void FocusList(ListView listView)
+		{
+			if(!FocusSelectedItem(listView))
+			{
+				listView.Focus();
+			}
+		}
+
+		private void TraceBackground(Control c)
+		{
+			DivinityApp.Log($"{c} Background({c.Background})");
+			foreach (var c2 in c.FindVisualChildren<Control>())
+			{
+				if (c2.Background != null && !c2.Background.Equals(Brushes.Transparent))
+				{
+					TraceBackground(c2);
+				}
+			}
+		}
+
 		private void SetupListView(ListView listView)
 		{
 			listView.InputBindings.Add(new KeyBinding(ApplicationCommands.SelectAll, new KeyGesture(Key.A, ModifierKeys.Control)));
@@ -240,7 +276,7 @@ namespace DivinityModManager.Views
 				var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
 				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
-				InactiveModsListView.Focus();
+				FocusList(ActiveModsListView);
 				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} mods to the inactive mods list.");
 				canMoveSelectedMods = false;
 			}
@@ -255,16 +291,10 @@ namespace DivinityModManager.Views
 				var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
 				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
-				ActiveModsListView.Focus();
+				FocusList(InactiveModsListView);
 				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} selected mods to the active mods list.");
 				canMoveSelectedMods = false;
 			}
-		}
-
-		private void FocusSelectedItem(ListView lv)
-		{
-			var listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.SelectedItem);
-			listBoxItem?.Focus();
 		}
 
 		public HorizontalModLayout()
@@ -306,6 +336,7 @@ namespace DivinityModManager.Views
 					{
 						ActiveModsListView.SelectedIndex = 0;
 					}
+					Keyboard.Focus((ListViewItem)ActiveModsListView.SelectedItem);
 					setInitialFocus = false;
 				}
 			};
@@ -330,24 +361,41 @@ namespace DivinityModManager.Views
 
 					ViewModel.Keys.MoveFocusLeft.AddAction(() =>
 					{
+						DivinityApp.IsKeyboardNavigating = true;
 						this.ActiveModsListView.Focus();
 						if (ViewModel.ActiveSelected <= 0)
 						{
 							ActiveModsListView.SelectedIndex = 0;
 						}
 						//InactiveModsListView.UnselectAll();
-						FocusSelectedItem(ActiveModsListView);
+						FocusList(ActiveModsListView);
 					});
 
 					ViewModel.Keys.MoveFocusRight.AddAction(() =>
 					{
+						DivinityApp.IsKeyboardNavigating = true;
 						InactiveModsListView.Focus();
 						if (ViewModel.InactiveSelected <= 0)
 						{
 							InactiveModsListView.SelectedIndex = 0;
 						}
 						//ActiveModsListView.UnselectAll();
-						FocusSelectedItem(InactiveModsListView);
+						FocusList(InactiveModsListView);
+					});
+
+
+					ViewModel.Keys.SwapListFocus.AddAction(() =>
+					{
+						if (ListHasFocus(InactiveModsListView))
+						{
+							DivinityApp.IsKeyboardNavigating = true;
+							FocusList(ActiveModsListView);
+						}
+						else if(ListHasFocus(ActiveModsListView))
+						{
+							DivinityApp.IsKeyboardNavigating = true;
+							FocusList(InactiveModsListView);
+						}
 					});
 
 					//InactiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveLeftCommand, new KeyGesture(Key.Left)));
@@ -427,6 +475,7 @@ namespace DivinityModManager.Views
 			if(canMoveSelectedMods && e.Key == ViewModel.Keys.Confirm.Key && (ViewModel.Keys.Confirm.Modifiers == ModifierKeys.None || 
 				Keyboard.Modifiers.HasFlag(ViewModel.Keys.Confirm.Modifiers)))
 			{
+				DivinityApp.IsKeyboardNavigating = true;
 				MoveSelectedMods();
 			}
 		}

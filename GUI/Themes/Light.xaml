@@ -10,8 +10,14 @@
 	<Color x:Key="{x:Static local:DivinityColors.TagBackgroundColor}">#495588</Color>
 	<Color x:Key="{x:Static local:DivinityColors.CustomTagBackgroundColor}">#497688</Color>
 	<Color x:Key="{x:Static local:DivinityColors.ModeTagBackgroundColor}">#5e4988</Color>
+	<Color x:Key="{x:Static local:DivinityColors.ListInactiveColor}">#10000000</Color>
+	<Style x:Key="{x:Static local:DivinityColors.ListInactiveRectangle}" TargetType="Rectangle">
+		<Setter Property="Fill" Value="Red" />
+		<Setter Property="Opacity" Value="0.1" />
+	</Style>
 	<!--  brushes  -->
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.TagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.TagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.CustomTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.CustomTagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ModeTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ModeTagBackgroundColor}}" />
+	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ListInactiveBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ListInactiveColor}}" />
 </ResourceDictionary>

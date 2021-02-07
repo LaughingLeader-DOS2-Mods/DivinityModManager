@@ -62,6 +62,18 @@ namespace DivinityModManager
 			}
 		}
 
+		private static bool isKeyboardNavigating = false;
+
+		public static bool IsKeyboardNavigating
+		{
+			get => isKeyboardNavigating;
+			set {
+				isKeyboardNavigating = value;
+				Log($"isKeyboardNavigating({isKeyboardNavigating})");
+				NotifyStaticPropertyChanged();
+			}
+		}
+
 		public static IObservable<Func<DivinityModDependencyData, bool>> DependencyFilter { get; set; }
 
 		public static string DateTimeColumnFormat { get; set; } = "MM/dd/yyyy";

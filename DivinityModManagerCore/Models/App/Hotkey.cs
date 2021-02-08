@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -21,12 +22,18 @@ namespace DivinityModManager.Models.App
 		bool Enabled { get; set; }
 		string DisplayName { get; set; }
 	}
+
+	[DataContract]
 	public class Hotkey : ReactiveObject, IHotkey
 	{
+		public string ID { get; set; }
 		[Reactive] public string DisplayName { get; set; }
 		[Reactive] public string DisplayBindingText { get; private set; }
+
+		[DataMember]
 		[Reactive] public Key Key { get; set; }
 
+		[DataMember]
 		[Reactive] public ModifierKeys Modifiers { get; set; }
 
 		[Reactive] public ICommand Command { get; set; }

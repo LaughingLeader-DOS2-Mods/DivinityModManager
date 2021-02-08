@@ -1,10 +1,18 @@
-﻿using DivinityModManager.Models.App;
+﻿using Alphaleonis.Win32.Filesystem;
+
+using DivinityModManager.Models.App;
+using DivinityModManager.Util;
+
+using DynamicData;
+
+using Newtonsoft.Json;
 
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -111,15 +119,75 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Help", "Open Repository Page...")]
 		[Reactive] public Hotkey OpenRepositoryPage { get; set; } = new Hotkey(Key.F11);
 
-		private List<Hotkey> allKeys = new List<Hotkey>();
-		public List<Hotkey> All => allKeys;
+		private SourceCache<Hotkey, string> keyMap = new SourceCache<Hotkey, string>((hk) => hk.ID);
+
+		protected readonly ReadOnlyObservableCollection<Hotkey> allKeys;
+		public ReadOnlyObservableCollection<Hotkey> All => allKeys;
+
+		public bool SaveKeybindings(MainWindowViewModel vm, string filePath = @"Data\keybindings.json")
+		{
+			try
+			{
+				Directory.CreateDirectory("Data");
+				var keyMapDict = new Dictionary<string, Hotkey>();
+				foreach(var key in All)
+				{
+					keyMapDict.Add(key.ID, key);
+				}
+				string contents = JsonConvert.SerializeObject(keyMapDict, Newtonsoft.Json.Formatting.Indented);
+				File.WriteAllText(filePath, contents);
+				return true;
+			}
+			catch (Exception ex)
+			{
+				vm.ShowAlert($"Error saving keybindings at '{filePath}': {ex}", AlertType.Danger);
+			}
+			return false;
+		}
+
+		public bool LoadKeybindings(MainWindowViewModel vm, string filePath = @"Data\keybindings.json")
+		{
+			try
+			{
+				if (File.Exists(filePath))
+				{
+					using (var reader = File.OpenText(filePath))
+					{
+						var fileText = reader.ReadToEnd();
+						var allKeybindings = DivinityJsonUtils.SafeDeserialize<Dictionary<string, Hotkey>>(fileText);
+						if(allKeybindings != null)
+						{
+							foreach(var kvp in allKeybindings)
+							{
+								var existingHotkey = keyMap.Items.FirstOrDefault(x => x.ID == kvp.Key);
+								if(existingHotkey != null)
+								{
+									existingHotkey.Key = kvp.Value.Key;
+									existingHotkey.Modifiers = kvp.Value.Modifiers;
+								}
+							}
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				vm.ShowAlert($"Error loading keybindings at '{filePath}': {ex}", AlertType.Danger);
+			}
+			return false;
+		}
 
 		public AppKeys()
 		{
 			Type t = typeof(AppKeys);
-			allKeys.AddRange(t.GetRuntimeProperties()
-			.Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)))
-			.Select(prop => t.GetProperty(prop.Name).GetValue(this)).Cast<Hotkey>());
+			var keyProps = t.GetRuntimeProperties().Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)) && prop.GetGetMethod() != null).ToList();
+			foreach(var prop in keyProps)
+			{
+				var hotkey = (Hotkey)t.GetProperty(prop.Name).GetValue(this);
+				hotkey.ID = prop.Name;
+				keyMap.AddOrUpdate(hotkey);
+			}
+			keyMap.Connect().Bind(out allKeys).Subscribe();
 			this.RaisePropertyChanged("All");
 		}
 	}

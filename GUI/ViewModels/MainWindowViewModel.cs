@@ -3074,6 +3074,7 @@ namespace DivinityModManager.ViewModels
 			}
 
 			LoadSettings();
+			Keys.LoadKeybindings(this);
 			if (Settings.CheckForUpdates)
 			{
 				CheckForUpdates();
@@ -3081,6 +3082,7 @@ namespace DivinityModManager.ViewModels
 			RefreshAsync_Start("Loading...");
 			//Refresh();
 			SaveSettings(); // New values
+			Keys.SaveKeybindings(this);
 			IsInitialized = true;
 		}
 

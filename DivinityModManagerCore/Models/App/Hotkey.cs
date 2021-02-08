@@ -54,8 +54,12 @@ namespace DivinityModManager.Models.App
 		private List<Action> actions = new List<Action>();
 		private List<IObservable<bool>> canExecuteList = new List<IObservable<bool>>();
 
-		public void AddAction(Action action, IObservable<bool> actionCanExecute = null)
+		public void AddAction(Action action, IObservable<bool> actionCanExecute = null, bool clearAllFirst = false)
 		{
+			if(clearAllFirst)
+			{
+				ClearActions();
+			}
 			if(!actions.Contains(action))
 			{
 				actions.Add(action);
@@ -67,6 +71,17 @@ namespace DivinityModManager.Models.App
 				CanExecute = Observable.Merge(canExecuteList);
 				Command = ReactiveCommand.Create(Invoke, CanExecute);
 			}
+		}
+
+		public void ClearActions()
+		{
+			actions.Clear();
+			canExecuteList.Clear();
+
+			var canExecuteInitial = this.WhenAnyValue(x => x.Enabled, (b) => b == true);
+			canExecuteList.Add(canExecuteInitial);
+			CanExecute = Observable.Merge(canExecuteList);
+			Command = ReactiveCommand.Create(Invoke, CanExecute);
 		}
 
 		public void Invoke()
@@ -124,6 +139,11 @@ namespace DivinityModManager.Models.App
 		{
 			Init(key, modifiers);
 		}
+		
+		public Hotkey()
+		{
+			Init(Key.None, ModifierKeys.None);
+		}
 
 		public void UpdateDisplayBindingText()
 		{
@@ -143,7 +163,7 @@ namespace DivinityModManager.Models.App
 			if (Modifiers.HasFlag(ModifierKeys.Windows))
 				str.Append("Win + ");
 
-			str.Append(Key);
+			str.Append(Key.GetKeyName());
 
 			return str.ToString();
 		}

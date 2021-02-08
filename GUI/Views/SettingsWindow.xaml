@@ -334,6 +334,8 @@
 					<ListView.ItemContainerStyle>
 						<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
 							<Setter Property="Tag" Value="{Binding}" />
+							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
+							<Setter Property="VerticalContentAlignment" Value="Stretch" />
 							<Setter Property="ContextMenu">
 								<Setter.Value>
 									<ContextMenu>
@@ -354,16 +356,19 @@
 						<GridView AllowsColumnReorder="False" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 							<GridView.Columns>
 								<GridViewColumn
-									Width="300"
+									Width="450"
 									Header="Command"
 									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 									<GridViewColumn.CellTemplate>
 										<DataTemplate>
 											<TextBlock
-												HorizontalAlignment="Left"
-												VerticalAlignment="Center"
+												Margin="0,4"
+												Padding="0"
+												HorizontalAlignment="Stretch"
+												VerticalAlignment="Bottom"
 												IsHitTestVisible="False"
 												Text="{Binding DisplayName}"
+												TextAlignment="Left"
 												ToolTip="{Binding DisplayName}" />
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
@@ -375,6 +380,7 @@
 									<GridViewColumn.CellTemplate>
 										<DataTemplate>
 											<controls:HotkeyEditorControl
+												HorizontalAlignment="Left"
 												FocusReturnTarget="{Binding ElementName=KeybindingsListView}"
 												GotFocus="HotkeyEditorControl_GotFocus"
 												Hotkey="{Binding}"

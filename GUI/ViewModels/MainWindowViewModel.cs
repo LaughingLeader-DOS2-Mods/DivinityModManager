@@ -381,10 +381,6 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
-		public ICommand OpenModsFolderCommand { get; private set; }
-		public ICommand OpenWorkshopFolderCommand { get; private set; }
-		public ICommand OpenExtenderLogDirectoryCommand { get; private set; }
-		public ICommand OpenGameCommand { get; private set; }
 		public ICommand DebugCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
@@ -714,25 +710,23 @@ namespace DivinityModManager.ViewModels
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile()).StartWith(false);
 			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.GameExecutablePath,
 			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
-
-			OpenExtenderLogDirectoryCommand = ReactiveCommand.Create(() =>
-			{
-				Process.Start(Settings.ExtenderLogDirectory);
-			}, canOpenLogDirectory).DisposeWith(Settings.Disposables);
-			this.RaisePropertyChanged("OpenExtenderLogDirectoryCommand");
-
 			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start).DisposeWith(Settings.Disposables);
 
-			OpenWorkshopFolderCommand = ReactiveCommand.Create(() =>
+			Keys.OpenLogsFolder.AddAction(() =>
+			{
+				Process.Start(Settings.ExtenderLogDirectory);
+			}, canOpenLogDirectory, true);
+
+			Keys.OpenWorkshopFolder.AddAction(() =>
 			{
 				//DivinityApp.Log($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
 				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 				{
 					Process.Start(Settings.WorkshopPath);
 				}
-			}, canOpenWorkshopFolder).DisposeWith(Settings.Disposables);
+			}, canOpenWorkshopFolder, true);
 
-			OpenGameCommand = ReactiveCommand.Create(() =>
+			Keys.LaunchGame.AddAction(() =>
 			{
 				if (!File.Exists(Settings.GameExecutablePath))
 				{
@@ -781,7 +775,7 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-			}, canOpenGameExe).DisposeWith(Settings.Disposables);
+			}, canOpenGameExe, true);
 
 			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
 			{
@@ -3937,7 +3931,7 @@ Directory the zip will be extracted to:
 			});
 
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
-			OpenModsFolderCommand = ReactiveCommand.Create(() =>
+			Keys.OpenModsFolder.AddAction(() =>
 			{
 				Process.Start(PathwayData.DocumentsModsPath);
 			}, canOpenModsFolder);

@@ -535,7 +535,7 @@
 							<TextBlock Text="Shortcuts" />
 							<Button
 								x:Name="OpenModsFolderButton"
-								Command="{Binding OpenModsFolderCommand}"
+								Command="{Binding Keys.OpenModsFolder.Command}"
 								ToolTip="Open Mods Folder">
 								<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
 								<Button.ContextMenu>
@@ -549,7 +549,7 @@
 							</Button>
 							<Button
 								x:Name="OpenWorkshopFolderButton"
-								Command="{Binding OpenWorkshopFolderCommand}"
+								Command="{Binding Keys.OpenWorkshopFolder.Command}"
 								ToolTip="Open Workshop Folder">
 								<controls:AutoGrayableImage Source="{StaticResource OpenSteamWorkshopFolderImage}" />
 								<Button.ContextMenu>
@@ -563,7 +563,7 @@
 							</Button>
 							<Button
 								x:Name="OpenExtenderLogsFolderButton"
-								Command="{Binding OpenExtenderLogDirectoryCommand}"
+								Command="{Binding Keys.OpenLogsFolder.Command}"
 								ToolTip="Open Logs Folder">
 								<controls:AutoGrayableImage
 									Width="16"
@@ -580,7 +580,7 @@
 							</Button>
 							<Button
 								x:Name="OpenGameButton"
-								Command="{Binding OpenGameCommand}"
+								Command="{Binding Keys.LaunchGame.Command}"
 								ToolTip="Launch Game">
 								<controls:AutoGrayableImage Source="{StaticResource OpenGameImage}" />
 								<Button.ContextMenu>
@@ -749,6 +749,7 @@
 						<MenuItem x:Name="EditMenuItem" Header="Edit" />
 						<MenuItem x:Name="SettingsMenuItem" Header="Settings" />
 						<MenuItem x:Name="ViewMenuItem" Header="View" />
+						<MenuItem x:Name="GoMenuItem" Header="Go" />
 						<MenuItem
 							x:Name="ToolsMenuItem"
 							Header="Tools"

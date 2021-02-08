@@ -95,6 +95,21 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("View", "Toggle Updates View")]
 		[Reactive] public Hotkey ToggleUpdatesView { get; set; } = new Hotkey(Key.U, ModifierKeys.Control);
 
+		[MenuSettings("Go", "Open Mods Folder")]
+		[Reactive] public Hotkey OpenModsFolder { get; set; } = new Hotkey(Key.D1, ModifierKeys.Control);
+
+		[MenuSettings("Go", "Open Game Folder")]
+		[Reactive] public Hotkey OpenGameFolder { get; set; } = new Hotkey(Key.D2, ModifierKeys.Control);
+
+		[MenuSettings("Go", "Open Workshop Folder")]
+		[Reactive] public Hotkey OpenWorkshopFolder { get; set; } = new Hotkey(Key.D3, ModifierKeys.Control);
+
+		[MenuSettings("Go", "Open Extender Logs Folder")]
+		[Reactive] public Hotkey OpenLogsFolder { get; set; } = new Hotkey(Key.D4, ModifierKeys.Control);
+
+		[MenuSettings("Go", "Launch Game")]
+		[Reactive] public Hotkey LaunchGame { get; set; } = new Hotkey(Key.G, ModifierKeys.Control | ModifierKeys.Shift);
+
 		[MenuSettings("Tools", "Extract Selected Mods To...")]
 		[Reactive] public Hotkey ExtractSelectedMods { get; set; } = new Hotkey(Key.M, ModifierKeys.Control);
 
@@ -119,7 +134,7 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Help", "Open Repository Page...")]
 		[Reactive] public Hotkey OpenRepositoryPage { get; set; } = new Hotkey(Key.F11);
 
-		private SourceCache<Hotkey, string> keyMap = new SourceCache<Hotkey, string>((hk) => hk.ID);
+		private readonly SourceCache<Hotkey, string> keyMap = new SourceCache<Hotkey, string>((hk) => hk.ID);
 
 		protected readonly ReadOnlyObservableCollection<Hotkey> allKeys;
 		public ReadOnlyObservableCollection<Hotkey> All => allKeys;
@@ -132,7 +147,14 @@ namespace DivinityModManager.ViewModels
 				var keyMapDict = new Dictionary<string, Hotkey>();
 				foreach(var key in All)
 				{
-					keyMapDict.Add(key.ID, key);
+					if(!key.IsDefault())
+					{
+						keyMapDict.Add(key.ID, key);
+					}
+				}
+				if(keyMapDict.Count == 0)
+				{
+					return true;
 				}
 				string contents = JsonConvert.SerializeObject(keyMapDict, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(filePath, contents);
@@ -180,6 +202,7 @@ namespace DivinityModManager.ViewModels
 		public AppKeys()
 		{
 			Type t = typeof(AppKeys);
+			// Building a list of keys / key names from properties, because lazy
 			var keyProps = t.GetRuntimeProperties().Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)) && prop.GetGetMethod() != null).ToList();
 			foreach(var prop in keyProps)
 			{

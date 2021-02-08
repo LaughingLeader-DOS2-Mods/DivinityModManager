@@ -416,12 +416,12 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		private Dictionary<string, string> _buttonBindings = new Dictionary<string, string>()
+		private Dictionary<string, string> _shortcutButtonBindings = new Dictionary<string, string>()
 		{
-			["OpenWorkshopFolderButton"] = "OpenWorkshopFolderCommand",
-			["OpenModsFolderButton"] = "OpenModsFolderCommand",
-			["OpenExtenderLogsFolderButton"] = "OpenExtenderLogDirectoryCommand",
-			["OpenGameButton"] = "OpenGameCommand"
+			["OpenWorkshopFolderButton"] = "Keys.OpenWorkshopFolder.Command",
+			["OpenModsFolderButton"] = "Keys.OpenModsFolder.Command",
+			["OpenExtenderLogsFolderButton"] = "Keys.OpenLogsFolder.Command",
+			["OpenGameButton"] = "Keys.LaunchGame.Command"
 		};
 
 		private void ModOrderPanel_Loaded(object sender, RoutedEventArgs e)
@@ -432,9 +432,12 @@ namespace DivinityModManager.Views
 				var buttons = orderPanel.FindVisualChildren<Button>();
 				foreach(var button in buttons)
 				{
-					if(_buttonBindings.TryGetValue(button.Name, out string command))
+					if(_shortcutButtonBindings.TryGetValue(button.Name, out string path))
 					{
-						BindingHelper.CreateCommandBinding(button, command, ViewModel);
+						if(button.Command == null)
+						{
+							BindingHelper.CreateCommandBinding(button, path, ViewModel);
+						}
 					}
 				}
 			};

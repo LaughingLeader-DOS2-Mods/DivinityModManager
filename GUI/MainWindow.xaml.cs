@@ -298,6 +298,10 @@ namespace DivinityModManager.Views
 			{
 				ResourceLocator.SetColorScheme(AboutWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
+			if(VersionGeneratorWindow != null)
+			{
+				ResourceLocator.SetColorScheme(VersionGeneratorWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
+			}
 		}
 
 		private void OnAppClosing(object sender, ExitEventArgs e)

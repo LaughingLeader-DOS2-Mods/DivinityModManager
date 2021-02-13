@@ -90,20 +90,26 @@ namespace DivinityModManager.Views
 
 		private void VersionNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
 		{
-			if (Int32.TryParse(this.VersionNumberTextBox.Text, out int version))
+			if (sender is TextBox tb)
 			{
-				VersionData.ParseInt(version);
-			}
-			else
-			{
-				VersionData.ParseInt(268435456);
-				VersionNumberTextBox.Text = "268435456";
+				if (Int32.TryParse(tb.Text, out int version))
+				{
+					VersionData.ParseInt(version);
+				}
+				else
+				{
+					VersionData.ParseInt(268435456);
+					tb.Text = "268435456";
+				}
 			}
 		}
 
 		private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
-			VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+			if(VersionNumberTextBox != null)
+			{
+				VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+			}
 		}
 
 		private void CopyButton_Click(object sender, RoutedEventArgs e)
@@ -120,7 +126,10 @@ namespace DivinityModManager.Views
 
 		private void IntegerUpDown_LostFocus(object sender, RoutedEventArgs e)
 		{
-			VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+			if (VersionNumberTextBox != null)
+			{
+				VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+			}
 		}
 	}
 }

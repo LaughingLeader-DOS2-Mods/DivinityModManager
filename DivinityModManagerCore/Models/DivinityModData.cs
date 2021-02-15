@@ -459,7 +459,8 @@ namespace DivinityModManager.Models
 			get
 			{
 				//return $"by {Author} Version {Version?.Version} Last Updated {LastUpdated.ToLongDateString()}";
-				return $"by {Author} Version {Version?.Version}";
+				//return $"by {Author} Version {Version?.Version}";
+				return "";
 			}
 		}
 

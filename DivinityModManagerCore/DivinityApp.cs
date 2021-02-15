@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Automation.Peers;
@@ -84,13 +85,22 @@ namespace DivinityModManager
 			System.Diagnostics.Trace.WriteLine($"[{Path.GetFileName(path)}:{mName}({line})] {msg}");
 		}
 
+		[DllImport("user32.dll")]
+		static extern bool SystemParametersInfo(int iAction, int iParam, out bool bActive, int iUpdate);
+
 		public static bool IsScreenReaderActive()
 		{
-			if (AutomationPeer.ListenerExists(AutomationEvents.AutomationFocusChanged) || AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
-			{
-				return true;
-			}
-			return false;
+			int iAction = 70; // SPI_GETSCREENREADER constant;
+			int iParam = 0;
+			int iUpdate = 0;
+			bool bActive = false;
+			bool bReturn = SystemParametersInfo(iAction, iParam, out bActive, iUpdate);
+			return bReturn && bActive;
+			//if (AutomationPeer.ListenerExists(AutomationEvents.AutomationFocusChanged) || AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
+			//{
+			//	return true;
+			//}
+			//return false;
 		}
 	}
 }

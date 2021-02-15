@@ -112,11 +112,6 @@ namespace DivinityModManager.Views
 			{
 				return;
 			}
-			if (e.Key == Key.Escape)
-			{
-				Hide();
-				ViewModel.SettingsWindowIsOpen = false;
-			}
 			else if(e.Key == Key.Left && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
 			{
 				int current = PreferencesTabControl.SelectedIndex;

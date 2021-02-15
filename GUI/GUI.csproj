@@ -96,9 +96,6 @@
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="NvdaTestingDriver, Version=0.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\NvdaTestingDriver.0.2.0-beta\lib\netstandard2.0\NvdaTestingDriver.dll</HintPath>
-    </Reference>
     <Reference Include="Ookii.Dialogs.Wpf, Version=3.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
       <HintPath>..\packages\Ookii.Dialogs.Wpf.3.1.0\lib\net45\Ookii.Dialogs.Wpf.dll</HintPath>
     </Reference>
@@ -111,8 +108,8 @@
     <Reference Include="ReactiveUI.Wpf, Version=13.1.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ReactiveUI.WPF.13.1.1\lib\net472\ReactiveUI.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.27.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.27.1\lib\netstandard2.0\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.28.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.28.0\lib\netstandard2.0\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=10.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Splat.10.0.1\lib\net461\Splat.dll</HintPath>
@@ -237,7 +234,11 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="Util\AssemblyResolver.cs" />
     <Compile Include="Util\FocusHelper.cs" />
+    <Compile Include="Util\NativeLibraryHelper.cs" />
+    <Compile Include="Util\ScreenReader\ScreenReaderHelper.cs" />
+    <Compile Include="Util\ScreenReader\Tolk.cs" />
     <Compile Include="ViewModels\AppKeys.cs" />
     <Compile Include="Themes\DivinityColors.cs" />
     <Compile Include="Themes\ResourceAliasHelper.cs" />
@@ -362,6 +363,7 @@
       <Link>.editorconfig</Link>
     </None>
     <None Include="App.config" />
+    <None Include="packages.config" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -568,8 +570,10 @@
   <Target Name="AfterBuild">
     <ItemGroup>
       <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml" />
+      <ExternalLibraries Include="$(SolutionDir)External\tolk\*.dll" />
     </ItemGroup>
     <Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
+    <Copy SourceFiles="@(ExternalLibraries)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
   </Target>
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.0\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

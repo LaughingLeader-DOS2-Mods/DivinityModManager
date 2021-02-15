@@ -4162,6 +4162,24 @@ Directory the zip will be extracted to:
 				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, out inactiveSelected);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
+
+			//var canSpeakOrder = this.WhenAnyValue(x => x.ActiveMods.Count, (c) => c > 0);
+
+			Keys.SpeakActiveModOrder.AddAction(() =>
+			{
+				if(ActiveMods.Count > 0)
+				{
+					string text = String.Join(", ", ActiveMods.Select(x => x.DisplayName));
+					ScreenReaderHelper.Speak($"{ActiveMods.Count} mods in the active order, including:", true);
+					ScreenReaderHelper.Speak(text, false);
+					//ShowAlert($"Active mods: {text}", AlertType.Info, 10);
+				}
+				else
+				{
+					//ShowAlert($"No mods in active order.", AlertType.Warning, 10);
+					ScreenReaderHelper.Speak($"The active mods order is empty.");
+				}
+			});
 		}
 	}
 }

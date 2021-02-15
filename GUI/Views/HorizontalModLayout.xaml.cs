@@ -27,6 +27,7 @@ using GongSolutions.Wpf.DragDrop;
 using System.Windows.Automation.Peers;
 using DivinityModManager.Util;
 using System.Timers;
+using DivinityModManager.Controls;
 
 namespace DivinityModManager.Views
 {
@@ -277,7 +278,10 @@ namespace DivinityModManager.Views
 				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
 				FocusList(ActiveModsListView);
-				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} mods to the inactive mods list.");
+				string countSuffix = selectedMods.Count > 1 ? "mods" : "mod";
+				string text = $"Moved {selectedMods.Count} {countSuffix} to the inactive mods list.";
+				ScreenReaderHelper.Speak(text);
+				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
 			}
 			else if (ListHasFocus(InactiveModsListView))
@@ -292,7 +296,10 @@ namespace DivinityModManager.Views
 				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
 				FocusList(InactiveModsListView);
-				if (DivinityApp.IsScreenReaderActive()) ViewModel.ShowAlert($"Moved {selectedMods.Count} selected mods to the active mods list.");
+				string countSuffix = selectedMods.Count > 1 ? "mods" : "mod";
+				string text = $"Moved {selectedMods.Count} {countSuffix} to the active mods list.";
+				ScreenReaderHelper.Speak(text);
+				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
 			}
 		}

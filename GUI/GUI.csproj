@@ -234,7 +234,6 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
-    <Compile Include="Util\AssemblyResolver.cs" />
     <Compile Include="Util\FocusHelper.cs" />
     <Compile Include="Util\NativeLibraryHelper.cs" />
     <Compile Include="Util\ScreenReader\ScreenReaderHelper.cs" />

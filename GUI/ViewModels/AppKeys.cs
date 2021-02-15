@@ -117,7 +117,7 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public Hotkey ToggleVersionGeneratorWindow { get; set; } = new Hotkey(Key.G, ModifierKeys.Control);
 
 		[MenuSettings("Tools", "Download & Install the Script Extender...", Style = "MenuItemHightlightBlink")]
-		[Reactive] public Hotkey DownloadScriptExtender { get; set; } = new Hotkey(Key.None);
+		[Reactive] public Hotkey DownloadScriptExtender { get; set; } = new Hotkey(Key.T, ModifierKeys.Control | ModifierKeys.Shift | ModifierKeys.Alt);
 
 		[MenuSettings("Tools", "Speak Active Order")]
 		[Reactive] public Hotkey SpeakActiveModOrder { get; set; } = new Hotkey(Key.Home, ModifierKeys.Control);

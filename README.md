@@ -69,6 +69,11 @@ If you're feeling generous, an easy way to show support is by tipping me a coffe
 
 All coffee goes toward fueling future and current development efforts. Thanks!
 
+# Building From Source  
+## External Libraries  
+* [lslib](https://github.com/Norbyte/lslib)
+* [tolk](https://github.com/dkager/tolk)
+
 # Credits
 
 * Thanks to [Norbyte](https://github.com/Norbyte) for creating [LSLib](https://github.com/Norbyte/lslib), which allows various features of the manager (getting data from paks, reading lsb files, just to name a few).

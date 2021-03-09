@@ -372,7 +372,7 @@ namespace DivinityModManager.ViewModels
 
 		public IObservable<bool> canRenameOrder;
 
-		private IObservable<bool> canSaveSettings;
+		//private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenGameExe;
 		private IObservable<bool> canOpenDialogWindow;
@@ -704,7 +704,7 @@ namespace DivinityModManager.ViewModels
 				Settings.WorkshopPath = "";
 			}
 
-			canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings).StartWith(false);
+			//canSaveSettings = this.WhenAnyValue(x => x.Settings.CanSaveSettings).StartWith(false);
 			canOpenGameExe = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p)).StartWith(false);
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f)).StartWith(false);
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile()).StartWith(false);
@@ -807,7 +807,7 @@ namespace DivinityModManager.ViewModels
 				{
 					view.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.", 10);
 				}
-			}, canSaveSettings).DisposeWith(Settings.Disposables);
+			}).DisposeWith(Settings.Disposables);
 
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
@@ -968,6 +968,7 @@ namespace DivinityModManager.ViewModels
 				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(settingsFile, contents);
 				Settings.CanSaveSettings = false;
+				Keys.SaveKeybindings(this);
 				return true;
 			}
 			catch (Exception ex)
@@ -3076,7 +3077,6 @@ namespace DivinityModManager.ViewModels
 			RefreshAsync_Start("Loading...");
 			//Refresh();
 			SaveSettings(); // New values
-			Keys.SaveKeybindings(this);
 			IsInitialized = true;
 		}
 
@@ -3829,6 +3829,7 @@ Directory the zip will be extracted to:
 			});
 
 			#region Keys Setup
+			Keys.SaveDefaultKeybindings();
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
 			Keys.Save.AddAction(SaveLoadOrder, canExecuteSaveCommand);

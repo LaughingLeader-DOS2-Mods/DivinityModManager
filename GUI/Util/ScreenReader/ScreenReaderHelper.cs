@@ -28,7 +28,7 @@ namespace DivinityModManager
 			if(!loadedLibraries)
 			{
 				/*
-				 * Since the above DLLs are native, they need to be loaded manually from the _Lib directory since DLLImport, and LoadLibrary in
+				 * Since the above DLLs are native, they need to be loaded manually from the _Lib directory since DLLImport and LoadLibrary in
 				 * Tolk.dll won't be able to find nvdaControllerClient64.dll inside the _Lib folder.
 				*/
 				foreach (var lib in libraries)

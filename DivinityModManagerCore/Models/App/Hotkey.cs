@@ -1,4 +1,7 @@
-﻿using ReactiveUI;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
 
 using System;
@@ -31,9 +34,11 @@ namespace DivinityModManager.Models.App
 		[Reactive] public string DisplayBindingText { get; private set; }
 
 		[DataMember]
+		[JsonConverter(typeof(StringEnumConverter))]
 		[Reactive] public Key Key { get; set; }
 
 		[DataMember]
+		[JsonConverter(typeof(StringEnumConverter))]
 		[Reactive] public ModifierKeys Modifiers { get; set; }
 
 		[Reactive] public ICommand Command { get; set; }

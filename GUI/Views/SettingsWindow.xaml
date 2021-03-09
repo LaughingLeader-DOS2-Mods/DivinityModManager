@@ -467,7 +467,7 @@
 					Command="{Binding ExportExtenderSettingsCommand}"
 					Content="Export Settings"
 					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json"
-					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=COllapsed}" />
+					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 			</Grid>
 			<Grid Grid.Column="1">
 				<Button

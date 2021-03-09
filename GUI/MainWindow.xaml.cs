@@ -147,16 +147,12 @@ namespace DivinityModManager.Views
 			{
 				if (switchToKeybindings == true)
 				{
-					ViewModel.Settings.SelectedTabIndex = SettingsWindow.KeybindingsTabItem.TabIndex;
+					ViewModel.Settings.SelectedTabIndex = SettingsWindow.PreferencesTabControl.Items.IndexOf(SettingsWindow.KeybindingsTabItem);
 				}
 				SettingsWindow.Init(this.ViewModel);
 				SettingsWindow.Show();
 				SettingsWindow.Owner = this;
 				ViewModel.Settings.SettingsWindowIsOpen = true;
-				if(switchToKeybindings == true)
-				{
-					SettingsWindow.KeybindingsTabItem.Focus();
-				}
 			}
 			else
 			{

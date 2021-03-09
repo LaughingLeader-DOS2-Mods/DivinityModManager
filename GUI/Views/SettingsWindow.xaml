@@ -92,6 +92,7 @@
 		<TabControl
 			x:Name="PreferencesTabControl"
 			Grid.Row="1"
+			SelectedIndex="{Binding SelectedTabIndex}"
 			SelectionChanged="PreferencesTabControl_SelectionChanged">
 			<TabItem FocusManager.FocusedElement="{Binding ElementName=SettingsAutoGrid}" Header="General">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">

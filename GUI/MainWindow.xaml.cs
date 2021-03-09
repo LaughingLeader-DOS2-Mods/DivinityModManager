@@ -145,6 +145,10 @@ namespace DivinityModManager.Views
 		{
 			if (!SettingsWindow.IsVisible)
 			{
+				if (switchToKeybindings == true)
+				{
+					ViewModel.Settings.SelectedTabIndex = SettingsWindow.KeybindingsTabItem.TabIndex;
+				}
 				SettingsWindow.Init(this.ViewModel);
 				SettingsWindow.Show();
 				SettingsWindow.Owner = this;

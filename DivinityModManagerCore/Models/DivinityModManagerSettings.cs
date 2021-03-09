@@ -15,6 +15,7 @@ using System.Reflection;
 using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Models.App;
 using System.Reactive;
+using ReactiveUI.Fody.Helpers;
 
 namespace DivinityModManager.Models
 {
@@ -281,6 +282,8 @@ namespace DivinityModManager.Models
 			get => selectedHotkey;
 			set { this.RaiseAndSetIfChanged(ref selectedHotkey, value); }
 		}
+
+		[Reactive] public int SelectedTabIndex { get; set; } = 0;
 
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }

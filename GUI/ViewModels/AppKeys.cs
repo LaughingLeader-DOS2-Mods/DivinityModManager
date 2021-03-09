@@ -139,6 +139,26 @@ namespace DivinityModManager.ViewModels
 		protected readonly ReadOnlyObservableCollection<Hotkey> allKeys;
 		public ReadOnlyObservableCollection<Hotkey> All => allKeys;
 
+		public void SaveDefaultKeybindings()
+		{
+			string filePath = @"Data\keybindings-default.json";
+			try
+			{
+				Directory.CreateDirectory("Data");
+				var keyMapDict = new Dictionary<string, Hotkey>();
+				foreach (var key in All)
+				{
+					keyMapDict.Add(key.ID, key);
+				}
+				string contents = JsonConvert.SerializeObject(keyMapDict, Newtonsoft.Json.Formatting.Indented);
+				File.WriteAllText(filePath, contents);
+			}
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error saving default keybindings at '{filePath}': {ex}");
+			}
+		}
+
 		public bool SaveKeybindings(MainWindowViewModel vm, string filePath = @"Data\keybindings.json")
 		{
 			try
@@ -181,13 +201,19 @@ namespace DivinityModManager.ViewModels
 						{
 							foreach(var kvp in allKeybindings)
 							{
-								var existingHotkey = keyMap.Items.FirstOrDefault(x => x.ID == kvp.Key);
+								var existingHotkey = All.FirstOrDefault(x => x.ID.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase));
 								if(existingHotkey != null)
 								{
 									existingHotkey.Key = kvp.Value.Key;
 									existingHotkey.Modifiers = kvp.Value.Modifiers;
+									existingHotkey.UpdateDisplayBindingText();
 								}
 							}
+						}
+						else
+						{
+							DivinityApp.Log("Error deserializing keybindings.json - result is null.");
+							DivinityApp.Log(fileText);
 						}
 					}
 				}

@@ -31,7 +31,7 @@
 		IsReadOnlyCaretVisible="False"
 		IsUndoEnabled="False"
 		KeyboardNavigation.IsTabStop="False"
-		PreviewKeyDown="HotkeyTextBox_PreviewKeyDown"
+		PreviewKeyUp="HotkeyTextBox_PreviewKeyUp"
 		PreviewMouseRightButtonDown="HotkeyTextBox_PreviewMouseRightButtonDown"
 		Text="{Binding Path=Hotkey.DisplayBindingText, ElementName=HotkeyUserControl, Mode=OneWay}">
 		<TextBox.ContextMenu>

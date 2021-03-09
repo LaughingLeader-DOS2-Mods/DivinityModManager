@@ -56,7 +56,7 @@ namespace DivinityModManager.Controls
 			StopEditing();
 		}
 
-		private void HotkeyTextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+		private void HotkeyTextBox_PreviewKeyUp(object sender, KeyEventArgs e)
 		{
 			// Don't let the event pass further
 			// because we don't want standard textbox shortcuts working
@@ -88,7 +88,7 @@ namespace DivinityModManager.Controls
 			}
 			// Pressing enter without modifiers removes focus
 			// If the hotkey's default key is Return, and it's set to Return, stop editing as well.
-			if (modifiers == ModifierKeys.None && key == Key.Return && (key != Hotkey.DefaultKey || Hotkey.Key == Hotkey.DefaultKey))
+			if (modifiers == ModifierKeys.None && key == Key.Return && (Hotkey.DefaultKey != Key.Return || Hotkey.Key == Hotkey.DefaultKey))
 			{
 				StopEditing();
 				return;

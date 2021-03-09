@@ -80,7 +80,7 @@ namespace DivinityModManager.Views
 					Keyboard.Focus(row);
 				}
 			};
-			KeybindingsListView.KeyDown += KeybindingsListView_KeyDown;
+			KeybindingsListView.KeyUp += KeybindingsListView_KeyUp;
 			//this.WhenAnyValue(x => x.ViewModel.ExportExtenderSettingsCommand).BindTo(this, view => view.ExportExtenderSettingsButton.Command);
 			//this.WhenAnyValue(x => x.ViewModel.SaveSettingsCommand).BindTo(this, view => view.SaveSettingsButton.Command);
 		}
@@ -98,7 +98,7 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		private void KeybindingsListView_KeyDown(object sender, KeyEventArgs e)
+		private void KeybindingsListView_KeyUp(object sender, KeyEventArgs e)
 		{
 			if (KeybindingsListView.SelectedIndex >= 0 && e.Key == Key.Enter)
 			{

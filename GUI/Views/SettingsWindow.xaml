@@ -5,6 +5,7 @@
 	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
 	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
 	xmlns:autogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+	xmlns:behavior="clr-namespace:DivinityModManager.Controls.Behavior"
 	xmlns:c="clr-namespace:DivinityModManager.Controls"
 	xmlns:controls="clr-namespace:DivinityModManager.Controls"
 	xmlns:conv="clr-namespace:DivinityModManager.Converters"
@@ -336,6 +337,7 @@
 							<Setter Property="Tag" Value="{Binding}" />
 							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 							<Setter Property="VerticalContentAlignment" Value="Stretch" />
+							<Setter Property="ToolTip" Value="{Binding ToolTip}" />
 							<Setter Property="ContextMenu">
 								<Setter.Value>
 									<ContextMenu>
@@ -367,11 +369,9 @@
 												HorizontalAlignment="Stretch"
 												VerticalAlignment="Bottom"
 												IsHitTestVisible="False"
-												TextAlignment="Left"
-												ToolTip="{Binding DisplayName}">
+												TextAlignment="Left">
 												<Run Foreground="Lime" Text="{Binding ModifiedText}" />
-												<Run Text="{Binding DisplayName}" />
-											</TextBlock>
+												<Run Text="{Binding DisplayName}" /></TextBlock>
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>

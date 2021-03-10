@@ -30,7 +30,32 @@ namespace DivinityModManager.Models.App
 	public class Hotkey : ReactiveObject, IHotkey
 	{
 		public string ID { get; set; }
-		[Reactive] public string DisplayName { get; set; }
+
+		private string _displayName = "";
+		public string DisplayName
+		{
+			get => _displayName;
+			set
+			{
+				this.RaiseAndSetIfChanged(ref _displayName, value);
+				this.RaisePropertyChanged("ToolTip");
+			}
+		}
+
+		public string ToolTip
+		{
+			get
+			{
+				if (!IsDefault)
+				{
+					return DisplayName + " (Modified)";
+				}
+				else
+				{
+					return DisplayName;
+				}
+			}
+		}
 		[Reactive] public string DisplayBindingText { get; private set; }
 
 		[DataMember]
@@ -47,6 +72,9 @@ namespace DivinityModManager.Models.App
 
 		[Reactive] public bool Enabled { get; set; } = true;
 		[Reactive] public bool CanEdit { get; set; } = true;
+		[Reactive] public bool IsDefault { get; set; } = true;
+		[Reactive] public bool IsSelected { get; set; } = false;
+		[Reactive] public string ModifiedText { get; set; } = "";
 
 		private Key _defaultKey;
 		private ModifierKeys _defaultModifiers;
@@ -108,9 +136,10 @@ namespace DivinityModManager.Models.App
 			UpdateDisplayBindingText();
 		}
 
-		[Reactive] public bool IsDefault { get; set; } = true;
-		[Reactive] public bool IsSelected { get; set; } = false;
-		[Reactive] public string ModifiedText { get; set; } = "";
+		public void UpdateDisplayBindingText()
+		{
+			DisplayBindingText = ToString();
+		}
 
 		private void Init(Key key, ModifierKeys modifiers)
 		{
@@ -133,9 +162,14 @@ namespace DivinityModManager.Models.App
 			ClearCommand = ReactiveCommand.Create(Clear, canClear);
 
 			this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k == _defaultKey && m == _defaultModifiers).BindTo(this, x => x.IsDefault);
-			this.WhenAnyValue(x => x.IsDefault).Select(b => !b ? "*" : "").BindTo(this, x => x.ModifiedText);
-		}
+			var isDefaultChanged = this.WhenAnyValue(x => x.IsDefault);
+			isDefaultChanged.Subscribe((b) =>
+			{
+				this.RaisePropertyChanged("ToolTip");
+			});
 
+			isDefaultChanged.Select(b => !b ? "*" : "").BindTo(this, x => x.ModifiedText);
+		}
 
 		public Hotkey(Key key)
 		{
@@ -150,11 +184,6 @@ namespace DivinityModManager.Models.App
 		public Hotkey()
 		{
 			Init(Key.None, ModifierKeys.None);
-		}
-
-		public void UpdateDisplayBindingText()
-		{
-			DisplayBindingText = ToString();
 		}
 
 		public override string ToString()

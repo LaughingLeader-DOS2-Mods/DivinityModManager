@@ -212,6 +212,7 @@
     <Compile Include="Controls\AutomationTooltip.cs" />
     <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
     <Compile Include="Controls\Behavior\ScreenReaderHelperBehavior.cs" />
+    <Compile Include="Controls\Behavior\ToolTipHelperBehavior.cs" />
     <Compile Include="Controls\BusyIndicator.xaml.cs">
       <DependentUpon>BusyIndicator.xaml</DependentUpon>
     </Compile>

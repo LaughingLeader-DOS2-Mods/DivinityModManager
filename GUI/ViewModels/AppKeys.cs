@@ -167,7 +167,7 @@ namespace DivinityModManager.ViewModels
 				var keyMapDict = new Dictionary<string, Hotkey>();
 				foreach(var key in All)
 				{
-					if(!key.IsDefault())
+					if(!key.IsDefault)
 					{
 						keyMapDict.Add(key.ID, key);
 					}

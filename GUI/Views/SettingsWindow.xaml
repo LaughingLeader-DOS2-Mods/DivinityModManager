@@ -332,6 +332,7 @@
 					ScrollViewer.VerticalScrollBarVisibility="Auto">
 					<ListView.ItemContainerStyle>
 						<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
+							<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
 							<Setter Property="Tag" Value="{Binding}" />
 							<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 							<Setter Property="VerticalContentAlignment" Value="Stretch" />
@@ -366,9 +367,11 @@
 												HorizontalAlignment="Stretch"
 												VerticalAlignment="Bottom"
 												IsHitTestVisible="False"
-												Text="{Binding DisplayName}"
 												TextAlignment="Left"
-												ToolTip="{Binding DisplayName}" />
+												ToolTip="{Binding DisplayName}">
+												<Run Foreground="Lime" Text="{Binding ModifiedText}" />
+												<Run Text="{Binding DisplayName}" />
+											</TextBlock>
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>

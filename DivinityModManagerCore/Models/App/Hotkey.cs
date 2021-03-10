@@ -61,16 +61,16 @@ namespace DivinityModManager.Models.App
 
 		public void AddAction(Action action, IObservable<bool> actionCanExecute = null, bool clearAllFirst = false)
 		{
-			if(clearAllFirst)
+			if (clearAllFirst)
 			{
 				ClearActions();
 			}
-			if(!actions.Contains(action))
+			if (!actions.Contains(action))
 			{
 				actions.Add(action);
 			}
-			
-			if(actionCanExecute != null && !canExecuteList.Contains(actionCanExecute))
+
+			if (actionCanExecute != null && !canExecuteList.Contains(actionCanExecute))
 			{
 				canExecuteList.Add(actionCanExecute);
 				CanExecute = Observable.Merge(canExecuteList);
@@ -108,10 +108,9 @@ namespace DivinityModManager.Models.App
 			UpdateDisplayBindingText();
 		}
 
-		public bool IsDefault()
-		{
-			return Key == _defaultKey && Modifiers == _defaultModifiers;
-		}
+		[Reactive] public bool IsDefault { get; set; } = true;
+		[Reactive] public bool IsSelected { get; set; } = false;
+		[Reactive] public string ModifiedText { get; set; } = "";
 
 		private void Init(Key key, ModifierKeys modifiers)
 		{
@@ -132,6 +131,9 @@ namespace DivinityModManager.Models.App
 			ResetCommand = ReactiveCommand.Create(ResetToDefault, canReset);
 			var canClear = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != Key.None).StartWith(false);
 			ClearCommand = ReactiveCommand.Create(Clear, canClear);
+
+			this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k == _defaultKey && m == _defaultModifiers).BindTo(this, x => x.IsDefault);
+			this.WhenAnyValue(x => x.IsDefault).Select(b => !b ? "*" : "").BindTo(this, x => x.ModifiedText);
 		}
 
 

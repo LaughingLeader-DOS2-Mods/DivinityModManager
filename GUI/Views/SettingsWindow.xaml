@@ -92,8 +92,7 @@
 		<TabControl
 			x:Name="PreferencesTabControl"
 			Grid.Row="1"
-			SelectedIndex="{Binding SelectedTabIndex}"
-			SelectionChanged="PreferencesTabControl_SelectionChanged">
+			SelectedIndex="{Binding SelectedTabIndex}">
 			<TabItem FocusManager.FocusedElement="{Binding ElementName=SettingsAutoGrid}" Header="General">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
 					<autogrid:AutoGrid
@@ -328,7 +327,6 @@
 				Header="Keyboard Shortcuts">
 				<ListView
 					x:Name="KeybindingsListView"
-					GridViewColumnHeader.Click="KeybindingsListView_Click"
 					KeyboardNavigation.TabNavigation="Continue"
 					MouseDoubleClick="HotkeyListViewItem_MouseDoubleClick"
 					ScrollViewer.VerticalScrollBarVisibility="Auto">
@@ -468,6 +466,13 @@
 					Content="Export Settings"
 					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json"
 					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+				<Button
+					x:Name="ResetKeybindingsButton"
+					HorizontalAlignment="Center"
+					Command="{Binding ResetKeybindingsCommand}"
+					Content="Reset to Default"
+					ToolTip="Reset all keybindings to their default value."
+					Visibility="{Binding KeybindingsTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 			</Grid>
 			<Grid Grid.Column="1">
 				<Button

@@ -225,6 +225,14 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
+		public void SetToDefault()
+		{
+			foreach(var entry in keyMap.Items)
+			{
+				entry.ResetToDefault();
+			}
+		}
+
 		public AppKeys()
 		{
 			Type t = typeof(AppKeys);

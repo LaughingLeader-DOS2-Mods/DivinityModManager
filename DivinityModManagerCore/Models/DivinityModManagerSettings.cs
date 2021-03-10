@@ -267,13 +267,9 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref gameLaunchParams, value); }
 		}
 
-		private bool extenderTabIsVisible = false;
+		[Reactive] public bool ExtenderTabIsVisible { get; set; } = false;
 
-		public bool ExtenderTabIsVisible
-		{
-			get => extenderTabIsVisible;
-			set { this.RaiseAndSetIfChanged(ref extenderTabIsVisible, value); }
-		}
+		[Reactive] public bool KeybindingsTabIsVisible { get; set; } = false;
 
 		private Hotkey selectedHotkey;
 
@@ -289,6 +285,7 @@ namespace DivinityModManager.Models
 		public ICommand OpenSettingsFolderCommand { get; set; }
 		public ICommand ExportExtenderSettingsCommand { get; set; }
 		public ICommand ResetExtenderSettingsToDefaultCommand { get; set; }
+		public ICommand ResetKeybindingsCommand { get; set; }
 		public ICommand ClearWorkshopCacheCommand { get; set; }
 		public ICommand AddLaunchParamCommand { get; set; }
 		public ICommand ClearLaunchParamsCommand { get; set; }
@@ -338,6 +335,9 @@ namespace DivinityModManager.Models
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 				this.RaisePropertyChanged("ExtenderLogDirectory");
 			}).DisposeWith(Disposables);
+
+			this.WhenAnyValue(x => x.SelectedTabIndex, (index) => index == 1).BindTo(this, x => x.ExtenderTabIsVisible);
+			this.WhenAnyValue(x => x.SelectedTabIndex, (index) => index == 2).BindTo(this, x => x.KeybindingsTabIsVisible);
 		}
 	}
 }

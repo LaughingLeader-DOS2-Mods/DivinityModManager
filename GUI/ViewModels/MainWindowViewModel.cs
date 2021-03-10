@@ -846,6 +846,16 @@ namespace DivinityModManager.ViewModels
 				}
 			}, canResetExtenderSettingsObservable).DisposeWith(Settings.Disposables);
 
+			Settings.ResetKeybindingsCommand = ReactiveCommand.Create(() =>
+			{
+				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view.SettingsWindow, $"Reset Keybindings to Default?\nCurrent keybindings may be lost.", "Confirm Reset",
+					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
+				if (result == MessageBoxResult.Yes)
+				{
+					Keys.SetToDefault();
+				}
+			});
+
 			Settings.ClearWorkshopCacheCommand = ReactiveCommand.Create(() =>
 			{
 				if (File.Exists("Data\\workshopdata.json"))

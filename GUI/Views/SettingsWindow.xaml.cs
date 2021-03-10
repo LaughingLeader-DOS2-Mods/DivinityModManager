@@ -155,24 +155,6 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		private void TabItem_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
-		{
-			if(sender is TabItem tabItem)
-			{
-				ViewModel.ExtenderTabIsVisible = tabItem.IsSelected;
-			}
-		}
-
-		private void PreferencesTabControl_SelectionChanged(object sender, SelectionChangedEventArgs e)
-		{
-			ViewModel.ExtenderTabIsVisible = PreferencesTabControl.SelectedItem == this.OsirisExtenderTab;
-		}
-
-		private void KeybindingsListView_Click(object sender, RoutedEventArgs e)
-		{
-
-		}
-
 		private void HotkeyEditorControl_GotFocus(object sender, RoutedEventArgs e)
 		{
 			isSettingKeybinding = true;

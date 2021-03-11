@@ -265,7 +265,10 @@ namespace DivinityModManager.Views
 
 		private void MoveSelectedMods()
 		{
-			DivinityApp.Log($"ListHasFocus(ActiveModsListView) = {ListHasFocus(ActiveModsListView)} | ListHasFocus(InactiveModsListView) = {ListHasFocus(InactiveModsListView)}");
+			List<DivinityModData> selectedMods = new List<DivinityModData>();
+			int nextIndex = -1;
+			DivinityModData targetMod = null;
+			//DivinityApp.Log($"ListHasFocus(ActiveModsListView) = {ListHasFocus(ActiveModsListView)} | ListHasFocus(InactiveModsListView) = {ListHasFocus(InactiveModsListView)}");
 			if (ListHasFocus(ActiveModsListView))
 			{
 				//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
@@ -274,8 +277,21 @@ namespace DivinityModManager.Views
 				//	ViewModel.ActiveMods.Remove(selectedMods[i]);
 				//	ViewModel.InactiveMods.Add(selectedMods[i]);
 				//}
-				var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
-				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
+				
+				foreach(var m in ViewModel.ActiveMods.Where(x => x.IsSelected))
+				{
+					if(m.Index > nextIndex)
+					{
+						nextIndex = Math.Min(m.Index + 1, ViewModel.ActiveMods.Count);
+					}
+					selectedMods.Add(m);
+				}
+				if(nextIndex > -1)
+				{
+					targetMod = ViewModel.ActiveMods.FirstOrDefault(x => x.Index == nextIndex && !x.IsSelected);
+				}
+
+				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
 				FocusList(ActiveModsListView);
 				string countSuffix = selectedMods.Count > 1 ? "mods" : "mod";
@@ -283,6 +299,11 @@ namespace DivinityModManager.Views
 				ScreenReaderHelper.Speak(text);
 				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
+
+				if (targetMod != null)
+				{
+					ActiveModsListView.SelectedItem = targetMod;
+				}
 			}
 			else if (ListHasFocus(InactiveModsListView))
 			{
@@ -292,8 +313,19 @@ namespace DivinityModManager.Views
 				//	ViewModel.InactiveMods.Remove(selectedMods[i]);
 				//	ViewModel.ActiveMods.Add(selectedMods[i]);
 				//}
-				var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
+				foreach (var m in ViewModel.InactiveMods.Where(x => x.IsSelected))
+				{
+					if (m.Index > nextIndex)
+					{
+						nextIndex = Math.Min(m.Index + 1, ViewModel.InactiveMods.Count);
+					}
+					selectedMods.Add(m);
+				}
+				if (nextIndex > -1)
+				{
+					targetMod = ViewModel.InactiveMods.FirstOrDefault(x => x.Index == nextIndex && !x.IsSelected);
+				}
+				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
 				FocusList(InactiveModsListView);
 				string countSuffix = selectedMods.Count > 1 ? "mods" : "mod";
@@ -301,6 +333,11 @@ namespace DivinityModManager.Views
 				ScreenReaderHelper.Speak(text);
 				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
+
+				if (targetMod != null)
+				{
+					InactiveModsListView.SelectedItem = targetMod;
+				}
 			}
 		}
 

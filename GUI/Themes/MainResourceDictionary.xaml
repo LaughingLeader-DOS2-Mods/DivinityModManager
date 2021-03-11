@@ -248,6 +248,22 @@
 		<Setter Property="HorizontalContentAlignment" Value="Stretch" />
 		<!--<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />-->
 		<Setter Property="Visibility" Value="{Binding Visibility, FallbackValue='Visible'}" />
+		<Setter Property="FocusVisualStyle">
+			<Setter.Value>
+				<Style>
+					<Setter Property="Control.Template">
+						<Setter.Value>
+							<ControlTemplate>
+								<Rectangle
+									SnapsToDevicePixels="true"
+									Stroke="{DynamicResource {x:Static adonisUI:Brushes.AccentIntenseHighlightBorderBrush}}"
+									StrokeThickness="2" />
+							</ControlTemplate>
+						</Setter.Value>
+					</Setter>
+				</Style>
+			</Setter.Value>
+		</Setter>
 		<Style.Triggers>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>

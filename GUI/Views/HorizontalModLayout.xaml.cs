@@ -304,6 +304,12 @@ namespace DivinityModManager.Views
 				{
 					ActiveModsListView.SelectedItem = targetMod;
 				}
+
+				if(ViewModel.Settings.ShiftListFocusOnSwap)
+				{
+					this.InactiveModsListView.Focus();
+					FocusList(InactiveModsListView);
+				}
 			}
 			else if (ListHasFocus(InactiveModsListView))
 			{
@@ -337,6 +343,12 @@ namespace DivinityModManager.Views
 				if (targetMod != null && !targetMod.IsActive)
 				{
 					InactiveModsListView.SelectedItem = targetMod;
+				}
+
+				if (ViewModel.Settings.ShiftListFocusOnSwap)
+				{
+					this.ActiveModsListView.Focus();
+					FocusList(ActiveModsListView);
 				}
 			}
 		}

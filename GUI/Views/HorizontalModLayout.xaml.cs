@@ -300,7 +300,7 @@ namespace DivinityModManager.Views
 				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
 
-				if (targetMod != null)
+				if (targetMod != null && targetMod.IsActive)
 				{
 					ActiveModsListView.SelectedItem = targetMod;
 				}
@@ -323,7 +323,7 @@ namespace DivinityModManager.Views
 				}
 				if (nextIndex > -1)
 				{
-					targetMod = ViewModel.InactiveMods.FirstOrDefault(x => x.Index == nextIndex && !x.IsSelected);
+					targetMod = ViewModel.InactiveMods.FirstOrDefault(x => x.Index == nextIndex && !x.IsSelected && !x.IsClassicMod);
 				}
 				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 				ViewModel.DropHandler.Drop(dropInfo);
@@ -334,7 +334,7 @@ namespace DivinityModManager.Views
 				ViewModel.ShowAlert(text, AlertType.Info, 10);
 				canMoveSelectedMods = false;
 
-				if (targetMod != null)
+				if (targetMod != null && !targetMod.IsActive)
 				{
 					InactiveModsListView.SelectedItem = targetMod;
 				}

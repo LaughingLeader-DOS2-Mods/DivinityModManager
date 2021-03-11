@@ -102,20 +102,25 @@
 						ChildMargin="4"
 						ColumnCount="2"
 						Columns="auto,*"
-						RowCount="10"
+						RowCount="11"
 						RowHeight="*"
-						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
-						<TextBlock Text="Game Data Path" ToolTip="The path to the Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data" />
+						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+						<autogrid:AutoGrid.Resources>
+							<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
+								<Setter Property="DataContext" Value="{Binding}" />
+							</Style>
+						</autogrid:AutoGrid.Resources>
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameDataPath" />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
 							Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
-						<TextBlock Text="Game Executable Path" ToolTip="The path to the game exe, EoCApp.exe." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameExecutablePath" />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
 							Text="{Binding GameExecutablePath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
-						<TextBlock Text="Workshop Path" ToolTip="The workshop folder.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="WorkshopPath" />
 						<controls:UnfocusableTextBox
 							x:Name="WorkshopPathTextbox"
 							VerticalAlignment="Center"
@@ -123,21 +128,23 @@
 							LostFocus="WorkshopPathTextbox_LostFocus"
 							Text="{Binding WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
 							TextAlignment="Left" />
-						<TextBlock Text="Saved Load Orders Path" ToolTip="The folder to save and load load orders to." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="LoadOrderPath" />
 						<controls:UnfocusableTextBox
 							VerticalAlignment="Center"
 							Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
 							TextAlignment="Left" />
-						<TextBlock Text="Enable Story Log" ToolTip="When launching the game, enable the story log." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameStoryLogEnabled" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Auto Add Missing Dependencies When Exporting" ToolTip="Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutoAddDependenciesWhenExporting" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutoAddDependenciesWhenExporting, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Enable Automatic Updates" ToolTip="Automatically check for updates when the program starts." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="CheckForUpdates" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding CheckForUpdates, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Disable Missing Mod Warnings" ToolTip="If a load order is missing mods, no warnings will be displayed." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="DisableMissingModWarnings" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableMissingModWarnings, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock Text="Disable Checking for Steam Workshop Tags" ToolTip="The mod manager will try and find mod tags from the workshop by default." />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="DisableWorkshopTagCheck" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="ShiftListFocusOnSwap" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ShiftListFocusOnSwap, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="On Game Launch" />
 						<ComboBox
 							DisplayMemberPath="Description"
@@ -408,8 +415,8 @@
 						Rows="auto,auto,auto,auto">
 						<TextBlock
 							x:Name="DebugModeTextBlock"
-							Text="Enable Developer Mode"
-							ToolTip="This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options." />
+							behavior:TextBlockSettingsEntryAttributeBehavior.Target="DebugModeEnabled"
+							DataContext="{Binding}" />
 						<CheckBox
 							VerticalAlignment="Center"
 							IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"

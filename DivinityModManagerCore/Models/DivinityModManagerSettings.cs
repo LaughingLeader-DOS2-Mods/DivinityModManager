@@ -22,119 +22,42 @@ namespace DivinityModManager.Models
 	[DataContract]
 	public class DivinityModManagerSettings : ReactiveObject, IDisposable
 	{
-		private string gameDataPath = "";
+		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods.&#x0a;Example: Divinity Original Sin 2/DefEd/Data")]
 
-		[DataMember]
-		public string GameDataPath
-		{
-			get => gameDataPath;
-			set 
-			{
-				if (value != gameDataPath) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref gameDataPath, value);
-			}
-		}
+		[DataMember] [Reactive]
+		public string GameDataPath { get; set; } = "";
 
-		private string gameExecutable = "";
+		[SettingsEntry("Game Executable Path", "The path to the game exe, EoCApp.exe.")]
 
-		[DataMember]
-		public string GameExecutablePath
-		{
-			get => gameExecutable;
-			set
-			{
-				if (value != gameExecutable) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref gameExecutable, value);
-			}
-		}
+		[DataMember] [Reactive]
+		public string GameExecutablePath { get; set; } = "";
 
 		//Old. Will be read, but not written.
 		[DataMember]
 		public string DOS2DEGameExecutable { set => GameExecutablePath = value; }
 
-		private bool gameStoryLogEnabled = false;
+		[SettingsEntry("Enable Story Log", "When launching the game, enable the Osiris story log (osiris.log).")]
+		[DataMember] [Reactive] public bool GameStoryLogEnabled { get; set; } = false;
 
-		[DataMember]
-		public bool GameStoryLogEnabled
-		{
-			get => gameStoryLogEnabled;
-			set
-			{
-				if (value != gameStoryLogEnabled) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref gameStoryLogEnabled, value);
-			}
-		}
 
-		private string workshopPath = "";
+		[SettingsEntry("Workshop Path", "The workshop folder.&#x0a;Used for detecting mod updates and new mods to be copied into the local mods folder.")]
+		[DataMember] [Reactive] public string WorkshopPath { get; set; } = "";
 
-		[DataMember]
-		public string WorkshopPath
-		{
-			get => workshopPath;
-			set 
-			{
-				if (value != workshopPath) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref workshopPath, value);
-			}
-		}
 
-		private string loadOrderPath = "Orders";
+		[SettingsEntry("Saved Load Orders Path", "The folder containing mod load orders.")]
+		[DataMember] [Reactive] public string LoadOrderPath { get; set; } = "Orders";
 
-		[DataMember]
-		public string LoadOrderPath
-		{
-			get => loadOrderPath;
-			set 
-			{
-				if (value != loadOrderPath) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref loadOrderPath, value); 
-			}
-		}
 
-		private bool logEnabled = false;
+		[SettingsEntry("Enable Internal Log", "Enable the log for the mod manager.")]
+		[DataMember] [Reactive] public bool LogEnabled { get; set; } = false;
 
-		[DataMember]
-		public bool LogEnabled
-		{
-			get => logEnabled;
-			set
-			{
-				if (value != logEnabled) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref logEnabled, value);
-			}
-		}
+		[SettingsEntry("Auto Add Missing Dependencies When Exporting", "Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order.")]
+		[DataMember] [Reactive] public bool AutoAddDependenciesWhenExporting { get; set; } = true;
 
-		private bool autoAddDependenciesWhenExporting = true;
+		[SettingsEntry("Enable Automatic Updates", "Automatically check for updates when the program starts.")]
+		[DataMember] [Reactive] public bool CheckForUpdates { get; set; } = true;
 
-		[DataMember]
-		public bool AutoAddDependenciesWhenExporting
-		{
-			get => autoAddDependenciesWhenExporting;
-			set
-			{
-				if (value != autoAddDependenciesWhenExporting) CanSaveSettings = true;
-				this.RaiseAndSetIfChanged(ref autoAddDependenciesWhenExporting, value);
-			}
-		}
-
-		private bool checkForUpdates = true;
-
-		[DataMember]
-		public bool CheckForUpdates
-		{
-			get => checkForUpdates;
-			set { this.RaiseAndSetIfChanged(ref checkForUpdates, value); }
-		}
-
-		private long lastUpdateCheck = -1;
-
-		[DataMember]
-		public long LastUpdateCheck
-		{
-			get => lastUpdateCheck;
-			set { this.RaiseAndSetIfChanged(ref lastUpdateCheck, value); }
-		}
-
+		[DataMember][Reactive] public long LastUpdateCheck { get; set; } = -1;
 		private string lastOrder = "";
 
 		[DataMember]
@@ -171,6 +94,9 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref darkThemeEnabled, value); }
 		}
 
+		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well.")]
+		[DataMember] [Reactive] public bool ShiftListFocusOnSwap { get; set; } = false;
+
 		private OsiExtenderSettings extenderSettings;
 
 		[DataMember]
@@ -203,36 +129,13 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
 		}
 
-		private bool disableMissingModWarnings = false;
+		[SettingsEntry("Disable Missing Mod Warnings", "If a load order is missing mods, no warnings will be displayed.")]
+		[DataMember] [Reactive] public bool DisableMissingModWarnings { get; set; } = false;
 
-		[DataMember]
-		public bool DisableMissingModWarnings
-		{
-			get => disableMissingModWarnings;
-			set { this.RaiseAndSetIfChanged(ref disableMissingModWarnings, value); }
-		}
+		[SettingsEntry("Disable Checking for Steam Workshop Tags", "The mod manager will try and find mod tags from the workshop by default.")]
+		[DataMember] [Reactive] public bool DisableWorkshopTagCheck { get; set; } = false;
 
-		private bool disableWorkshopTagCheck = false;
-
-		[DataMember]
-		public bool DisableWorkshopTagCheck
-		{
-			get => disableWorkshopTagCheck;
-			set { this.RaiseAndSetIfChanged(ref disableWorkshopTagCheck, value); }
-		}
-
-		private bool exportDefaultExtenderSettings = false;
-
-		[DataMember]
-		public bool ExportDefaultExtenderSettings
-		{
-			get => exportDefaultExtenderSettings;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref exportDefaultExtenderSettings, value);
-			}
-
-		}
+		[DataMember] [Reactive] public bool ExportDefaultExtenderSettings { get; set; } = false;
 
 		//Not saved for now
 
@@ -246,6 +149,7 @@ namespace DivinityModManager.Models
 
 		private bool debugModeEnabled = false;
 
+		[SettingsEntry("Enable Developer Mode", "This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options.")]
 		[DataMember]
 		public bool DebugModeEnabled
 		{
@@ -255,7 +159,6 @@ namespace DivinityModManager.Models
 				this.RaiseAndSetIfChanged(ref debugModeEnabled, value);
 				DivinityApp.DeveloperModeEnabled = value;
 			}
-
 		}
 
 		private string gameLaunchParams = "";

@@ -1582,7 +1582,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error reading 'OsiToolsConfig.json': {ex.ToString()}");
+				DivinityApp.Log($"Error reading 'OsiToolsConfig.json': {ex}");
 			}
 			return null;
 		}

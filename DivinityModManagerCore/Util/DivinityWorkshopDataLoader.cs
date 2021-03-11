@@ -107,7 +107,7 @@ namespace DivinityModManager.Util
 						}
 					}
 
-					DivinityApp.Log($"Successfully loaded workshop data for {totalLoaded} mods.");
+					DivinityApp.Log($"Successfully loaded workshop mod data.");
 				}
 				else
 				{

@@ -3,6 +3,8 @@ using DivinityModManager.Util.ScreenReader;
 
 using DynamicData.Binding;
 
+using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,6 +13,9 @@ using System.Reflection;
 using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Concurrency;
 
 namespace DivinityModManager.Controls
 {
@@ -34,55 +39,76 @@ namespace DivinityModManager.Controls
 		{
 			bool handled = false;
 
-			if ((Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt && ItemsSource is ObservableCollectionExtended<DivinityModData> list)
+			DivinityApp.Log($"IsKeyboardFocused({IsKeyboardFocused}) IsKeyboardFocusWithin({IsKeyboardFocusWithin}) IsFocused({IsFocused})");
+
+			if (SelectedItem != null && (Keyboard.Modifiers & ModifierKeys.Alt) == ModifierKeys.Alt && ItemsSource is ObservableCollectionExtended<DivinityModData> list)
 			{
-				switch (e.SystemKey)
+				var key = e.SystemKey;
+				switch (key)
 				{
 					case Key.Up:
 					case Key.Down:
+					case Key.Right:
+					case Key.Left:
 						var selectedItems = list.Where(x => x.IsSelected).ToList();
-						var lastIndexes = selectedItems.ToDictionary(m => m.UUID, m => m.Index);
+						var lastIndexes = selectedItems.ToDictionary(m => m.UUID, m => list.IndexOf(m));
 						int nextIndex = -1;
+						int targetScrollIndex = -1;
 
-						if (e.SystemKey == Key.Up)
+						if (key == Key.Up)
 						{
-							for(int i = 0; i < selectedItems.Count; i++)
+							for (int i = 0; i < selectedItems.Count; i++)
 							{
 								var m = selectedItems[i];
-								nextIndex = Math.Max(0, m.Index - 1);
+								int modIndex = list.IndexOf(m);
+								nextIndex = Math.Max(0, modIndex - 1);
 								var existingMod = list.ElementAtOrDefault(nextIndex);
 								if (existingMod != null && existingMod.IsSelected)
 								{
 									var lastIndex = lastIndexes[existingMod.UUID];
-									if (existingMod.Index == lastIndex)
+									if (list.IndexOf(existingMod) == lastIndex)
 									{
 										// The selected mod at the target index
 										// didn't get moved up/down, so skip moving the next one
 										continue;
 									}
 								}
-								list.Move(m.Index, nextIndex);
+								if (targetScrollIndex == -1) targetScrollIndex = nextIndex;
+								list.Move(modIndex, nextIndex);
 							}
 						}
-						else
+						else if(key == Key.Down)
 						{
 							for (int i = selectedItems.Count - 1; i >= 0; i--)
 							{
 								var m = selectedItems[i];
-								nextIndex = Math.Min(list.Count - 1, m.Index + 1);
+								int modIndex = list.IndexOf(m);
+								nextIndex = Math.Min(list.Count - 1, modIndex + 1);
 								var existingMod = list.ElementAtOrDefault(nextIndex);
 								if (existingMod != null && existingMod.IsSelected)
 								{
 									var lastIndex = lastIndexes[existingMod.UUID];
-									if (existingMod.Index == lastIndex)
+									if (list.IndexOf(existingMod) == lastIndex)
 									{
 										continue;
 									}
 								}
-								list.Move(m.Index, nextIndex);
+								if (targetScrollIndex == -1) targetScrollIndex = nextIndex;
+								list.Move(modIndex, nextIndex);
 							}
 						}
-						
+
+						if(targetScrollIndex > -1)
+						{
+							var item = Items.GetItemAt(targetScrollIndex);
+							ScrollIntoView(item);
+							//RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ =>
+							//{
+							//	var item = Items.GetItemAt(targetScrollIndex);
+							//	ScrollIntoView(item);
+							//});
+						}
+
 						handled = true;
 						break;
 				}

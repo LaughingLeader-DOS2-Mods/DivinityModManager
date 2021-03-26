@@ -2,8 +2,13 @@
 using DivinityModManager.Util;
 using DynamicData;
 using DynamicData.Binding;
+
+using LSLib.LS;
+
 using Newtonsoft.Json;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -26,7 +31,7 @@ namespace DivinityModManager.Models
 	}
 
 	[JsonObject(MemberSerialization.OptIn)]
-	[ScreenReaderHelper(Name="DisplayName", HelpText = "HelpText")]
+	[ScreenReaderHelper(Name = "DisplayName", HelpText = "HelpText")]
 	public class DivinityModData : ReactiveObject, IDivinityModData, ISelectable
 	{
 		private int index = -1;
@@ -43,10 +48,10 @@ namespace DivinityModManager.Models
 		public string FilePath
 		{
 			get => filePath;
-			set 
-			{ 
-				this.RaiseAndSetIfChanged(ref filePath, value); 
-				if(!String.IsNullOrWhiteSpace(filePath))
+			set
+			{
+				this.RaiseAndSetIfChanged(ref filePath, value);
+				if (!String.IsNullOrWhiteSpace(filePath))
 				{
 					FileName = Path.GetFileName(FilePath);
 				}
@@ -70,13 +75,13 @@ namespace DivinityModManager.Models
 		public string Name
 		{
 			get => name;
-			set 
-			{ 
+			set
+			{
 				this.RaiseAndSetIfChanged(ref name, value);
 			}
 		}
 
-		[JsonProperty(PropertyName="FileName")]
+		[JsonProperty(PropertyName = "FileName")]
 		public string OutputPakName
 		{
 			get
@@ -119,7 +124,7 @@ namespace DivinityModManager.Models
 			set
 			{
 				headerVersion = value;
-				if(headerVersion != null)
+				if (headerVersion != null)
 				{
 					IsClassicMod = headerVersion.Minor == 1;
 					if (IsClassicMod)
@@ -148,15 +153,20 @@ namespace DivinityModManager.Models
 		public bool IsClassicMod
 		{
 			get => isClassicMod;
-			set 
-			{ 
-				this.RaiseAndSetIfChanged(ref isClassicMod, value); 
-				if(value)
+			set
+			{
+				this.RaiseAndSetIfChanged(ref isClassicMod, value);
+				if (value)
 				{
 					CanDrag = false;
 				}
 			}
 		}
+
+		#region GameMaster Support
+		[Reactive] public bool IsGameMasterCampaign {get; set;} = false;
+		public Resource Resource { get; set; }
+		#endregion
 
 		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
 

@@ -16,6 +16,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Newtonsoft.Json.Linq;
 using DynamicData;
+using DivinityModManager.Extensions;
 
 namespace DivinityModManager.Util
 {
@@ -729,6 +730,208 @@ namespace DivinityModManager.Util
 				}
 			}
 			return mods;
+		}
+
+		private static string GetNodeAttribute(Node node, string key, string defaultValue)
+		{
+			if(node.Attributes.TryGetValue(key, out var att))
+			{
+				if(att.Type == NodeAttribute.DataType.DT_TranslatedString)
+				{
+					TranslatedString ts = (TranslatedString)att.Value;
+					return ts.Value;
+				}
+				return att.Value.ToString();
+			}
+			return defaultValue;
+		}
+
+		private static T GetNodeAttribute<T>(Node node, string key, T defaultValue)
+		{
+			if(node.Attributes.TryGetValue(key, out var att))
+			{
+				return (T)Convert.ChangeType(att.Value, typeof(T));
+			}
+			return defaultValue;
+		}
+		private static DivinityModData ParseGameMasterCampaignMetaFile(Resource meta)
+		{
+			try
+			{
+				meta.PrintDebug();
+				int headerMajor = 3;
+				int headerMinor = 6;
+				int headerRevision = 0;
+				int headerBuild = 0;
+
+				int.TryParse(meta.Metadata.MajorVersion.ToString(), out headerMajor);
+				int.TryParse(meta.Metadata.MinorVersion.ToString(), out headerMinor);
+				int.TryParse(meta.Metadata.Revision.ToString(), out headerRevision);
+				int.TryParse(meta.Metadata.BuildNumber.ToString(), out headerBuild);
+
+				if (meta.TryFindNode("ModuleInfo", out var moduleInfoNode))
+				{
+					var uuid = moduleInfoNode.Attributes.First(x => x.Key == "UUID").Value.Value.ToString();
+					var name = moduleInfoNode.Attributes.First(x => x.Key == "Name").Value.Value.ToString();
+					var description = moduleInfoNode.Attributes.First(x => x.Key == "Description").Value.Value.ToString();
+					var author = moduleInfoNode.Attributes.First(x => x.Key == "Author").Value.Value.ToString();
+					/*
+					if (DivinityApp.MODS_GiftBag.Any(x => x.UUID == uuid))
+					{
+						name = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DisplayName", name));
+						description = UnescapeXml(GetAttributeWithId(moduleInfoNode, "DescriptionName", description));
+						author = "Larian Studios";
+					}
+					*/
+
+					DivinityModData modData = new DivinityModData()
+					{
+						UUID = GetNodeAttribute(moduleInfoNode, "UUID", ""),
+						Name = GetNodeAttribute(moduleInfoNode, "Name", ""),
+						Author = GetNodeAttribute(moduleInfoNode, "Author", ""),
+						Version = DivinityModVersion.FromInt(SafeConvertString(GetNodeAttribute(moduleInfoNode, "Version", ""))),
+						Folder = GetNodeAttribute(moduleInfoNode, "Folder", ""),
+						Description = GetNodeAttribute(moduleInfoNode, "Description", ""),
+						MD5 = GetNodeAttribute(moduleInfoNode, "MD5", ""),
+						Type = GetNodeAttribute(moduleInfoNode, "Type", ""),
+						TagsText = GetNodeAttribute(moduleInfoNode, "Tags", ""),
+						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
+					};
+					if (!String.IsNullOrEmpty(modData.TagsText))
+					{
+						var tags = modData.TagsText.Split(';');
+						modData.AddTags(tags);
+					}
+					modData.UpdateDisplayName();
+
+					if (meta.TryFindNode("Dependencies", out var dependenciesNode))
+					{
+						foreach(var container in dependenciesNode.Children)
+						{
+							foreach (var node in container.Value)
+							{
+								DivinityModDependencyData dependencyMod = new DivinityModDependencyData()
+								{
+									UUID = GetNodeAttribute(node, "UUID", ""),
+									Name = GetNodeAttribute(node, "Name", ""),
+									Version = DivinityModVersion.FromInt(SafeConvertString(GetNodeAttribute(node, "Version", ""))),
+									Folder = GetNodeAttribute(node, "Folder", ""),
+									MD5 = GetNodeAttribute(node, "MD5", "")
+								};
+								//DivinityApp.LogMessage($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
+								if (dependencyMod.UUID != "")
+								{
+									modData.Dependencies.Add(dependencyMod);
+								}
+							}
+						}
+					}
+					modData.UpdateDependencyInfo();
+
+					if (moduleInfoNode.Children.TryGetValue("PublishVersion", out var publishVersionList))
+					{
+						var publishVersion = DivinityModVersion.FromInt(SafeConvertString(GetNodeAttribute(publishVersionList.First(), "Version", "")));
+						modData.PublishVersion = publishVersion;
+					}
+
+					if (moduleInfoNode.Children.TryGetValue("TargetModes", out var targetModesList))
+					{
+						foreach (var node in targetModesList)
+						{
+							var target = GetNodeAttribute(node, "Object", "");
+							if (!String.IsNullOrEmpty(target))
+							{
+								modData.Modes.Add(target);
+							}
+						}
+						modData.Targets = string.Join(", ", modData.Modes);
+					}
+
+					modData.IsGameMasterCampaign = true;
+					modData.Resource = meta;
+
+					return modData;
+				}
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine($"Error parsing meta.lsx: {ex}");
+			}
+			return null;
+		}
+
+		private static bool CanProcessGMMetaFile(FileSystemEntryInfo f)
+		{
+			return f.FileName.Equals("meta.lsf", StringComparison.OrdinalIgnoreCase);
+		}
+
+		private static DirectoryEnumerationFilters GMMetaFilters = new DirectoryEnumerationFilters()
+		{
+			InclusionFilter = CanProcessGMMetaFile
+		};
+
+		public static async Task<List<DivinityModData>> LoadGameMasterDataAsync(string folderPath, CancellationToken? token = null)
+		{
+			List<DivinityModData> campaignEntries = new List<DivinityModData>();
+
+			if (Directory.Exists(folderPath))
+			{
+				List<string> campaignMetaFiles = new List<string>();
+				try
+				{
+					var files = Directory.EnumerateFiles(folderPath, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive, GMMetaFilters);
+					if (files != null)
+					{
+						campaignMetaFiles.AddRange(files);
+					}
+				}
+				catch (Exception ex)
+				{
+					DivinityApp.Log($"Error enumerating GM campaigns folder '{folderPath}':\n{ex}");
+				}
+
+				DivinityApp.Log("Campaign meta files: " + campaignMetaFiles.Count());
+				foreach (var metaPath in campaignMetaFiles)
+				{
+					try
+					{
+						if (token.HasValue && token.Value.IsCancellationRequested)
+						{
+							return campaignEntries;
+						}
+						DivinityModData campaignData = null;
+						using (var fileStream = new System.IO.FileStream(metaPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read, 4096, true))
+						{
+							//var result = new byte[fileStream.Length];
+							//await fileStream.ReadAsync(result, 0, (int)fileStream.Length);
+							using (var reader = new LSFReader(fileStream))
+							{
+								campaignData = ParseGameMasterCampaignMetaFile(reader.Read());
+							}
+						}
+
+						if (campaignData != null)
+						{
+							campaignData.FilePath = metaPath;
+							try
+							{
+								campaignData.LastModified = File.GetChangeTime(metaPath);
+								campaignData.LastUpdated = campaignData.LastModified;
+							}
+							catch (PlatformNotSupportedException ex)
+							{
+								DivinityApp.Log($"Error getting pak last modified date for '{metaPath}':\n{ex}");
+							}
+							campaignEntries.Add(campaignData);
+						}
+					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error loading meta file '{metaPath}':\n{ex}");
+					}
+				}
+			}
+			return campaignEntries;
 		}
 
 		private static Node FindResourceNode(Node node, string attribute, string matchVal)

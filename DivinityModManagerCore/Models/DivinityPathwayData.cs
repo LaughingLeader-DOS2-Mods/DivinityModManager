@@ -1,6 +1,8 @@
 ﻿using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Extensions;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,45 +13,15 @@ namespace DivinityModManager.Models
 {
 	public class DivinityPathwayData : ReactiveObject
 	{
-		private string installPath = "";
+		[Reactive] public string InstallPath { get; set; } = "";
+		[Reactive] public string LarianDocumentsFolder { get; set; } = "";
+		[Reactive] public string DocumentsModsPath { get; set; } = "";
+		[Reactive] public string DocumentsProfilesPath { get; set; } = "";
+		[Reactive] public string LastSaveFilePath { get; set; } = "";
+		[Reactive] public string DocumentsGMCampaignsPath { get; set; } = "";
 
-		public string InstallPath
-		{
-			get => installPath;
-			set { this.RaiseAndSetIfChanged(ref installPath, value); }
-		}
-
-		private string larianDocumentsFolder = "";
-
-		public string LarianDocumentsFolder
-		{
-			get => larianDocumentsFolder;
-			set { this.RaiseAndSetIfChanged(ref larianDocumentsFolder, value); }
-		}
-
-		private string documentsModsPath = "";
-
-		public string DocumentsModsPath
-		{
-			get => documentsModsPath;
-			set { this.RaiseAndSetIfChanged(ref documentsModsPath, value); }
-		}
-
-		private string documentsProfilesPath = "";
-
-		public string DocumentsProfilesPath
-		{
-			get => documentsProfilesPath;
-			set { this.RaiseAndSetIfChanged(ref documentsProfilesPath, value); }
-		}
-
-		private string lastSaveFilePath = "";
-
-		public string LastSaveFilePath
-		{
-			get => lastSaveFilePath;
-			set { this.RaiseAndSetIfChanged(ref lastSaveFilePath, value); }
-		}
+		[Reactive] public string OsirisExtenderLatestReleaseUrl { get; set; } = "";
+		[Reactive] public string OsirisExtenderLatestReleaseVersion { get; set; } = "";
 
 		public string OsirisExtenderSettingsFile(DivinityModManagerSettings settings)
 		{
@@ -59,15 +31,5 @@ namespace DivinityModManager.Models
 			}
 			return "";
 		}
-
-		private string osirisExtenderLatestReleaseUrl = "";
-
-		public string OsirisExtenderLatestReleaseUrl
-		{
-			get => osirisExtenderLatestReleaseUrl;
-			set { this.RaiseAndSetIfChanged(ref osirisExtenderLatestReleaseUrl, value); }
-		}
-
-		public string OsirisExtenderLatestReleaseVersion { get; set; } = "";
 	}
 }

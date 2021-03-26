@@ -16,6 +16,7 @@ using System.Windows.Input;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Concurrency;
+using System.Windows;
 
 namespace DivinityModManager.Controls
 {

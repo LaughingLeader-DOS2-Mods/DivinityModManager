@@ -377,10 +377,10 @@
 		<Setter Property="ItemContainerStyle" Value="{StaticResource DivinityModDataListItem}" />
 		<Setter Property="Template">
 			<Setter.Value>
-				<ControlTemplate TargetType="{x:Type ListView}">
+				<ControlTemplate TargetType="{x:Type controls:ModListView}">
 					<Grid>
 						<ScrollViewer Name="ListScrollViewer" Style="{DynamicResource {x:Static GridView.GridViewScrollViewerStyleKey}}">
-							<ItemsPresenter />
+							<ItemsPresenter x:Name="ListItemsPresenter" />
 						</ScrollViewer>
 						<Rectangle
 							Name="DisabledRect"
@@ -398,7 +398,7 @@
 						</Trigger>
 						<MultiDataTrigger>
 							<MultiDataTrigger.Conditions>
-								<Condition Binding="{Binding ElementName=ListScrollViewer, Path=IsKeyboardFocusWithin}" Value="False" />
+								<Condition Binding="{Binding Path=IsKeyboardFocusWithin, RelativeSource={RelativeSource Self}}" Value="False" />
 								<Condition Binding="{Binding Path=(dapp:DivinityApp.IsKeyboardNavigating)}" Value="True" />
 							</MultiDataTrigger.Conditions>
 							<MultiDataTrigger.Setters>

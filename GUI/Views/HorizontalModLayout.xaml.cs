@@ -541,6 +541,17 @@ namespace DivinityModManager.Views
 
 		private void HorizontalModLayout_KeyDown(object sender, KeyEventArgs e)
 		{
+			var key = e.Key != Key.System ? e.Key : e.SystemKey;
+			switch (key)
+			{
+				case Key.Up:
+				case Key.Right:
+				case Key.Down:
+				case Key.Left:
+					DivinityApp.IsKeyboardNavigating = true;
+					break;
+			}
+
 			var keyIsDown = e.Key == ViewModel.Keys.Confirm.Key && (ViewModel.Keys.Confirm.Modifiers == ModifierKeys.None || Keyboard.Modifiers.HasFlag(ViewModel.Keys.Confirm.Modifiers));
 			if(!keyIsDown && (Keyboard.IsKeyDown(Key.LeftAlt) || Keyboard.IsKeyDown(Key.RightAlt)))
 			{

@@ -408,10 +408,10 @@ namespace DivinityModManager.ViewModels
 		#region GameMaster Support
 		[Reactive] public bool GameMasterModeEnabled { get; private set; } = false;
 
-		protected SourceList<DivinityModData> gameMasterCampaigns = new SourceList<DivinityModData>();
+		protected SourceList<DivinityGameMasterCampaign> gameMasterCampaigns = new SourceList<DivinityGameMasterCampaign>();
 
-		private readonly ReadOnlyObservableCollection<DivinityModData> gameMasterCampaignsData;
-		public ReadOnlyObservableCollection<DivinityModData> GameMasterCampaigns => gameMasterCampaignsData;
+		private readonly ReadOnlyObservableCollection<DivinityGameMasterCampaign> gameMasterCampaignsData;
+		public ReadOnlyObservableCollection<DivinityGameMasterCampaign> GameMasterCampaigns => gameMasterCampaignsData;
 
 		private int selectedGameMasterCampaignIndex = 0;
 
@@ -425,18 +425,18 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private readonly ObservableAsPropertyHelper<DivinityModData> selectedGameMasterCampaign;
-		public DivinityModData SelectedGameMasterCampaign => selectedGameMasterCampaign.Value;
+		private readonly ObservableAsPropertyHelper<DivinityGameMasterCampaign> selectedGameMasterCampaign;
+		public DivinityGameMasterCampaign SelectedGameMasterCampaign => selectedGameMasterCampaign.Value;
 		public ICommand OpenGameMasterCampaignInFileExplorerCommand { get; private set; }
 		public ICommand CopyGameMasterCampaignPathToClipboardCommand { get; private set; }
 
-		private void SetLoadedGMCampaigns(IEnumerable<DivinityModData> data)
+		private void SetLoadedGMCampaigns(IEnumerable<DivinityGameMasterCampaign> data)
 		{
 			gameMasterCampaigns.Clear();
 			gameMasterCampaigns.AddRange(data);
 		}
 
-		public bool LoadGameMasterCampaignModOrder(DivinityModData campaign, List<DivinityMissingModData> missingModsFromProfileOrder = null)
+		public bool LoadGameMasterCampaignModOrder(DivinityGameMasterCampaign campaign, List<DivinityMissingModData> missingModsFromProfileOrder = null)
 		{
 			if (campaign.Dependencies == null || campaign.Dependencies.Count == 0) return false;
 
@@ -454,7 +454,7 @@ namespace DivinityModManager.ViewModels
 			}
 
 			int index = 0;
-			foreach (var entry in campaign.Dependencies.Items)
+			foreach (var entry in campaign.Dependencies)
 			{
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null && !mod.IsClassicMod)
@@ -1183,7 +1183,6 @@ namespace DivinityModManager.ViewModels
 				{
 					break;
 				}
-				workshopMod.UpdateDisplayName();
 				DivinityModData pakMod = mods.Items.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
 
 				if (pakMod != null)
@@ -1502,9 +1501,9 @@ namespace DivinityModManager.ViewModels
 			return finalMods;
 		}
 
-		public async Task<List<DivinityModData>> LoadGameMasterCampaignsAsync(double taskStepAmount = 0.1d)
+		public async Task<List<DivinityGameMasterCampaign>> LoadGameMasterCampaignsAsync(double taskStepAmount = 0.1d)
 		{
-			List<DivinityModData> data = null;
+			List<DivinityGameMasterCampaign> data = null;
 
 			var cancelTokenSource = GetCancellationToken(int.MaxValue);
 
@@ -1526,7 +1525,6 @@ namespace DivinityModManager.ViewModels
 			DivinityApp.Log($"Loaded '{data.Count}' GM campaigns.");
 			return data;
 		}
-
 
 		public bool ModIsAvailable(IDivinityModData divinityModData)
 		{
@@ -3961,10 +3959,9 @@ Directory the zip will be extracted to:
 							}
 							if (dict.TryGetValue("Tags", out var tags))
 							{
-								mod.TagsText = (string)tags;
-								if(!String.IsNullOrEmpty(mod.TagsText))
+								if(tags is string tagsText && !String.IsNullOrWhiteSpace(tagsText))
 								{
-									mod.AddTags(mod.TagsText.Split(';'));
+									mod.AddTags(tagsText.Split(';'));
 								}
 							}
 							DivinityApp.IgnoredMods.Add(mod);
@@ -4065,7 +4062,6 @@ Directory the zip will be extracted to:
 					foreach (var m in Mods)
 					{
 						m.DisplayFileForName = Settings.DisplayFileNames;
-						m.UpdateDisplayName();
 					}
 				}
 				else
@@ -4073,7 +4069,6 @@ Directory the zip will be extracted to:
 					foreach (var m in Mods)
 					{
 						m.DisplayFileForName = !m.DisplayFileForName;
-						m.UpdateDisplayName();
 					}
 				}
 			});
@@ -4265,10 +4260,10 @@ Directory the zip will be extracted to:
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 
-			modsConnecton.WhenAnyPropertyChanged("Name", "IsClassicMod").Subscribe((mod) =>
-			{
-				mod.UpdateDisplayName();
-			});
+			//modsConnecton.WhenAnyPropertyChanged("Name", "IsClassicMod").Subscribe((mod) =>
+			//{
+			//	mod.UpdateDisplayName();
+			//});
 
 			modsConnecton.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 
@@ -4369,7 +4364,7 @@ Directory the zip will be extracted to:
 			gameMasterCampaigns.Connect().Bind(out gameMasterCampaignsData).Subscribe();
 			this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => GameMasterCampaigns[SelectedGameMasterCampaignIndex]).
-				ToProperty(this, x => x.SelectedGameMasterCampaign, out selectedGameMasterCampaign).DisposeWith(this.Disposables);
+				ToProperty(this, nameof(SelectedGameMasterCampaign)).DisposeWith(this.Disposables);
 
 			//var gmCampaignChanged = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count, (index, count) => index >= 0 && count > 0 && index < count).
 			//	Where(b => b == true).

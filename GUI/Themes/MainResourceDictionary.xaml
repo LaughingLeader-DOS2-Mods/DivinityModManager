@@ -514,7 +514,6 @@
 			</Style>
 		</controls:AutomationTooltip.Style>
 		<StackPanel
-			x:Name="DescTooltipStackPanel"
 			MaxWidth="700"
 			Background="Transparent"
 			Orientation="Vertical">
@@ -592,7 +591,6 @@
 					ItemsSource="{Binding DisplayedDependencies}" />
 			</StackPanel>
 			<StackPanel
-				x:Name="TagsStackPanel"
 				Margin="2"
 				DataContext="{Binding}"
 				Orientation="Vertical">
@@ -657,7 +655,6 @@
 		DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}"
 		Style="{StaticResource AdventureModTooltipStyle}">
 		<StackPanel
-			x:Name="DescTooltipStackPanel"
 			MaxWidth="700"
 			Background="Transparent"
 			Orientation="Vertical">
@@ -731,7 +728,6 @@
 					ItemsSource="{Binding Dependencies}" />
 			</StackPanel>
 			<StackPanel
-				x:Name="TagsStackPanel"
 				Margin="2"
 				DataContext="{Binding}"
 				Orientation="Vertical">
@@ -795,7 +791,6 @@
 		DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}"
 		Style="{StaticResource AdventureModTooltipStyle}">
 		<StackPanel
-			x:Name="DescTooltipStackPanel"
 			MaxWidth="700"
 			Background="Transparent"
 			Orientation="Vertical">
@@ -837,7 +832,7 @@
 			<TextBlock
 				Margin="2"
 				TextWrapping="Wrap"
-				Visibility="{Binding Author, Converter={StaticResource StringNotEmptyToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Created by " /><Run
+				Visibility="{Binding AuthorVisibility}"><Run Text="Created by " /><Run
 					FontWeight="Bold"
 					Foreground="#3da2fa"
 					Text="{Binding Author}" />
@@ -854,9 +849,8 @@
 				Margin="2"
 				Text="{Binding Description}"
 				TextWrapping="Wrap"
-				Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+				Visibility="{Binding DescriptionVisibility}" />
 			<StackPanel
-				x:Name="TagsStackPanel"
 				Margin="2"
 				DataContext="{Binding}"
 				Orientation="Vertical">

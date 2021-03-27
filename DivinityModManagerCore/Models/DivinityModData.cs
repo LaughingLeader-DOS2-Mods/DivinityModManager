@@ -15,73 +15,20 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Input;
 
 namespace DivinityModManager.Models
 {
-	public interface IDivinityModData
-	{
-		string UUID { get; set; }
-		string Name { get; set; }
-		string Folder { get; set; }
-		string MD5 { get; set; }
-		DivinityModVersion Version { get; set; }
-	}
-
-	[JsonObject(MemberSerialization.OptIn)]
+	[DataContract]
 	[ScreenReaderHelper(Name = "DisplayName", HelpText = "HelpText")]
-	public class DivinityModData : ReactiveObject, IDivinityModData, ISelectable
+	public class DivinityModData : DivinityBaseModData, ISelectable
 	{
-		private int index = -1;
+		[Reactive] [DataMember] public int Index { get; set; } = -1;
 
-		[JsonProperty]
-		public int Index
-		{
-			get => index;
-			set { this.RaiseAndSetIfChanged(ref index, value); }
-		}
-
-		private string filePath;
-
-		public string FilePath
-		{
-			get => filePath;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref filePath, value);
-				if (!String.IsNullOrWhiteSpace(filePath))
-				{
-					FileName = Path.GetFileName(FilePath);
-				}
-			}
-		}
-
-		private string filename;
-
-		public string FileName
-		{
-			get => filename;
-			set { this.RaiseAndSetIfChanged(ref filename, value); }
-		}
-
-		[JsonProperty]
-		public string UUID { get; set; }
-
-		private string name;
-
-		[JsonProperty]
-		public string Name
-		{
-			get => name;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref name, value);
-			}
-		}
-
-		[JsonProperty(PropertyName = "FileName")]
+		[DataMember(Name = "FileName")]
 		public string OutputPakName
 		{
 			get
@@ -97,76 +44,13 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		[JsonProperty] public string Description { get; set; }
-		[JsonProperty] public string Author { get; set; }
-		[JsonProperty] public DivinityModVersion Version { get; set; }
-		public DivinityModVersion PublishVersion { get; set; } = new DivinityModVersion();
-		public string Folder { get; set; }
-		public string MD5 { get; set; }
-		[JsonProperty] public string Type { get; set; }
-		[JsonProperty] public List<string> Modes { get; set; } = new List<string>();
+		[Reactive] [DataMember] public string Type { get; set; }
+		[DataMember] public List<string> Modes { get; set; } = new List<string>();
 
-		[JsonProperty] public string Targets { get; set; }
-		public DateTime LastModified { get; set; }
+		[DataMember] public string Targets { get; set; }
+		[Reactive] public DateTime LastUpdated { get; set; }
 
-		private DateTime lastUpdated;
-
-		public DateTime LastUpdated
-		{
-			get => lastUpdated;
-			set { this.RaiseAndSetIfChanged(ref lastUpdated, value); }
-		}
-
-		private DivinityModVersion headerVersion;
-		public DivinityModVersion HeaderVersion
-		{
-			get => headerVersion;
-			set
-			{
-				headerVersion = value;
-				if (headerVersion != null)
-				{
-					IsClassicMod = headerVersion.Minor == 1;
-					if (IsClassicMod)
-					{
-						DivinityApp.Log($"Found a Classic mod: {Name}");
-					}
-				}
-			}
-		}
-
-		private string tagsText = "";
-
-		public string TagsText
-		{
-			get => tagsText;
-			set { this.RaiseAndSetIfChanged(ref tagsText, value); }
-		}
-
-		public List<string> Tags { get; set; } = new List<string>();
-
-		public bool IsHidden { get; set; } = false;
-		public bool IsLarianMod { get; set; } = false;
-
-		private bool isClassicMod = false;
-
-		public bool IsClassicMod
-		{
-			get => isClassicMod;
-			set
-			{
-				this.RaiseAndSetIfChanged(ref isClassicMod, value);
-				if (value)
-				{
-					CanDrag = false;
-				}
-			}
-		}
-
-		#region GameMaster Support
-		[Reactive] public bool IsGameMasterCampaign {get; set;} = false;
-		public Resource Resource { get; set; }
-		#endregion
+		[Reactive] public bool IsClassicMod { get; set; } = false;
 
 		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
 
@@ -238,52 +122,30 @@ namespace DivinityModManager.Models
 			this.RaisePropertyChanged("OsirisExtenderSupportToolTipText");
 		}
 
-		[JsonProperty] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
-		[JsonProperty] public SourceList<DivinityModDependencyData> Dependencies { get; set; } = new SourceList<DivinityModDependencyData>();
+		[DataMember] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
+		[DataMember] public SourceList<DivinityModDependencyData> Dependencies { get; set; } = new SourceList<DivinityModDependencyData>();
 
 		protected ReadOnlyObservableCollection<DivinityModDependencyData> displayedDependencies;
 		public ReadOnlyObservableCollection<DivinityModDependencyData> DisplayedDependencies => displayedDependencies;
 
-		private string displayName;
-
-		public string DisplayName
-		{
-			get => displayName;
-			set { this.RaiseAndSetIfChanged(ref displayName, value); }
-		}
-
-		public void UpdateDisplayName()
+		public override string GetDisplayName()
 		{
 			if (DisplayFileForName)
 			{
 				if (!IsEditorMod)
 				{
-					DisplayName = Path.GetFileName(FilePath);
+					return FileName;
 				}
 				else
 				{
-					DisplayName = Folder + " [Editor Project]";
+					return Folder + " [Editor Project]";
 				}
 			}
 			else
 			{
-				DisplayName = !IsClassicMod ? Name : Name + " [Classic]";
+				return !IsClassicMod ? Name : Name + " [Classic]";
 			}
 		}
-
-		private bool displayFileForName = false;
-
-		public bool DisplayFileForName
-		{
-			get => displayFileForName;
-			set 
-			{ 
-				this.RaiseAndSetIfChanged(ref displayFileForName, value);
-			}
-		}
-
-		private readonly ObservableAsPropertyHelper<bool> hasDescription;
-		public bool HasDescription => hasDescription.Value;
 
 		private bool hasToolTip = true;
 
@@ -305,36 +167,11 @@ namespace DivinityModManager.Models
 
 		public bool HasDependencies => hasDependencies.Value;
 
-		private bool hasOsirisExtenderSettings = false;
+		[Reactive] public bool HasOsirisExtenderSettings { get; set; } = false;
 
-		public bool HasOsirisExtenderSettings
-		{
-			get => hasOsirisExtenderSettings;
-			set { this.RaiseAndSetIfChanged(ref hasOsirisExtenderSettings, value); }
-		}
+		[Reactive] public bool IsEditorMod { get; set; } = false;
 
-		private bool isEditorMod = false;
-
-		public bool IsEditorMod
-		{
-			get => isEditorMod;
-			set { this.RaiseAndSetIfChanged(ref isEditorMod, value); }
-		}
-
-		private bool isActive = false;
-
-		public bool IsActive
-		{
-			get => isActive;
-			set 
-			{ 
-				this.RaiseAndSetIfChanged(ref isActive, value);
-				if(IsClassicMod)
-				{
-					CanDrag = false;
-				}
-			}
-		}
+		[Reactive] public bool IsActive { get; set; } = false;
 
 		private bool isSelected = false;
 
@@ -351,34 +188,9 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private bool canDrag = true;
+		[Reactive] public bool CanDrag { get; set; } = true;
 
-		public bool CanDrag
-		{
-			get => canDrag;
-			private set { this.RaiseAndSetIfChanged(ref canDrag, value); }
-		}
-
-		private Visibility visibility = Visibility.Visible;
-
-		public Visibility Visibility
-		{
-			get => visibility;
-			set { this.RaiseAndSetIfChanged(ref visibility, value); }
-		}
-
-		private bool developerMode = false;
-
-		public bool DeveloperMode
-		{
-			get => developerMode;
-			private set { this.RaiseAndSetIfChanged(ref developerMode, value); }
-		}
-
-		public void UpdateDependencyInfo()
-		{
-			HasToolTip = HasDescription | HasDependencies;
-		}
+		[Reactive] public bool DeveloperMode { get; set; } = false;
 
 		private DivinityModWorkshopData workshopData = new DivinityModWorkshopData();
 
@@ -409,50 +221,9 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public void AddTag(string tag)
-		{
-			if(!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
-			{
-				Tags.Add(tag);
-				Tags.Sort((x, y) => string.Compare(x, y, true));
-			}
-		}
-
-		public void AddTags(IEnumerable<string> tags)
-		{
-			if(tags == null)
-			{
-				return;
-			}
-			bool addedTags = false;
-			foreach(var tag in tags)
-			{
-				if (!String.IsNullOrWhiteSpace(tag) && !Tags.Contains(tag))
-				{
-					Tags.Add(tag);
-					addedTags = true;
-				}
-			}
-			Tags.Sort((x, y) => string.Compare(x, y, true));
-			if(addedTags)
-			{
-				this.RaisePropertyChanged("Tags");
-			}
-		}
-
 		public override string ToString()
 		{
 			return $"Name({Name}) Version({Version?.Version}) Author({Author}) UUID({UUID})";
-		}
-
-		public string HelpText
-		{
-			get
-			{
-				//return $"by {Author} Version {Version?.Version} Last Updated {LastUpdated.ToLongDateString()}";
-				//return $"by {Author} Version {Version?.Version}";
-				return "";
-			}
 		}
 
 		public DivinityLoadOrderEntry ToOrderEntry()
@@ -476,13 +247,34 @@ namespace DivinityModManager.Models
 			};
 		}
 
-		public DivinityModData(bool isBaseGameMod = false)
+		public DivinityModData(bool isBaseGameMod = false) : base()
 		{
+			this.WhenAnyValue(x => x.Description, x => x.HasDependencies).Select(x => !String.IsNullOrWhiteSpace(x.Item1) || x.Item2).ToProperty(this, nameof(HasToolTip));
+
 			var connection = this.Dependencies.Connect();
 			connection.Bind(out displayedDependencies).DisposeMany().Subscribe();
 			connection.Count().Select(x => x > 0).ToProperty(this, o => o.HasDependencies, out hasDependencies);
-			this.WhenAnyValue(x => x.Description).Select(x => !String.IsNullOrWhiteSpace(x)).ToProperty(this, o => o.HasDescription, out hasDescription);
+			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod).Subscribe((b) =>
+			{
+				if(b.Item1)
+				{
+					//Allow removing a classic mod from the active list.
+					CanDrag = true;
+				}
+				else
+				{
+					CanDrag = !b.Item2;
+				}
+			});
 
+			this.WhenAnyValue(x => x.HeaderVersion).Select(x => x != null && x.Minor == 1).Subscribe((b) =>
+			{
+				if(b)
+				{
+					IsClassicMod = true;
+				}
+			});
+			
 			if (!isBaseGameMod)
 			{
 				var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));

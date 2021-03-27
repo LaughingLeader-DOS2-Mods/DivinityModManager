@@ -187,15 +187,14 @@ namespace DivinityModManager.Util
 						Description = description,
 						MD5 = GetAttributeWithId(moduleInfoNode, "MD5", ""),
 						Type = GetAttributeWithId(moduleInfoNode, "Type", ""),
-						TagsText = GetAttributeWithId(moduleInfoNode, "Tags", ""),
 						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
-					if(!String.IsNullOrEmpty(modData.TagsText))
+					var tagsText = GetAttributeWithId(moduleInfoNode, "Tags", "");
+					if (!String.IsNullOrWhiteSpace(tagsText))
 					{
-						var tags = modData.TagsText.Split(';');
+						var tags = tagsText.Split(';');
 						modData.AddTags(tags);
 					}
-					modData.UpdateDisplayName();
 					//var dependenciesNodes = xDoc.SelectNodes("//node[@id='ModuleShortDesc']");
 					var dependenciesNodes = xDoc.Descendants("node").Where(n => n.Attribute("id")?.Value == "ModuleShortDesc");
 
@@ -218,7 +217,6 @@ namespace DivinityModManager.Util
 							}
 						}
 					}
-					modData.UpdateDependencyInfo();
 
 					var publishVersionNode = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "PublishVersion").FirstOrDefault();
 					if (publishVersionNode != null)
@@ -754,11 +752,11 @@ namespace DivinityModManager.Util
 			}
 			return defaultValue;
 		}
-		private static DivinityModData ParseGameMasterCampaignMetaFile(Resource meta)
+		private static DivinityGameMasterCampaign ParseGameMasterCampaignMetaFile(Resource meta)
 		{
 			try
 			{
-				//meta.PrintDebug();
+				meta.PrintDebug();
 				int headerMajor = 3;
 				int headerMinor = 6;
 				int headerRevision = 0;
@@ -784,7 +782,7 @@ namespace DivinityModManager.Util
 					}
 					*/
 
-					DivinityModData modData = new DivinityModData()
+					DivinityGameMasterCampaign data = new DivinityGameMasterCampaign()
 					{
 						UUID = GetNodeAttribute(moduleInfoNode, "UUID", ""),
 						Name = GetNodeAttribute(moduleInfoNode, "Name", ""),
@@ -793,16 +791,14 @@ namespace DivinityModManager.Util
 						Folder = GetNodeAttribute(moduleInfoNode, "Folder", ""),
 						Description = GetNodeAttribute(moduleInfoNode, "Description", ""),
 						MD5 = GetNodeAttribute(moduleInfoNode, "MD5", ""),
-						Type = GetNodeAttribute(moduleInfoNode, "Type", ""),
-						TagsText = GetNodeAttribute(moduleInfoNode, "Tags", ""),
 						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
-					if (!String.IsNullOrEmpty(modData.TagsText))
+					var tagsText = GetNodeAttribute(moduleInfoNode, "Tags", "");
+					if (!String.IsNullOrWhiteSpace(tagsText))
 					{
-						var tags = modData.TagsText.Split(';');
-						modData.AddTags(tags);
+						var tags = tagsText.Split(';');
+						data.AddTags(tags);
 					}
-					modData.UpdateDisplayName();
 
 					if (meta.TryFindNode("Dependencies", out var dependenciesNode))
 					{
@@ -821,36 +817,34 @@ namespace DivinityModManager.Util
 								//DivinityApp.LogMessage($"Added dependency to {modData.Name} - {dependencyMod.ToString()}");
 								if (dependencyMod.UUID != "")
 								{
-									modData.Dependencies.Add(dependencyMod);
+									data.Dependencies.Add(dependencyMod);
 								}
 							}
 						}
 					}
-					modData.UpdateDependencyInfo();
 
 					if (moduleInfoNode.Children.TryGetValue("PublishVersion", out var publishVersionList))
 					{
 						var publishVersion = DivinityModVersion.FromInt(SafeConvertString(GetNodeAttribute(publishVersionList.First(), "Version", "")));
-						modData.PublishVersion = publishVersion;
+						data.PublishVersion = publishVersion;
 					}
 
-					if (moduleInfoNode.Children.TryGetValue("TargetModes", out var targetModesList))
-					{
-						foreach (var node in targetModesList)
-						{
-							var target = GetNodeAttribute(node, "Object", "");
-							if (!String.IsNullOrEmpty(target))
-							{
-								modData.Modes.Add(target);
-							}
-						}
-						modData.Targets = string.Join(", ", modData.Modes);
-					}
+					//if (moduleInfoNode.Children.TryGetValue("TargetModes", out var targetModesList))
+					//{
+					//	foreach (var node in targetModesList)
+					//	{
+					//		var target = GetNodeAttribute(node, "Object", "");
+					//		if (!String.IsNullOrEmpty(target))
+					//		{
+					//			data.Modes.Add(target);
+					//		}
+					//	}
+					//	data.Targets = string.Join(", ", data.Modes);
+					//}
 
-					modData.IsGameMasterCampaign = true;
-					modData.Resource = meta;
+					data.MetaResource = meta;
 
-					return modData;
+					return data;
 				}
 			}
 			catch (Exception ex)
@@ -870,9 +864,9 @@ namespace DivinityModManager.Util
 			InclusionFilter = CanProcessGMMetaFile
 		};
 
-		public static async Task<List<DivinityModData>> LoadGameMasterDataAsync(string folderPath, CancellationToken? token = null)
+		public static async Task<List<DivinityGameMasterCampaign>> LoadGameMasterDataAsync(string folderPath, CancellationToken? token = null)
 		{
-			List<DivinityModData> campaignEntries = new List<DivinityModData>();
+			List<DivinityGameMasterCampaign> campaignEntries = new List<DivinityGameMasterCampaign>();
 
 			if (Directory.Exists(folderPath))
 			{
@@ -899,7 +893,7 @@ namespace DivinityModManager.Util
 						{
 							return campaignEntries;
 						}
-						DivinityModData campaignData = null;
+						DivinityGameMasterCampaign campaignData = null;
 						using (var fileStream = new System.IO.FileStream(metaPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read, 4096, true))
 						{
 							//var result = new byte[fileStream.Length];
@@ -916,7 +910,6 @@ namespace DivinityModManager.Util
 							try
 							{
 								campaignData.LastModified = File.GetChangeTime(metaPath);
-								campaignData.LastUpdated = campaignData.LastModified;
 							}
 							catch (PlatformNotSupportedException ex)
 							{

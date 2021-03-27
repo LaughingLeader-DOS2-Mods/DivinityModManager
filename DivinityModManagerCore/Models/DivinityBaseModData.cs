@@ -113,10 +113,10 @@ namespace DivinityModManager.Models
 
 		public DivinityBaseModData()
 		{
-			this.WhenAnyValue(x => x.FilePath).Select(f => Path.GetFileName(f)).ToProperty(this, nameof(FileName));
-			this.WhenAnyValue(x => x.Name, x => x.FilePath, x => x.DisplayFileForName).Select(x => this.GetDisplayName()).ToProperty(this, nameof(DisplayName));
-			this.WhenAnyValue(x => x.Description).Select(x => !String.IsNullOrWhiteSpace(x) ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(DescriptionVisibility));
-			this.WhenAnyValue(x => x.Author).Select(x => !String.IsNullOrWhiteSpace(x) ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(AuthorVisibility));
+			fileName = this.WhenAnyValue(x => x.FilePath).Select(f => Path.GetFileName(f)).ToProperty(this, nameof(FileName));
+			displayName = this.WhenAnyValue(x => x.Name, x => x.FilePath, x => x.DisplayFileForName).Select(x => this.GetDisplayName()).ToProperty(this, nameof(DisplayName));
+			descriptionVisibility = this.WhenAnyValue(x => x.Description).Select(x => !String.IsNullOrWhiteSpace(x) ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(DescriptionVisibility));
+			authorVisibility = this.WhenAnyValue(x => x.Author).Select(x => !String.IsNullOrWhiteSpace(x) ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(AuthorVisibility));
 		}
 	}
 }

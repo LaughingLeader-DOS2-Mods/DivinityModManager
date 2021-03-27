@@ -147,21 +147,9 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private bool hasToolTip = true;
+		private ObservableAsPropertyHelper<bool> hasToolTip;
 
-		public bool HasToolTip
-		{
-			get
-			{
-				// If a screen reader is active, don't bother making tooltips for the mod item entry
-				if(DivinityApp.IsScreenReaderActive())
-				{
-					return false;
-				}
-				return hasToolTip;
-			}
-			set { this.RaiseAndSetIfChanged(ref hasToolTip, value); }
-		}
+		public bool HasToolTip => hasToolTip.Value;
 
 		private ObservableAsPropertyHelper<bool> hasDependencies;
 
@@ -249,11 +237,9 @@ namespace DivinityModManager.Models
 
 		public DivinityModData(bool isBaseGameMod = false) : base()
 		{
-			this.WhenAnyValue(x => x.Description, x => x.HasDependencies).Select(x => !String.IsNullOrWhiteSpace(x.Item1) || x.Item2).ToProperty(this, nameof(HasToolTip));
-
 			var connection = this.Dependencies.Connect();
 			connection.Bind(out displayedDependencies).DisposeMany().Subscribe();
-			connection.Count().Select(x => x > 0).ToProperty(this, o => o.HasDependencies, out hasDependencies);
+			hasDependencies = connection.Count().Select(x => x > 0).StartWith(false).ToProperty(this, nameof(HasDependencies));
 			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod).Subscribe((b) =>
 			{
 				if(b.Item1)
@@ -285,6 +271,10 @@ namespace DivinityModManager.Models
 				this.IsHidden = true;
 				this.IsLarianMod = true;
 			}
+
+			// If a screen reader is active, don't bother making tooltips for the mod item entry
+			hasToolTip = this.WhenAnyValue(x => x.Description, x => x.HasDependencies).
+				Select(x => !DivinityApp.IsScreenReaderActive() && (!String.IsNullOrWhiteSpace(x.Item1) || x.Item2)).StartWith(true).ToProperty(this, nameof(HasToolTip));
 		}
 	}
 }

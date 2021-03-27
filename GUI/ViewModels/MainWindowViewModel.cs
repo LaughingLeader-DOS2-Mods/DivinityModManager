@@ -192,10 +192,11 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public DivinityLoadOrder SelectedModOrder
-		{
-			get => ModOrderList.ElementAtOrDefault(SelectedModOrderIndex);
-		}
+		private ObservableAsPropertyHelper<DivinityLoadOrder> selectedModOrder;
+		public DivinityLoadOrder SelectedModOrder => selectedModOrder.Value;
+
+		private ObservableAsPropertyHelper<bool> isBaseLoadOrder;
+		public bool IsBaseLoadOrder => isBaseLoadOrder.Value;
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
 
@@ -2581,66 +2582,127 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<bool> ExportLoadOrderAsync()
 		{
-			if (SelectedProfile != null && SelectedModOrder != null)
+			if(!GameMasterModeEnabled)
 			{
-				string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-				var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder,
-					mods.Items, Settings.AutoAddDependenciesWhenExporting, SelectedAdventureMod);
-
-				if (result)
+				if (SelectedProfile != null && SelectedModOrder != null)
 				{
-					await Observable.Start(() => {
-						ShowAlert($"Exported load order to '{outputPath}'", AlertType.Success, 15);
+					string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
+					var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder,
+						mods.Items, Settings.AutoAddDependenciesWhenExporting, SelectedAdventureMod);
 
-						if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
-						{
-							DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
-						}
-						else
-						{
-							DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
-						}
+					if (result)
+					{
+						await Observable.Start(() => {
+							ShowAlert($"Exported load order to '{outputPath}'", AlertType.Success, 15);
 
-						//Update "Current" order
-						if (SelectedModOrder.Name != "Current")
-						{
-							var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
-							currentOrder.SetOrder(SelectedModOrder.Order);
-						}
+							if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+							{
+								DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
+							}
+							else
+							{
+								DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
+							}
 
-						List<string> orderList = new List<string>();
-						if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
-						orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
+							//Update "Current" order
+							if (SelectedModOrder.Name != "Current")
+							{
+								var currentOrder = this.ModOrderList.FirstOrDefault(x => x.Name == "Current");
+								currentOrder.SetOrder(SelectedModOrder.Order);
+							}
 
-						SelectedProfile.ModOrder.Clear();
-						SelectedProfile.ModOrder.AddRange(orderList);
-						SelectedProfile.ActiveMods.Clear();
-						SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
-						DisplayMissingMods(SelectedModOrder);
+							List<string> orderList = new List<string>();
+							if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
+							orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
 
-						return Unit.Default;
-					}, RxApp.MainThreadScheduler);
-					return true;
+							SelectedProfile.ModOrder.Clear();
+							SelectedProfile.ModOrder.AddRange(orderList);
+							SelectedProfile.ActiveMods.Clear();
+							SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
+							DisplayMissingMods(SelectedModOrder);
+
+							return Unit.Default;
+						}, RxApp.MainThreadScheduler);
+						return true;
+					}
+					else
+					{
+						await Observable.Start(() => {
+							string msg = $"Problem exporting load order to '{outputPath}'";
+							ShowAlert(msg, AlertType.Danger);
+							view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+							view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+							view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+							return Unit.Default;
+						}, RxApp.MainThreadScheduler);
+					}
 				}
 				else
 				{
 					await Observable.Start(() => {
-						string msg = $"Problem exporting load order to '{outputPath}'";
-						ShowAlert(msg, AlertType.Danger);
-						view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-						view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-						view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+						ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
 						return Unit.Default;
 					}, RxApp.MainThreadScheduler);
 				}
 			}
 			else
 			{
-				await Observable.Start(() => {
-					ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
-					return Unit.Default;
-				}, RxApp.MainThreadScheduler);
+				if(SelectedGameMasterCampaign != null)
+				{
+					var orderMods = SelectedModOrder.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID));
+					if (SelectedGameMasterCampaign.Export(orderMods))
+					{
+						await Observable.Start(() => {
+							ShowAlert($"Exported load order to '{SelectedGameMasterCampaign.FilePath}'", AlertType.Success, 15);
+
+							if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+							{
+								DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
+							}
+							else
+							{
+								DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
+							}
+
+							//Update the campaign's saved dependencies
+							SelectedGameMasterCampaign.Dependencies.Clear();
+							SelectedGameMasterCampaign.Dependencies.AddRange(orderMods.Select(x => DivinityModDependencyData.FromModData(x)));
+
+							List<string> orderList = new List<string>();
+							if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
+							orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
+
+							SelectedProfile.ModOrder.Clear();
+							SelectedProfile.ModOrder.AddRange(orderList);
+							SelectedProfile.ActiveMods.Clear();
+							SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
+							DisplayMissingMods(SelectedModOrder);
+
+							return Unit.Default;
+						}, RxApp.MainThreadScheduler);
+						return true;
+					}
+					else
+					{
+						await Observable.Start(() => {
+							string msg = $"Problem exporting load order to '{SelectedGameMasterCampaign.FilePath}'";
+							ShowAlert(msg, AlertType.Danger);
+							view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+							view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
+							view.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+							return Unit.Default;
+						}, RxApp.MainThreadScheduler);
+					}
+				}
+				else
+				{
+					await Observable.Start(() => {
+						ShowAlert("SelectedGameMasterCampaign is null! Failed to export mod order.", AlertType.Danger);
+						return Unit.Default;
+					}, RxApp.MainThreadScheduler);
+				}
 			}
+			
 			return false;
 		}
 
@@ -4164,6 +4226,9 @@ Directory the zip will be extracted to:
 				}
 			});
 
+			selectedModOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex).Select(x => ModOrderList.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedModOrder));
+			isBaseLoadOrder = this.WhenAnyValue(x => x.SelectedModOrder).Select(x => x.Name == "Current").ToProperty(this, nameof(IsBaseLoadOrder));
+
 			//Throttle in case the index changes quickly in a short timespan
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
 				if (!this.Refreshing && SelectedModOrderIndex > -1)
@@ -4362,9 +4427,8 @@ Directory the zip will be extracted to:
 
 			#region GameMaster Support
 			gameMasterCampaigns.Connect().Bind(out gameMasterCampaignsData).Subscribe();
-			this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count, (index, count) => index >= 0 && count > 0 && index < count).
-				Where(b => b == true).Select(x => GameMasterCampaigns[SelectedGameMasterCampaignIndex]).
-				ToProperty(this, nameof(SelectedGameMasterCampaign)).DisposeWith(this.Disposables);
+			//this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
+			selectedGameMasterCampaign = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
 
 			//var gmCampaignChanged = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count, (index, count) => index >= 0 && count > 0 && index < count).
 			//	Where(b => b == true).

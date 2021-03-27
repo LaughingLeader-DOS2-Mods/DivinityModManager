@@ -161,15 +161,9 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private string gameLaunchParams = "";
+		[Reactive] [DataMember] public string GameLaunchParams { get; set; }
 
-		[DataMember]
-		public string GameLaunchParams
-		{
-			get => gameLaunchParams;
-			set { this.RaiseAndSetIfChanged(ref gameLaunchParams, value); }
-		}
-
+		[Reactive] [DataMember] public bool GameMasterModeEnabled { get; set; } = false;
 		[Reactive] public bool ExtenderTabIsVisible { get; set; } = false;
 
 		[Reactive] public bool KeybindingsTabIsVisible { get; set; } = false;

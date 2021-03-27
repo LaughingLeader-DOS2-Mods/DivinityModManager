@@ -23,6 +23,7 @@
 	Title="{Binding Title}"
 	Width="1600"
 	Height="800"
+	d:DataContext="{d:DesignInstance Type=vm:MainWindowViewModel}"
 	FocusManager.FocusedElement="{Binding ElementName=MainContentPresenter}"
 	TitleBarBackground="#4e38c9"
 	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
@@ -376,6 +377,17 @@
 								<controls:AutoGrayableImage Source="{StaticResource ZipFileAsImage}" />
 							</Button>
 							<Rectangle />
+							<TextBlock
+								Padding="2,0,2,0"
+								Text="GM"
+								ToolTip="{Binding ElementName=ToggleGMCheckbox, Path=ToolTip}" />
+							<CheckBox
+								x:Name="ToggleGMCheckbox"
+								HorizontalAlignment="Center"
+								VerticalAlignment="Center"
+								IsChecked="{Binding Settings.GameMasterModeEnabled, Mode=TwoWay}"
+								ToolTip="Enable Game Master Campaign Selection" />
+							<Rectangle />
 							<StackPanel Orientation="Horizontal">
 								<TextBlock Text="Campaign" />
 								<ComboBox
@@ -390,7 +402,8 @@
 									ItemsSource="{Binding AdventureMods}"
 									SelectedIndex="{Binding SelectedAdventureModIndex}"
 									Tag="{Binding SelectedAdventureMod, NotifyOnSourceUpdated=True}"
-									ToolTip="{StaticResource AdventureModTooltip}">
+									ToolTip="{StaticResource AdventureModTooltip}"
+									Visibility="{Binding AdventureModBoxVisibility, FallbackValue=Visible}">
 									<ComboBox.ContextMenu>
 										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 											<MenuItem
@@ -404,7 +417,6 @@
 										</ContextMenu>
 									</ComboBox.ContextMenu>
 								</ComboBox>
-								<TextBlock Text="{Binding SelectedAdventureMod.Name}" />
 								<ComboBox
 									x:Name="GameMasterCampaignComboBox"
 									Grid.Column="1"
@@ -419,7 +431,7 @@
 									SelectedIndex="{Binding SelectedGameMasterCampaignIndex}"
 									Tag="{Binding SelectedGameMasterCampaign}"
 									ToolTip="{StaticResource GMCampaignTooltip}"
-									Visibility="{Binding GameMasterModeEnabled, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+									Visibility="{Binding GameMasterModeVisibility, FallbackValue=Collapsed}">
 									<ComboBox.ContextMenu>
 										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 											<MenuItem

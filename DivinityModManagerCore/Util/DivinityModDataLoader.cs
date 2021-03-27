@@ -756,7 +756,6 @@ namespace DivinityModManager.Util
 		{
 			try
 			{
-				meta.PrintDebug();
 				int headerMajor = 3;
 				int headerMinor = 6;
 				int headerRevision = 0;

@@ -107,6 +107,9 @@ namespace DivinityModManager.ViewModels
 		private readonly ObservableAsPropertyHelper<DivinityModData> selectedAdventureMod;
 		public DivinityModData SelectedAdventureMod => selectedAdventureMod.Value;
 
+		private readonly ObservableAsPropertyHelper<Visibility> adventureModBoxVisibility;
+		public Visibility AdventureModBoxVisibility => adventureModBoxVisibility.Value;
+
 		protected ReadOnlyObservableCollection<DivinityModData> selectedPakMods;
 		public ReadOnlyObservableCollection<DivinityModData> SelectedPakMods => selectedPakMods;
 
@@ -129,7 +132,7 @@ namespace DivinityModManager.ViewModels
 
 		public AppSettings AppSettings => appSettings;
 
-		public DivinityModManagerSettings Settings { get; set; }
+		[Reactive] public DivinityModManagerSettings Settings { get; set; }
 
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
@@ -407,7 +410,9 @@ namespace DivinityModManager.ViewModels
 		public EventHandler OnOrderChanged { get; set; }
 
 		#region GameMaster Support
-		[Reactive] public bool GameMasterModeEnabled { get; private set; } = false;
+
+		private readonly ObservableAsPropertyHelper<Visibility> gameMasterModeVisibility;
+		public Visibility GameMasterModeVisibility => gameMasterModeVisibility.Value;
 
 		protected SourceList<DivinityGameMasterCampaign> gameMasterCampaigns = new SourceList<DivinityGameMasterCampaign>();
 
@@ -2582,7 +2587,7 @@ namespace DivinityModManager.ViewModels
 
 		private async Task<bool> ExportLoadOrderAsync()
 		{
-			if(!GameMasterModeEnabled)
+			if(!Settings.GameMasterModeEnabled)
 			{
 				if (SelectedProfile != null && SelectedModOrder != null)
 				{
@@ -4205,9 +4210,8 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count, (index, count) => index >= 0 && count > 0 && index < count).Where(b => b == true).
-				Select(x => Profiles.ElementAtOrDefault(SelectedProfileIndex));
-			profileChanged.ToProperty(this, x => x.SelectedProfile, out selectedprofile).DisposeWith(this.Disposables);
+			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count).Select(x => Profiles.ElementAtOrDefault(x.Item1));
+			selectedprofile = profileChanged.ToProperty(this, nameof(SelectedProfile)).DisposeWith(this.Disposables);
 
 			profileChanged.Subscribe((profile) =>
 			{
@@ -4226,8 +4230,9 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			selectedModOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex).Select(x => ModOrderList.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedModOrder));
-			isBaseLoadOrder = this.WhenAnyValue(x => x.SelectedModOrder).Select(x => x.Name == "Current").ToProperty(this, nameof(IsBaseLoadOrder));
+			selectedModOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count).
+				Select(x => ModOrderList.ElementAtOrDefault(x.Item1)).ToProperty(this, nameof(SelectedModOrder));
+			isBaseLoadOrder = this.WhenAnyValue(x => x.SelectedModOrder).Select(x => x != null && x.Name == "Current").ToProperty(this, nameof(IsBaseLoadOrder));
 
 			//Throttle in case the index changes quickly in a short timespan
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
@@ -4290,7 +4295,7 @@ Directory the zip will be extracted to:
 						SelectedProfile.ActiveMods.Insert(0, SelectedAdventureMod.ToProfileModData());
 					}
 				}
-				GameMasterModeEnabled = SelectedAdventureMod != null && SelectedAdventureMod.UUID == DivinityApp.GAMEMASTER_UUID;
+				//GameMasterModeEnabled = SelectedAdventureMod != null && SelectedAdventureMod.UUID == DivinityApp.GAMEMASTER_UUID;
 			});
 
 			OpenAdventureModInFileExplorerCommand = ReactiveCommand.Create<string>((path) =>
@@ -4425,6 +4430,10 @@ Directory the zip will be extracted to:
 				}
 			});
 
+			var gmModeChanged = this.WhenAnyValue(x => x.Settings.GameMasterModeEnabled);
+			adventureModBoxVisibility = gmModeChanged.Select(x => !x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(AdventureModBoxVisibility));
+			gameMasterModeVisibility = gmModeChanged.Select(x => x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(GameMasterModeVisibility));
+
 			#region GameMaster Support
 			gameMasterCampaigns.Connect().Bind(out gameMasterCampaignsData).Subscribe();
 			//this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
@@ -4441,7 +4450,7 @@ Directory the zip will be extracted to:
 					{
 						if (LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign))
 						{
-							DivinityApp.Log($"Successfully loaded GM campaign order {SelectedModOrder.Name}.");
+							DivinityApp.Log($"Successfully loaded GM campaign order {SelectedGameMasterCampaign.Name}.");
 						}
 						else
 						{

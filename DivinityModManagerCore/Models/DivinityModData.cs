@@ -282,13 +282,8 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private bool hasDescription = false;
-
-		public bool HasDescription
-		{
-			get => hasDescription;
-			set { this.RaiseAndSetIfChanged(ref hasDescription, value); }
-		}
+		private readonly ObservableAsPropertyHelper<bool> hasDescription;
+		public bool HasDescription => hasDescription.Value;
 
 		private bool hasToolTip = true;
 
@@ -306,13 +301,9 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref hasToolTip, value); }
 		}
 
-		private bool hasDependencies = false;
+		private ObservableAsPropertyHelper<bool> hasDependencies;
 
-		public bool HasDependencies
-		{
-			get => hasDependencies;
-			set { this.RaiseAndSetIfChanged(ref hasDependencies, value); }
-		}
+		public bool HasDependencies => hasDependencies.Value;
 
 		private bool hasOsirisExtenderSettings = false;
 
@@ -386,16 +377,6 @@ namespace DivinityModManager.Models
 
 		public void UpdateDependencyInfo()
 		{
-			HasDescription = !String.IsNullOrWhiteSpace(Description);
-			if (Dependencies.Count > 0)
-			{
-				HasDependencies = true;
-			}
-			else
-			{
-				HasDependencies = false;
-			}
-
 			HasToolTip = HasDescription | HasDependencies;
 		}
 
@@ -497,21 +478,15 @@ namespace DivinityModManager.Models
 
 		public DivinityModData(bool isBaseGameMod = false)
 		{
-			if(!isBaseGameMod)
+			var connection = this.Dependencies.Connect();
+			connection.Bind(out displayedDependencies).DisposeMany().Subscribe();
+			connection.Count().Select(x => x > 0).ToProperty(this, o => o.HasDependencies, out hasDependencies);
+			this.WhenAnyValue(x => x.Description).Select(x => !String.IsNullOrWhiteSpace(x)).ToProperty(this, o => o.HasDescription, out hasDescription);
+
+			if (!isBaseGameMod)
 			{
 				var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
 				OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
-
-				this.Dependencies.Connect().Bind(out displayedDependencies).DisposeMany().Subscribe();
-
-				//if(DivinityApp.DependencyFilter != null)
-				//{
-				//	this.Dependencies.Connect().Filter(DivinityApp.DependencyFilter).Bind(out displayedDependencies).DisposeMany().Subscribe();
-				//}
-				//else
-				//{
-				//	this.Dependencies.Connect().Filter(x => !DivinityModDataLoader.IgnoreModDependency(x.UUID)).Bind(out displayedDependencies).DisposeMany().Subscribe();
-				//}
 			}
 			else
 			{

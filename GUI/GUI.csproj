@@ -234,6 +234,7 @@
     <Compile Include="Converters\EnumToStringConverter.cs" />
     <Compile Include="Converters\IntToVisibilityConverter.cs" />
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
+    <Compile Include="Converters\StringNotEmptyToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="Util\FocusHelper.cs" />

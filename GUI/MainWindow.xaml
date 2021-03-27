@@ -389,21 +389,22 @@
 									IsTextSearchEnabled="False"
 									ItemsSource="{Binding AdventureMods}"
 									SelectedIndex="{Binding SelectedAdventureModIndex}"
-									Tag="{Binding}"
+									Tag="{Binding SelectedAdventureMod, NotifyOnSourceUpdated=True}"
 									ToolTip="{StaticResource AdventureModTooltip}">
 									<ComboBox.ContextMenu>
 										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 											<MenuItem
-												Command="{Binding OpenAdventureModInFileExplorerCommand}"
-												CommandParameter="{Binding SelectedAdventureMod.FilePath}"
-												Header="Open Mod in File Explorer..." />
+												Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+												CommandParameter="{Binding FilePath}"
+												Header="Open Adventure Mod in File Explorer..." />
 											<MenuItem
-												Command="{Binding CopyAdventureModPathToClipboardCommand}"
-												CommandParameter="{Binding SelectedAdventureMod.FilePath}"
+												Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+												CommandParameter="{Binding FilePath}"
 												Header="Copy Mod Path to Clipboard" />
 										</ContextMenu>
 									</ComboBox.ContextMenu>
 								</ComboBox>
+								<TextBlock Text="{Binding SelectedAdventureMod.Name}" />
 								<ComboBox
 									x:Name="GameMasterCampaignComboBox"
 									Grid.Column="1"
@@ -416,18 +417,18 @@
 									IsTextSearchEnabled="False"
 									ItemsSource="{Binding GameMasterCampaigns}"
 									SelectedIndex="{Binding SelectedGameMasterCampaignIndex}"
-									Tag="{Binding}"
-									ToolTip="{StaticResource AdventureModTooltip}"
+									Tag="{Binding SelectedGameMasterCampaign}"
+									ToolTip="{StaticResource GMCampaignTooltip}"
 									Visibility="{Binding GameMasterModeEnabled, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
 									<ComboBox.ContextMenu>
 										<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 											<MenuItem
 												Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}"
-												CommandParameter="{Binding SelectedGameMasterCampaign.FilePath}"
+												CommandParameter="{Binding FilePath}"
 												Header="Open Campaign in File Explorer..." />
 											<MenuItem
-												Command="{Binding CopyPathToClipboardCommand}"
-												CommandParameter="{Binding SelectedGameMasterCampaign.FilePath}"
+												Command="{Binding Path=CopyToClipboardCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+												CommandParameter="{Binding FilePath}"
 												Header="Copy Campaign Path to Clipboard" />
 										</ContextMenu>
 									</ComboBox.ContextMenu>

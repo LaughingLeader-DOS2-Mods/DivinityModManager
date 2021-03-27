@@ -21,5 +21,17 @@ namespace DivinityModManager.Models
 		{
 			return $"Dependency|Name({Name}) UUID({UUID}) Version({Version?.Version})";
 		}
+
+		public static DivinityModDependencyData FromModData(DivinityModData m)
+		{
+			return new DivinityModDependencyData
+			{
+				Folder = m.Folder,
+				Name = m.Name,
+				UUID = m.UUID,
+				MD5 = m.MD5,
+				Version = m.Version
+			};
+		}
 	}
 }

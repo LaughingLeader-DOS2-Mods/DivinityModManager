@@ -44,20 +44,22 @@ namespace DivinityModManager.Models
 						foreach (var m in order)
 						{
 							var attributes = new Dictionary<string, NodeAttribute>()
-						{
-							{ "UUID", new NodeAttribute(NodeAttribute.DataType.DT_FixedString) {Value = m.UUID}},
-							{ "Name", new NodeAttribute(NodeAttribute.DataType.DT_FixedString) {Value = m.Name}},
-							{ "Version", new NodeAttribute(NodeAttribute.DataType.DT_Int) {Value = m.Version.VersionInt}},
-							{ "MD5", new NodeAttribute(NodeAttribute.DataType.DT_LSString) {Value = m.MD5}},
-							{ "Folder", new NodeAttribute(NodeAttribute.DataType.DT_LSWString) {Value = m.Folder}},
-						};
+							{
+								{ "UUID", new NodeAttribute(NodeAttribute.DataType.DT_FixedString) {Value = m.UUID}},
+								{ "Name", new NodeAttribute(NodeAttribute.DataType.DT_FixedString) {Value = m.Name}},
+								{ "Version", new NodeAttribute(NodeAttribute.DataType.DT_Int) {Value = m.Version.VersionInt}},
+								{ "MD5", new NodeAttribute(NodeAttribute.DataType.DT_LSString) {Value = m.MD5}},
+								{ "Folder", new NodeAttribute(NodeAttribute.DataType.DT_LSWString) {Value = m.Folder}},
+							};
 							var modNode = new Node()
 							{
 								Name = "ModuleShortDesc",
 								Parent = dependenciesNode,
-								Attributes = attributes
+								Attributes = attributes,
+								Children = new Dictionary<string, List<Node>>()
 							};
-							nodeList.Add(modNode);
+							dependenciesNode.AppendChild(modNode);
+							//nodeList.Add(modNode);
 						}
 						ResourceUtils.SaveResource(MetaResource, FilePath);
 						return true;

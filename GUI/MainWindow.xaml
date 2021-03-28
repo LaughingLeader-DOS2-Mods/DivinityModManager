@@ -385,6 +385,7 @@
 								x:Name="ToggleGMCheckbox"
 								HorizontalAlignment="Center"
 								VerticalAlignment="Center"
+								Command="{Binding SaveSettingsSilentlyCommand}"
 								IsChecked="{Binding Settings.GameMasterModeEnabled, Mode=TwoWay}"
 								ToolTip="Enable Game Master Campaign Selection" />
 							<Rectangle />

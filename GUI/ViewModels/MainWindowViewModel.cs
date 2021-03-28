@@ -397,6 +397,7 @@ namespace DivinityModManager.ViewModels
 		public ICommand CopyAdventureModPathToClipboardCommand { get; private set; }
 		public ICommand ConfirmCommand { get; set; }
 		public ICommand FocusFilterCommand { get; set; }
+		public ICommand SaveSettingsSilentlyCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 		public ReactiveCommand<object, Unit> ToggleOrderRenamingCommand { get; set; }
 
@@ -2174,6 +2175,10 @@ namespace DivinityModManager.ViewModels
 					if (nextAdventureMod != null)
 					{
 						SelectedAdventureModIndex = AdventureMods.IndexOf(nextAdventureMod);
+						if(nextAdventureMod.UUID == DivinityApp.GAMEMASTER_UUID)
+						{
+							Settings.GameMasterModeEnabled = true;
+						}
 					}
 					else
 					{
@@ -2592,8 +2597,8 @@ namespace DivinityModManager.ViewModels
 				if (SelectedProfile != null && SelectedModOrder != null)
 				{
 					string outputPath = Path.Combine(SelectedProfile.Folder, "modsettings.lsx");
-					var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, SelectedModOrder,
-						mods.Items, Settings.AutoAddDependenciesWhenExporting, SelectedAdventureMod);
+					var finalOrder = DivinityModDataLoader.BuildOutputList(SelectedModOrder.Order, mods.Items, Settings.AutoAddDependenciesWhenExporting, SelectedAdventureMod);
+					var result = await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, finalOrder);
 
 					if (result)
 					{
@@ -2654,9 +2659,14 @@ namespace DivinityModManager.ViewModels
 			{
 				if(SelectedGameMasterCampaign != null)
 				{
-					var orderMods = SelectedModOrder.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID));
-					if (SelectedGameMasterCampaign.Export(orderMods))
+					var gmAdventureMod = mods.Items.FirstOrDefault(x => x.UUID == DivinityApp.GAMEMASTER_UUID);
+					var finalOrder = DivinityModDataLoader.BuildOutputList(SelectedModOrder.Order, mods.Items, Settings.AutoAddDependenciesWhenExporting);
+					if (SelectedGameMasterCampaign.Export(finalOrder))
 					{
+						// Need to still write to modsettings.lsx
+						finalOrder.Insert(0, gmAdventureMod);
+						await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, finalOrder);
+
 						await Observable.Start(() => {
 							ShowAlert($"Exported load order to '{SelectedGameMasterCampaign.FilePath}'", AlertType.Success, 15);
 
@@ -2671,7 +2681,7 @@ namespace DivinityModManager.ViewModels
 
 							//Update the campaign's saved dependencies
 							SelectedGameMasterCampaign.Dependencies.Clear();
-							SelectedGameMasterCampaign.Dependencies.AddRange(orderMods.Select(x => DivinityModDependencyData.FromModData(x)));
+							SelectedGameMasterCampaign.Dependencies.AddRange(finalOrder.Select(x => DivinityModDependencyData.FromModData(x)));
 
 							List<string> orderList = new List<string>();
 							if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
@@ -4429,11 +4439,34 @@ Directory the zip will be extracted to:
 				}
 			});
 
+			SaveSettingsSilentlyCommand = ReactiveCommand.Create(SaveSettings);
+
+			#region GameMaster Support
+
 			var gmModeChanged = this.WhenAnyValue(x => x.Settings.GameMasterModeEnabled);
 			adventureModBoxVisibility = gmModeChanged.Select(x => !x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(AdventureModBoxVisibility));
 			gameMasterModeVisibility = gmModeChanged.Select(x => x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(GameMasterModeVisibility));
 
-			#region GameMaster Support
+			int lastSelectedAdventureModIndex = 0;
+			gmModeChanged.Subscribe((b) =>
+			{
+				//if(b)
+				//{
+				//	lastSelectedAdventureModIndex = SelectedAdventureModIndex;
+				//}
+				//else
+				//{
+				//	if(lastSelectedAdventureModIndex < AdventureMods.Count)
+				//	{
+				//		SelectedAdventureModIndex = lastSelectedAdventureModIndex;
+				//	}
+				//	else
+				//	{
+				//		SelectedAdventureModIndex = 0;
+				//	}
+				//}
+			});
+
 			gameMasterCampaigns.Connect().Bind(out gameMasterCampaignsData).Subscribe();
 			//this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
 			selectedGameMasterCampaign = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));

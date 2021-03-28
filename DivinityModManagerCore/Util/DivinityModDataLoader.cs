@@ -1452,12 +1452,12 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static async Task<bool> ExportModSettingsToFileAsync(string folder, DivinityLoadOrder order, IEnumerable<DivinityModData> allMods, bool addDependencies, DivinityModData selectedAdventure)
+		public static async Task<bool> ExportModSettingsToFileAsync(string folder, IEnumerable<DivinityModData> order)
 		{
 			if(Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
-				string contents = GenerateModSettingsFile(order.Order, allMods, addDependencies, selectedAdventure);
+				string contents = GenerateModSettingsFile(order);
 				try
 				{
 					//Lazy indentation!
@@ -1490,35 +1490,66 @@ namespace DivinityModManager.Util
 			return false;
 		}
 
-		public static string GenerateModSettingsFile(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies, DivinityModData selectedAdventure)
+		public static List<DivinityModData> GetDependencyMods(DivinityModData mod, IEnumerable<DivinityModData> allMods, IEnumerable<DivinityLoadOrderEntry> order)
 		{
-			List<string> orderList = new List<string>();
+			List<DivinityModData> mods = new List<DivinityModData>();
+			//var dependencies = mod.Dependencies.Items.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
+			foreach (var d in mod.Dependencies.Items.Where(x => !IgnoreMod(x.UUID)))
+			{
+				var dependencyModData = allMods.FirstOrDefault(x => x.UUID == d.UUID);
+				if (dependencyModData != null)
+				{
+					var dependencyMods = GetDependencyMods(dependencyModData, allMods, order);
+					if(dependencyMods.Count > 0)
+					{
+						mods.AddRange(dependencyMods);
+					}
+					if(!order.Any(x => x.UUID == dependencyModData.UUID) && !mods.Any(x => x.UUID == dependencyModData.UUID))
+					{
+						mods.Add(dependencyModData);
+					}
+				}
+			}
+			return mods;
+		}
+
+		public static List<DivinityModData> BuildOutputList(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies = true, DivinityModData selectedAdventure = null)
+		{
+			List<DivinityModData> orderList = new List<DivinityModData>();
+			if(selectedAdventure != null)
+			{
+				if (addDependencies && selectedAdventure.HasDependencies)
+				{
+					orderList.AddRange(GetDependencyMods(selectedAdventure, allMods, order));
+				}
+				orderList.Add(selectedAdventure);
+			}
+
 			foreach (var m in order.Where(x => !x.Missing))
 			{
 				var mData = allMods.FirstOrDefault(x => x.UUID == m.UUID);
-				if(mData != null)
+				if (mData != null)
 				{
 					if (addDependencies && mData.HasDependencies)
 					{
-						var dependencies = mData.Dependencies.Items.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
-						foreach (var d in dependencies)
-						{
-							if (!orderList.Any(x => x == d.UUID))
-							{
-								orderList.Add(d.UUID);
-								DivinityApp.Log($"Added missing dependency '{d.Name}' above mod '{mData.Name}'");
-							}
-						}
+						orderList.AddRange(GetDependencyMods(mData, allMods, order));
 					}
 
-					orderList.Add(mData.UUID);
+					if (!orderList.Any(x => x.UUID == mData.UUID))
+					{
+						orderList.Add(mData);
+					}
 				}
 				else
 				{
-					DivinityApp.Log($"[*ERROR*] Missing mod pak for mod in order: '{m.Name}'.");
+					DivinityApp.Log($"[*ERROR*] Missing mod for mod in order: '{m.Name}'.");
 				}
 			}
+			return orderList;
+		}
 
+		public static string GenerateModSettingsFile(IEnumerable<DivinityModData> orderList)
+		{
 			/* The ModOrder node contains the load order. DOS2 by default stores all UUIDs, even if the mod no longer exists. */
 			string modulesText = "";
 			foreach (var uuid in orderList)
@@ -1526,21 +1557,17 @@ namespace DivinityModManager.Util
 				modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, uuid) + Environment.NewLine;
 			}
 
-			/* Active mods are contained within the Mods node, and this is used for the order too. The loaded mod is always at the top. */
+			/* Active mods are contained within the Mods node, and this is used for the order too. The selected adventure mod is always at the top. */
 			string modShortDescText = "";
 
-			modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC,
-					selectedAdventure.Folder, selectedAdventure.MD5, System.Security.SecurityElement.Escape(selectedAdventure.Name), selectedAdventure.UUID, selectedAdventure.Version.VersionInt) + Environment.NewLine;
+			//modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC,
+			//		selectedAdventure.Folder, selectedAdventure.MD5, System.Security.SecurityElement.Escape(selectedAdventure.Name), selectedAdventure.UUID, selectedAdventure.Version.VersionInt) + Environment.NewLine;
 
 			/* The game using the active mod nodes as the mod order apparently, and ModOrder just for the in-game menu.*/
-			foreach (var uuid in orderList)
+			foreach (var mod in orderList)
 			{
-				var mod = allMods.FirstOrDefault(x => x.UUID == uuid);
-				if (mod != null)
-				{
-					string safeName = System.Security.SecurityElement.Escape(mod.Name);
-					modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
-				}
+				string safeName = System.Security.SecurityElement.Escape(mod.Name);
+				modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
 			}
 			return String.Format(DivinityApp.XML_MOD_SETTINGS_TEMPLATE, modulesText, modShortDescText);
 		}

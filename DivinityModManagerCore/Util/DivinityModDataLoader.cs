@@ -1550,25 +1550,21 @@ namespace DivinityModManager.Util
 
 		public static string GenerateModSettingsFile(IEnumerable<DivinityModData> orderList)
 		{
-			/* The ModOrder node contains the load order. DOS2 by default stores all UUIDs, even if the mod no longer exists. */
+			/* Active mods are contained within the "ModOrder" node.*/
 			string modulesText = "";
-			foreach (var uuid in orderList)
-			{
-				modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, uuid) + Environment.NewLine;
-			}
-
-			/* Active mods are contained within the Mods node, and this is used for the order too. The selected adventure mod is always at the top. */
+			/* The "Mods" node is used for the in-game menu it seems. The selected adventure mod is always at the top. */
 			string modShortDescText = "";
 
-			//modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC,
-			//		selectedAdventure.Folder, selectedAdventure.MD5, System.Security.SecurityElement.Escape(selectedAdventure.Name), selectedAdventure.UUID, selectedAdventure.Version.VersionInt) + Environment.NewLine;
-
-			/* The game using the active mod nodes as the mod order apparently, and ModOrder just for the in-game menu.*/
 			foreach (var mod in orderList)
 			{
-				string safeName = System.Security.SecurityElement.Escape(mod.Name);
-				modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+				if(!String.IsNullOrWhiteSpace(mod.UUID))
+				{
+					modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, mod.UUID) + Environment.NewLine;
+					string safeName = System.Security.SecurityElement.Escape(mod.Name);
+					modShortDescText += String.Format(DivinityApp.XML_MODULE_SHORT_DESC, mod.Folder, mod.MD5, safeName, mod.UUID, mod.Version.VersionInt) + Environment.NewLine;
+				}
 			}
+
 			return String.Format(DivinityApp.XML_MOD_SETTINGS_TEMPLATE, modulesText, modShortDescText);
 		}
 

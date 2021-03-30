@@ -63,6 +63,7 @@
 	<BitmapImage x:Key="DivinityEngine2" UriSource="pack://application:,,,/Resources/Icons/DivinityEngine2_64x.png" />
 	<BitmapImage x:Key="CopyToClipboardImage" UriSource="pack://application:,,,/Resources/Icons/CopyToClipboard_16x.png" />
 	<BitmapImage x:Key="RenameFileImage" UriSource="pack://application:,,,/Resources/Icons/Rename_16x.png" />
+	<BitmapImage x:Key="LoadCampaignOrderImage" UriSource="pack://application:,,,/Resources/Icons/LoadCampaignOrder_16x.png" />
 	<!--  Overrides the default context menu open animation to remove flickering.  -->
 	<PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
 	<Style
@@ -560,7 +561,7 @@
 			<TextBlock
 				Margin="2"
 				TextWrapping="Wrap"
-				Visibility="{Binding Author, Converter={StaticResource StringNotEmptyToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Created by " /><Run
+				Visibility="{Binding AuthorVisibility}"><Run Text="Created by " /><Run
 					FontWeight="Bold"
 					Foreground="#3da2fa"
 					Text="{Binding Author}" />
@@ -577,7 +578,7 @@
 				Margin="2"
 				Text="{Binding Description}"
 				TextWrapping="Wrap"
-				Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />
+				Visibility="{Binding DescriptionVisibility}" />
 			<StackPanel
 				Margin="2"
 				Orientation="Vertical"
@@ -697,7 +698,7 @@
 			<TextBlock
 				Margin="2"
 				TextWrapping="Wrap"
-				Visibility="{Binding Author, Converter={StaticResource StringNotEmptyToVisibilityConverter}, FallbackValue=Collapsed}"><Run Text="Created by " /><Run
+				Visibility="{Binding AuthorVisibility, FallbackValue=Collapsed}"><Run Text="Created by " /><Run
 					FontWeight="Bold"
 					Foreground="#3da2fa"
 					Text="{Binding Author}" />

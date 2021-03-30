@@ -431,6 +431,7 @@ namespace DivinityModManager.ViewModels
 				this.RaisePropertyChanged("SelectedGameMasterCampaign");
 			}
 		}
+		public bool UserChangedSelectedGMCampaign { get; set; } = false;
 
 		private readonly ObservableAsPropertyHelper<DivinityGameMasterCampaign> selectedGameMasterCampaign;
 		public DivinityGameMasterCampaign SelectedGameMasterCampaign => selectedGameMasterCampaign.Value;
@@ -439,107 +440,101 @@ namespace DivinityModManager.ViewModels
 
 		private void SetLoadedGMCampaigns(IEnumerable<DivinityGameMasterCampaign> data)
 		{
-			gameMasterCampaigns.Clear();
-			gameMasterCampaigns.AddRange(data);
-		}
-
-		public bool LoadGameMasterCampaignModOrder(DivinityGameMasterCampaign campaign, List<DivinityMissingModData> missingModsFromProfileOrder = null)
-		{
-			if (campaign.Dependencies == null || campaign.Dependencies.Count == 0) return false;
-
-			LoadingOrder = true;
-
-			ActiveMods.Clear();
-			InactiveMods.Clear();
-
-			DivinityApp.Log($"Loading GM campaign mod order.");
-			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
-			if (missingModsFromProfileOrder != null && missingModsFromProfileOrder.Count > 0)
+			string lastSelectedCampaignUUID = "";
+			if(UserChangedSelectedGMCampaign && SelectedGameMasterCampaign != null)
 			{
-				missingMods.AddRange(missingModsFromProfileOrder);
-				DivinityApp.Log($"Missing mods (from campaign): {String.Join(";", missingModsFromProfileOrder)}");
+				lastSelectedCampaignUUID = SelectedGameMasterCampaign.UUID;
 			}
 
-			int index = 0;
-			foreach (var entry in campaign.Dependencies)
+			gameMasterCampaigns.Clear();
+			gameMasterCampaigns.AddRange(data);
+
+			DivinityGameMasterCampaign nextSelected = null;
+
+			if(String.IsNullOrEmpty(lastSelectedCampaignUUID) || !IsInitialized)
 			{
-				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-				if (mod != null && !mod.IsClassicMod)
+				nextSelected = gameMasterCampaigns.Items.OrderByDescending(x => x.LastModified.HasValue ? x.LastModified.Value : DateTime.MinValue).FirstOrDefault();
+
+			}
+			else
+			{
+				nextSelected = gameMasterCampaigns.Items.FirstOrDefault(x => x.UUID == lastSelectedCampaignUUID);
+			}
+
+			if (nextSelected != null)
+			{
+				SelectedGameMasterCampaignIndex = gameMasterCampaigns.Items.IndexOf(nextSelected);
+			}
+			else
+			{
+				SelectedGameMasterCampaignIndex = 0;
+			}
+		}
+
+		public bool LoadGameMasterCampaignModOrder(DivinityGameMasterCampaign campaign)
+		{
+			if (campaign.Dependencies == null) return false;
+
+			var currentOrder = ModOrderList.First();
+			currentOrder.Order.Clear();
+
+			List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
+			if(campaign.Dependencies.Count > 0)
+			{
+				int index = 0;
+				foreach (var entry in campaign.Dependencies)
 				{
-					ActiveMods.Add(mod);
-					if (mod.Dependencies.Count > 0)
+					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
+					if (mod != null && !mod.IsClassicMod)
 					{
-						foreach (var dependency in mod.Dependencies.Items)
+						ActiveMods.Add(mod);
+						if (mod.Dependencies.Count > 0)
 						{
-							if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
-								!missingMods.Any(x => x.UUID == dependency.UUID))
+							foreach (var dependency in mod.Dependencies.Items)
 							{
-								var x = new DivinityMissingModData
+								if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
+									!missingMods.Any(x => x.UUID == dependency.UUID))
 								{
-									Index = -1,
-									Name = dependency.Name,
-									UUID = dependency.UUID,
-									Dependency = true
-								};
-								missingMods.Add(x);
+									var x = new DivinityMissingModData
+									{
+										Index = -1,
+										Name = dependency.Name,
+										UUID = dependency.UUID,
+										Dependency = true
+									};
+									missingMods.Add(x);
+								}
 							}
 						}
 					}
-				}
-				else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !missingMods.Any(x => x.UUID == entry.UUID))
-				{
-					var x = new DivinityMissingModData
+					else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !missingMods.Any(x => x.UUID == entry.UUID))
 					{
-						Index = index,
+						var x = new DivinityMissingModData
+						{
+							Index = index,
+							Name = entry.Name,
+							UUID = entry.UUID
+						};
+						missingMods.Add(x);
+					}
+					currentOrder.Order.Add(new DivinityLoadOrderEntry()
+					{
 						Name = entry.Name,
-						UUID = entry.UUID
-					};
-					missingMods.Add(x);
+						UUID = entry.UUID,
+						Missing = mod == null
+					});
+					index++;
 				}
-				index++;
 			}
 
-			List<DivinityModData> inactive = new List<DivinityModData>();
+			DivinityApp.Log($"Updated 'Current' with dependencies from GM campaign {campaign.Name}.");
 
-			for (int i = 0; i < Mods.Count; i++)
+			if (SelectedModOrderIndex == 0)
 			{
-				var mod = Mods[i];
-				if (ActiveMods.Any(m => m.UUID == mod.UUID))
-				{
-					mod.IsActive = true;
-				}
-				else
-				{
-					mod.IsActive = false;
-					mod.Index = -1;
-					inactive.Add(mod);
-				}
+				DivinityApp.Log($"Loading mod order for GM campaign {campaign.Name}.");
+				LoadModOrder(currentOrder, missingMods);
 			}
 
-			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
-
-			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
-			OnFilterTextChanged(InactiveModFilterText, InactiveMods);
-
-			OnOrderChanged?.Invoke(this, new EventArgs());
-
-			if (missingMods.Count > 0)
-			{
-				DivinityApp.Log($"Missing mods: {String.Join(";", missingMods)}");
-				if (Settings?.DisableMissingModWarnings == true)
-				{
-					DivinityApp.Log("Skipping missing mod display.");
-				}
-				else
-				{
-					view.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-					view.MainWindowMessageBox_OK.Closed += MainWindowMessageBox_Closed_ResetColor;
-					view.MainWindowMessageBox_OK.ShowMessageBox(String.Join("\n", missingMods.OrderBy(x => x.Index)),
-						"Missing Mods in Load Order", MessageBoxButton.OK);
-				}
-			}
-
-			LoadingOrder = false;
 			return true;
 		}
 
@@ -1645,7 +1640,15 @@ namespace DivinityModManager.ViewModels
 						{
 							SelectedModOrderIndex = selectIndex;
 							var nextOrder = ModOrderList.ElementAtOrDefault(selectedModOrderIndex);
-							LoadModOrder(nextOrder, missingMods);
+							if(nextOrder.Name == "Current" && Settings.GameMasterModeEnabled && SelectedGameMasterCampaign != null)
+							{
+								LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign);
+							}
+							else
+							{
+								LoadModOrder(nextOrder, missingMods);
+							}
+							
 							Settings.LastOrder = nextOrder?.Name;
 						}
 						catch (Exception ex)
@@ -4447,46 +4450,48 @@ Directory the zip will be extracted to:
 			adventureModBoxVisibility = gmModeChanged.Select(x => !x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(AdventureModBoxVisibility));
 			gameMasterModeVisibility = gmModeChanged.Select(x => x ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(GameMasterModeVisibility));
 
-			int lastSelectedAdventureModIndex = 0;
-			gmModeChanged.Subscribe((b) =>
-			{
-				//if(b)
-				//{
-				//	lastSelectedAdventureModIndex = SelectedAdventureModIndex;
-				//}
-				//else
-				//{
-				//	if(lastSelectedAdventureModIndex < AdventureMods.Count)
-				//	{
-				//		SelectedAdventureModIndex = lastSelectedAdventureModIndex;
-				//	}
-				//	else
-				//	{
-				//		SelectedAdventureModIndex = 0;
-				//	}
-				//}
-			});
+			//int lastSelectedAdventureModIndex = 0;
+			//gmModeChanged.Subscribe((b) =>
+			//{
+			//	//if(b)
+			//	//{
+			//	//	lastSelectedAdventureModIndex = SelectedAdventureModIndex;
+			//	//}
+			//	//else
+			//	//{
+			//	//	if(lastSelectedAdventureModIndex < AdventureMods.Count)
+			//	//	{
+			//	//		SelectedAdventureModIndex = lastSelectedAdventureModIndex;
+			//	//	}
+			//	//	else
+			//	//	{
+			//	//		SelectedAdventureModIndex = 0;
+			//	//	}
+			//	//}
+			//});
 
 			gameMasterCampaigns.Connect().Bind(out gameMasterCampaignsData).Subscribe();
 			//this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
-			selectedGameMasterCampaign = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex).Select(x => GameMasterCampaigns.ElementAtOrDefault(x)).ToProperty(this, nameof(SelectedGameMasterCampaign));
+			var justSelectedGameMasterCampaign = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count);
+			selectedGameMasterCampaign = justSelectedGameMasterCampaign.Select(x => GameMasterCampaigns.ElementAtOrDefault(x.Item1)).ToProperty(this, nameof(SelectedGameMasterCampaign));
 
 			//var gmCampaignChanged = this.WhenAnyValue(x => x.SelectedGameMasterCampaignIndex, x => x.GameMasterCampaigns.Count, (index, count) => index >= 0 && count > 0 && index < count).
 			//	Where(b => b == true).
 			//	Select(x => GameMasterCampaigns.ElementAtOrDefault(SelectedGameMasterCampaignIndex));
-			//Throttle in case the index changes quickly in a short timespan
-			this.WhenAnyValue(vm => vm.SelectedGameMasterCampaignIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) => {
-				if (!this.Refreshing && SelectedGameMasterCampaignIndex > -1)
+			Keys.ImportOrderFromSelectedGMCampaign.AddAction(() => LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign), gmModeChanged);
+			justSelectedGameMasterCampaign.ObserveOn(RxApp.MainThreadScheduler).Subscribe((d) => {
+				if (!this.Refreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoaGMCampaignMods) && d.Item1 > -1)
 				{
-					if (SelectedGameMasterCampaign != null && !LoadingOrder && SelectedGameMasterCampaign.Dependencies.Count > 0)
+					var selectedCampaign = GameMasterCampaigns.ElementAtOrDefault(d.Item1);
+					if (selectedCampaign != null && !LoadingOrder)
 					{
-						if (LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign))
+						if (LoadGameMasterCampaignModOrder(selectedCampaign))
 						{
-							DivinityApp.Log($"Successfully loaded GM campaign order {SelectedGameMasterCampaign.Name}.");
+							DivinityApp.Log($"Successfully loaded GM campaign order {selectedCampaign.Name}.");
 						}
 						else
 						{
-							DivinityApp.Log($"Failed to load GM campaign order {SelectedGameMasterCampaign.Name}.");
+							DivinityApp.Log($"Failed to load GM campaign order {selectedCampaign.Name}.");
 						}
 					}
 				}

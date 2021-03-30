@@ -44,6 +44,9 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("File", "Import Order from Zip...", true)]
 		[Reactive] public Hotkey ImportOrderFromZipFile { get; set; } = new Hotkey(Key.None);
 
+		[MenuSettings("File", "Load Order From Selected GM Campaign", true)]
+		[Reactive] public Hotkey ImportOrderFromSelectedGMCampaign { get; set; } = new Hotkey(Key.None);
+
 		[MenuSettings("File", "Export Order to Game")]
 		[Reactive] public Hotkey ExportOrderToGame { get; set; } = new Hotkey(Key.E, ModifierKeys.Control);
 

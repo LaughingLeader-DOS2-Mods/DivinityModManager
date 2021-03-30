@@ -425,7 +425,8 @@ namespace DivinityModManager.Views
 			["OpenWorkshopFolderButton"] = "Keys.OpenWorkshopFolder.Command",
 			["OpenModsFolderButton"] = "Keys.OpenModsFolder.Command",
 			["OpenExtenderLogsFolderButton"] = "Keys.OpenLogsFolder.Command",
-			["OpenGameButton"] = "Keys.LaunchGame.Command"
+			["OpenGameButton"] = "Keys.LaunchGame.Command",
+			["LoadGameMasterModOrderButton"] = "Keys.ImportOrderFromSelectedGMCampaign.Command",
 		};
 
 		private void ModOrderPanel_Loaded(object sender, RoutedEventArgs e)
@@ -445,6 +446,11 @@ namespace DivinityModManager.Views
 					}
 				}
 			};
+		}
+
+		private void GameMasterCampaignComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+		{
+			ViewModel.UserChangedSelectedGMCampaign = true;
 		}
 	}
 }

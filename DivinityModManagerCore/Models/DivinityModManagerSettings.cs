@@ -57,6 +57,9 @@ namespace DivinityModManager.Models
 		[SettingsEntry("Enable Automatic Updates", "Automatically check for updates when the program starts.")]
 		[DataMember] [Reactive] public bool CheckForUpdates { get; set; } = true;
 
+		[SettingsEntry("Automatically Load GM Campaign Mods", "When a GM campaign is selected, its dependency mods will automatically be loaded without needing to manually import them.")]
+		[DataMember] [Reactive] public bool AutomaticallyLoaGMCampaignMods { get; set; } = false;
+
 		[DataMember][Reactive] public long LastUpdateCheck { get; set; } = -1;
 		private string lastOrder = "";
 

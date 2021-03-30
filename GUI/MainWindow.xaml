@@ -380,7 +380,7 @@
 							<TextBlock
 								Padding="2,0,2,0"
 								Text="GM"
-								ToolTip="{Binding ElementName=ToggleGMCheckbox, Path=ToolTip}" />
+								ToolTip="Enable Game Master Campaign Selection" />
 							<CheckBox
 								x:Name="ToggleGMCheckbox"
 								HorizontalAlignment="Center"
@@ -388,6 +388,13 @@
 								Command="{Binding SaveSettingsSilentlyCommand}"
 								IsChecked="{Binding Settings.GameMasterModeEnabled, Mode=TwoWay}"
 								ToolTip="Enable Game Master Campaign Selection" />
+							<Button
+								x:Name="LoadGameMasterModOrderButton"
+								Command="{Binding Keys.ImportOrderFromSelectedGMCampaign.Command}"
+								ToolTip="Load Mod Order from GM Campaign"
+								Visibility="{Binding GameMasterModeVisibility}">
+								<controls:AutoGrayableImage Source="{StaticResource LoadCampaignOrderImage}" />
+							</Button>
 							<Rectangle />
 							<StackPanel Orientation="Horizontal">
 								<TextBlock Text="Campaign" />
@@ -430,6 +437,7 @@
 									IsTextSearchEnabled="False"
 									ItemsSource="{Binding GameMasterCampaigns}"
 									SelectedIndex="{Binding SelectedGameMasterCampaignIndex}"
+									SelectionChanged="GameMasterCampaignComboBox_SelectionChanged"
 									Tag="{Binding SelectedGameMasterCampaign}"
 									ToolTip="{StaticResource GMCampaignTooltip}"
 									Visibility="{Binding GameMasterModeVisibility, FallbackValue=Collapsed}">

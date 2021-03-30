@@ -102,9 +102,9 @@
 						ChildMargin="4"
 						ColumnCount="2"
 						Columns="auto,*"
-						RowCount="11"
+						RowCount="12"
 						RowHeight="*"
-						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
 						<autogrid:AutoGrid.Resources>
 							<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
 								<Setter Property="DataContext" Value="{Binding}" />
@@ -145,6 +145,8 @@
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="ShiftListFocusOnSwap" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ShiftListFocusOnSwap, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutomaticallyLoaGMCampaignMods" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutomaticallyLoaGMCampaignMods, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="On Game Launch" />
 						<ComboBox
 							DisplayMemberPath="Description"

@@ -36,6 +36,12 @@ namespace DivinityModManager.Models
 		{
 			try
 			{
+				if(File.Exists(FilePath) && File.GetSize(FilePath) > 0)
+				{
+					var backupName = Path.Combine(Path.GetDirectoryName(FilePath), FileName + ".backup");
+					File.Copy(FilePath, backupName, true);
+				}
+				
 				if (MetaResource.TryFindNode("Dependencies", out var dependenciesNode))
 				{
 					if (dependenciesNode.Children.TryGetValue("ModuleShortDesc", out var nodeList))
@@ -61,10 +67,17 @@ namespace DivinityModManager.Models
 							dependenciesNode.AppendChild(modNode);
 							//nodeList.Add(modNode);
 						}
-						ResourceUtils.SaveResource(MetaResource, FilePath);
-						return true;
 					}
 				}
+				ResourceUtils.SaveResource(MetaResource, FilePath);
+				if (File.Exists(FilePath))
+				{
+					File.SetLastWriteTime(FilePath, DateTime.Now);
+					File.SetLastAccessTime(FilePath, DateTime.Now);
+					LastModified = DateTime.Now;
+					DivinityApp.Log($"Wrote GM campaign metadata to {FilePath}");
+				}
+				return true;
 			}
 			catch(Exception ex)
 			{

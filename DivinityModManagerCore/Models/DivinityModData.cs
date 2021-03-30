@@ -48,9 +48,7 @@ namespace DivinityModManager.Models
 		[DataMember] public List<string> Modes { get; set; } = new List<string>();
 
 		[DataMember] public string Targets { get; set; }
-		[Reactive] public DateTime LastUpdated { get; set; }
-
-		[Reactive] public bool IsClassicMod { get; set; } = false;
+		[Reactive] public DateTime? LastUpdated { get; set; }
 
 		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
 

@@ -53,11 +53,12 @@ namespace DivinityModManager.Models
 		[Reactive] [DataMember] public DivinityModVersion Version { get; set; }
 		[Reactive] public DivinityModVersion HeaderVersion { get; set; }
 		[Reactive] public DivinityModVersion PublishVersion { get; set; }
-		[Reactive] public DateTime LastModified { get; set; }
+		[Reactive] public DateTime? LastModified { get; set; }
 
 		[Reactive] public bool DisplayFileForName { get; set; } = false;
 		[Reactive] public bool IsHidden { get; set; } = false;
 		[Reactive] public bool IsLarianMod { get; set; } = false;
+		[Reactive] public bool IsClassicMod { get; set; } = false;
 		[Reactive] public string HelpText { get; set; } = "";
 
 		public List<string> Tags { get; set; } = new List<string>();

@@ -290,7 +290,7 @@ namespace DivinityModManager.Util
 									try
 									{
 										modData.LastModified = File.GetChangeTime(metaFile);
-										modData.LastUpdated = modData.LastModified;
+										modData.LastUpdated = modData.LastModified.Value;
 									}
 									catch (PlatformNotSupportedException ex)
 									{
@@ -377,7 +377,7 @@ namespace DivinityModManager.Util
 										try
 										{
 											modData.LastModified = File.GetChangeTime(metaFile);
-											modData.LastUpdated = modData.LastModified;
+											modData.LastUpdated = modData.LastModified.Value;
 										}
 										catch (PlatformNotSupportedException ex)
 										{
@@ -508,7 +508,7 @@ namespace DivinityModManager.Util
 								try
 								{
 									modData.LastModified = File.GetChangeTime(pakPath);
-									modData.LastUpdated = modData.LastModified;
+									modData.LastUpdated = modData.LastModified.Value;
 								}
 								catch (PlatformNotSupportedException ex)
 								{
@@ -686,7 +686,7 @@ namespace DivinityModManager.Util
 									try
 									{
 										modData.LastModified = File.GetChangeTime(pakPath);
-										modData.LastUpdated = modData.LastModified;
+										modData.LastUpdated = modData.LastModified.Value;
 									}
 									catch (PlatformNotSupportedException ex)
 									{
@@ -1494,7 +1494,7 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 			//var dependencies = mod.Dependencies.Items.Where(x => (!order.Any(y => y.UUID == x.UUID) && !IgnoreMod(x.UUID)));
-			foreach (var d in mod.Dependencies.Items.Where(x => !IgnoreMod(x.UUID)))
+			foreach (var d in mod.Dependencies.Items.Where(x => !IgnoreModDependency(x.UUID)))
 			{
 				var dependencyModData = allMods.FirstOrDefault(x => x.UUID == d.UUID);
 				if (dependencyModData != null)

@@ -126,6 +126,20 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private DirectoryEnumerationFilters IsPakFilter = new DirectoryEnumerationFilters()
+		{
+			InclusionFilter = (f) =>
+			{
+				return f.Extension.Equals(".pak", StringComparison.OrdinalIgnoreCase);
+			}
+		});
+
+		private IEnumerable<string> GetUpdateFiles(string directoryPath)
+		{
+			var files = Directory.EnumerateFiles(directoryPath, DirectoryEnumerationOptions.Recursive, IsPakFilter);
+			return files;
+		}
+
 		private void CopySelectedMods_Run()
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -150,8 +164,8 @@ namespace DivinityModManager.ViewModels
 					{
 						DocumentsFolder = documentsFolder,
 						ModPakFolder = modPakFolder,
-						NewFilesToMove = new List<string>(NewMods.Where(x => x.IsSelected).Select(x => x.FilePath)),
-						UpdatesToMove = new List<string>(Updates.Where(x => x.IsSelected).Select(x => x.WorkshopMod.FilePath)),
+						NewFilesToMove = NewMods.Where(x => x.IsSelected).Select(x => GetUpdateFiles(Path.GetDirectoryName(x.FilePath))).SelectMany(x => x).ToList(),
+						UpdatesToMove = Updates.Where(x => x.IsSelected).Select(x => GetUpdateFiles(Path.GetDirectoryName(x.WorkshopMod.FilePath))).SelectMany(x => x).ToList(),
 						TotalMoved = 0
 					};
 

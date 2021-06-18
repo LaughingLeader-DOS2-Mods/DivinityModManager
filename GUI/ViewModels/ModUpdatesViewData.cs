@@ -132,7 +132,7 @@ namespace DivinityModManager.ViewModels
 			{
 				return f.Extension.Equals(".pak", StringComparison.OrdinalIgnoreCase);
 			}
-		});
+		};
 
 		private IEnumerable<string> GetUpdateFiles(string directoryPath)
 		{

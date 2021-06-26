@@ -42,19 +42,8 @@ namespace DivinityModManager.Views
 	/// </summary>
 	public partial class HorizontalModLayout : UserControl, IViewFor<MainWindowViewModel>, ModViewLayout
 	{
-		public MainWindowViewModel ViewModel
-		{
-			get { return (MainWindowViewModel)GetValue(ViewModelProperty); }
-			set { SetValue(ViewModelProperty, value); }
-		}
-
-		// Using a DependencyProperty as the backing store for ViewModel.  This enables animation, styling, binding, etc...
-		public static readonly DependencyProperty ViewModelProperty =
-			DependencyProperty.Register("ViewModel", typeof(MainWindowViewModel), typeof(HorizontalModLayout), new PropertyMetadata(null));
-
+		public MainWindowViewModel ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
-
-		private MainWindowViewModel _lastVM;
 
 		private object _focusedList = null;
 
@@ -73,16 +62,27 @@ namespace DivinityModManager.Views
 
 		private bool FocusSelectedItem(ListView lv)
 		{
-			var listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.SelectedItem);
-			if(listBoxItem == null)
+			try
 			{
-				listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.Items.GetItemAt(0));
+				var listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(lv.SelectedItem);
+				if (listBoxItem == null)
+				{
+					var firstItem = lv.Items.GetItemAt(0);
+					if(firstItem != null)
+					{
+						listBoxItem = (ListBoxItem)lv.ItemContainerGenerator.ContainerFromItem(firstItem);
+					}
+				}
+				if (listBoxItem != null)
+				{
+					listBoxItem.Focus();
+					Keyboard.Focus(listBoxItem);
+					return true;
+				}
 			}
-			if(listBoxItem != null)
+			catch(Exception ex)
 			{
-				listBoxItem.Focus();
-				Keyboard.Focus(listBoxItem);
-				return true;
+				DivinityApp.Log($"{ex}");
 			}
 			return false;
 		}
@@ -302,11 +302,9 @@ namespace DivinityModManager.Views
 				if(ViewModel.Settings.ShiftListFocusOnSwap)
 				{
 					InactiveModsListView.Focus();
-					//FocusList(InactiveModsListView);
 				}
 				else
 				{
-					//FocusList(ActiveModsListView);
 					ActiveModsListView.Focus();
 				}
 
@@ -315,7 +313,6 @@ namespace DivinityModManager.Views
 					ActiveModsListView.UnselectAll();
 					ActiveModsListView.SelectedItem = targetMod;
 					targetMod.IsSelected = true;
-					//FocusSelectedItem(ActiveModsListView);
 				}
 			}
 			else if (ListHasFocus(InactiveModsListView))
@@ -349,11 +346,9 @@ namespace DivinityModManager.Views
 				if (ViewModel.Settings.ShiftListFocusOnSwap)
 				{
 					ActiveModsListView.Focus();
-					//FocusList(ActiveModsListView);
 				}
 				else
 				{
-					//FocusList(InactiveModsListView);
 					InactiveModsListView.Focus();
 				}
 
@@ -362,7 +357,6 @@ namespace DivinityModManager.Views
 					InactiveModsListView.UnselectAll();
 					InactiveModsListView.SelectedItem = targetMod;
 					targetMod.IsSelected = true;
-					//FocusSelectedItem(InactiveModsListView);
 				}
 			}
 		}
@@ -422,10 +416,20 @@ namespace DivinityModManager.Views
 				}
 			};
 
+			DataContextChanged += (o, e) =>
+			{
+				if(DataContext != null && DataContext is MainWindowViewModel vm)
+				{
+					ViewModel = vm;
+				}
+				else
+				{
+					ViewModel = null;
+				}
+			};
+
 			this.WhenActivated((d) =>
 			{
-				_lastVM = ViewModel;
-
 				if(ViewModel != null)
 				{
 					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
@@ -444,10 +448,15 @@ namespace DivinityModManager.Views
 					{
 						DivinityApp.IsKeyboardNavigating = true;
 						this.ActiveModsListView.Focus();
-						if (ViewModel.ActiveSelected <= 0)
+						
+						if(ViewModel != null)
 						{
-							ActiveModsListView.SelectedIndex = 0;
+							if (ViewModel.ActiveSelected <= 0)
+							{
+								ActiveModsListView.SelectedIndex = 0;
+							}
 						}
+
 						//InactiveModsListView.UnselectAll();
 						FocusList(ActiveModsListView);
 					});
@@ -456,9 +465,12 @@ namespace DivinityModManager.Views
 					{
 						DivinityApp.IsKeyboardNavigating = true;
 						InactiveModsListView.Focus();
-						if (ViewModel.InactiveSelected <= 0)
+						if (ViewModel != null)
 						{
-							InactiveModsListView.SelectedIndex = 0;
+							if (ViewModel.ActiveSelected <= 0)
+							{
+								InactiveModsListView.SelectedIndex = 0;
+							}
 						}
 						//ActiveModsListView.UnselectAll();
 						FocusList(InactiveModsListView);
@@ -540,12 +552,10 @@ namespace DivinityModManager.Views
 				// when the ViewModel gets deactivated
 				Disposable.Create(() =>
 				{
-					if(_lastVM != null)
+					if(ViewModel != null)
 					{
-						_lastVM.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
-						_lastVM.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
-
-						_lastVM = null;
+						ViewModel.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
+						ViewModel.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
 					}
 				}).DisposeWith(d);
 			});

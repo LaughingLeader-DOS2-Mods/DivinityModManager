@@ -41,7 +41,7 @@
 				<local:VerticalModLayout />
 			</DataTemplate>
 			<DataTemplate x:Key="HorizontalModLayout">
-				<local:HorizontalModLayout ViewModel="{Binding}" />
+                <local:HorizontalModLayout DataContext="{Binding}" />
 			</DataTemplate>
 			<Style x:Key="UpdateButtonStyle" TargetType="Button">
 				<Setter Property="Background" Value="Transparent" />

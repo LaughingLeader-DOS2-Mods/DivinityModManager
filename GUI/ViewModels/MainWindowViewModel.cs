@@ -3666,8 +3666,6 @@ namespace DivinityModManager.ViewModels
 				string outputDirectory = dialog.SelectedPath;
 				DivinityApp.Log($"Extracting adventure mod to '{outputDirectory}'.");
 
-				int totalWork = SelectedPakMods.Count;
-				double taskStepAmount = 1.0 / totalWork;
 				MainProgressTitle = $"Extracting {SelectedAdventureMod.DisplayName}...";
 				MainProgressValue = 0d;
 				MainProgressToken = new CancellationTokenSource();
@@ -3695,9 +3693,9 @@ namespace DivinityModManager.ViewModels
 					}
 					catch (Exception ex)
 					{
-						DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+						DivinityApp.Log($"Error extracting package: {ex}");
 					}
-					IncreaseMainProgressValue(taskStepAmount);
+					IncreaseMainProgressValue(1);
 
 					await ctrl.Yield();
 					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());

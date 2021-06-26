@@ -28,6 +28,7 @@ using System.Windows.Automation.Peers;
 using DivinityModManager.Util;
 using System.Timers;
 using DivinityModManager.Controls;
+using GongSolutions.Wpf.DragDrop.Utilities;
 
 namespace DivinityModManager.Views
 {
@@ -405,7 +406,18 @@ namespace DivinityModManager.Views
 					{
 						ActiveModsListView.SelectedIndex = 0;
 					}
-					Keyboard.Focus((ListViewItem)ActiveModsListView.SelectedItem);
+					try
+					{
+						ListViewItem item = (ListViewItem)ActiveModsListView.ItemContainerGenerator.ContainerFromItem(ActiveModsListView.SelectedItem);
+						if (item != null)
+						{
+							Keyboard.Focus(item);
+						}
+					}
+					catch(Exception ex)
+					{
+						DivinityApp.Log($"Error focusing selected item:{ex}");
+					}
 					setInitialFocus = false;
 				}
 			};

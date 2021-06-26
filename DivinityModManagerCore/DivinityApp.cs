@@ -71,7 +71,6 @@ namespace DivinityModManager
 			get => isKeyboardNavigating;
 			set {
 				isKeyboardNavigating = value;
-				Log($"isKeyboardNavigating({isKeyboardNavigating})");
 				NotifyStaticPropertyChanged();
 			}
 		}

@@ -112,8 +112,7 @@ namespace DivinityModManager.ViewModels
 					objects2Insert.Add(obj2Insert);
 					try
 					{
-						insertIndex = insertIndex + 1;
-						if (destinationList.Count > insertIndex)
+						if (insertIndex < destinationList.Count)
 						{
 							destinationList.Insert(insertIndex, obj2Insert);
 						}
@@ -121,10 +120,10 @@ namespace DivinityModManager.ViewModels
 						{
 							destinationList.Add(obj2Insert);
 						}
+						insertIndex++;
 					}
 					catch (Exception ex)
 					{
-						DivinityApp.Log($"insertIndex({insertIndex}) destinationList({destinationList.Count})");
 						DivinityApp.Log($"Error adding drop operation item to destinationList:\n{ex}");
 						destinationList.Add(obj2Insert);
 					}

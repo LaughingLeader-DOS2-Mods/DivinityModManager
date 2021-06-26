@@ -421,6 +421,8 @@ namespace DivinityModManager.Views
 				if(DataContext != null && DataContext is MainWindowViewModel vm)
 				{
 					ViewModel = vm;
+					BindingOperations.SetBinding(ActiveModsListView, ListView.ItemsSourceProperty, new Binding { Path = new PropertyPath("ActiveMods"), Source = ViewModel });
+					BindingOperations.SetBinding(InactiveModsListView, ListView.ItemsSourceProperty, new Binding { Path = new PropertyPath("InactiveMods"), Source = ViewModel });
 				}
 				else
 				{

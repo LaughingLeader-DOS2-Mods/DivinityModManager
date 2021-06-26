@@ -115,12 +115,12 @@ namespace DivinityModManager.ViewModels
 						if (insertIndex < destinationList.Count)
 						{
 							destinationList.Insert(insertIndex, obj2Insert);
+							insertIndex++;
 						}
 						else
 						{
 							destinationList.Add(obj2Insert);
 						}
-						insertIndex++;
 					}
 					catch (Exception ex)
 					{

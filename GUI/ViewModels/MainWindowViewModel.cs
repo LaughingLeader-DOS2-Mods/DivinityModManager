@@ -3523,7 +3523,7 @@ namespace DivinityModManager.ViewModels
 			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
 			dialog.ShowNewFolderButton = true;
 			dialog.UseDescriptionForTitle = true;
-			dialog.Description = "Select folder to extract mod to...";
+			dialog.Description = "Select folder to extract mod(s) to...";
 
 			if (Settings.LastExtractOutputPath.IsExistingDirectory())
 			{
@@ -3554,6 +3554,8 @@ namespace DivinityModManager.ViewModels
 				CanCancelProgress = true;
 				MainProgressIsActive = true;
 
+				var openOutputPath = dialog.SelectedPath;
+
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 				{
 					int successes = 0;
@@ -3567,13 +3569,20 @@ namespace DivinityModManager.ViewModels
 							RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Extracting {pakName}...");
 							string destination = Path.Combine(outputDirectory, pakName);
 
-							//Unless the foldername == the pak name and we're only extracting one pak
+							//In case the foldername == the pak name and we're only extracting one pak
 							if (totalWork == 1 && Path.GetDirectoryName(outputDirectory).Equals(pakName))
 							{
 								destination = outputDirectory;
 							}
 							var success = await DivinityFileUtils.ExtractPackageAsync(path, destination, MainProgressToken.Token);
-							if (success) successes += 1;
+							if (success)
+							{
+								successes += 1;
+								if (totalWork == 1)
+								{
+									openOutputPath = destination;
+								}
+							}
 						}
 						catch (Exception ex)
 						{
@@ -3590,7 +3599,7 @@ namespace DivinityModManager.ViewModels
 						if (successes >= totalWork)
 						{
 							view.AlertBar.SetSuccessAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", 20);
-							Process.Start(dialog.SelectedPath);
+							Process.Start(openOutputPath);
 						}
 						else
 						{
@@ -3619,6 +3628,95 @@ namespace DivinityModManager.ViewModels
 				{
 					ExtractSelectedMods_ChooseFolder();
 				}
+			}
+		}
+
+		private void ExtractSelectedAdventure()
+		{
+			if(SelectedAdventureMod == null || SelectedAdventureMod.IsEditorMod || SelectedAdventureMod.IsLarianMod || !File.Exists(SelectedAdventureMod.FilePath))
+			{
+				var displayName = SelectedAdventureMod != null ? SelectedAdventureMod.DisplayName : "";
+				view.AlertBar.SetWarningAlert($"Current adventure mod '{displayName}' is not extractable.", 30);
+				return;
+			}
+
+			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
+			dialog.ShowNewFolderButton = true;
+			dialog.UseDescriptionForTitle = true;
+			dialog.Description = "Select folder to extract mod to...";
+
+			if (Settings.LastExtractOutputPath.IsExistingDirectory())
+			{
+				dialog.SelectedPath = Settings.LastExtractOutputPath + "\\";
+			}
+			else if (PathwayData.LastSaveFilePath.IsExistingDirectory())
+			{
+				dialog.SelectedPath = PathwayData.LastSaveFilePath + "\\";
+			}
+			else
+			{
+				dialog.RootFolder = Environment.SpecialFolder.Desktop;
+			}
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				Settings.LastExtractOutputPath = dialog.SelectedPath;
+				SaveSettings();
+
+				string outputDirectory = dialog.SelectedPath;
+				DivinityApp.Log($"Extracting adventure mod to '{outputDirectory}'.");
+
+				int totalWork = SelectedPakMods.Count;
+				double taskStepAmount = 1.0 / totalWork;
+				MainProgressTitle = $"Extracting {SelectedAdventureMod.DisplayName}...";
+				MainProgressValue = 0d;
+				MainProgressToken = new CancellationTokenSource();
+				CanCancelProgress = true;
+				MainProgressIsActive = true;
+
+				var openOutputPath = dialog.SelectedPath;
+
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+				{
+					if (MainProgressToken.IsCancellationRequested) return Disposable.Empty;
+					var path = SelectedAdventureMod.FilePath;
+					var success = false;
+					try
+					{
+						string pakName = Path.GetFileNameWithoutExtension(path);
+						RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Extracting {pakName}...");
+						string destination = Path.Combine(outputDirectory, pakName);
+						if (Path.GetDirectoryName(outputDirectory).Equals(pakName))
+						{
+							destination = outputDirectory;
+						}
+						openOutputPath = destination;
+						success = await DivinityFileUtils.ExtractPackageAsync(path, destination, MainProgressToken.Token);
+					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+					}
+					IncreaseMainProgressValue(taskStepAmount);
+
+					await ctrl.Yield();
+					RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
+
+					RxApp.MainThreadScheduler.Schedule(() =>
+					{
+						if (success)
+						{
+							view.AlertBar.SetSuccessAlert($"Successfully extracted adventure mod to '{dialog.SelectedPath}'.", 20);
+							Process.Start(openOutputPath);
+						}
+						else
+						{
+							view.AlertBar.SetDangerAlert($"Error occurred when extracting adventure mod to '{dialog.SelectedPath}'.", 30);
+						}
+					});
+
+					return Disposable.Empty;
+				});
 			}
 		}
 
@@ -4375,6 +4473,9 @@ Directory the zip will be extracted to:
 
 			var anyPakModSelectedObservable = this.WhenAnyValue(x => x.SelectedPakMods.Count, (count) => count > 0);
 			Keys.ExtractSelectedMods.AddAction(ExtractSelectedMods_Start, anyPakModSelectedObservable);
+
+			var canExtractAdventure = this.WhenAnyValue(x => x.SelectedAdventureMod, x => x.Settings.GameMasterModeEnabled, (m,b) => !b && m != null && !m.IsEditorMod && !m.IsLarianMod);
+			Keys.ExtractSelectedAdventure.AddAction(ExtractSelectedAdventure, canExtractAdventure);
 
 			this.WhenAnyValue(x => x.ModUpdatesViewData.NewAvailable,
 				x => x.ModUpdatesViewData.UpdatesAvailable, (b1, b2) => b1 || b2).BindTo(this, x => x.ModUpdatesAvailable);

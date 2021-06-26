@@ -116,6 +116,9 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Tools", "Extract Selected Mods To...")]
 		[Reactive] public Hotkey ExtractSelectedMods { get; set; } = new Hotkey(Key.M, ModifierKeys.Control);
 
+		[MenuSettings("Tools", "Extract Selected Adventure To...")]
+		[Reactive] public Hotkey ExtractSelectedAdventure { get; set; } = new Hotkey(Key.M, ModifierKeys.Control | ModifierKeys.Shift);
+
 		[MenuSettings("Tools", "Toggle Version Generator Window", Tooltip = "A tool for mod authors to generate version numbers for a mod's meta.lsx.")]
 		[Reactive] public Hotkey ToggleVersionGeneratorWindow { get; set; } = new Hotkey(Key.G, ModifierKeys.Control);
 

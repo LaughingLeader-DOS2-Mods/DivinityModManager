@@ -232,12 +232,12 @@ namespace DivinityModManager.Util
 						foreach (var node in targets)
 						{
 							var target = GetAttributeWithId(node, "Object", "");
-							if(!String.IsNullOrEmpty(target))
+							if(!String.IsNullOrWhiteSpace(target))
 							{
 								modData.Modes.Add(target);
 							}
 						}
-						modData.Targets = string.Join(", ", modData.Modes);
+						modData.Targets = String.Join(", ", modData.Modes);
 					}
 					return modData;
 				}

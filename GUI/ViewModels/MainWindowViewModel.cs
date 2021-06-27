@@ -1732,7 +1732,16 @@ namespace DivinityModManager.ViewModels
 				var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 				if (mod != null && !mod.IsClassicMod)
 				{
-					ActiveMods.Add(mod);
+					if(mod.Type != "Adventure")
+					{
+						ActiveMods.Add(mod);
+					}
+					else
+					{
+						var nextIndex = AdventureMods.IndexOf(mod);
+						if (nextIndex != -1) SelectedAdventureModIndex = nextIndex;
+					}
+					
 					if (mod.Dependencies.Count > 0)
 					{
 						foreach (var dependency in mod.Dependencies.Items)
@@ -2169,6 +2178,15 @@ namespace DivinityModManager.ViewModels
 			}
 
 			await Observable.Start(() => {
+				if(String.IsNullOrEmpty(lastAdventureMod))
+				{
+					var activeAdventureMod = SelectedModOrder.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.Type == "Adventure")).FirstOrDefault();
+					if(activeAdventureMod != null)
+					{
+						lastAdventureMod = activeAdventureMod.UUID;
+					}
+				}
+
 				int defaultAdventureIndex = AdventureMods.IndexOf(AdventureMods.FirstOrDefault(x => x.UUID == DivinityApp.ORIGINS_UUID));
 				if (defaultAdventureIndex == -1) defaultAdventureIndex = 0;
 				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)

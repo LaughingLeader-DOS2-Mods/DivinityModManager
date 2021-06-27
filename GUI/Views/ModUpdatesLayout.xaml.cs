@@ -1,21 +1,15 @@
-﻿using System;
+﻿using AdonisUI;
+using DivinityModManager.ViewModels;
+using Microsoft.Windows.Themes;
+using ReactiveUI;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Concurrency;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using DivinityModManager.ViewModels;
-using ReactiveUI;
 
 namespace DivinityModManager.Views
 {
@@ -35,7 +29,7 @@ namespace DivinityModManager.Views
 
 		private void ModUpdatesLayout_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			if(DataContext is ModUpdatesViewData vm)
+			if (DataContext is ModUpdatesViewData vm)
 			{
 				ViewModel = vm;
 
@@ -72,9 +66,15 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		private List<string> ignoreColors = new List<string>{"#FFEDEDED", "#00FFFFFF", "#FFFFFFFF", "#FFF4F4F4", "#FFE8E8E8", "#FF000000" };
+
 		private void ModUpdatesLayout_Loaded(object sender, RoutedEventArgs e)
 		{
-			
+			//Fix for IsEnabled False ListView having a system color border background we can't change.
+			foreach(var border in this.FindVisualChildren<ClassicBorderDecorator>())
+			{
+				border.SetResourceReference(BackgroundProperty, Brushes.Layer4BackgroundBrush);
+			}
 		}
 
 		GridViewColumnHeader _lastHeaderClicked = null;

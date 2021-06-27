@@ -19,6 +19,7 @@
 	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
 	xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
 	xmlns:xcthemes="clr-namespace:Xceed.Wpf.Toolkit.Themes;assembly=Xceed.Wpf.Toolkit"
+	xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Classic"
 	x:Name="MainResources">
 	<ResourceDictionary.MergedDictionaries>
 		<ResourceDictionary Source="DefaultStyles/ComboBox.xaml" />
@@ -369,9 +370,7 @@
 		<Setter Property="Tag" Value="{Binding WorkshopMod}" />
 	</Style>
 	<Style
-		x:Key="ModOrderListView"
-		BasedOn="{StaticResource {x:Type ListView}}"
-		TargetType="ListView">
+		x:Key="ModOrderListView" TargetType="ListView" BasedOn="{StaticResource {x:Type ListView}}">
 		<Setter Property="KeyboardNavigation.AcceptsReturn" Value="False" />
 		<Setter Property="KeyboardNavigation.TabNavigation" Value="Continue" />
 		<Setter Property="dd:DragDrop.IsDragSource" Value="True" />
@@ -393,10 +392,9 @@
 							KeyboardNavigation.IsTabStop="False"
 							Visibility="Collapsed" />
 					</Grid>
-
 					<ControlTemplate.Triggers>
 						<Trigger Property="IsGrouping" Value="True">
-							<Setter Property="ScrollViewer.CanContentScroll" Value="False" />
+							<Setter Property="CanContentScroll" TargetName="ListScrollViewer" Value="False" />
 						</Trigger>
 						<MultiDataTrigger>
 							<MultiDataTrigger.Conditions>
@@ -553,12 +551,8 @@
 					Text=" (Definitive Edition)"
 					Visibility="{Binding IsClassicMod, Converter={StaticResource BoolToVisibilityConverterReversed}}" />
 			</StackPanel>
-			<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
-			<!--<html:HtmlPanel
-							Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
-							Text="{Binding Description}"
-							Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}}" />-->
-			<TextBlock
+            <Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+            <TextBlock
 				Margin="2"
 				TextWrapping="Wrap"
 				Visibility="{Binding AuthorVisibility}"><Run Text="Created by " /><Run
@@ -582,7 +576,7 @@
 			<StackPanel
 				Margin="2"
 				Orientation="Vertical"
-				Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}}">
+				Visibility="{Binding DependencyVisibility, FallbackValue=Collapsed}">
 				<TextBlock FontWeight="Bold" Text="Dependencies:" />
 				<ListBox
 					Margin="2"
@@ -715,18 +709,18 @@
 				Margin="2"
 				Text="{Binding Description}"
 				TextWrapping="Wrap"
-				Visibility="{Binding HasDescription, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+				Visibility="{Binding Description, Converter={StaticResource StringNotEmptyToVisibilityConverter}, FallbackValue=Collapsed}" />
 			<StackPanel
 				Margin="2"
 				Orientation="Vertical"
-				Visibility="{Binding HasDependencies, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+				Visibility="{Binding DependencyVisibility, FallbackValue=Collapsed}">
 				<TextBlock FontWeight="Bold" Text="Dependencies:" />
 				<ListBox
 					Margin="2"
 					Padding="0"
 					BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.AccentInteractionBorderBrush}}"
 					BorderThickness="1"
-					ItemsSource="{Binding Dependencies}" />
+					ItemsSource="{Binding DisplayedDependencies}" />
 			</StackPanel>
 			<StackPanel
 				Margin="2"
@@ -1156,7 +1150,7 @@
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn
-				Width="80"
+				Width="Auto"
 				Header="Modes"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>
@@ -1265,7 +1259,7 @@
 				</GridViewColumn.CellTemplate>
 			</GridViewColumn>
 			<GridViewColumn
-				Width="100"
+				Width="Auto"
 				Header="Modes"
 				HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 				<GridViewColumn.CellTemplate>

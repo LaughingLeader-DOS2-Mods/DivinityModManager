@@ -2,6 +2,7 @@
 using DivinityModManager.Util;
 using DynamicData;
 using DynamicData.Binding;
+using DynamicData.Aggregation;
 
 using LSLib.LS;
 
@@ -149,9 +150,15 @@ namespace DivinityModManager.Models
 
 		public bool HasToolTip => hasToolTip.Value;
 
+		private ObservableAsPropertyHelper<int> dependencyCount;
+		public int TotalDependencies => dependencyCount.Value;
+
 		private ObservableAsPropertyHelper<bool> hasDependencies;
 
 		public bool HasDependencies => hasDependencies.Value;
+
+		private ObservableAsPropertyHelper<Visibility> dependencyVisibility;
+		public Visibility DependencyVisibility => dependencyVisibility.Value;
 
 		[Reactive] public bool HasOsirisExtenderSettings { get; set; } = false;
 
@@ -235,9 +242,11 @@ namespace DivinityModManager.Models
 
 		public DivinityModData(bool isBaseGameMod = false) : base()
 		{
-			var connection = this.Dependencies.Connect();
+			var connection = this.Dependencies.Connect().ObserveOn(RxApp.MainThreadScheduler);
 			connection.Bind(out displayedDependencies).DisposeMany().Subscribe();
-			hasDependencies = connection.Count().Select(x => x > 0).StartWith(false).ToProperty(this, nameof(HasDependencies));
+			dependencyCount = connection.Count().StartWith(0).ToProperty(this, nameof(TotalDependencies));
+			hasDependencies = this.WhenAnyValue(x => x.TotalDependencies, c => c > 0).StartWith(false).ToProperty(this, nameof(HasDependencies));
+			dependencyVisibility = this.WhenAnyValue(x => x.HasDependencies, b => b ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(DependencyVisibility));
 			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod).Subscribe((b) =>
 			{
 				if(b.Item1)

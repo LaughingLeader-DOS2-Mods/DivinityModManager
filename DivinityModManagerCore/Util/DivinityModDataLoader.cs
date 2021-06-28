@@ -1639,7 +1639,7 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static DivinityLoadOrder GetLoadOrderFromSave(string file)
+		public static DivinityLoadOrder GetLoadOrderFromSave(string file, string ordersFolder = "")
 		{
 			try
 			{
@@ -1685,7 +1685,8 @@ namespace DivinityModManager.Util
 								}
 								DivinityLoadOrder loadOrder = new DivinityLoadOrder()
 								{
-									Name = orderName
+									Name = orderName,
+									FilePath = Path.Combine(ordersFolder, MakeSafeFilename(Path.Combine(orderName + ".json"), '_'))
 								};
 
 								foreach (var c in modList)

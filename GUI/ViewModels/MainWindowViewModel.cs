@@ -1582,7 +1582,7 @@ namespace DivinityModManager.ViewModels
 			return null;
 		}
 
-		public void BuildModOrderList(int selectIndex = -1)
+		public void BuildModOrderList(int selectIndex = -1, string lastOrderName = "")
 		{
 			if (SelectedProfile != null)
 			{
@@ -1629,6 +1629,12 @@ namespace DivinityModManager.ViewModels
 				ModOrderList.Clear();
 				ModOrderList.Add(SelectedProfile.SavedLoadOrder);
 				ModOrderList.AddRange(SavedModOrderList);
+
+				if(!String.IsNullOrEmpty(lastOrderName))
+				{
+					int lastOrderIndex = ModOrderList.IndexOf(ModOrderList.FirstOrDefault(x => x.Name == lastOrderName));
+					if (lastOrderIndex != -1) selectIndex = lastOrderIndex;
+				}
 
 				RxApp.MainThreadScheduler.Schedule(_ =>
 				{
@@ -1697,6 +1703,7 @@ namespace DivinityModManager.ViewModels
 						Name = "New" + nextOrders.Count,
 						Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
 					};
+					newOrder.FilePath = Path.Combine(Settings.LoadOrderPath, DivinityModDataLoader.MakeSafeFilename(Path.Combine(newOrder.Name + ".json"), '_'));
 				}
 				SavedModOrderList.Add(newOrder);
 				BuildModOrderList(SavedModOrderList.Count);
@@ -2071,11 +2078,11 @@ namespace DivinityModManager.ViewModels
 			double taskStepAmount = 1.0 / 11;
 
 			List<DivinityLoadOrderEntry> lastActiveOrder = null;
-			int lastOrderIndex = -1;
+			string lastOrderName = "";
 			if (SelectedModOrder != null)
 			{
 				lastActiveOrder = SelectedModOrder.Order.ToList();
-				lastOrderIndex = SelectedModOrderIndex;
+				lastOrderName = SelectedModOrder.Name;
 			}
 
 			string lastAdventureMod = null;
@@ -2159,12 +2166,8 @@ namespace DivinityModManager.ViewModels
 					if (lastActiveOrder != null && lastActiveOrder.Count > 0)
 					{
 						if (SelectedModOrder != null) SelectedModOrder.SetOrder(lastActiveOrder);
-						BuildModOrderList(lastOrderIndex);
 					}
-					else
-					{
-						BuildModOrderList(0);
-					}
+					BuildModOrderList(0, lastOrderName);
 					MainProgressValue += taskStepAmount;
 					return Unit.Default;
 				}, RxApp.MainThreadScheduler);
@@ -2330,6 +2333,13 @@ namespace DivinityModManager.ViewModels
 				}
 
 				string outputPath = SelectedModOrder.FilePath;
+				string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
+				if(String.IsNullOrWhiteSpace(SelectedModOrder.FilePath))
+				{
+					SelectedModOrder.FilePath = Path.Combine(Settings.LoadOrderPath, outputName);
+					outputPath = SelectedModOrder.FilePath;
+				}
+
 				try
 				{
 					if (SelectedModOrder.Name.Equals("Current"))
@@ -2340,8 +2350,6 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
-
 						// Renaming existing files
 						if (!String.IsNullOrWhiteSpace(outputPath) && !String.IsNullOrWhiteSpace(SelectedModOrder.Name) && File.Exists(outputPath))
 						{
@@ -2370,7 +2378,7 @@ namespace DivinityModManager.ViewModels
 								}
 								catch (Exception ex)
 								{
-									DivinityApp.Log($"Error renaming file:\n{ex.ToString()}");
+									DivinityApp.Log($"Error renaming file:\n{ex}");
 								}
 							}
 						}
@@ -3094,7 +3102,7 @@ namespace DivinityModManager.ViewModels
 			{
 				PathwayData.LastSaveFilePath = Path.GetDirectoryName(dialog.FileName);
 				DivinityApp.Log($"Loading order from '{dialog.FileName}'.");
-				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName);
+				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName, Settings.LoadOrderPath);
 				if (newOrder != null)
 				{
 					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");

@@ -1241,7 +1241,6 @@ namespace DivinityModManager.ViewModels
 				}
 				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
 
-
 				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
 				DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");
 				if (!Directory.Exists(larianDocumentsFolder))

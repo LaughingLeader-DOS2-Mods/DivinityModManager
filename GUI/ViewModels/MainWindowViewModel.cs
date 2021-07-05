@@ -936,6 +936,12 @@ namespace DivinityModManager.ViewModels
 							Settings.GameExecutablePath = exe;
 						}
 					}
+
+					if(Settings.SelectedTabIndex == 1)
+					{
+						// Help for people confused about needing to click the export button to save the json
+						Settings.ExportExtenderSettingsCommand?.Execute(null);
+					}
 				}
 				catch (Exception ex) { }
 				if (SaveSettings())

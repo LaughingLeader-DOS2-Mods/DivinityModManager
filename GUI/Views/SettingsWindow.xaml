@@ -475,7 +475,7 @@
 					x:Name="ExportExtenderSettingsButton"
 					HorizontalAlignment="Center"
 					Command="{Binding ExportExtenderSettingsCommand}"
-					Content="Export Settings"
+					Content="Save OsirisExtenderSettings.json"
 					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json"
 					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 				<Button

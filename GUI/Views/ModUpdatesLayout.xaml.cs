@@ -29,7 +29,7 @@ namespace DivinityModManager.Views
 
 		private void ModUpdatesLayout_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
 		{
-			if (DataContext is ModUpdatesViewData vm)
+			if (e.NewValue != null && e.NewValue is ModUpdatesViewData vm)
 			{
 				ViewModel = vm;
 

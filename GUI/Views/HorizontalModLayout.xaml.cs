@@ -418,15 +418,11 @@ namespace DivinityModManager.Views
 
 			DataContextChanged += (o, e) =>
 			{
-				if(DataContext != null && DataContext is MainWindowViewModel vm)
+				if(e.NewValue != null && e.NewValue is MainWindowViewModel vm)
 				{
 					ViewModel = vm;
 					BindingOperations.SetBinding(ActiveModsListView, ListView.ItemsSourceProperty, new Binding { Path = new PropertyPath("ActiveMods"), Source = ViewModel });
 					BindingOperations.SetBinding(InactiveModsListView, ListView.ItemsSourceProperty, new Binding { Path = new PropertyPath("InactiveMods"), Source = ViewModel });
-				}
-				else
-				{
-					ViewModel = null;
 				}
 			};
 
@@ -680,6 +676,7 @@ namespace DivinityModManager.Views
 
 		public void AutoSizeNameColumn_ActiveMods(object sender, EventArgs e)
 		{
+			if (ViewModel == null) return;
 			if (ViewModel.ActiveMods.Count > 0 && ActiveModsListView.View is GridView gridView && gridView.Columns.Count >= 2)
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
@@ -708,6 +705,7 @@ namespace DivinityModManager.Views
 
 		public void AutoSizeNameColumn_InactiveMods(object sender, EventArgs e)
 		{
+			if (ViewModel == null) return;
 			if (ViewModel.InactiveMods.Count > 0 && InactiveModsListView.View is GridView gridView && gridView.Columns.Count >= 2)
 			{
 				var longestName = ViewModel.InactiveMods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;

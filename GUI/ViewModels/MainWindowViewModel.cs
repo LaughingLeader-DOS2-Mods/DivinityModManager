@@ -1235,7 +1235,13 @@ namespace DivinityModManager.ViewModels
 			try
 			{
 				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				if(String.IsNullOrWhiteSpace(AppSettings.DefaultPathways.DocumentsGameFolder))
+				{
+					AppSettings.DefaultPathways.DocumentsGameFolder = "Larian Studios\\Divinity Original Sin 2 Definitive Edition";
+				}
 				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
+
+
 				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
 				DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");
 				if (!Directory.Exists(larianDocumentsFolder))
@@ -1515,7 +1521,7 @@ namespace DivinityModManager.ViewModels
 
 			var cancelTokenSource = GetCancellationToken(int.MaxValue);
 
-			if (Directory.Exists(PathwayData.DocumentsGMCampaignsPath))
+			if (!String.IsNullOrWhiteSpace(PathwayData.DocumentsGMCampaignsPath) && Directory.Exists(PathwayData.DocumentsGMCampaignsPath))
 			{
 				DivinityApp.Log($"Loading gamemaster campaigns from '{PathwayData.DocumentsGMCampaignsPath}'.");
 				await SetMainProgressTextAsync("Loading GM Campaigns from documents folder...");

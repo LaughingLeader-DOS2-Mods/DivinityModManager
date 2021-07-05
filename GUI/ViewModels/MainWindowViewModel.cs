@@ -1199,7 +1199,7 @@ namespace DivinityModManager.ViewModels
 					if (!pakMod.IsEditorMod)
 					{
 						//DivinityApp.LogMessage($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
-						if (workshopMod.Version.VersionInt > pakMod.Version.VersionInt || workshopMod.LastModified > pakMod.LastModified)
+						if (!File.Exists(pakMod.FilePath) || workshopMod.Version.VersionInt > pakMod.Version.VersionInt || workshopMod.LastModified > pakMod.LastModified)
 						{
 							ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
 							{
@@ -1839,14 +1839,8 @@ namespace DivinityModManager.ViewModels
 				messageBox.Closed -= MainWindowMessageBox_Closed_ResetColor;
 			}
 		}
-
-		private bool refreshing = false;
-
-		public bool Refreshing
-		{
-			get => refreshing;
-			set { this.RaiseAndSetIfChanged(ref refreshing, value); }
-		}
+		[Reactive] public bool Refreshing { get; set; } = false;
+		[Reactive] public bool RefreshingWorkshop { get; set; } = false;
 
 		private List<DivinityLoadOrder> LoadExternalLoadOrders()
 		{
@@ -1991,6 +1985,7 @@ namespace DivinityModManager.ViewModels
 
 		private void LoadWorkshopModDataBackground()
 		{
+			RefreshingWorkshop = true;
 			bool workshopCacheFound = false;
 			CheckingForWorkshopUpdates = true;
 
@@ -2066,6 +2061,7 @@ namespace DivinityModManager.ViewModels
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
 						view.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
+						RefreshingWorkshop = false;
 					});
 
 					if (CachedWorkshopData.CacheUpdated)
@@ -2285,6 +2281,17 @@ namespace DivinityModManager.ViewModels
 			Profiles.Clear();
 			workshopMods.Clear();
 			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
+		}
+
+		public void RefreshWorkshopAsync_Start()
+		{
+			if (ModUpdatesViewData != null)
+			{
+				ModUpdatesViewData.Clear();
+			}
+			ModUpdatesViewVisible = ModUpdatesAvailable = false;
+			workshopMods.Clear();
+			LoadWorkshopModDataBackground();
 		}
 
 		private async Task<List<DivinityLoadOrder>> LoadExternalLoadOrdersAsync()
@@ -4228,6 +4235,9 @@ Directory the zip will be extracted to:
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
 			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
+
+			var canRefreshWorkshop = this.WhenAnyValue(x => x.Refreshing, x => x.RefreshingWorkshop, (r1,r2) => r1 == false && r2 == false && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
+			Keys.RefreshWorkshop.AddAction(RefreshWorkshopAsync_Start, canRefreshWorkshop);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
 			Keys.ExportOrderToZip.AddAction(ExportLoadOrderToArchive_Start, canStartExport);

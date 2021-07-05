@@ -62,6 +62,9 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("File", "Reload All")]
 		[Reactive] public Hotkey Refresh { get; set; } = new Hotkey(Key.F5);
 
+		[MenuSettings("File", "Refresh Workshop Updates")]
+		[Reactive] public Hotkey RefreshWorkshop { get; set; } = new Hotkey(Key.F6);
+
 		[MenuSettings("Edit", "Moved Selected Mods to Opposite List", true)]
 		[Reactive] public Hotkey Confirm { get; set; } = new Hotkey(Key.Enter);
 
@@ -116,7 +119,7 @@ namespace DivinityModManager.ViewModels
 		[MenuSettings("Tools", "Extract Selected Mods To...")]
 		[Reactive] public Hotkey ExtractSelectedMods { get; set; } = new Hotkey(Key.M, ModifierKeys.Control);
 
-		[MenuSettings("Tools", "Extract Selected Adventure To...")]
+		[MenuSettings("Tools", "Extract Active Adventure Mod To...")]
 		[Reactive] public Hotkey ExtractSelectedAdventure { get; set; } = new Hotkey(Key.M, ModifierKeys.Control | ModifierKeys.Shift);
 
 		[MenuSettings("Tools", "Toggle Version Generator Window", Tooltip = "A tool for mod authors to generate version numbers for a mod's meta.lsx.")]

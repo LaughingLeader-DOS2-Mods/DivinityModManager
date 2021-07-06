@@ -19,9 +19,12 @@ namespace DivinityModManager.Views
 	/// </summary>
 	public partial class ModUpdatesLayout : ModUpdatesLayoutBase
 	{
+		public static ModUpdatesLayout Instance { get; private set; }
 		public ModUpdatesLayout()
 		{
 			InitializeComponent();
+
+			Instance = this;
 
 			Loaded += ModUpdatesLayout_Loaded;
 			DataContextChanged += ModUpdatesLayout_DataContextChanged;
@@ -68,13 +71,26 @@ namespace DivinityModManager.Views
 
 		private List<string> ignoreColors = new List<string>{"#FFEDEDED", "#00FFFFFF", "#FFFFFFFF", "#FFF4F4F4", "#FFE8E8E8", "#FF000000" };
 
-		private void ModUpdatesLayout_Loaded(object sender, RoutedEventArgs e)
+		public void UpdateBackgroundColors()
 		{
 			//Fix for IsEnabled False ListView having a system color border background we can't change.
-			foreach(var border in this.FindVisualChildren<ClassicBorderDecorator>())
+			foreach (var border in this.FindVisualChildren<ClassicBorderDecorator>())
 			{
 				border.SetResourceReference(BackgroundProperty, Brushes.Layer4BackgroundBrush);
 			}
+
+			//foreach (var c in this.FindVisualChildren<Control>())
+			//{
+			//	if(c.Background != null)
+			//	{
+			//		DivinityApp.Log($"{c.GetType()} ({c.Name}) | Background: {c.Background.ToString().Replace("#FF", "#")}");
+			//	}
+			//	//c.SetResourceReference(BackgroundProperty, Brushes.Layer4BackgroundBrush);
+			//}
+		}
+		private void ModUpdatesLayout_Loaded(object sender, RoutedEventArgs e)
+		{
+			UpdateBackgroundColors();
 		}
 
 		GridViewColumnHeader _lastHeaderClicked = null;

@@ -19,13 +19,16 @@
     IsManipulationEnabled="{Binding Unlocked, Mode=OneWay}"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <ResourceDictionary>
-            <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="../Themes/MainResourceDictionary.xaml" />
-            </ResourceDictionary.MergedDictionaries>
-        </ResourceDictionary>
-    </UserControl.Resources>
-    <Border BorderBrush="LightGray" BorderThickness="1">
+		<ResourceDictionary>
+			<ResourceDictionary.MergedDictionaries>
+				<ResourceDictionary Source="../Themes/MainResourceDictionary.xaml" />
+			</ResourceDictionary.MergedDictionaries>
+		</ResourceDictionary>
+	</UserControl.Resources>
+	<UserControl.Style>
+		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
+	</UserControl.Style>
+	<Border BorderBrush="LightGray" BorderThickness="1">
         <Grid x:Name="UpdateGrid">
             <Grid.Resources>
                 <ControlTemplate x:Key="VerticalGridSplitter" TargetType="{x:Type GridSplitter}">

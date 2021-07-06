@@ -369,6 +369,9 @@
 		TargetType="{x:Type ListViewItem}">
 		<Setter Property="Tag" Value="{Binding WorkshopMod}" />
 	</Style>
+	<Style TargetType="controls:ModListView" BasedOn="{StaticResource {x:Type ListView}}">
+		<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer4BackgroundBrush}}" />
+	</Style>
 	<Style
 		x:Key="ModOrderListView" TargetType="ListView" BasedOn="{StaticResource {x:Type ListView}}">
 		<Setter Property="KeyboardNavigation.AcceptsReturn" Value="False" />

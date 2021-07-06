@@ -302,6 +302,11 @@ namespace DivinityModManager.Views
 			{
 				ResourceLocator.SetColorScheme(VersionGeneratorWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
+			//if(ModUpdatesLayout.Instance != null)
+			//{
+			//	ResourceLocator.SetColorScheme(ModUpdatesLayout.Instance.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
+			//	ModUpdatesLayout.Instance.UpdateBackgroundColors();
+			//}
 		}
 
 		private void OnAppClosing(object sender, ExitEventArgs e)

@@ -96,7 +96,7 @@
 				<controls:UnfocusableTextBox
 					x:Name="VersionNumberTextBox"
 					PreviewTextInput="VersionNumberTextBox_PreviewTextInput"
-					TextChanged="VersionNumberTextBox_TextChanged" />
+					LostFocus="VersionNumberTextBox_LostFocus" />
 			</StackPanel>
 			<StackPanel
 				Grid.Row="2"

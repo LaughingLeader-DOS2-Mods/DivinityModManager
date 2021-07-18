@@ -16,6 +16,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using System.Reactive;
+using System.Reactive.Disposables;
+using System.Reactive.Concurrency;
 
 namespace DivinityModManager.Views
 {
@@ -88,27 +91,14 @@ namespace DivinityModManager.Views
 			e.Handled = _numberOnlyRegex.IsMatch(e.Text);
 		}
 
-		private void VersionNumberTextBox_TextChanged(object sender, TextChangedEventArgs e)
-		{
-			if (sender is TextBox tb)
-			{
-				if (Int32.TryParse(tb.Text, out int version))
-				{
-					VersionData.ParseInt(version);
-				}
-				else
-				{
-					VersionData.ParseInt(268435456);
-					tb.Text = "268435456";
-				}
-			}
-		}
-
 		private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
 			if(VersionNumberTextBox != null)
 			{
-				VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ =>
+				{
+					VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+				});
 			}
 		}
 
@@ -129,6 +119,22 @@ namespace DivinityModManager.Views
 			if (VersionNumberTextBox != null)
 			{
 				VersionNumberTextBox.Text = VersionData.VersionInt.ToString();
+			}
+		}
+
+		private void VersionNumberTextBox_LostFocus(object sender, RoutedEventArgs e)
+		{
+			if (sender is TextBox tb)
+			{
+				if (Int32.TryParse(tb.Text, out int version))
+				{
+					VersionData.ParseInt(version);
+				}
+				else
+				{
+					VersionData.ParseInt(268435456);
+					tb.Text = "268435456";
+				}
 			}
 		}
 	}

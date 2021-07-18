@@ -447,7 +447,10 @@ namespace DivinityModManager.ViewModels
 			}
 
 			gameMasterCampaigns.Clear();
-			gameMasterCampaigns.AddRange(data);
+			if(data != null)
+			{
+				gameMasterCampaigns.AddRange(data);
+			}
 
 			DivinityGameMasterCampaign nextSelected = null;
 
@@ -1533,9 +1536,9 @@ namespace DivinityModManager.ViewModels
 			if (data != null)
 			{
 				data = data.OrderBy(m => m.Name).ToList();
+				DivinityApp.Log($"Loaded '{data.Count}' GM campaigns.");
 			}
 			
-			DivinityApp.Log($"Loaded '{data.Count}' GM campaigns.");
 			return data;
 		}
 

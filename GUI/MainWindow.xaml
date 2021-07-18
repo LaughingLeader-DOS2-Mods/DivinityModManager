@@ -113,13 +113,15 @@
 									</TextBlock.Effect>
 								</TextBlock>
 								<Image
+									Width="16"
+									Height="16"
 									x:Name="ExpandImage"
 									Grid.Column="3"
 									RenderOptions.BitmapScalingMode="Fant"
 									Source="{StaticResource ExpandDownImage}"
 									Stretch="Uniform"
 									StretchDirection="UpOnly"
-									Visibility="{Binding ModUpdatesAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue='Hidden'}" />
+									Visibility="{Binding ModUpdatesAvailable, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 							</Grid>
 						</Button.Content>
 					</Button>

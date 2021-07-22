@@ -36,6 +36,12 @@ namespace DivinityModManager
 		public const string ORIGINS_UUID = "1301db3d-1f54-4e98-9be5-5094030916e4";
 		public const string GAMEMASTER_UUID = "00550ab2-ac92-410c-8d94-742f7629de0e";
 
+		public const string EXTENDER_REPO_URL = "Norbyte/ositools";
+		public const string EXTENDER_LATEST_URL = "https://github.com/Norbyte/ositools/releases/latest";
+		public const string EXTENDER_APPDATA_DLL = "OsirisExtender/OsiExtenderEoCApp.dll";
+		public const string EXTENDER_MOD_CONFIG = "OsiToolsConfig.json";
+		public const string EXTENDER_UPDATER_FILE = "DXGI.dll";
+
 		public static readonly Uri LightTheme = new Uri("pack://application:,,,/DivinityModManager;component/Themes/Light.xaml", UriKind.Absolute);
 		public static readonly Uri DarkTheme = new Uri("pack://application:,,,/DivinityModManager;component/Themes/Dark.xaml", UriKind.Absolute);
 

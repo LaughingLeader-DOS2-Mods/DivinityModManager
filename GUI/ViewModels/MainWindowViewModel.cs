@@ -613,8 +613,8 @@ namespace DivinityModManager.ViewModels
 			try
 			{
 				string latestReleaseZipUrl = "";
-				DivinityApp.Log($"Checking for latest DXGI.dll release at 'Norbyte/ositools'.");
-				var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync("Norbyte/ositools");
+				DivinityApp.Log($"Checking for latest {DivinityApp.EXTENDER_UPDATER_FILE} release at '{DivinityApp.EXTENDER_REPO_URL}'.");
+				var latestReleaseData = await GithubHelper.GetLatestReleaseDataAsync(DivinityApp.EXTENDER_REPO_URL);
 				if (!String.IsNullOrEmpty(latestReleaseData))
 				{
 					var jsonData = DivinityJsonUtils.SafeDeserialize<Dictionary<string, object>>(latestReleaseData);
@@ -681,25 +681,22 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"Error loading extender settings: {ex.ToString()}");
 			}
 
-			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "DXGI.dll");
+			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), DivinityApp.EXTENDER_UPDATER_FILE);
 			DivinityApp.Log($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
 			if (File.Exists(extenderUpdaterPath))
 			{
-				DivinityApp.Log($"Checking DXGI.dll for Osiris ASCII bytes.");
+				DivinityApp.Log($"Checking {DivinityApp.EXTENDER_UPDATER_FILE} for Osiris ASCII bytes.");
 				try
 				{
-					using (var stream = new FileStream(extenderUpdaterPath, FileMode.Open, FileAccess.Read, FileShare.Read))
+					FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(extenderUpdaterPath);
+					if (fvi != null && fvi.ProductName.IndexOf("Script Extender", StringComparison.OrdinalIgnoreCase) >= 0)
 					{
-						byte[] bytes = DivinityStreamUtils.ReadToEnd(stream);
-						if (bytes.IndexOf(Encoding.ASCII.GetBytes("Osiris")) >= 0)
-						{
-							Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
-							DivinityApp.Log($"Found the OsiExtender at '{extenderUpdaterPath}'.");
-						}
-						else
-						{
-							DivinityApp.Log($"Failed to find ASCII bytes in '{extenderUpdaterPath}'.");
-						}
+						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+						DivinityApp.Log($"Found the Extender at '{extenderUpdaterPath}'.");
+					}
+					else
+					{
+						DivinityApp.Log($"'{extenderUpdaterPath}' isn't the Script Extender?");
 					}
 				}
 				catch (System.IO.IOException ex)
@@ -717,10 +714,10 @@ namespace DivinityModManager.ViewModels
 			else
 			{
 				Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = false;
-				DivinityApp.Log($"Extender DXGI.dll not found.");
+				DivinityApp.Log($"Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} not found.");
 			}
 
-			string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "OsirisExtender/OsiExtenderEoCApp.dll");
+			string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DivinityApp.EXTENDER_APPDATA_DLL);
 			if (File.Exists(extenderAppFile))
 			{
 				Settings.ExtenderSettings.ExtenderIsAvailable = true;
@@ -3831,7 +3828,7 @@ namespace DivinityModManager.ViewModels
 			CanCancelProgress = true;
 			MainProgressIsActive = true;
 
-			string dllDestination = Path.Combine(exeDir, "DXGI.dll");
+			string dllDestination = Path.Combine(exeDir, DivinityApp.EXTENDER_UPDATER_FILE);
 
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 			{
@@ -3851,7 +3848,7 @@ namespace DivinityModManager.ViewModels
 						foreach (ZipArchiveEntry entry in archive.Entries)
 						{
 							if (MainProgressToken.IsCancellationRequested) break;
-							if (entry.Name.Equals("DXGI.dll", StringComparison.OrdinalIgnoreCase))
+							if (entry.Name.Equals(DivinityApp.EXTENDER_UPDATER_FILE, StringComparison.OrdinalIgnoreCase))
 							{
 								unzippedEntryStream = entry.Open(); // .Open will return a stream
 								using (var fs = File.Create(dllDestination, 4096, FileOptions.Asynchronous))
@@ -3884,7 +3881,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if (successes >= 3)
 					{
-						view.AlertBar.SetSuccessAlert($"Successfully installed the Osiris Extender DXGI.dll to '{exeDir}'.", 20);
+						view.AlertBar.SetSuccessAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", 20);
 						HighlightExtenderDownload = false;
 						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
 						if (Settings.ExtenderSettings.ExtenderVersion <= -1)
@@ -3920,7 +3917,7 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						view.AlertBar.SetDangerAlert($"Error occurred when installing the Osiris Extender DXGI.dll. Check the log.", 30);
+						view.AlertBar.SetDangerAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", 30);
 					}
 				});
 
@@ -3933,15 +3930,15 @@ namespace DivinityModManager.ViewModels
 			if (!OpenRepoLinkToDownload)
 			{
 				string exeDir = Path.GetDirectoryName(Settings.GameExecutablePath);
-				string messageText = String.Format(@"Download and install the Osiris Extender?
-The Osiris Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
+				string messageText = String.Format(@"Download and install the Script Extender (ositools)?
+The Script Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
 The extenders needs to only be installed once, as it can auto-update itself automatically when you launch the game.
 Download url: 
 {0}
 Directory the zip will be extracted to:
 {1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
 
-				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Osiris Extender?",
+				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Script Extender?",
 					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
 				if (result == MessageBoxResult.Yes)
 				{

@@ -299,7 +299,7 @@ namespace DivinityModManager.Util
 
 									projects.Add(modData);
 
-									var osiConfigFile = Path.Combine(folder, "OsiToolsConfig.json");
+									var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
 									if (File.Exists(osiConfigFile))
 									{
 										var osiToolsConfig = LoadOsiConfig(osiConfigFile);
@@ -315,7 +315,7 @@ namespace DivinityModManager.Util
 										}
 										else
 										{
-											DivinityApp.Log($"Failed to parse OsiToolsConfig.json for '{folder}'.");
+											DivinityApp.Log($"Failed to parse {DivinityApp.EXTENDER_MOD_CONFIG} for '{folder}'.");
 										}
 									}
 								}
@@ -385,7 +385,7 @@ namespace DivinityModManager.Util
 										}
 										projects.Add(modData);
 
-										var osiConfigFile = Path.Combine(folder, "OsiToolsConfig.json");
+										var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
 										if (File.Exists(osiConfigFile))
 										{
 											var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
@@ -401,7 +401,7 @@ namespace DivinityModManager.Util
 											}
 											else
 											{
-												DivinityApp.Log($"Failed to parse OsiToolsConfig.json for '{folder}'.");
+												DivinityApp.Log($"Failed to parse {DivinityApp.EXTENDER_MOD_CONFIG} for '{folder}'.");
 											}
 										}
 									}
@@ -533,7 +533,7 @@ namespace DivinityModManager.Util
 									}
 								}
 
-								var osiToolsConfig = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains("OsiToolsConfig.json"));
+								var osiToolsConfig = pak?.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
 								if (osiToolsConfig != null)
 								{
 									try
@@ -694,7 +694,7 @@ namespace DivinityModManager.Util
 									}
 									mods.Add(modData);
 
-									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains("OsiToolsConfig.json"));
+									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
 									if(osiConfigInfo != null)
 									{
 										var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);

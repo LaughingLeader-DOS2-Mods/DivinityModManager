@@ -78,7 +78,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				_viewModel.ShowAlert($"Error copying text to clipboard: {ex.ToString()}", AlertType.Danger, 10);
+				_viewModel.ShowAlert($"Error copying text to clipboard: {ex}", AlertType.Danger, 10);
 			}
 		}
 

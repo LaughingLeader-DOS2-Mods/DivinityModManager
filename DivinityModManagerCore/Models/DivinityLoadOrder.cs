@@ -107,7 +107,7 @@ namespace DivinityModManager.Models
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error adding mod to order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error adding mod to order:\n{ex}");
 			}
 		}
 
@@ -139,7 +139,7 @@ namespace DivinityModManager.Models
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error removing mod from order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error removing mod from order:\n{ex}");
 			}
 		}
 
@@ -165,7 +165,7 @@ namespace DivinityModManager.Models
 			}
 			catch(Exception ex)
 			{
-				DivinityApp.Log($"Error sorting order:\n{ex.ToString()}");
+				DivinityApp.Log($"Error sorting order:\n{ex}");
 			}
 		}
 

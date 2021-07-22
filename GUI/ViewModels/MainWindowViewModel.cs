@@ -658,7 +658,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error checking for latest OsiExtender release: {ex.ToString()}");
+				DivinityApp.Log($"Error checking for latest OsiExtender release: {ex}");
 
 				OpenRepoLinkToDownload = true;
 			}
@@ -678,7 +678,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error loading extender settings: {ex.ToString()}");
+				DivinityApp.Log($"Error loading extender settings: {ex}");
 			}
 
 			string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), DivinityApp.EXTENDER_UPDATER_FILE);
@@ -708,7 +708,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error reading: '{extenderUpdaterPath}'\n\t{ex.ToString()}");
+					DivinityApp.Log($"Error reading: '{extenderUpdaterPath}'\n\t{ex}");
 				}
 			}
 			else
@@ -740,7 +740,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error getting file info from: '{extenderAppFile}'\n\t{ex.ToString()}");
+					DivinityApp.Log($"Error getting file info from: '{extenderAppFile}'\n\t{ex}");
 				}
 			}
 			return Unit.Default;
@@ -801,7 +801,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				view.AlertBar.SetDangerAlert($"Error loading settings at '{settingsFile}': {ex.ToString()}");
+				view.AlertBar.SetDangerAlert($"Error loading settings at '{settingsFile}': {ex}");
 				Settings = null;
 			}
 
@@ -971,7 +971,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					view.AlertBar.SetDangerAlert($"Error saving Osiris Extender settings to '{outputFile}':\n{ex.ToString()}");
+					view.AlertBar.SetDangerAlert($"Error saving Osiris Extender settings to '{outputFile}':\n{ex}");
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -1013,7 +1013,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							view.AlertBar.SetDangerAlert($"Error deleting workshop cache:\n{ex.ToString()}");
+							view.AlertBar.SetDangerAlert($"Error deleting workshop cache:\n{ex}");
 						}
 					}
 				}
@@ -1124,7 +1124,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				view.AlertBar.SetDangerAlert($"Error saving settings at '{settingsFile}': {ex.ToString()}");
+				view.AlertBar.SetDangerAlert($"Error saving settings at '{settingsFile}': {ex}");
 			}
 			return false;
 		}
@@ -1332,7 +1332,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error setting up game pathways: {ex.ToString()}");
+				DivinityApp.Log($"Error setting up game pathways: {ex}");
 			}
 		}
 
@@ -1458,7 +1458,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error awaiting task:\n{ex.ToString()}");
+				DivinityApp.Log($"Error awaiting task:\n{ex}");
 			}
 			return defaultValue;
 		}
@@ -1670,7 +1670,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							DivinityApp.Log($"Error setting next load order:\n{ex.ToString()}");
+							DivinityApp.Log($"Error setting next load order:\n{ex}");
 						}
 					}
 					LoadingOrder = false;
@@ -2320,7 +2320,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error loading external load orders: {ex.ToString()}.");
+				DivinityApp.Log($"Error loading external load orders: {ex}.");
 				return new List<DivinityLoadOrder>();
 			}
 		}
@@ -2905,7 +2905,7 @@ namespace DivinityModManager.ViewModels
 				{
 					RxApp.MainThreadScheduler.Schedule(() =>
 					{
-						string msg = $"Error writing load order archive '{outputPath}': {ex.ToString()}";
+						string msg = $"Error writing load order archive '{outputPath}': {ex}";
 						DivinityApp.Log(msg);
 						view.AlertBar.SetDangerAlert(msg);
 					});
@@ -3071,7 +3071,7 @@ namespace DivinityModManager.ViewModels
 					}
 					catch (Exception ex)
 					{
-						view.AlertBar.SetDangerAlert($"Error exporting mod order to '{dialog.FileName}':\n{ex.ToString()}");
+						view.AlertBar.SetDangerAlert($"Error exporting mod order to '{dialog.FileName}':\n{ex}");
 					}
 				}
 			}
@@ -3333,7 +3333,7 @@ namespace DivinityModManager.ViewModels
 					}
 					catch (Exception ex)
 					{
-						DivinityApp.Log($"Error running AutoUpdater:\n{ex.ToString()}");
+						DivinityApp.Log($"Error running AutoUpdater:\n{ex}");
 					}
 				}
 			}
@@ -3630,7 +3630,7 @@ namespace DivinityModManager.ViewModels
 						}
 						catch (Exception ex)
 						{
-							DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+							DivinityApp.Log($"Error extracting package: {ex}");
 						}
 						IncreaseMainProgressValue(taskStepAmount);
 					}
@@ -3864,7 +3864,7 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+					DivinityApp.Log($"Error extracting package: {ex}");
 				}
 				finally
 				{

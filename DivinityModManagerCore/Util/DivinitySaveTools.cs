@@ -136,7 +136,7 @@ namespace DivinityModManager.Util
 			}
 			catch(Exception ex)
 			{
-				DivinityApp.Log($"Failed to rename save: {ex.ToString()}");
+				DivinityApp.Log($"Failed to rename save: {ex}");
 			}
 
 			return false;

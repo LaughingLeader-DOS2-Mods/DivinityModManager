@@ -71,7 +71,7 @@ namespace DivinityModManager.Util
 			}
 			catch(Exception ex)
 			{
-				DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+				DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex}");
 			}
 
 			int totalLoaded = 0;
@@ -103,7 +103,7 @@ namespace DivinityModManager.Util
 						}
 						catch(Exception ex)
 						{
-							DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
+							DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex}");
 						}
 					}
 
@@ -142,7 +142,7 @@ namespace DivinityModManager.Util
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex.ToString()}");
+					DivinityApp.Log($"Error requesting Steam API to get workshop mod data:\n{ex}");
 				}
 
 				if (!String.IsNullOrEmpty(responseData))
@@ -180,7 +180,7 @@ namespace DivinityModManager.Util
 							}
 							catch (Exception ex)
 							{
-								DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
+								DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex}");
 							}
 						}
 					}
@@ -285,7 +285,7 @@ namespace DivinityModManager.Util
 							}
 							catch (Exception ex)
 							{
-								DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex.ToString()}");
+								DivinityApp.Log($"Error parsing mod data for {d.title}({d.publishedfileid})\n{ex}");
 							}
 						}
 					}

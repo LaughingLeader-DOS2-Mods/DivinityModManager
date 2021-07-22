@@ -148,11 +148,11 @@ namespace DivinityModManager.Util
 			{
 				if (!token.Value.IsCancellationRequested)
 				{
-					DivinityApp.Log($"Error creating package: {ex.ToString()}");
+					DivinityApp.Log($"Error creating package: {ex}");
 				}
 				else
 				{
-					DivinityApp.Log($"Cancelled creating package: {ex.ToString()}");
+					DivinityApp.Log($"Cancelled creating package: {ex}");
 				}
 				return false;
 			}
@@ -319,7 +319,7 @@ namespace DivinityModManager.Util
 				}
 				catch (Exception ex)
 				{
-					DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+					DivinityApp.Log($"Error extracting package: {ex}");
 				}
 			}
 			return success >= count;
@@ -335,7 +335,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error extracting package: {ex.ToString()}");
+				DivinityApp.Log($"Error extracting package: {ex}");
 				return false;
 			}
 		}
@@ -379,7 +379,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error writing file: {ex.ToString()}");
+				DivinityApp.Log($"Error writing file: {ex}");
 				return false;
 			}
 		}

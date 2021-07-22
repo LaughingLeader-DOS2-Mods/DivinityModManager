@@ -78,7 +78,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex) 
 			{
-				DivinityApp.Log($"Error checking junction point '{path}': {ex.ToString()}");
+				DivinityApp.Log($"Error checking junction point '{path}': {ex}");
 			}
 			return path;
 		}
@@ -191,7 +191,7 @@ namespace DivinityModManager.Util
 							}
 							catch (Exception ex)
 							{
-								DivinityApp.Log($"Error parsing steam library file at '{libraryFile}': {ex.ToString()}");
+								DivinityApp.Log($"Error parsing steam library file at '{libraryFile}': {ex}");
 							}
 
 							foreach (var folderPath in libraryFolders)
@@ -221,7 +221,7 @@ namespace DivinityModManager.Util
 			}
 			catch(Exception ex)
 			{
-				DivinityApp.Log($"[*ERROR*] Error finding game path: {ex.ToString()}");
+				DivinityApp.Log($"[*ERROR*] Error finding game path: {ex}");
 			}
 
 			return "";

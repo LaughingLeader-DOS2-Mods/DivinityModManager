@@ -17,6 +17,7 @@ using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Concurrency;
 using System.Windows;
+using System.ComponentModel;
 
 namespace DivinityModManager.Controls
 {
@@ -25,10 +26,39 @@ namespace DivinityModManager.Controls
 		private MethodInfo getInfoMethod;
 		private MethodInfo updateAnchorMethod;
 
+		public bool Resizing { get; set; } = false;
+		public bool UserResizedColumns { get; set; } = false;
+
 		public ModListView() : base() 
 		{
 			getInfoMethod = typeof(ItemsControl).GetMethod("ItemInfoFromContainer", BindingFlags.NonPublic | BindingFlags.Instance);
 			updateAnchorMethod = typeof(ListBox).GetMethod("UpdateAnchorAndActionItem", BindingFlags.NonPublic | BindingFlags.Instance);
+
+			Loaded += (o, e) =>
+			{
+				PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(GridViewColumn.WidthProperty, typeof(GridViewColumn));
+				if (this.View is GridView grid)
+				{
+					//Capture user-resizing of the name column to disable auto-resizing
+					var nameColumn = grid.Columns[1];
+					if (nameColumn != null)
+					{
+						pd.AddValueChanged(nameColumn, NameColumnWidthChanged);
+					}
+				}
+			};
+		}
+
+		private void NameColumnWidthChanged(object sender, EventArgs e)
+		{
+			if (!Resizing)
+			{
+				UserResizedColumns = true;
+			}
+			else
+			{
+				Resizing = false;
+			}
 		}
 
 		protected override AutomationPeer OnCreateAutomationPeer()

@@ -1855,7 +1855,9 @@ namespace DivinityModManager.Util
 				modHelper.CollectGlobals = false;
 				modHelper.CollectLevels = false;
 				modHelper.CollectStoryGoals = false;
-				modHelper.Discover(gameDataPath);
+				modHelper.CollectStats = false;
+
+				modHelper.DiscoverBuiltinPackages(gameDataPath);
 
 				if (modResources.Mods != null && modResources.Mods.Values != null)
 				{
@@ -1916,7 +1918,9 @@ namespace DivinityModManager.Util
 				modHelper.CollectGlobals = false;
 				modHelper.CollectLevels = false;
 				modHelper.CollectStoryGoals = false;
-				modHelper.Discover(gameDataPath);
+				modHelper.CollectStats = false;
+
+				modHelper.DiscoverBuiltinPackages(gameDataPath);
 
 				if (modResources.Mods != null && modResources.Mods.Values != null)
 				{

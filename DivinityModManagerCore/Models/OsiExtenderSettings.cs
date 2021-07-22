@@ -1,5 +1,7 @@
 ﻿using DivinityModManager.Extensions;
 using ReactiveUI;
+using ReactiveUI.Fody.Helpers;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -37,184 +39,113 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref extenderVersion, value); }
 		}
 
-		private bool enableExtensions = true;
-
+		[SettingsEntry("Enable Extensions", "Make the Osiris extension functionality available ingame or in the editor.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(true)]
-		public bool EnableExtensions
-		{
-			get => enableExtensions;
-			set { this.RaiseAndSetIfChanged(ref enableExtensions, value); }
-		}
+		public bool EnableExtensions { get; set; } = true;
 
-		private bool createConsole = false;
-
+		[SettingsEntry("Create Console", "Creates a console window that logs extender internals. Mainly useful for debugging.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool CreateConsole
-		{
-			get => createConsole;
-			set { this.RaiseAndSetIfChanged(ref createConsole, value); }
-		}
+		public bool CreateConsole { get; set; } = false;
 
-		private bool logFailedCompile = true;
-
+		[SettingsEntry("Log Working Story Errors", "Log errors during Osiris story compilation to a log file (LogFailedCompile).")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(true)]
-		public bool LogFailedCompile
-		{
-			get => logFailedCompile;
-			set { this.RaiseAndSetIfChanged(ref logFailedCompile, value); }
-		}
+		public bool LogFailedCompile { get; set; } = true;
 
-		private bool enableLogging = false;
-
+		[SettingsEntry("Enable Osiris Logging", "Enable logging of Osiris activity (rule evaluation, queries, etc.) to a log file.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool EnableLogging
-		{
-			get => enableLogging;
-			set { this.RaiseAndSetIfChanged(ref enableLogging, value); }
-		}
+		public bool EnableLogging { get; set; } = false;
 
-		private bool logCompile = false;
-
+		[SettingsEntry("Log Script Compilation", "Log Osiris story compilation to a log file.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool LogCompile
-		{
-			get => logCompile;
-			set { this.RaiseAndSetIfChanged(ref logCompile, value); }
-		}
+		public bool LogCompile { get; set; } = false;
 
-		private string logDirectory;
-
+		[SettingsEntry("Log Directory", "Directory where the generated Osiris logs will be stored. Default is Documents\\OsirisLogs")]
+		[Reactive]
 		[DataMember]
-		public string LogDirectory
-		{
-			get => logDirectory;
-			set { this.RaiseAndSetIfChanged(ref logDirectory, value); }
-		}
+		public string LogDirectory { get; set; } = "";
 
-		private bool logRuntime = false;
-
+		[SettingsEntry("Log Runtime", "Log extender console and script output to a log file.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool LogRuntime
-		{
-			get => logRuntime;
-			set { this.RaiseAndSetIfChanged(ref logRuntime, value); }
-		}
+		public bool LogRuntime { get; set; } = false;
 
-		private bool disableModValidation = true;
-
+		[SettingsEntry("Disable Mod Validation", "Disable module hashing when loading modules. Speeds up mod loading with no drawbacks.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(true)]
-		public bool DisableModValidation
-		{
-			get => disableModValidation;
-			set { this.RaiseAndSetIfChanged(ref disableModValidation, value); }
-		}
+		public bool DisableModValidation { get; set; } = true;
 
-		private bool enableAchievements = true;
-
+		[SettingsEntry("Enable Achievements", "Re-enable achievements for modded games.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(true)]
-		public bool EnableAchievements
-		{
-			get => enableAchievements;
-			set { this.RaiseAndSetIfChanged(ref enableAchievements, value); }
-		}
+		public bool EnableAchievements { get; set; } = true;
 
-		private bool sendCrashReports = true;
-
+		[SettingsEntry("Send Crash Reports", "Upload minidumps to the crash report collection server after a game crash.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(true)]
-		public bool SendCrashReports
-		{
-			get => sendCrashReports;
-			set { this.RaiseAndSetIfChanged(ref sendCrashReports, value); }
-		}
+		public bool SendCrashReports { get; set; } = true;
 
-		private bool enableDebugger = false;
-
+		[SettingsEntry("Enable Osiris Debugger", "Enables the Osiris debugger interface (vscode extension).", true)]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool EnableDebugger
-		{
-			get => enableDebugger;
-			set { this.RaiseAndSetIfChanged(ref enableDebugger, value); }
-		}
+		public bool EnableDebugger { get; set; } = false;
 
-		private int debuggerPort = 9999;
-
+		[SettingsEntry("Osiris Debugger Port", "Port number the Osiris debugger will listen on (default 9999)", true)]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(9999)]
-		public int DebuggerPort
-		{
-			get => debuggerPort;
-			set { this.RaiseAndSetIfChanged(ref debuggerPort, value); }
-		}
+		public int DebuggerPort { get; set; } = 9999;
 
-		private int debuggerFlags = 0;
+		[SettingsEntry("Dump Network Strings", "Dumps the NetworkFixedString table to LogDirectory. Mainly useful for debugging desync issues.", true)]
+		[Reactive]
+		[DataMember]
+		[DefaultValue(false)]
+		public bool DumpNetworkStrings { get; set; } = false;
 
+		[SettingsEntry("Osiris Debugger Flags", "Debugger flags to set. Default: 0")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(0)]
-		public int DebuggerFlags
-		{
-			get => debuggerFlags;
-			set { this.RaiseAndSetIfChanged(ref debuggerFlags, value); }
-		}
+		public int DebuggerFlags { get; set; } = 0;
 
-		private bool dumpNetworkStrings = false;
-
+		[SettingsEntry("Enable Developer Mode", "Enables various debug functionality for development purposes. This can be checked by mods to enable additional log messages and more.")]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool DumpNetworkStrings
-		{
-			get => dumpNetworkStrings;
-			set { this.RaiseAndSetIfChanged(ref dumpNetworkStrings, value); }
-		}
+		public bool DeveloperMode { get; set; } = false;
 
-		private bool developerMode = false;
-
+		[SettingsEntry("Enable Lua Debugger", "Enables the Lua debugger interface (vscode extension).", true)]
+		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool DeveloperMode
-		{
-			get => developerMode;
-			set { this.RaiseAndSetIfChanged(ref developerMode, value); }
-		}
-
-		private bool enableLuaDebugger = false;
-
-		[DataMember]
-		[DefaultValue(false)]
-		public bool EnableLuaDebugger
-		{
-			get => enableLuaDebugger;
-			set { this.RaiseAndSetIfChanged(ref enableLuaDebugger, value); }
-		}
+		public bool EnableLuaDebugger { get; set; } = false;
 
 		public static OsiExtenderSettings DefaultSettings = new OsiExtenderSettings();
 
 		public void SetToDefault()
 		{
-			EnableExtensions = true;
-			CreateConsole = false;
-			EnableLogging = false;
-			LogFailedCompile = true;
-			LogCompile = false;
-			LogRuntime = false;
-			LogDirectory = "";
-			DisableModValidation = true;
-			EnableAchievements = true;
-			SendCrashReports = true;
-			EnableDebugger = false;
-			DebuggerPort = 9999;
-			DebuggerFlags = 0;
-			DeveloperMode = false;
-			EnableLuaDebugger = false;
+			PropertyDescriptorCollection props = TypeDescriptor.GetProperties(this.GetType());
+			foreach (PropertyDescriptor pr in props)
+			{
+				if (pr.CanResetValue(this))
+				{
+					pr.ResetValue(this);
+				}
+			}
 		}
 
 		public void Set(OsiExtenderSettings osirisExtenderSettings)

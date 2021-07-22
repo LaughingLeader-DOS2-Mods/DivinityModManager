@@ -22,8 +22,13 @@
 			</ResourceDictionary.MergedDictionaries>
 			<Style
 				x:Key="IntegerUpDownStyle"
-				BasedOn="{StaticResource ThemedIntegerUpDown}"
+				BasedOn="{StaticResource {x:Type xc:IntegerUpDown}}"
 				TargetType="xc:IntegerUpDown">
+				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />
+				<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
+				<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
+				<Setter Property="WatermarkTemplate" Value="{StaticResource DefaultXCWatermarkTemplate}" />
+				<Setter Property="BorderThickness" Value="0" />
 				<Setter Property="VerticalAlignment" Value="Center" />
 				<Setter Property="HorizontalAlignment" Value="Center" />
 				<Setter Property="MinHeight" Value="25" />

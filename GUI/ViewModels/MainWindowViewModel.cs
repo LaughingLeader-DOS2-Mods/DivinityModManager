@@ -3340,8 +3340,7 @@ namespace DivinityModManager.ViewModels
 			else
 			{
 				AutoUpdater.ReportErrors = true;
-				//AutoUpdater.Start(DivinityApp.URL_UPDATE);
-				AutoUpdater.Start(@"G:\Projects\VisualStudio\DivinityModManager\Update.xml");
+				AutoUpdater.Start(DivinityApp.URL_UPDATE);
 				Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
 				SaveSettings();
 				Task.Delay(1000).ContinueWith(_ =>
@@ -4475,6 +4474,7 @@ Directory the zip will be extracted to:
 			var canCheckForUpdates = this.WhenAnyValue(x => x.MainProgressIsActive, b => b == false);
 			void checkForUpdatesAction()
 			{
+				view.UserInvokedUpdate = true;
 				CheckForUpdates(true);
 			}
 			CheckForAppUpdatesCommand = ReactiveCommand.Create(checkForUpdatesAction, canCheckForUpdates);

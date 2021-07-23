@@ -78,7 +78,16 @@ namespace DivinityModManager.Views
 			UpdateArgs = args;
 			//Title = $"{AutoUpdater.AppTitle} {args.CurrentVersion}";
 
-			var markdownText = WebHelper.DownloadUrlAsString(args.ChangelogURL);
+			string markdownText = "";
+
+			if (!args.ChangelogURL.EndsWith(".md"))
+			{
+				markdownText = WebHelper.DownloadUrlAsString(DivinityApp.URL_CHANGELOG_RAW);
+			}
+			else
+			{
+				markdownText = WebHelper.DownloadUrlAsString(args.ChangelogURL);
+			}
 			if (!String.IsNullOrEmpty(markdownText))
 			{
 				markdownText = Regex.Replace(markdownText, @"^\s+$[\r\n]*", string.Empty, RegexOptions.Multiline);
@@ -164,8 +173,13 @@ namespace DivinityModManager.Views
 			if (args.Error == null)
 			{
 				Init(args);
-				Owner = MainWindow.Self;
-				Show();
+
+				if(MainWindow.Self.UserInvokedUpdate || args.IsUpdateAvailable)
+				{
+					Owner = MainWindow.Self;
+					Show();
+					MainWindow.Self.UserInvokedUpdate = false;
+				}
 			}
 			else
 			{

@@ -85,7 +85,7 @@
                 <Button x:Name="ConfirmButton"
                         HorizontalAlignment="Center"
                         Content="Download"
-                        Background="LimeGreen"
+                        Background="#FF267E26"
                         ToolTip="Download Update">
                     <Button.Resources>
                         <Style TargetType="Border">

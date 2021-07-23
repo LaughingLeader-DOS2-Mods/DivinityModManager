@@ -238,9 +238,19 @@ namespace DivinityModManager.Views
 				this.InputBindings.Add(keyBinding);
 			}
 
-			foreach (var entry in TopMenuBar.Items.Cast<MenuItem>())
+			foreach (var item in TopMenuBar.Items)
 			{
-				menuItems.Add((string)entry.Header, entry);
+				if(item is MenuItem entry)
+				{
+					if (entry.Header is string label)
+					{
+						menuItems.Add(label, entry);
+					}
+					else if (!String.IsNullOrWhiteSpace(entry.Name))
+					{
+						menuItems.Add(entry.Name, entry);
+					}
+				}
 			}
 
 			//Generating menu items

@@ -390,7 +390,6 @@ namespace DivinityModManager.ViewModels
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
 		public ICommand CopyPathToClipboardCommand { get; set; }
-		public ICommand DownloadAndInstallOsiExtenderCommand { get; private set; }
 		public ICommand RenameSaveCommand { get; private set; }
 		public ICommand CopyOrderToClipboardCommand { get; private set; }
 		public ICommand OpenAdventureModInFileExplorerCommand { get; private set; }
@@ -845,7 +844,8 @@ namespace DivinityModManager.ViewModels
 			gameExeFoundObservable = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (path) => path.IsExistingFile()).StartWith(false);
 			//canInstallOsiExtender = this.WhenAnyValue(x => x.PathwayData.OsirisExtenderLatestReleaseUrl, x => x.Settings.GameExecutablePath,
 			//	(url, exe) => !String.IsNullOrWhiteSpace(url) && exe.IsExistingFile()).ObserveOn(RxApp.MainThreadScheduler);
-			DownloadAndInstallOsiExtenderCommand = ReactiveCommand.Create(InstallOsiExtender_Start).DisposeWith(Settings.Disposables);
+
+			Keys.DownloadScriptExtender.AddAction(() => InstallOsiExtender_Start());
 
 			Keys.OpenLogsFolder.AddAction(() =>
 			{
@@ -3938,9 +3938,15 @@ Download url:
 Directory the zip will be extracted to:
 {1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
 
-				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view, messageText, "Download & Install the Script Extender?",
-					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
-				if (result == MessageBoxResult.Yes)
+				var result = AdonisUI.Controls.MessageBox.Show(new AdonisUI.Controls.MessageBoxModel
+				{
+					Text = messageText,
+					Caption = "Download & Install the Script Extender?",
+					Buttons = AdonisUI.Controls.MessageBoxButtons.YesNo(),
+					Icon = AdonisUI.Controls.MessageBoxImage.Question
+				});
+
+				if (result == AdonisUI.Controls.MessageBoxResult.Yes)
 				{
 					InstallOsiExtender_DownloadStart(exeDir);
 				}

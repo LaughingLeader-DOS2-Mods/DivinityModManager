@@ -3340,7 +3340,8 @@ namespace DivinityModManager.ViewModels
 			else
 			{
 				AutoUpdater.ReportErrors = true;
-				AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				//AutoUpdater.Start(DivinityApp.URL_UPDATE);
+				AutoUpdater.Start(@"G:\Projects\VisualStudio\DivinityModManager\Update.xml");
 				Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
 				SaveSettings();
 				Task.Delay(1000).ContinueWith(_ =>

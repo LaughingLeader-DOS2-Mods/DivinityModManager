@@ -81,8 +81,8 @@
     <Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
       <HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
     </Reference>
-    <Reference Include="AutoUpdater.NET, Version=1.6.4.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
-      <HintPath>..\packages\Autoupdater.NET.Official.1.6.4\lib\net45\AutoUpdater.NET.dll</HintPath>
+    <Reference Include="AutoUpdater.NET, Version=1.7.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autoupdater.NET.Official.1.7.0\lib\net45\AutoUpdater.NET.dll</HintPath>
     </Reference>
     <Reference Include="DynamicData, Version=7.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\DynamicData.7.2.1\lib\net461\DynamicData.dll</HintPath>
@@ -235,6 +235,7 @@
     <Compile Include="Controls\HyperlinkText.xaml.cs">
       <DependentUpon>HyperlinkText.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Controls\Markdown.cs" />
     <Compile Include="Controls\ModEntryGrid.cs" />
     <Compile Include="Controls\ModListView.cs" />
     <Compile Include="Controls\SelectableTextBlock.cs" />
@@ -245,6 +246,7 @@
     <Compile Include="Converters\ModIsAvailableConverter.cs" />
     <Compile Include="Converters\StringNotEmptyToVisibilityConverter.cs" />
     <Compile Include="Converters\StringToUriConverter.cs" />
+    <Compile Include="Converters\TextToFlowDocumentConverter.cs" />
     <Compile Include="Extensions\DependencyObjectExtensions.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
@@ -273,6 +275,9 @@
     <Compile Include="ViewModels\ModUpdatesViewData.cs" />
     <Compile Include="Views\AboutWindow.xaml.cs">
       <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AppUpdateWindow.xaml.cs">
+      <DependentUpon>AppUpdateWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HideWindowBase.cs" />
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
@@ -316,6 +321,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Themes\DefaultStyles\MarkdownStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Themes\Light.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -332,6 +341,10 @@
     <Page Include="Views\AboutWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AppUpdateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\HorizontalModLayout.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -523,6 +536,9 @@
     <Resource Include="Resources\Icons\LoadCampaignOrder_16x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FodyWeavers.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

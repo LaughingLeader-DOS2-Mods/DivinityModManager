@@ -48,6 +48,22 @@ namespace DivinityModManager.Util
             }
         }
 
+        public static string DownloadUrlAsString(string downloadUrl)
+        {
+            using (System.Net.WebClient webClient = new System.Net.WebClient())
+            {
+                try
+				{
+                    return webClient.DownloadString(downloadUrl);
+				}
+                catch(Exception ex)
+				{
+                    DivinityApp.Log($"Error downloading '{downloadUrl}' as string:\n{ex}");
+				}
+                return "";
+            }
+        }
+
         #region OLD
 
         // Get/Post sources from here: https://stackoverflow.com/a/27108442

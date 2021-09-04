@@ -70,7 +70,7 @@ namespace DivinityModManager.Models
 						}
 					}
 				}
-				ResourceUtils.SaveResource(MetaResource, FilePath, conversionParams);
+				ResourceUtils.SaveResource(MetaResource, FilePath, LSLib.LS.Enums.ResourceFormat.LSF, conversionParams);
 				if (File.Exists(FilePath))
 				{
 					File.SetLastWriteTime(FilePath, DateTime.Now);

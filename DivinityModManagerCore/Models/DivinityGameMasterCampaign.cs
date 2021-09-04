@@ -36,7 +36,8 @@ namespace DivinityModManager.Models
 		{
 			try
 			{
-				if(File.Exists(FilePath) && File.GetSize(FilePath) > 0)
+				var conversionParams = ResourceConversionParameters.FromGameVersion(LSLib.LS.Enums.Game.DivinityOriginalSin2DE);
+				if (File.Exists(FilePath) && File.GetSize(FilePath) > 0)
 				{
 					var backupName = Path.Combine(Path.GetDirectoryName(FilePath), FileName + ".backup");
 					File.Copy(FilePath, backupName, true);
@@ -69,7 +70,7 @@ namespace DivinityModManager.Models
 						}
 					}
 				}
-				ResourceUtils.SaveResource(MetaResource, FilePath);
+				ResourceUtils.SaveResource(MetaResource, FilePath, conversionParams);
 				if (File.Exists(FilePath))
 				{
 					File.SetLastWriteTime(FilePath, DateTime.Now);

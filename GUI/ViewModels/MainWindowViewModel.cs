@@ -2188,41 +2188,48 @@ namespace DivinityModManager.ViewModels
 			}
 
 			await Observable.Start(() => {
-				if(String.IsNullOrEmpty(lastAdventureMod))
+				try
 				{
-					var activeAdventureMod = SelectedModOrder.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.Type == "Adventure")).FirstOrDefault();
-					if(activeAdventureMod != null)
+					if (String.IsNullOrEmpty(lastAdventureMod))
 					{
-						lastAdventureMod = activeAdventureMod.UUID;
-					}
-				}
-
-				int defaultAdventureIndex = AdventureMods.IndexOf(AdventureMods.FirstOrDefault(x => x.UUID == DivinityApp.ORIGINS_UUID));
-				if (defaultAdventureIndex == -1) defaultAdventureIndex = 0;
-				if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
-				{
-					DivinityApp.Log($"Setting selected adventure mod.");
-					var nextAdventureMod = AdventureMods.FirstOrDefault(x => x.UUID == lastAdventureMod);
-					if (nextAdventureMod != null)
-					{
-						SelectedAdventureModIndex = AdventureMods.IndexOf(nextAdventureMod);
-						if(nextAdventureMod.UUID == DivinityApp.GAMEMASTER_UUID)
+						var activeAdventureMod = SelectedModOrder.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.Type == "Adventure")).FirstOrDefault();
+						if (activeAdventureMod != null)
 						{
-							Settings.GameMasterModeEnabled = true;
+							lastAdventureMod = activeAdventureMod.UUID;
+						}
+					}
+
+					int defaultAdventureIndex = AdventureMods.IndexOf(AdventureMods.FirstOrDefault(x => x.UUID == DivinityApp.ORIGINS_UUID));
+					if (defaultAdventureIndex == -1) defaultAdventureIndex = 0;
+					if (lastAdventureMod != null && AdventureMods != null && AdventureMods.Count > 0)
+					{
+						DivinityApp.Log($"Setting selected adventure mod.");
+						var nextAdventureMod = AdventureMods.FirstOrDefault(x => x.UUID == lastAdventureMod);
+						if (nextAdventureMod != null)
+						{
+							SelectedAdventureModIndex = AdventureMods.IndexOf(nextAdventureMod);
+							if (nextAdventureMod.UUID == DivinityApp.GAMEMASTER_UUID)
+							{
+								Settings.GameMasterModeEnabled = true;
+							}
+						}
+						else
+						{
+
+							SelectedAdventureModIndex = defaultAdventureIndex;
 						}
 					}
 					else
 					{
-
 						SelectedAdventureModIndex = defaultAdventureIndex;
 					}
 				}
-				else
+				catch(Exception ex)
 				{
-					SelectedAdventureModIndex = defaultAdventureIndex;
+					DivinityApp.Log($"Error setting active adventure mod:\n{ex}");
 				}
 
-				DivinityApp.Log($"Finishing up refresh.");
+				DivinityApp.Log($"Finalizing refresh operation.");
 
 				Refreshing = false;
 				OnMainProgressComplete();
@@ -2230,7 +2237,7 @@ namespace DivinityModManager.ViewModels
 
 				if (AppSettings.FeatureEnabled("ScriptExtender"))
 				{
-					if (this.IsInitialized)
+					if (IsInitialized)
 					{
 						DivinityApp.Log($"Loading extender settings.");
 						LoadExtenderSettings();
@@ -3929,8 +3936,10 @@ namespace DivinityModManager.ViewModels
 		{
 			if (!OpenRepoLinkToDownload)
 			{
-				string exeDir = Path.GetDirectoryName(Settings.GameExecutablePath);
-				string messageText = String.Format(@"Download and install the Script Extender (ositools)?
+				if (!String.IsNullOrWhiteSpace(Settings.GameExecutablePath) && File.Exists(Settings.GameExecutablePath))
+				{
+					string exeDir = Path.GetDirectoryName(Settings.GameExecutablePath);
+					string messageText = String.Format(@"Download and install the Script Extender (ositools)?
 The Script Extender is used by various mods to extend the scripting language of the game, allowing new functionality.
 The extenders needs to only be installed once, as it can auto-update itself automatically when you launch the game.
 Download url: 
@@ -3938,17 +3947,22 @@ Download url:
 Directory the zip will be extracted to:
 {1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
 
-				var result = AdonisUI.Controls.MessageBox.Show(new AdonisUI.Controls.MessageBoxModel
-				{
-					Text = messageText,
-					Caption = "Download & Install the Script Extender?",
-					Buttons = AdonisUI.Controls.MessageBoxButtons.YesNo(),
-					Icon = AdonisUI.Controls.MessageBoxImage.Question
-				});
+					var result = AdonisUI.Controls.MessageBox.Show(new AdonisUI.Controls.MessageBoxModel
+					{
+						Text = messageText,
+						Caption = "Download & Install the Script Extender?",
+						Buttons = AdonisUI.Controls.MessageBoxButtons.YesNo(),
+						Icon = AdonisUI.Controls.MessageBoxImage.Question
+					});
 
-				if (result == AdonisUI.Controls.MessageBoxResult.Yes)
+					if (result == AdonisUI.Controls.MessageBoxResult.Yes)
+					{
+						InstallOsiExtender_DownloadStart(exeDir);
+					}
+				}
+				else
 				{
-					InstallOsiExtender_DownloadStart(exeDir);
+					ShowAlert("The 'Game Executable Path' is not set or is not valid.", AlertType.Danger);
 				}
 			}
 			else

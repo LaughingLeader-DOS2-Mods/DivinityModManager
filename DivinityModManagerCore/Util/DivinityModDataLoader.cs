@@ -863,7 +863,7 @@ namespace DivinityModManager.Util
 			InclusionFilter = CanProcessGMMetaFile
 		};
 
-		public static async Task<List<DivinityGameMasterCampaign>> LoadGameMasterDataAsync(string folderPath, CancellationToken? token = null)
+		public static List<DivinityGameMasterCampaign> LoadGameMasterData(string folderPath, CancellationToken? token = null)
 		{
 			List<DivinityGameMasterCampaign> campaignEntries = new List<DivinityGameMasterCampaign>();
 
@@ -1243,6 +1243,7 @@ namespace DivinityModManager.Util
 
 		public static bool ExportedSelectedProfile(string profilePath, string profileUUID)
 		{
+			var conversionParams = ResourceConversionParameters.FromGameVersion(LSLib.LS.Enums.Game.DivinityOriginalSin2DE);
 			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
 			if (File.Exists(playerprofilesFile))
 			{
@@ -1254,7 +1255,7 @@ namespace DivinityModManager.Util
 						if (region.Attributes.TryGetValue("ActiveProfile", out var att))
 						{
 							att.Value = profileUUID;
-							ResourceUtils.SaveResource(res, playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+							ResourceUtils.SaveResource(res, playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB, conversionParams);
 							return true;
 						}
 					}

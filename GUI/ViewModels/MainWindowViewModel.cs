@@ -25,7 +25,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Globalization;
-using System.IO;
+using Alphaleonis.Win32.Filesystem;
 using System.IO.Compression;
 using System.Linq;
 using System.Reactive;
@@ -1525,7 +1525,7 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"Loading gamemaster campaigns from '{PathwayData.DocumentsGMCampaignsPath}'.");
 				await SetMainProgressTextAsync("Loading GM Campaigns from documents folder...");
 				cancelTokenSource.CancelAfter(60000);
-				data = await RunTask(DivinityModDataLoader.LoadGameMasterDataAsync(PathwayData.DocumentsGMCampaignsPath, cancelTokenSource.Token), null);
+				data = DivinityModDataLoader.LoadGameMasterData(PathwayData.DocumentsGMCampaignsPath, cancelTokenSource.Token);
 				cancelTokenSource = GetCancellationToken(int.MaxValue);
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
@@ -3833,8 +3833,8 @@ namespace DivinityModManager.ViewModels
 			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 			{
 				int successes = 0;
-				Stream webStream = null;
-				Stream unzippedEntryStream = null;
+				System.IO.Stream webStream = null;
+				System.IO.Stream unzippedEntryStream = null;
 				try
 				{
 					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Downloading {PathwayData.OsirisExtenderLatestReleaseUrl}...");
@@ -3851,7 +3851,7 @@ namespace DivinityModManager.ViewModels
 							if (entry.Name.Equals(DivinityApp.EXTENDER_UPDATER_FILE, StringComparison.OrdinalIgnoreCase))
 							{
 								unzippedEntryStream = entry.Open(); // .Open will return a stream
-								using (var fs = File.Create(dllDestination, 4096, FileOptions.Asynchronous))
+								using (var fs = File.Create(dllDestination, 4096, System.IO.FileOptions.Asynchronous))
 								{
 									await unzippedEntryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
 									successes += 1;

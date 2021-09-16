@@ -42,6 +42,8 @@ using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using SharpCompress.Archives.SevenZip;
+using SharpCompress.Readers;
 
 namespace DivinityModManager.ViewModels
 {
@@ -2802,14 +2804,14 @@ namespace DivinityModManager.ViewModels
 		}
 
 		//TODO: Extract zip mods to the Mods folder, possibly import a load order if a json exists.
-		private void ImportOrderZipFile()
+		private void ImportOrderFromArchive()
 		{
 			var dialog = new OpenFileDialog();
 			dialog.CheckFileExists = true;
 			dialog.CheckPathExists = true;
 			dialog.DefaultExt = ".zip";
-			dialog.Filter = "Zip file (*.zip)|*.zip";
-			dialog.Title = "Import Mods from Zip...";
+			dialog.Filter = "Archive file (*.zip;*.7z)|*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|All files (*.*)|*.*";
+			dialog.Title = "Import Mods from Archive...";
 			dialog.ValidateNames = true;
 			dialog.ReadOnlyChecked = true;
 			dialog.Multiselect = false;
@@ -2821,11 +2823,11 @@ namespace DivinityModManager.ViewModels
 
 			if (dialog.ShowDialog(view) == true)
 			{
-				if(!Path.GetExtension(dialog.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase))
-				{
-					view.AlertBar.SetDangerAlert($"Currently only .zip format archives are supported.", -1);
-					return;
-				}
+				//if(!Path.GetExtension(dialog.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+				//{
+				//	view.AlertBar.SetDangerAlert($"Currently only .zip format archives are supported.", -1);
+				//	return;
+				//}
 				MainProgressTitle = $"Importing mods from '{dialog.FileName}'.";
 				MainProgressWorkText = "";
 				MainProgressValue = 0d;
@@ -2847,13 +2849,132 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
+		private async Task<bool> ImportSevenZipArchiveAsync(string outputDirectory, System.IO.Stream stream, Dictionary<string,string> jsonFiles, CancellationToken t)
+		{
+			int successes = 0;
+			int total = 0;
+			using (var archiveStream = SevenZipArchive.Open(stream))
+			{
+				foreach(var entry in archiveStream.Entries)
+				{
+					if (t.IsCancellationRequested) return false;
+					if (!entry.IsDirectory)
+					{
+						if (entry.Key.EndsWith(".pak", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							string outputFilePath = Path.Combine(outputDirectory, entry.Key);
+							using (var entryStream = entry.OpenEntryStream())
+							{
+								using (var fs = File.Create(outputFilePath, 4096, System.IO.FileOptions.Asynchronous))
+								{
+									try
+									{
+										await entryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
+										successes += 1;
+									}
+									catch (Exception ex)
+									{
+										DivinityApp.Log($"Error copying file '{entry.Key}' from archive to '{outputFilePath}':\n{ex}");
+									}
+								}
+							}
+						}
+						else if (entry.Key.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							using (var entryStream = entry.OpenEntryStream())
+							{
+								try
+								{
+									int length = (int)entry.CompressedSize;
+									var result = new byte[length];
+									await entryStream.ReadAsync(result, 0, length);
+									string text = System.Text.Encoding.UTF8.GetString(result);
+									if (!String.IsNullOrWhiteSpace(text))
+									{
+										jsonFiles.Add(Path.GetFileNameWithoutExtension(entry.Key), text);
+									}
+									successes += 1;
+								}
+								catch (Exception ex)
+								{
+									DivinityApp.Log($"Error reading json file '{entry.Key}' from archive:\n{ex}");
+								}
+							}
+						}
+					}
+				}
+			}
+			return successes >= total;
+		}
+
+		private async Task<bool> ImportGenericArchiveAsync(string outputDirectory, System.IO.Stream stream, Dictionary<string,string> jsonFiles, CancellationToken t)
+		{
+			int successes = 0;
+			int total = 0;
+			using (var reader = SharpCompress.Readers.ReaderFactory.Open(stream))
+			{
+				while (reader.MoveToNextEntry())
+				{
+					if (t.IsCancellationRequested) return false;
+					if (!reader.Entry.IsDirectory)
+					{
+						if (reader.Entry.Key.EndsWith(".pak", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							string outputFilePath = Path.Combine(outputDirectory, reader.Entry.Key);
+							using (var entryStream = reader.OpenEntryStream())
+							{
+								using (var fs = File.Create(outputFilePath, 4096, System.IO.FileOptions.Asynchronous))
+								{
+									try
+									{
+										await entryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
+										successes += 1;
+									}
+									catch (Exception ex)
+									{
+										DivinityApp.Log($"Error copying file '{reader.Entry.Key}' from archive to '{outputFilePath}':\n{ex}");
+									}
+								}
+							}
+						}
+						else if (reader.Entry.Key.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							using (var entryStream = reader.OpenEntryStream())
+							{
+								try
+								{
+									int length = (int)reader.Entry.CompressedSize;
+									var result = new byte[length];
+									await entryStream.ReadAsync(result, 0, length);
+									string text = System.Text.Encoding.UTF8.GetString(result);
+									if (!String.IsNullOrWhiteSpace(text))
+									{
+										jsonFiles.Add(Path.GetFileNameWithoutExtension(reader.Entry.Key), text);
+									}
+									successes += 1;
+								}
+								catch (Exception ex)
+								{
+									DivinityApp.Log($"Error reading json file '{reader.Entry.Key}' from archive:\n{ex}");
+								}
+							}
+						}
+					}
+				}
+			}
+			return successes >= total;
+		}
+
 		private async Task<bool> ImportOrderZipFileAsync(string archivePath, CancellationToken t)
 		{
 			System.IO.FileStream fileStream = null;
 			string outputDirectory = PathwayData.DocumentsModsPath;
 			double taskStepAmount = 1.0 / 4;
-			int successes = 0;
-			int total = 0;
+			bool success = false;
 			var jsonFiles = new Dictionary<string, string>();
 			try
 			{
@@ -2862,48 +2983,17 @@ namespace DivinityModManager.ViewModels
 				{
 					await fileStream.ReadAsync(new byte[fileStream.Length], 0, (int)fileStream.Length);
 					IncreaseMainProgressValue(taskStepAmount);
-					ZipArchive archive = new ZipArchive(fileStream);
-					foreach (ZipArchiveEntry entry in archive.Entries)
-					{
-						if (MainProgressToken.IsCancellationRequested) break;
-						if (entry.Name.EndsWith(".pak", StringComparison.OrdinalIgnoreCase))
-						{
-							total += 1;
-							using (var zipEntryStream = entry.Open())
-							{
-								string outputFilePath = Path.Combine(outputDirectory, entry.Name);
 
-								using (var fs = File.Create(outputFilePath, 4096, System.IO.FileOptions.Asynchronous))
-								{
-									try
-									{
-										await zipEntryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
-										successes += 1;
-									}
-									catch (Exception ex)
-									{
-										DivinityApp.Log($"Error copying file '{entry.Name}' from archive to '{outputFilePath}' \n:{ex}");
-									}
-								}
-							}
-						}
-						else if (entry.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
-						{
-							total += 1;
-							using (var zipEntryStream = entry.Open())
-							{
-								int length = (int)entry.CompressedLength;
-								var result = new byte[length];
-								await zipEntryStream.ReadAsync(result, 0, length);
-								string text = System.Text.Encoding.UTF8.GetString(result);
-								if (!String.IsNullOrWhiteSpace(text))
-								{
-									jsonFiles.Add(Path.GetFileNameWithoutExtension(entry.Name), text);
-								}
-							}
-							
-						}
+					var extension = Path.GetExtension(archivePath);
+					if(extension.Equals(".7z", StringComparison.OrdinalIgnoreCase) || extension.Equals(".7zip", StringComparison.OrdinalIgnoreCase))
+					{
+						success = await ImportSevenZipArchiveAsync(outputDirectory, fileStream, jsonFiles, t);
 					}
+					else
+					{
+						success = await ImportGenericArchiveAsync(outputDirectory, fileStream, jsonFiles, t);
+					}
+					
 					IncreaseMainProgressValue(taskStepAmount);
 				}
 			}
@@ -2911,12 +3001,11 @@ namespace DivinityModManager.ViewModels
 			{
 				DivinityApp.Log($"Error extracting package: {ex}");
 				RxApp.MainThreadScheduler.Schedule(_ => {
-					view.AlertBar.SetDangerAlert($"Error extracting archive (check the log): {ex.Message}", -1);
+					view.AlertBar.SetDangerAlert($"Error extracting archive (check the log): {ex.Message}", 0);
 				});
 			}
 			finally
 			{
-				DivinityApp.Log($"Extracted {successes}/{total} files.");
 				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Cleaning up...");
 				if (fileStream != null) fileStream.Close();
 				IncreaseMainProgressValue(taskStepAmount);
@@ -2939,7 +3028,7 @@ namespace DivinityModManager.ViewModels
 				}
 				IncreaseMainProgressValue(taskStepAmount);
 			}
-			return successes >= total;
+			return success;
 		}
 
 		private void ExportLoadOrderToArchive_Start()
@@ -4412,7 +4501,7 @@ Directory the zip will be extracted to:
 			Keys.ImportOrderFromSave.AddAction(ImportOrderFromSaveToCurrent, canOpenDialogWindow);
 			Keys.ImportOrderFromSaveAsNew.AddAction(ImportOrderFromSaveAsNew, canOpenDialogWindow);
 			Keys.ImportOrderFromFile.AddAction(ImportOrderFromFile, canOpenDialogWindow);
-			Keys.ImportOrderFromZipFile.AddAction(ImportOrderZipFile, canOpenDialogWindow);
+			Keys.ImportOrderFromZipFile.AddAction(ImportOrderFromArchive, canOpenDialogWindow);
 
 
 			Keys.OpenDonationLink.AddAction(() =>

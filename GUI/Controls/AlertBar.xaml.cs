@@ -104,7 +104,7 @@ namespace DivinityModManager.Controls
 
 			lblMessage.Text = msg;
 			grdWrapper.Visibility = System.Windows.Visibility.Visible;
-			key1.KeyTime = new TimeSpan(0, 0, (secs == 0 ? 0 : secs - 1));
+			key1.KeyTime = new TimeSpan(0, 0, (secs <= 0 ? 0 : secs - 1));
 			key2.KeyTime = new TimeSpan(0, 0, secs);
 			RaiseShowEvent();
 

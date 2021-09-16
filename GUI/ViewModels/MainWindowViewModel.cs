@@ -2808,8 +2808,11 @@ namespace DivinityModManager.ViewModels
 			dialog.CheckFileExists = true;
 			dialog.CheckPathExists = true;
 			dialog.DefaultExt = ".zip";
-			dialog.Filter = "Archive file (*.zip)|*.zip|*.7z|*.rar";
-			dialog.Title = "Import Mods from Archive...";
+			dialog.Filter = "Zip file (*.zip)|*.zip";
+			dialog.Title = "Import Mods from Zip...";
+			dialog.ValidateNames = true;
+			dialog.ReadOnlyChecked = true;
+			dialog.Multiselect = false;
 
 			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
 			{
@@ -2818,6 +2821,11 @@ namespace DivinityModManager.ViewModels
 
 			if (dialog.ShowDialog(view) == true)
 			{
+				if(!Path.GetExtension(dialog.FileName).Equals(".zip", StringComparison.OrdinalIgnoreCase))
+				{
+					view.AlertBar.SetDangerAlert($"Currently only .zip format archives are supported.", -1);
+					return;
+				}
 				MainProgressTitle = $"Importing mods from '{dialog.FileName}'.";
 				MainProgressWorkText = "";
 				MainProgressValue = 0d;

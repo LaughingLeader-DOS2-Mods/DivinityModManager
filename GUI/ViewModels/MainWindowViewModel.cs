@@ -2801,6 +2801,132 @@ namespace DivinityModManager.ViewModels
 			});
 		}
 
+		//TODO: Extract zip mods to the Mods folder, possibly import a load order if a json exists.
+		private void ImportOrderZipFile()
+		{
+			var dialog = new OpenFileDialog();
+			dialog.CheckFileExists = true;
+			dialog.CheckPathExists = true;
+			dialog.DefaultExt = ".zip";
+			dialog.Filter = "Archive file (*.zip)|*.zip|*.7z|*.rar";
+			dialog.Title = "Import Mods from Archive...";
+
+			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
+			{
+				dialog.InitialDirectory = PathwayData.LastSaveFilePath;
+			}
+
+			if (dialog.ShowDialog(view) == true)
+			{
+				string archivePath = Path.GetDirectoryName(dialog.FileName);
+				MainProgressTitle = $"Importing mods from '{dialog.FileName}'.";
+				MainProgressWorkText = "";
+				MainProgressValue = 0d;
+				MainProgressIsActive = true;
+				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
+				{
+					MainProgressToken = new CancellationTokenSource();
+					await ImportOrderZipFileAsync(archivePath, MainProgressToken.Token);
+					await ctrl.Yield();
+					RxApp.MainThreadScheduler.Schedule(_ => {
+						OnMainProgressComplete();
+						view.AlertBar.SetSuccessAlert($"Successfully extracted archive.", 20);
+					});
+					return Disposable.Empty;
+				});
+			}
+		}
+
+		private async Task<bool> ImportOrderZipFileAsync(string archivePath, CancellationToken t)
+		{
+			System.IO.FileStream fileStream = null;
+			string outputDirectory = PathwayData.DocumentsModsPath;
+			double taskStepAmount = 1.0 / 4;
+			int successes = 0;
+			int total = 0;
+			List<string> jsonFiles = new List<string>();
+			try
+			{
+				fileStream = File.Open(archivePath, System.IO.FileMode.Open);
+				if (fileStream != null)
+				{
+					await fileStream.ReadAsync(new byte[fileStream.Length], 0, (int)fileStream.Length);
+					IncreaseMainProgressValue(taskStepAmount);
+					ZipArchive archive = new ZipArchive(fileStream);
+					foreach (ZipArchiveEntry entry in archive.Entries)
+					{
+						if (MainProgressToken.IsCancellationRequested) break;
+						if (entry.Name.EndsWith(".pak", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							using (var zipEntryStream = entry.Open())
+							{
+								string outputFilePath = Path.Combine(outputDirectory, entry.Name);
+
+								using (var fs = File.Create(outputFilePath, 4096, System.IO.FileOptions.Asynchronous))
+								{
+									try
+									{
+										await zipEntryStream.CopyToAsync(fs, 4096, MainProgressToken.Token);
+										successes += 1;
+									}
+									catch (Exception ex)
+									{
+										DivinityApp.Log($"Error copying file '{entry.Name}' from archive to '{outputFilePath}' \n:{ex}");
+									}
+								}
+							}
+						}
+						else if (entry.Name.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+						{
+							total += 1;
+							using (var zipEntryStream = entry.Open())
+							{
+								var result = new byte[zipEntryStream.Length];
+								await zipEntryStream.ReadAsync(result, 0, (int)zipEntryStream.Length);
+								string text = System.Text.Encoding.UTF8.GetString(result);
+								if (!String.IsNullOrWhiteSpace(text))
+								{
+									jsonFiles.Add(text);
+								}
+							}
+							
+						}
+					}
+					IncreaseMainProgressValue(taskStepAmount);
+				}
+			}
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error extracting package: {ex}");
+			}
+			finally
+			{
+				DivinityApp.Log($"Extracted {successes}/{total} files.");
+				RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Cleaning up...");
+				if (fileStream != null) fileStream.Close();
+				IncreaseMainProgressValue(taskStepAmount);
+
+				if(jsonFiles.Count > 0)
+				{
+					RxApp.MainThreadScheduler.Schedule(_ =>
+					{
+						foreach (var jsonContents in jsonFiles)
+						{
+							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(jsonContents);
+							if (order != null)
+							{
+								DivinityApp.Log($"Imported mod order from archive: {String.Join(@"\n\t", order.Order.Select(x => x.Name))}");
+								AddNewModOrder(order);
+							}
+						}
+					});
+				}
+				IncreaseMainProgressValue(taskStepAmount);
+			}
+			return successes >= total;
+		}
+
 		private void ExportLoadOrderToArchive_Start()
 		{
 			//view.MainWindowMessageBox.Text = "Add active mods to a zip file?";
@@ -3223,11 +3349,6 @@ namespace DivinityModManager.ViewModels
 					DivinityApp.Log($"Failed to load order from '{dialog.FileName}'.");
 				}
 			}
-		}
-
-		private void ImportOrderZipFile()
-		{
-
 		}
 
 		private void RenameSave_Start()

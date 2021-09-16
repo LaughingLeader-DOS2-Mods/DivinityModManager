@@ -2818,7 +2818,6 @@ namespace DivinityModManager.ViewModels
 
 			if (dialog.ShowDialog(view) == true)
 			{
-				string archivePath = Path.GetDirectoryName(dialog.FileName);
 				MainProgressTitle = $"Importing mods from '{dialog.FileName}'.";
 				MainProgressWorkText = "";
 				MainProgressValue = 0d;
@@ -2826,11 +2825,14 @@ namespace DivinityModManager.ViewModels
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 				{
 					MainProgressToken = new CancellationTokenSource();
-					await ImportOrderZipFileAsync(archivePath, MainProgressToken.Token);
+					bool success = await ImportOrderZipFileAsync(dialog.FileName, MainProgressToken.Token);
 					await ctrl.Yield();
 					RxApp.MainThreadScheduler.Schedule(_ => {
 						OnMainProgressComplete();
-						view.AlertBar.SetSuccessAlert($"Successfully extracted archive.", 20);
+						if(success)
+						{
+							view.AlertBar.SetSuccessAlert($"Successfully extracted archive.", 20);
+						}
 					});
 					return Disposable.Empty;
 				});
@@ -2844,10 +2846,10 @@ namespace DivinityModManager.ViewModels
 			double taskStepAmount = 1.0 / 4;
 			int successes = 0;
 			int total = 0;
-			List<string> jsonFiles = new List<string>();
+			var jsonFiles = new Dictionary<string, string>();
 			try
 			{
-				fileStream = File.Open(archivePath, System.IO.FileMode.Open);
+				fileStream = File.Open(archivePath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read, 4096, true);
 				if (fileStream != null)
 				{
 					await fileStream.ReadAsync(new byte[fileStream.Length], 0, (int)fileStream.Length);
@@ -2882,12 +2884,13 @@ namespace DivinityModManager.ViewModels
 							total += 1;
 							using (var zipEntryStream = entry.Open())
 							{
-								var result = new byte[zipEntryStream.Length];
-								await zipEntryStream.ReadAsync(result, 0, (int)zipEntryStream.Length);
+								int length = (int)entry.CompressedLength;
+								var result = new byte[length];
+								await zipEntryStream.ReadAsync(result, 0, length);
 								string text = System.Text.Encoding.UTF8.GetString(result);
 								if (!String.IsNullOrWhiteSpace(text))
 								{
-									jsonFiles.Add(text);
+									jsonFiles.Add(Path.GetFileNameWithoutExtension(entry.Name), text);
 								}
 							}
 							
@@ -2899,6 +2902,9 @@ namespace DivinityModManager.ViewModels
 			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error extracting package: {ex}");
+				RxApp.MainThreadScheduler.Schedule(_ => {
+					view.AlertBar.SetDangerAlert($"Error extracting archive (check the log): {ex.Message}", -1);
+				});
 			}
 			finally
 			{
@@ -2911,11 +2917,12 @@ namespace DivinityModManager.ViewModels
 				{
 					RxApp.MainThreadScheduler.Schedule(_ =>
 					{
-						foreach (var jsonContents in jsonFiles)
+						foreach (var kvp in jsonFiles)
 						{
-							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(jsonContents);
+							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(kvp.Value);
 							if (order != null)
 							{
+								order.Name = kvp.Key;
 								DivinityApp.Log($"Imported mod order from archive: {String.Join(@"\n\t", order.Order.Select(x => x.Name))}");
 								AddNewModOrder(order);
 							}

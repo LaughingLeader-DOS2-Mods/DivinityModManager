@@ -3090,6 +3090,19 @@ namespace DivinityModManager.ViewModels
 					using (var zip = File.OpenWrite(outputPath))
 					using (var zipWriter = WriterFactory.Open(zip, ArchiveType.Zip, CompressionType.Deflate))
 					{
+						string orderFileName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
+						string contents = JsonConvert.SerializeObject(SelectedModOrder.Name, Newtonsoft.Json.Formatting.Indented);
+						using (var ms = new System.IO.MemoryStream())
+						{
+							using (var swriter = new System.IO.StreamWriter(ms))
+							{
+								await swriter.WriteAsync(contents);
+								swriter.Flush();
+								ms.Position = 0;
+								zipWriter.Write(orderFileName, ms);
+							}
+						}
+
 						foreach (var mod in modPaks)
 						{
 							if (t.IsCancellationRequested) return false;

@@ -64,7 +64,7 @@
 			<Button
 				Command="{Binding SaveSettingsCommand}"
 				Style="{StaticResource IconButtonStyle}"
-				ToolTip="Save Settings">
+				ToolTip="Save Settings (CTRL + S)">
 				<controls:AutoGrayableImage Source="{StaticResource SaveImage}" />
 			</Button>
 			<Rectangle
@@ -329,7 +329,7 @@
 					HorizontalAlignment="Center"
 					Command="{Binding ExportExtenderSettingsCommand}"
 					Content="Save OsirisExtenderSettings.json"
-					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json"
+					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json (CTRL + S)"
 					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 				<Button
 					x:Name="ResetKeybindingsButton"

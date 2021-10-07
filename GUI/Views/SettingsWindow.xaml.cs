@@ -50,6 +50,8 @@ namespace DivinityModManager.Views
 			int count = ExtenderSettingsAutoGrid.RowCount + props.Count();
 			int row = ExtenderSettingsAutoGrid.RowCount + 1;
 
+			ExtenderSettingsAutoGrid.Children.Clear();
+
 			ExtenderSettingsAutoGrid.RowCount = count;
 			ExtenderSettingsAutoGrid.Rows = String.Join(",", Enumerable.Repeat("auto", count));
 			DivinityApp.Log($"{count} = {ExtenderSettingsAutoGrid.Rows}");
@@ -75,7 +77,14 @@ namespace DivinityModManager.Views
 					});
 				}
 
-				switch (Type.GetTypeCode(prop.Property.PropertyType))
+				var propType = Type.GetTypeCode(prop.Property.PropertyType);
+
+				if (prop.Attribute.DisplayName == "Osiris Debugger Flags")
+				{
+					propType = TypeCode.String;
+				}
+
+				switch (propType)
 				{
 					case TypeCode.Boolean:
 						CheckBox cb = new CheckBox();
@@ -133,6 +142,7 @@ namespace DivinityModManager.Views
 						ud.ToolTip = prop.Attribute.Tooltip;
 						ud.VerticalAlignment = VerticalAlignment.Center;
 						ud.HorizontalAlignment = HorizontalAlignment.Left;
+						ud.Padding = new Thickness(4, 2, 4, 2);
 						ud.AllowTextInput = true;
 						ud.SetBinding(IntegerUpDown.ValueProperty, new Binding(prop.Property.Name)
 						{
@@ -223,6 +233,15 @@ namespace DivinityModManager.Views
 			if(isSettingKeybinding)
 			{
 				return;
+			}
+			else if(e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			{
+				ViewModel.SaveSettingsCommand.Execute(null);
+				if(ViewModel.ExtenderTabIsVisible)
+				{
+					ViewModel.ExportExtenderSettingsCommand.Execute(null);
+				}
+				e.Handled = true;
 			}
 			else if(e.Key == Key.Left && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
 			{

@@ -84,11 +84,11 @@
     <Reference Include="AutoUpdater.NET, Version=1.7.0.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
       <HintPath>..\packages\Autoupdater.NET.Official.1.7.0\lib\net45\AutoUpdater.NET.dll</HintPath>
     </Reference>
-    <Reference Include="DynamicData, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\DynamicData.7.3.1\lib\net461\DynamicData.dll</HintPath>
+    <Reference Include="DynamicData, Version=7.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.7.4.1\lib\net461\DynamicData.dll</HintPath>
     </Reference>
     <Reference Include="GongSolutions.WPF.DragDrop, Version=2.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
-      <HintPath>..\packages\gong-wpf-dragdrop.2.4.1\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
+      <HintPath>..\packages\gong-wpf-dragdrop.2.4.3\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
@@ -110,14 +110,14 @@
     <Reference Include="ReactiveUI.Wpf, Version=16.2.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ReactiveUI.WPF.16.2.6\lib\net472\ReactiveUI.Wpf.dll</HintPath>
     </Reference>
-    <Reference Include="SharpCompress, Version=0.29.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-      <HintPath>..\packages\SharpCompress.0.29.0\lib\netstandard2.0\SharpCompress.dll</HintPath>
+    <Reference Include="SharpCompress, Version=0.30.0.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.30.0\lib\net461\SharpCompress.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=13.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.13.1.10\lib\net472\Splat.dll</HintPath>
+      <HintPath>..\packages\Splat.13.1.22\lib\net472\Splat.dll</HintPath>
     </Reference>
     <Reference Include="Splat.Drawing, Version=13.1.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Splat.Drawing.13.1.10\lib\net472\Splat.Drawing.dll</HintPath>
+      <HintPath>..\packages\Splat.Drawing.13.1.22\lib\net472\Splat.Drawing.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
@@ -565,10 +565,10 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets'))" />
     <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets'))" />
-    <Error Condition="!Exists('..\packages\Fody.6.5.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.5.3\build\Fody.targets'))" />
     <Error Condition="!Exists('..\packages\ReactiveUI.Fody.16.2.6\build\ReactiveUI.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ReactiveUI.Fody.16.2.6\build\ReactiveUI.Fody.props'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.5.4\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.5.4\build\Fody.targets'))" />
   </Target>
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
   <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />
-  <Import Project="..\packages\Fody.6.5.3\build\Fody.targets" Condition="Exists('..\packages\Fody.6.5.3\build\Fody.targets')" />
+  <Import Project="..\packages\Fody.6.5.4\build\Fody.targets" Condition="Exists('..\packages\Fody.6.5.4\build\Fody.targets')" />
 </Project>

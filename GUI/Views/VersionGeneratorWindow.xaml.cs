@@ -19,56 +19,21 @@ using System.Windows.Shapes;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Concurrency;
+using ReactiveUI.Fody.Helpers;
 
 namespace DivinityModManager.Views
 {
 	public class VersionGeneratorData : ReactiveObject
 	{
-		private long versionNumber;
+		[Reactive] public long VersionNumber { get; set; }
 
-		public long VersionNumber
-		{
-			get => versionNumber;
-			set { this.RaiseAndSetIfChanged(ref versionNumber, value); }
-		}
+		[Reactive] public long Major { get; set; }
 
-		private long major;
+		[Reactive] public long Minor { get; set; }
 
-		public long Major
-		{
-			get => major;
-			set { this.RaiseAndSetIfChanged(ref major, value); }
-		}
+		[Reactive] public long Revision { get; set; }
 
-		private long minor;
-
-		public long Minor
-		{
-			get => minor;
-			set { this.RaiseAndSetIfChanged(ref minor, value); }
-		}
-
-		private long revision;
-
-		public long Revision
-		{
-			get => revision;
-			set { this.RaiseAndSetIfChanged(ref revision, value); }
-		}
-
-
-		private long build;
-
-		public long Build
-		{
-			get => build;
-			set { this.RaiseAndSetIfChanged(ref build, value); }
-		}
-
-		public void UpdateVersionNumber()
-		{
-
-		}
+		[Reactive] public long Build { get; set; }
 	}
 
 	/// <summary>
@@ -93,7 +58,7 @@ namespace DivinityModManager.Views
 
 		private void IntegerUpDown_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
 		{
-			if(VersionNumberTextBox != null)
+			if (VersionNumberTextBox != null)
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ =>
 				{

@@ -27,7 +27,7 @@ namespace DivinityModManager.Models
 	[ScreenReaderHelper(Name = "DisplayName", HelpText = "HelpText")]
 	public class DivinityModData : DivinityBaseModData, ISelectable
 	{
-		[Reactive] [DataMember] public int Index { get; set; } = -1;
+		[Reactive][DataMember] public int Index { get; set; } = -1;
 
 		[DataMember(Name = "FileName")]
 		public string OutputPakName
@@ -45,7 +45,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		[Reactive] [DataMember] public string Type { get; set; }
+		[Reactive][DataMember] public string Type { get; set; }
 		[DataMember] public List<string> Modes { get; set; } = new List<string>();
 
 		[DataMember] public string Targets { get; set; }
@@ -56,8 +56,8 @@ namespace DivinityModManager.Models
 		public DivinityExtenderModStatus ExtenderModStatus
 		{
 			get => extenderModStatus;
-			set 
-			{ 
+			set
+			{
 				this.RaiseAndSetIfChanged(ref extenderModStatus, value);
 				UpdateOsirisExtenderToolTip();
 			}
@@ -67,7 +67,7 @@ namespace DivinityModManager.Models
 
 		public void UpdateOsirisExtenderToolTip()
 		{
-			switch(ExtenderModStatus)
+			switch (ExtenderModStatus)
 			{
 				case DivinityExtenderModStatus.REQUIRED:
 				case DivinityExtenderModStatus.REQUIRED_MISSING:
@@ -171,13 +171,13 @@ namespace DivinityModManager.Models
 		public bool IsSelected
 		{
 			get => isSelected;
-			set 
-			{ 
-				if(value && Visibility != Visibility.Visible)
+			set
+			{
+				if (value && Visibility != Visibility.Visible)
 				{
 					value = false;
 				}
-				this.RaiseAndSetIfChanged(ref isSelected, value); 
+				this.RaiseAndSetIfChanged(ref isSelected, value);
 			}
 		}
 
@@ -249,7 +249,7 @@ namespace DivinityModManager.Models
 			dependencyVisibility = this.WhenAnyValue(x => x.HasDependencies, b => b ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(DependencyVisibility));
 			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod).Subscribe((b) =>
 			{
-				if(b.Item1)
+				if (b.Item1)
 				{
 					//Allow removing a classic mod from the active list.
 					CanDrag = true;
@@ -262,12 +262,12 @@ namespace DivinityModManager.Models
 
 			this.WhenAnyValue(x => x.HeaderVersion).Select(x => x != null && x.Minor == 1).Subscribe((b) =>
 			{
-				if(b)
+				if (b)
 				{
 					IsClassicMod = true;
 				}
 			});
-			
+
 			if (!isBaseGameMod)
 			{
 				var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
@@ -280,8 +280,9 @@ namespace DivinityModManager.Models
 			}
 
 			// If a screen reader is active, don't bother making tooltips for the mod item entry
-			hasToolTip = this.WhenAnyValue(x => x.Description, x => x.HasDependencies).
-				Select(x => !DivinityApp.IsScreenReaderActive() && (!String.IsNullOrWhiteSpace(x.Item1) || x.Item2)).StartWith(true).ToProperty(this, nameof(HasToolTip));
+			hasToolTip = this.WhenAnyValue(x => x.Description, x => x.HasDependencies, x => x.UUID).
+				Select(x => !DivinityApp.IsScreenReaderActive() && (
+				!String.IsNullOrEmpty(x.Item1) || x.Item2 || !String.IsNullOrEmpty(x.Item3))).StartWith(true).ToProperty(this, nameof(HasToolTip));
 		}
 	}
 }

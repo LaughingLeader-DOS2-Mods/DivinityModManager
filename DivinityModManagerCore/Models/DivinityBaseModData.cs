@@ -41,16 +41,16 @@ namespace DivinityModManager.Models
 
 		readonly ObservableAsPropertyHelper<string> fileName;
 		public string FileName => fileName.Value;
-		[Reactive] [DataMember] public string UUID { get; set; }
-		[Reactive] [DataMember] public string Folder { get; set; }
-		[Reactive] [DataMember] public string Name { get; set; }
+		[Reactive][DataMember] public string UUID { get; set; }
+		[Reactive][DataMember] public string Folder { get; set; }
+		[Reactive][DataMember] public string Name { get; set; }
 
 		readonly ObservableAsPropertyHelper<string> displayName;
 		public string DisplayName => displayName.Value;
-		[Reactive] [DataMember] public string Description { get; set; }
-		[Reactive] [DataMember] public string Author { get; set; }
+		[Reactive][DataMember] public string Description { get; set; }
+		[Reactive][DataMember] public string Author { get; set; }
 		[Reactive] public string MD5 { get; set; }
-		[Reactive] [DataMember] public DivinityModVersion Version { get; set; }
+		[Reactive][DataMember] public DivinityModVersion Version { get; set; }
 		[Reactive] public DivinityModVersion HeaderVersion { get; set; }
 		[Reactive] public DivinityModVersion PublishVersion { get; set; }
 		[Reactive] public DateTime? LastModified { get; set; }
@@ -59,6 +59,7 @@ namespace DivinityModManager.Models
 		[Reactive] public bool IsHidden { get; set; } = false;
 		[Reactive] public bool IsLarianMod { get; set; } = false;
 		[Reactive] public bool IsClassicMod { get; set; } = false;
+		[Reactive] public bool HasOverride { get; set; } = false;
 		[Reactive] public string HelpText { get; set; } = "";
 
 		public List<string> Tags { get; set; } = new List<string>();

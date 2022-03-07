@@ -77,7 +77,7 @@ namespace DivinityModManager.Util
 
 		private static int SafeConvertString(string str)
 		{
-			if(!String.IsNullOrWhiteSpace(str) && int.TryParse(str, out int val))
+			if (!String.IsNullOrWhiteSpace(str) && int.TryParse(str, out int val))
 			{
 				return val;
 			}
@@ -142,19 +142,19 @@ namespace DivinityModManager.Util
 					//DivinityApp.LogMessage($"Version node: {versionNode.ToString()}");
 					//DE Mods <version major="3" minor="6" revision="2" build="0" />
 					//Classic Mods <version major="3" minor="1" revision="3" build="5" />
-					if(TryGetAttribute(versionNode, "major", out var headerMajorStr))
+					if (TryGetAttribute(versionNode, "major", out var headerMajorStr))
 					{
 						int.TryParse(headerMajorStr, out headerMajor);
 					}
-					if(TryGetAttribute(versionNode, "minor", out var headerMinorStr))
+					if (TryGetAttribute(versionNode, "minor", out var headerMinorStr))
 					{
 						int.TryParse(headerMinorStr, out headerMinor);
 					}
-					if(TryGetAttribute(versionNode, "revision", out var headerRevisionStr))
+					if (TryGetAttribute(versionNode, "revision", out var headerRevisionStr))
 					{
 						int.TryParse(headerRevisionStr, out headerRevision);
 					}
-					if(TryGetAttribute(versionNode, "build", out var headerBuildStr))
+					if (TryGetAttribute(versionNode, "build", out var headerBuildStr))
 					{
 						int.TryParse(headerBuildStr, out headerBuild);
 					}
@@ -227,12 +227,12 @@ namespace DivinityModManager.Util
 					}
 
 					var targets = moduleInfoNode.Descendants("node").Where(n => n.Attribute("id")?.Value == "Target");
-					if(targets != null)
+					if (targets != null)
 					{
 						foreach (var node in targets)
 						{
 							var target = GetAttributeWithId(node, "Object", "");
-							if(!String.IsNullOrWhiteSpace(target))
+							if (!String.IsNullOrWhiteSpace(target))
 							{
 								modData.Modes.Add(target);
 							}
@@ -246,7 +246,7 @@ namespace DivinityModManager.Util
 					DivinityApp.Log($"**[ERROR] ModuleInfo node not found for meta.lsx: {metaContents}");
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				Console.WriteLine($"Error parsing meta.lsx: {ex}");
 			}
@@ -273,9 +273,9 @@ namespace DivinityModManager.Util
 						var metaFile = Path.Combine(folder, "meta.lsx");
 						if (File.Exists(metaFile))
 						{
-							
+
 							var str = File.ReadAllText(metaFile);
-							if(!String.IsNullOrEmpty(str))
+							if (!String.IsNullOrEmpty(str))
 							{
 								//BOM stripping
 								if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
@@ -324,7 +324,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error loading mod projects: {ex}");
 			}
@@ -353,7 +353,7 @@ namespace DivinityModManager.Util
 						var metaFile = Path.Combine(folder, "meta.lsx");
 						if (File.Exists(metaFile))
 						{
-							using (var fileStream = new System.IO.FileStream(metaFile, 
+							using (var fileStream = new System.IO.FileStream(metaFile,
 								System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
 							{
 								var result = new byte[fileStream.Length];
@@ -361,7 +361,7 @@ namespace DivinityModManager.Util
 
 								string str = Encoding.UTF8.GetString(result, 0, result.Length);
 
-								if(!String.IsNullOrEmpty(str))
+								if (!String.IsNullOrEmpty(str))
 								{
 									//XML parsing doesn't like the BOM for some reason
 									if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
@@ -411,7 +411,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error loading mod projects: {ex}");
 			}
@@ -428,7 +428,7 @@ namespace DivinityModManager.Util
 		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
 		private static bool IsModMetaFile(string pakName, AbstractFileInfo f)
 		{
-			if(Path.GetFileName(f.Name).Equals("meta.lsx", StringComparison.OrdinalIgnoreCase))
+			if (Path.GetFileName(f.Name).Equals("meta.lsx", StringComparison.OrdinalIgnoreCase))
 			{
 				return modMetaPattern.IsMatch(f.Name);
 			}
@@ -454,7 +454,7 @@ namespace DivinityModManager.Util
 						modPaks.AddRange(files);
 					}
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					DivinityApp.Log($"Error enumerating pak folder '{modsFolderPath}': {ex}");
 				}
@@ -473,7 +473,7 @@ namespace DivinityModManager.Util
 							var pak = pr.Read();
 							var metaFiles = pak?.Files?.Where(pf => IsModMetaFile(pakName, pf));
 							AbstractFileInfo metaFile = null;
-							foreach(var f in metaFiles)
+							foreach (var f in metaFiles)
 							{
 								var parentDir = Directory.GetParent(f.Name);
 								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match the parent diretory against the pak name in that case.
@@ -502,7 +502,7 @@ namespace DivinityModManager.Util
 								DivinityApp.Log($"Error: No meta.lsx for mod pak '{pakPath}'.");
 							}
 
-							if(modData != null && (!ignoreClassic || !modData.IsClassicMod))
+							if (modData != null && (!ignoreClassic || !modData.IsClassicMod))
 							{
 								modData.FilePath = pakPath;
 								try
@@ -514,17 +514,17 @@ namespace DivinityModManager.Util
 								{
 									DivinityApp.Log($"Error getting pak last modified date for '{pakPath}': {ex}");
 								}
-								if(!mods.Any(x => x.UUID == modData.UUID))
+								if (!mods.Any(x => x.UUID == modData.UUID))
 								{
 									mods.Add(modData);
 								}
 								else
 								{
 									var duplicateMods = mods.Where(x => x.UUID == modData.UUID).ToList();
-									for(int i = 0; i < duplicateMods.Count; i++)
+									for (int i = 0; i < duplicateMods.Count; i++)
 									{
 										var duplicateMod = duplicateMods[i];
-										if (modData.Version.VersionInt > duplicateMod.Version.VersionInt || 
+										if (modData.Version.VersionInt > duplicateMod.Version.VersionInt ||
 											(modData.Version.VersionInt == duplicateMod.Version.VersionInt && modData.LastModified > duplicateMod.LastModified))
 										{
 											mods.Remove(duplicateMod);
@@ -565,7 +565,7 @@ namespace DivinityModManager.Util
 															modData.OsiExtenderData.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
 															modData.OsiExtenderData.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
 
-															if(modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+															if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
 #if DEBUG
 															//DivinityApp.LogMessage($"Loaded OsiToolsConfig.json for '{pakPath}':");
 															//DivinityApp.LogMessage($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
@@ -588,7 +588,7 @@ namespace DivinityModManager.Util
 											}
 										}
 									}
-									catch(Exception ex)
+									catch (Exception ex)
 									{
 										DivinityApp.Log($"Error reading 'OsiToolsConfig.json' for '{pakPath}': {ex}");
 									}
@@ -605,15 +605,17 @@ namespace DivinityModManager.Util
 
 			try
 			{
-				
+
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error loading mod paks: {ex}");
 			}
 
 			return mods;
 		}
+
+		private static Regex _ModFolderPattern = new Regex("^(Mods|Public)/(.+?)/.+$");
 
 		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false, CancellationToken? token = null)
 		{
@@ -644,7 +646,7 @@ namespace DivinityModManager.Util
 				{
 					try
 					{
-						if(token.HasValue && token.Value.IsCancellationRequested)
+						if (token.HasValue && token.Value.IsCancellationRequested)
 						{
 							return mods;
 						}
@@ -655,13 +657,40 @@ namespace DivinityModManager.Util
 							string pakName = Path.GetFileNameWithoutExtension(pakPath);
 
 							var pak = pr.Read();
-							var metaFiles = pak?.Files?.Where(pf => IsModMetaFile(pakName, pf));
+
+							var hasBuiltinDirectory = false;
+							var metaFiles = new List<AbstractFileInfo>();
+
+							if (pak != null && pak.Files != null)
+							{
+								foreach (var f in pak.Files)
+								{
+									if (IsModMetaFile(pakName, f))
+									{
+										metaFiles.Add(f);
+									}
+									else if (!hasBuiltinDirectory)
+									{
+										var modFolderMatch = _ModFolderPattern.Match(f.Name);
+										if (modFolderMatch.Success)
+										{
+											var modFolder = modFolderMatch.Groups[1].Value;
+											if (IgnoreModByFolder(modFolder))
+											{
+												hasBuiltinDirectory = true;
+												DivinityApp.Log($"Found a mod overriding a builtin directory. Pak({pakName}) Folder({modFolder}) File({f.Name}");
+											}
+										}
+									}
+								}
+							}
+
 							AbstractFileInfo metaFile = null;
 							foreach (var f in metaFiles)
 							{
 								var parentDir = Directory.GetParent(f.Name);
 								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
-								if (parentDir.Name == pakName)
+								if (pakName.Contains(parentDir.Name))
 								{
 									metaFile = f;
 									break;
@@ -682,6 +711,7 @@ namespace DivinityModManager.Util
 
 								if (modData != null && (!ignoreClassic || !modData.IsClassicMod))
 								{
+									modData.HasOverride = hasBuiltinDirectory;
 									modData.FilePath = pakPath;
 									try
 									{
@@ -695,7 +725,7 @@ namespace DivinityModManager.Util
 									mods.Add(modData);
 
 									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
-									if(osiConfigInfo != null)
+									if (osiConfigInfo != null)
 									{
 										var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
 										if (osiToolsConfig != null)
@@ -732,9 +762,9 @@ namespace DivinityModManager.Util
 
 		private static string GetNodeAttribute(Node node, string key, string defaultValue)
 		{
-			if(node.Attributes.TryGetValue(key, out var att))
+			if (node.Attributes.TryGetValue(key, out var att))
 			{
-				if(att.Type == NodeAttribute.DataType.DT_TranslatedString)
+				if (att.Type == NodeAttribute.DataType.DT_TranslatedString)
 				{
 					TranslatedString ts = (TranslatedString)att.Value;
 					return ts.Value;
@@ -746,7 +776,7 @@ namespace DivinityModManager.Util
 
 		private static T GetNodeAttribute<T>(Node node, string key, T defaultValue)
 		{
-			if(node.Attributes.TryGetValue(key, out var att))
+			if (node.Attributes.TryGetValue(key, out var att))
 			{
 				return (T)Convert.ChangeType(att.Value, typeof(T));
 			}
@@ -801,7 +831,7 @@ namespace DivinityModManager.Util
 
 					if (meta.TryFindNode("Dependencies", out var dependenciesNode))
 					{
-						foreach(var container in dependenciesNode.Children)
+						foreach (var container in dependenciesNode.Children)
 						{
 							foreach (var node in container.Value)
 							{
@@ -936,9 +966,9 @@ namespace DivinityModManager.Util
 					return node;
 				}
 			}
-			foreach(var nList in node.Children.Values)
+			foreach (var nList in node.Children.Values)
 			{
-				foreach(var n in nList)
+				foreach (var n in nList)
 				{
 					var match = FindResourceNode(n, attribute, matchVal);
 					if (match != null) return match;
@@ -949,7 +979,7 @@ namespace DivinityModManager.Util
 
 		private static bool NodeIdMatch(Node n, string id)
 		{
-			if(n.Attributes.TryGetValue("id", out var att))
+			if (n.Attributes.TryGetValue("id", out var att))
 			{
 				string idAttVal = (string)att.Value;
 				return id.Equals(idAttVal, StringComparison.OrdinalIgnoreCase);
@@ -992,7 +1022,7 @@ namespace DivinityModManager.Util
 								}
 							}
 						}
-						catch(Exception ex)
+						catch (Exception ex)
 						{
 							DivinityApp.Log($"Error parsing profile data: \n{ex}");
 						}
@@ -1007,27 +1037,27 @@ namespace DivinityModManager.Util
 					};
 
 					var modSettingsFile = Path.Combine(folder, "modsettings.lsx");
-					if(File.Exists(modSettingsFile))
+					if (File.Exists(modSettingsFile))
 					{
 						Resource modSettingsRes = null;
 						try
 						{
 							modSettingsRes = ResourceUtils.LoadResource(modSettingsFile, LSLib.LS.Enums.ResourceFormat.LSX);
 						}
-						catch(Exception ex)
+						catch (Exception ex)
 						{
 							DivinityApp.Log($"Error reading '{modSettingsFile}': '{ex}'");
 						}
-						
+
 						if (modSettingsRes != null && modSettingsRes.Regions.TryGetValue("ModuleSettings", out var region))
 						{
-							if(region.Children.TryGetValue("ModOrder", out var modOrderRootNode))
+							if (region.Children.TryGetValue("ModOrder", out var modOrderRootNode))
 							{
 								var modOrderChildrenRoot = modOrderRootNode.FirstOrDefault();
-								if(modOrderChildrenRoot != null)
+								if (modOrderChildrenRoot != null)
 								{
 									var modOrder = modOrderChildrenRoot.Children.Values.FirstOrDefault();
-									if(modOrder != null)
+									if (modOrder != null)
 									{
 										foreach (var c in modOrder)
 										{
@@ -1056,7 +1086,7 @@ namespace DivinityModManager.Util
 										{
 											var activeModData = new DivinityProfileActiveModData();
 											activeModData.LoadFromAttributes(c.Attributes);
-											if(!DivinityModDataLoader.IgnoreMod(activeModData.UUID))
+											if (!DivinityModDataLoader.IgnoreMod(activeModData.UUID))
 											{
 												profileData.ActiveMods.Add(activeModData);
 											}
@@ -1260,7 +1290,7 @@ namespace DivinityModManager.Util
 						}
 					}
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					DivinityApp.Log($"Error saving {playerprofilesFile}: {ex}");
 				}
@@ -1383,14 +1413,14 @@ namespace DivinityModManager.Util
 					}
 				});
 
-				foreach(var loadOrderFile in files)
+				foreach (var loadOrderFile in files)
 				{
 					try
 					{
 						using (var reader = File.OpenText(loadOrderFile))
 						{
 							var fileText = await reader.ReadToEndAsync();
-				
+
 							DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
 							order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
 							if (order != null)
@@ -1402,7 +1432,7 @@ namespace DivinityModManager.Util
 							}
 						}
 					}
-					catch(Exception ex)
+					catch (Exception ex)
 					{
 						DivinityApp.Log($"Failed to read '{loadOrderFile}': {ex}");
 					}
@@ -1413,7 +1443,7 @@ namespace DivinityModManager.Util
 		}
 		public static async Task<DivinityLoadOrder> LoadOrderFromFileAsync(string loadOrderFile)
 		{
-			if(File.Exists(loadOrderFile))
+			if (File.Exists(loadOrderFile))
 			{
 				try
 				{
@@ -1421,14 +1451,14 @@ namespace DivinityModManager.Util
 					{
 						var fileText = await reader.ReadToEndAsync();
 						DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(fileText);
-						if(order != null)
+						if (order != null)
 						{
 							order.FilePath = loadOrderFile;
 						}
 						return order;
 					}
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					DivinityApp.Log($"Error loading '{loadOrderFile}': {ex}");
 				}
@@ -1445,7 +1475,7 @@ namespace DivinityModManager.Util
 					DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(File.ReadAllText(loadOrderFile));
 					return order;
 				}
-				catch(Exception ex)
+				catch (Exception ex)
 				{
 					DivinityApp.Log($"Error reading '{loadOrderFile}': {ex}");
 				}
@@ -1455,7 +1485,7 @@ namespace DivinityModManager.Util
 
 		public static async Task<bool> ExportModSettingsToFileAsync(string folder, IEnumerable<DivinityModData> order)
 		{
-			if(Directory.Exists(folder))
+			if (Directory.Exists(folder))
 			{
 				string outputFilePath = Path.Combine(folder, "modsettings.lsx");
 				string contents = GenerateModSettingsFile(order);
@@ -1483,7 +1513,7 @@ namespace DivinityModManager.Util
 
 					return true;
 				}
-				catch(AccessViolationException ex)
+				catch (AccessViolationException ex)
 				{
 					DivinityApp.Log($"Failed to write file '{outputFilePath}': {ex}");
 				}
@@ -1501,11 +1531,11 @@ namespace DivinityModManager.Util
 				if (dependencyModData != null)
 				{
 					var dependencyMods = GetDependencyMods(dependencyModData, allMods, order);
-					if(dependencyMods.Count > 0)
+					if (dependencyMods.Count > 0)
 					{
 						mods.AddRange(dependencyMods);
 					}
-					if(!order.Any(x => x.UUID == dependencyModData.UUID) && !mods.Any(x => x.UUID == dependencyModData.UUID))
+					if (!order.Any(x => x.UUID == dependencyModData.UUID) && !mods.Any(x => x.UUID == dependencyModData.UUID))
 					{
 						mods.Add(dependencyModData);
 					}
@@ -1517,7 +1547,7 @@ namespace DivinityModManager.Util
 		public static List<DivinityModData> BuildOutputList(IEnumerable<DivinityLoadOrderEntry> order, IEnumerable<DivinityModData> allMods, bool addDependencies = true, DivinityModData selectedAdventure = null)
 		{
 			List<DivinityModData> orderList = new List<DivinityModData>();
-			if(selectedAdventure != null)
+			if (selectedAdventure != null)
 			{
 				if (addDependencies && selectedAdventure.HasDependencies)
 				{
@@ -1558,7 +1588,7 @@ namespace DivinityModManager.Util
 
 			foreach (var mod in orderList)
 			{
-				if(!String.IsNullOrWhiteSpace(mod.UUID))
+				if (!String.IsNullOrWhiteSpace(mod.UUID))
 				{
 					modulesText += String.Format(DivinityApp.XML_MOD_ORDER_MODULE, mod.UUID) + Environment.NewLine;
 					string safeName = System.Security.SecurityElement.Escape(mod.Name);
@@ -1590,7 +1620,7 @@ namespace DivinityModManager.Util
 		{
 			foreach (var kvp in children)
 			{
-				if(kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
+				if (kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
 				{
 					return kvp.Value.FirstOrDefault();
 				}
@@ -1609,14 +1639,14 @@ namespace DivinityModManager.Util
 
 		private static Node FindNode(Region region, string name)
 		{
-			foreach(var kvp in region.Children)
+			foreach (var kvp in region.Children)
 			{
 				if (kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
 				{
 					return kvp.Value.First();
 				}
 			}
-			
+
 			var match = FindNode(region.Children, name);
 			if (match != null)
 			{
@@ -1628,7 +1658,7 @@ namespace DivinityModManager.Util
 
 		private static Node FindNode(Resource resource, string name)
 		{
-			foreach(var region in resource.Regions.Values)
+			foreach (var region in resource.Regions.Values)
 			{
 				var match = FindNode(region, name);
 				if (match != null)
@@ -1636,7 +1666,7 @@ namespace DivinityModManager.Util
 					return match;
 				}
 			}
-			
+
 			return null;
 		}
 
@@ -1732,7 +1762,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error parsing save '{file}':\n{ex}");
 			}
@@ -1900,7 +1930,7 @@ namespace DivinityModManager.Util
 					}
 				}
 			}
-			catch(Exception ex)
+			catch (Exception ex)
 			{
 				DivinityApp.Log("Error parsing base game mods:\n" + ex.ToString());
 			}

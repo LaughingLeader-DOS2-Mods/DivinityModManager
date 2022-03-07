@@ -23,6 +23,9 @@ namespace DivinityModManager.ViewModels
 {
 	public class AppKeys : ReactiveObject
 	{
+		[MenuSettings("File", "Import Mod...", true)]
+		[Reactive] public Hotkey ImportMod { get; set; } = new Hotkey(Key.M, ModifierKeys.Control);
+
 		[MenuSettings("File", "Add New Order", true)]
 		[Reactive] public Hotkey NewOrder { get; set; } = new Hotkey(Key.N, ModifierKeys.Control);
 
@@ -174,14 +177,14 @@ namespace DivinityModManager.ViewModels
 			{
 				Directory.CreateDirectory("Data");
 				var keyMapDict = new Dictionary<string, Hotkey>();
-				foreach(var key in All)
+				foreach (var key in All)
 				{
-					if(!key.IsDefault)
+					if (!key.IsDefault)
 					{
 						keyMapDict.Add(key.ID, key);
 					}
 				}
-				if(keyMapDict.Count == 0)
+				if (keyMapDict.Count == 0)
 				{
 					return true;
 				}
@@ -206,12 +209,12 @@ namespace DivinityModManager.ViewModels
 					{
 						var fileText = reader.ReadToEnd();
 						var allKeybindings = DivinityJsonUtils.SafeDeserialize<Dictionary<string, Hotkey>>(fileText);
-						if(allKeybindings != null)
+						if (allKeybindings != null)
 						{
-							foreach(var kvp in allKeybindings)
+							foreach (var kvp in allKeybindings)
 							{
 								var existingHotkey = All.FirstOrDefault(x => x.ID.Equals(kvp.Key, StringComparison.OrdinalIgnoreCase));
-								if(existingHotkey != null)
+								if (existingHotkey != null)
 								{
 									existingHotkey.Key = kvp.Value.Key;
 									existingHotkey.Modifiers = kvp.Value.Modifiers;
@@ -236,7 +239,7 @@ namespace DivinityModManager.ViewModels
 
 		public void SetToDefault()
 		{
-			foreach(var entry in keyMap.Items)
+			foreach (var entry in keyMap.Items)
 			{
 				entry.ResetToDefault();
 			}
@@ -247,7 +250,7 @@ namespace DivinityModManager.ViewModels
 			Type t = typeof(AppKeys);
 			// Building a list of keys / key names from properties, because lazy
 			var keyProps = t.GetRuntimeProperties().Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)) && prop.GetGetMethod() != null).ToList();
-			foreach(var prop in keyProps)
+			foreach (var prop in keyProps)
 			{
 				var hotkey = (Hotkey)t.GetProperty(prop.Name).GetValue(this);
 				hotkey.ID = prop.Name;

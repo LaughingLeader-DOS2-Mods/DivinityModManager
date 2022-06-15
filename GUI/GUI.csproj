@@ -70,6 +70,11 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
+	<PostBuildEventDependsOn>
+		$(PostBuildEventDependsOn);
+		PostBuildMacros;
+	</PostBuildEventDependsOn>
+    <PostBuildEvent>powershell start-process py -WindowStyle hidden -argumentlist ""$(SolutionDir)BuildRelease.py"",""@(VersionNumber)""</PostBuildEvent>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="AdonisUI, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
@@ -544,13 +549,6 @@
       <VersionNumber Include="@(Targets->'%(Version)')" />
     </ItemGroup>
   </Target>
-  <PropertyGroup>
-    <PostBuildEventDependsOn>
-		$(PostBuildEventDependsOn);
-		PostBuildMacros;
-	  </PostBuildEventDependsOn>
-    <PostBuildEvent>powershell start-process py -WindowStyle hidden -argumentlist ""$(SolutionDir)BuildRelease.py"",""@(VersionNumber)""</PostBuildEvent>
-  </PropertyGroup>
   <Target Name="AfterBuild">
     <ItemGroup>
       <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml" />

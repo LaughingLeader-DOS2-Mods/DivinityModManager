@@ -22,11 +22,11 @@ namespace DivinityModManager.Models
 	[DataContract]
 	public class DivinityModManagerSettings : ReactiveObject, IDisposable
 	{
-		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods.\nExample: Divinity Original Sin 2/DefEd/Data")]
+		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods\nExample: Divinity Original Sin 2/DefEd/Data")]
 
 		[DataMember][Reactive] public string GameDataPath { get; set; } = "";
 
-		[SettingsEntry("Game Executable Path", "The path to the game exe, EoCApp.exe.\nExample: Divinity Original Sin 2/DefEd/bin/EoCApp.exe")]
+		[SettingsEntry("Game Executable Path", "The path to the game exe, EoCApp.exe\nExample: Divinity Original Sin 2/DefEd/bin/EoCApp.exe")]
 
 		[DataMember][Reactive] public string GameExecutablePath { get; set; } = "";
 
@@ -34,28 +34,28 @@ namespace DivinityModManager.Models
 		[DataMember]
 		public string DOS2DEGameExecutable { set => GameExecutablePath = value; }
 
-		[SettingsEntry("Enable Story Log", "When launching the game, enable the Osiris story log (osiris.log).")]
+		[SettingsEntry("Enable Story Log", "When launching the game, enable the Osiris story log (osiris.log)")]
 		[DataMember][Reactive] public bool GameStoryLogEnabled { get; set; } = false;
 
 
-		[SettingsEntry("Workshop Path", "The workshop folder.\nUsed for detecting mod updates and new mods to be copied into the local mods folder.\nExample: Steam/steamapps/workshop/content/435150")]
+		[SettingsEntry("Workshop Path", "The Steam Workshop folder for Divinity: Original Sin 2\nUsed for detecting mod updates and new mods to be copied into the local mods folder\nExample: Steam/steamapps/workshop/content/435150")]
 		[DataMember][Reactive] public string WorkshopPath { get; set; } = "";
 
 
-		[SettingsEntry("Saved Load Orders Path", "The folder containing mod load orders.")]
+		[SettingsEntry("Saved Load Orders Path", "The folder containing mod load orders")]
 		[DataMember][Reactive] public string LoadOrderPath { get; set; } = "Orders";
 
 
-		[SettingsEntry("Enable Internal Log", "Enable the log for the mod manager.")]
+		[SettingsEntry("Enable Internal Log", "Enable the log for the mod manager")]
 		[DataMember][Reactive] public bool LogEnabled { get; set; } = false;
 
-		[SettingsEntry("Auto Add Missing Dependencies When Exporting", "Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order.")]
+		[SettingsEntry("Auto Add Missing Dependencies When Exporting", "Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order")]
 		[DataMember][Reactive] public bool AutoAddDependenciesWhenExporting { get; set; } = true;
 
-		[SettingsEntry("Enable Automatic Updates", "Automatically check for updates when the program starts.")]
+		[SettingsEntry("Enable Automatic Updates", "Automatically check for updates when the program starts")]
 		[DataMember][Reactive] public bool CheckForUpdates { get; set; } = true;
 
-		[SettingsEntry("Automatically Load GM Campaign Mods", "When a GM campaign is selected, its dependency mods will automatically be loaded without needing to manually import them.")]
+		[SettingsEntry("Automatically Load GM Campaign Mods", "When a GM campaign is selected, its dependency mods will automatically be loaded without needing to manually import them")]
 		[DataMember][Reactive] public bool AutomaticallyLoaGMCampaignMods { get; set; } = false;
 
 		[DataMember][Reactive] public long LastUpdateCheck { get; set; } = -1;
@@ -95,7 +95,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref darkThemeEnabled, value); }
 		}
 
-		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well.")]
+		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well")]
 		[DataMember][Reactive] public bool ShiftListFocusOnSwap { get; set; } = false;
 
 		private OsiExtenderSettings extenderSettings;
@@ -130,10 +130,10 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref actionOnGameLaunch, value); }
 		}
 
-		[SettingsEntry("Disable Missing Mod Warnings", "If a load order is missing mods, no warnings will be displayed.")]
+		[SettingsEntry("Disable Missing Mod Warnings", "If a load order is missing mods, no warnings will be displayed")]
 		[DataMember][Reactive] public bool DisableMissingModWarnings { get; set; } = false;
 
-		[SettingsEntry("Disable Checking for Steam Workshop Tags", "The mod manager will try and find mod tags from the workshop by default.")]
+		[SettingsEntry("Disable Checking for Steam Workshop Tags", "The mod manager will try and find mod tags from the workshop by default")]
 		[DataMember][Reactive] public bool DisableWorkshopTagCheck { get; set; } = false;
 
 		[DataMember][Reactive] public bool ExportDefaultExtenderSettings { get; set; } = false;
@@ -150,7 +150,7 @@ namespace DivinityModManager.Models
 
 		private bool debugModeEnabled = false;
 
-		[SettingsEntry("Enable Developer Mode", "This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options.")]
+		[SettingsEntry("Enable Developer Mode", "This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options")]
 		[DataMember]
 		public bool DebugModeEnabled
 		{

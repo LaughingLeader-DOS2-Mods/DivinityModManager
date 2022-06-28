@@ -361,6 +361,26 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		public void FocusInitialActiveSelected()
+		{
+			if (ViewModel.ActiveSelected <= 0)
+			{
+				ActiveModsListView.SelectedIndex = 0;
+			}
+			try
+			{
+				ListViewItem item = (ListViewItem)ActiveModsListView.ItemContainerGenerator.ContainerFromItem(ActiveModsListView.SelectedItem);
+				if (item != null)
+				{
+					Keyboard.Focus(item);
+				}
+			}
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error focusing selected item:{ex}");
+			}
+		}
+
 		public HorizontalModLayout()
 		{
 			InitializeComponent();
@@ -396,22 +416,7 @@ namespace DivinityModManager.Views
 				if (setInitialFocus)
 				{
 					this.ActiveModsListView.Focus();
-					if (ViewModel.ActiveSelected <= 0)
-					{
-						ActiveModsListView.SelectedIndex = 0;
-					}
-					try
-					{
-						ListViewItem item = (ListViewItem)ActiveModsListView.ItemContainerGenerator.ContainerFromItem(ActiveModsListView.SelectedItem);
-						if (item != null)
-						{
-							Keyboard.Focus(item);
-						}
-					}
-					catch (Exception ex)
-					{
-						DivinityApp.Log($"Error focusing selected item:{ex}");
-					}
+					//FocusInitialActiveSelected();
 					setInitialFocus = false;
 				}
 			};

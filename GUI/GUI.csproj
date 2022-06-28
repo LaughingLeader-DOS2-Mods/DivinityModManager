@@ -31,9 +31,6 @@
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
@@ -70,12 +67,9 @@
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <Prefer32Bit>true</Prefer32Bit>
-	<PostBuildEventDependsOn>
-		$(PostBuildEventDependsOn);
-		PostBuildMacros;
-	</PostBuildEventDependsOn>
-    <PostBuildEvent>powershell start-process py -WindowStyle hidden -argumentlist ""$(SolutionDir)BuildRelease.py"",""@(VersionNumber)""</PostBuildEvent>
+    <!-- <PostBuildEvent>powershell start-process python -WindowStyle hidden -argumentlist "$(SolutionDir)BuildRelease.py","@(VersionNumber)"</PostBuildEvent> -->
   </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
     <Reference Include="AdonisUI, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\AdonisUI.1.17.1\lib\net45\AdonisUI.dll</HintPath>
@@ -537,18 +531,9 @@
   <ItemGroup>
     <None Include="FodyWeavers.xml" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>
   </PropertyGroup>
-  <Target Name="PostBuildMacros">
-    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-      <Output TaskParameter="Assemblies" ItemName="Targets" />
-    </GetAssemblyIdentity>
-    <ItemGroup>
-      <VersionNumber Include="@(Targets->'%(Version)')" />
-    </ItemGroup>
-  </Target>
   <Target Name="AfterBuild">
     <ItemGroup>
       <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml" />
@@ -556,6 +541,14 @@
     </ItemGroup>
     <Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
     <Copy SourceFiles="@(ExternalLibraries)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
+  </Target>
+  <Target Name="AfterAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
+	<GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+		<Output TaskParameter="Assemblies" ItemName="AssemblyVersion"/>
+	</GetAssemblyIdentity>  
+	<Exec Command="python &quot;BuildRelease.py&quot; &quot;%(AssemblyVersion.Version)&quot;"
+		WorkingDirectory="$(SolutionDir)"
+	/>
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

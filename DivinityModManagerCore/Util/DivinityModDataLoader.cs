@@ -418,11 +418,30 @@ namespace DivinityModManager.Util
 			return projects;
 		}
 
+		private static HashSet<string> _AllPaksNames = new HashSet<string>();
+
 		private static Regex multiPartPakPattern = new Regex("_[0-9]+.pak", RegexOptions.IgnoreCase | RegexOptions.Singleline);
+		private static Regex multiPartPakPatternNoExtension = new Regex("(_[0-9]+)$", RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
 		private static bool CanProcessPak(FileSystemEntryInfo f)
 		{
 			return !multiPartPakPattern.IsMatch(f.FileName) && Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase);
+		}
+
+		private static bool PakIsNotPartial(string path)
+		{
+			var baseName = Path.GetFileNameWithoutExtension(path);
+			var match = multiPartPakPatternNoExtension.Match(baseName);
+			if (match.Success)
+			{
+				var nameWithoutPartial = baseName.Replace(match.Groups[0].Value, "");
+				if(_AllPaksNames.Contains(nameWithoutPartial))
+				{
+					DivinityApp.Log($"Pak ({baseName}) is a partial pak for ({nameWithoutPartial}). Skipping.");
+					return false;
+				}
+			}
+			return true;
 		}
 
 		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
@@ -442,17 +461,17 @@ namespace DivinityModManager.Util
 			if (Directory.Exists(modsFolderPath))
 			{
 				List<string> modPaks = new List<string>();
+
 				try
 				{
-					var files = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive,
-						new DirectoryEnumerationFilters()
-						{
-							InclusionFilter = CanProcessPak
-						});
-					if (files != null)
+					var dirOptions = DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive;
+					var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
+					new DirectoryEnumerationFilters()
 					{
-						modPaks.AddRange(files);
-					}
+						InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase)
+					}).ToList();
+					allPaks.ForEach((p) => _AllPaksNames.Add(Path.GetFileNameWithoutExtension(p)));
+					modPaks.AddRange(allPaks.Where(PakIsNotPartial));
 				}
 				catch (Exception ex)
 				{
@@ -626,15 +645,14 @@ namespace DivinityModManager.Util
 				List<string> modPaks = new List<string>();
 				try
 				{
-					var files = Directory.EnumerateFiles(modsFolderPath, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive,
-						new DirectoryEnumerationFilters()
-						{
-							InclusionFilter = CanProcessPak
-						});
-					if (files != null)
+					var dirOptions = DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive;
+					var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
+					new DirectoryEnumerationFilters()
 					{
-						modPaks.AddRange(files);
-					}
+						InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase)
+					}).ToList();
+					allPaks.ForEach((p) => _AllPaksNames.Add(Path.GetFileNameWithoutExtension(p)));
+					modPaks.AddRange(allPaks.Where(PakIsNotPartial));
 				}
 				catch (Exception ex)
 				{

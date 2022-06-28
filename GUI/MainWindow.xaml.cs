@@ -1,39 +1,28 @@
-﻿using DivinityModManager.Models;
+﻿using AdonisUI;
+using AdonisUI.Controls;
+
+using Alphaleonis.Win32.Filesystem;
+
+using AutoUpdaterDotNET;
+
+using DivinityModManager.Models.App;
 using DivinityModManager.Util;
+using DivinityModManager.Util.ScreenReader;
 using DivinityModManager.ViewModels;
+
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive.Concurrency;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Concurrency;
-using DynamicData;
-using DynamicData.Binding;
-using System.Diagnostics;
-using System.Globalization;
-using AutoUpdaterDotNET;
-using System.Windows.Threading;
-using AdonisUI.Controls;
-using Alphaleonis.Win32.Filesystem;
-using DivinityModManager.WinForms;
-using AdonisUI;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
-using DivinityModManager.Util.ScreenReader;
-using System.Reflection;
-using DivinityModManager.Models.App;
 
 namespace DivinityModManager.Views
 {
@@ -237,6 +226,21 @@ namespace DivinityModManager.Views
 				BindingOperations.SetBinding(keyBinding, KeyBinding.ModifiersProperty, new Binding { Path = new PropertyPath("Modifiers"), Source=key });
 				this.InputBindings.Add(keyBinding);
 			}
+
+			//Initial keyboard focus by hitting up or down
+			var setInitialFocusCommand = ReactiveCommand.Create(() =>
+			{
+				if (!DivinityApp.IsKeyboardNavigating && this.ViewModel.ActiveSelected == 0 && this.ViewModel.InactiveSelected == 0)
+				{
+					var modLayout = MainContentPresenter.FindVisualChildren<HorizontalModLayout>().FirstOrDefault();
+					if (modLayout != null)
+					{
+						modLayout.FocusInitialActiveSelected();
+					}
+				}
+			});
+			this.InputBindings.Add(new KeyBinding(setInitialFocusCommand, Key.Up, ModifierKeys.None));
+			this.InputBindings.Add(new KeyBinding(setInitialFocusCommand, Key.Down, ModifierKeys.None));
 
 			foreach (var item in TopMenuBar.Items)
 			{

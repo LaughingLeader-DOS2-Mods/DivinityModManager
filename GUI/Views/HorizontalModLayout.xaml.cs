@@ -416,7 +416,6 @@ namespace DivinityModManager.Views
 				if (setInitialFocus)
 				{
 					this.ActiveModsListView.Focus();
-					//FocusInitialActiveSelected();
 					setInitialFocus = false;
 				}
 			};

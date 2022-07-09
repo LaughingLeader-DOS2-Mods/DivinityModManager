@@ -1,14 +1,13 @@
-﻿<UserControl
-	x:Class="DivinityModManager.Controls.AlertBar"
-	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
-	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-	xmlns:local="clr-namespace:DivinityModManager.Controls"
-	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-	d:DesignHeight="450"
-	d:DesignWidth="800"
-	mc:Ignorable="d">
+﻿<UserControl x:Class="DivinityModManager.Controls.AlertBar"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:DivinityModManager.Controls"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
 	<UserControl.Style>
 		<Style BasedOn="{StaticResource {x:Type UserControl}}" TargetType="UserControl" />
 	</UserControl.Style>
@@ -23,21 +22,14 @@
 		<EventTrigger RoutedEvent="{x:Static local:AlertBar.ShowEvent}">
 			<BeginStoryboard>
 				<Storyboard>
-					<DoubleAnimationUsingKeyFrames
-						Name="AnimationObject"
-						Completed="AnimationObject_Completed"
-						Storyboard.TargetName="grdWrapper"
-						Storyboard.TargetProperty="Opacity">
+					<DoubleAnimationUsingKeyFrames Name="AnimationObject"
+					                               Completed="AnimationObject_Completed"
+					                               Storyboard.TargetName="grdWrapper"
+					                               Storyboard.TargetProperty="Opacity">
 						<EasingDoubleKeyFrame KeyTime="0" Value="0" />
 						<EasingDoubleKeyFrame KeyTime="0:0:0.25" Value="1" />
-						<EasingDoubleKeyFrame
-							x:Name="key1"
-							KeyTime="0:0:5"
-							Value="1" />
-						<EasingDoubleKeyFrame
-							x:Name="key2"
-							KeyTime="0:0:6"
-							Value="0" />
+						<EasingDoubleKeyFrame x:Name="key1" KeyTime="0:0:5" Value="1" />
+						<EasingDoubleKeyFrame x:Name="key2" KeyTime="0:0:6" Value="0" />
 					</DoubleAnimationUsingKeyFrames>
 				</Storyboard>
 			</BeginStoryboard>
@@ -51,25 +43,22 @@
 					<ColumnDefinition Width="*" />
 					<ColumnDefinition Width="20" />
 				</Grid.ColumnDefinitions>
-				<Image
-					Grid.Column="0"
-					Width="16"
-					Height="16"
-					Margin="10,4,0,4"
-					VerticalAlignment="Center" />
-				<TextBlock
-					Grid.Column="1"
-					Margin="5,0,5,0"
-					VerticalAlignment="Center"
-					FontSize="11"
-					FontWeight="Bold" />
-				<Image
-					Grid.Column="2"
-					Width="10"
-					Height="10"
-					Margin="0,4,10,4"
-					VerticalAlignment="Center"
-					MouseUp="Image_MouseUp">
+				<Image Grid.Column="0"
+				       Width="16"
+				       Height="16"
+				       Margin="10,4,0,4"
+				       VerticalAlignment="Center" />
+				<TextBlock Grid.Column="1"
+				           Margin="5,0,5,0"
+				           VerticalAlignment="Center"
+				           FontSize="11"
+				           FontWeight="Bold" />
+				<Image Grid.Column="2"
+				       Width="10"
+				       Height="10"
+				       Margin="0,4,10,4"
+				       VerticalAlignment="Center"
+				       MouseUp="Image_MouseUp">
 					<Image.Style>
 						<Style>
 							<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close.png" />
@@ -84,10 +73,7 @@
 			</Grid>
 		</StackPanel>
 		<StackPanel Name="spOutline" Visibility="Collapsed">
-			<Border
-				Name="bdr"
-				BorderThickness="2"
-				CornerRadius="5">
+			<Border Name="bdr" BorderThickness="2" CornerRadius="5">
 				<StackPanel>
 					<Grid>
 						<Grid.ColumnDefinitions>
@@ -95,25 +81,22 @@
 							<ColumnDefinition Width="*" />
 							<ColumnDefinition Width="20" />
 						</Grid.ColumnDefinitions>
-						<Image
-							Grid.Column="0"
-							Width="16"
-							Height="16"
-							Margin="10,4,0,4"
-							VerticalAlignment="Center" />
-						<TextBlock
-							Grid.Column="1"
-							Margin="5,0,5,0"
-							VerticalAlignment="Center"
-							FontSize="11"
-							FontWeight="Bold" />
-						<Image
-							Grid.Column="2"
-							Width="10"
-							Height="10"
-							Margin="0,4,10,4"
-							VerticalAlignment="Center"
-							MouseUp="Image_MouseUp">
+						<Image Grid.Column="0"
+						       Width="16"
+						       Height="16"
+						       Margin="10,4,0,4"
+						       VerticalAlignment="Center" />
+						<TextBlock Grid.Column="1"
+						           Margin="5,0,5,0"
+						           VerticalAlignment="Center"
+						           FontSize="11"
+						           FontWeight="Bold" />
+						<Image Grid.Column="2"
+						       Width="10"
+						       Height="10"
+						       Margin="0,4,10,4"
+						       VerticalAlignment="Center"
+						       MouseUp="Image_MouseUp">
 							<Image.Style>
 								<Style>
 									<Setter Property="Image.Source" Value="../Resources/Icons/AlertBar_Close.png" />

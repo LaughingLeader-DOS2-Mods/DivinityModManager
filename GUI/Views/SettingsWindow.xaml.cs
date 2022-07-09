@@ -54,7 +54,6 @@ namespace DivinityModManager.Views
 
 			ExtenderSettingsAutoGrid.RowCount = count;
 			ExtenderSettingsAutoGrid.Rows = String.Join(",", Enumerable.Repeat("auto", count));
-			DivinityApp.Log($"{count} = {ExtenderSettingsAutoGrid.Rows}");
 
 			foreach (var prop in props)
 			{

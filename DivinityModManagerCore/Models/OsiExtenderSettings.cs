@@ -104,7 +104,7 @@ namespace DivinityModManager.Models
 		[DefaultValue(false)]
 		public bool EnableDebugger { get; set; } = false;
 
-		[SettingsEntry("Osiris Debugger Port", "Port number the Osiris debugger will listen on (default 9999)", true)]
+		[SettingsEntry("Osiris Debugger Port", "Port number the Osiris debugger will listen on\nDefault: 9999", true)]
 		[Reactive]
 		[DataMember]
 		[DefaultValue(9999)]
@@ -133,6 +133,12 @@ namespace DivinityModManager.Models
 		[DataMember]
 		[DefaultValue(false)]
 		public bool EnableLuaDebugger { get; set; } = false;
+
+		[SettingsEntry("Lua Builtin Directory", "An additional directory where the Script Extender will check for builtin scripts\nThis setting is meant for ositools developers, to make it easier to test builtin script changes.", true)]
+		[Reactive]
+		[DataMember]
+		[DefaultValue("")]
+		public string LuaBuiltinResourceDirectory { get; set; } = "";
 
 		public static OsiExtenderSettings DefaultSettings = new OsiExtenderSettings();
 

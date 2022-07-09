@@ -1923,8 +1923,8 @@ namespace DivinityModManager.Util
 									var modData = ParseMetaFile(text, true);
 									if (modData != null)
 									{
-										modData.IsLarianMod = true;
-										modData.IsHidden = true;
+										modData.IsLarianMod = DivinityApp.IgnoredMods.Any(x => x.UUID == modData.UUID) || modData.Author.Contains("Larian");
+										modData.IsHidden = modData.IsLarianMod;
 
 										var last = baseMods.FirstOrDefault(x => x.UUID == modData.UUID);
 
@@ -1992,8 +1992,8 @@ namespace DivinityModManager.Util
 									if (modData != null)
 									{
 										DivinityApp.Log($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
-										modData.IsLarianMod = true;
-										modData.IsHidden = true;
+										modData.IsLarianMod = DivinityApp.IgnoredMods.Any(x => x.UUID == modData.UUID) || modData.Author.Contains("Larian");
+										modData.IsHidden = modData.IsLarianMod;
 										baseMods.Add(modData);
 									}
 								}

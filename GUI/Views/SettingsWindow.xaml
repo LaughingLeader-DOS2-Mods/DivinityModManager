@@ -113,8 +113,8 @@
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DisableWorkshopTagCheck, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="ShiftListFocusOnSwap" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ShiftListFocusOnSwap, UpdateSourceTrigger=PropertyChanged}" />
-						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutomaticallyLoaGMCampaignMods" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutomaticallyLoaGMCampaignMods, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutomaticallyLoadGMCampaignMods" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutomaticallyLoadGMCampaignMods, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="On Game Launch" />
 						<ComboBox DisplayMemberPath="Description"
 						          ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"

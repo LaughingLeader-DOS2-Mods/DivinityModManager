@@ -5013,7 +5013,7 @@ Directory the zip will be extracted to:
 			Keys.ImportOrderFromSelectedGMCampaign.AddAction(() => LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign), gmModeChanged);
 			justSelectedGameMasterCampaign.ObserveOn(RxApp.MainThreadScheduler).Subscribe((d) =>
 			{
-				if (!this.Refreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoaGMCampaignMods) && d.Item1 > -1)
+				if (!this.Refreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoadGMCampaignMods) && d.Item1 > -1)
 				{
 					var selectedCampaign = GameMasterCampaigns.ElementAtOrDefault(d.Item1);
 					if (selectedCampaign != null && !LoadingOrder)

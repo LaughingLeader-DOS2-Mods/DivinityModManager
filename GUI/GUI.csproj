@@ -31,8 +31,7 @@
     <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <SupportedCultures>en-US</SupportedCultures>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>

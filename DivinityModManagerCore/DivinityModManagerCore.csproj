@@ -5,6 +5,7 @@
     <RootNamespace>DivinityModManager</RootNamespace>
 	<Platforms>AnyCPU;x64</Platforms>
 	<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+	<SupportedCultures>en-US</SupportedCultures>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -26,8 +26,8 @@
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
 		<PackageReference Include="ReactiveHistory" Version="0.10.7" />
 		<PackageReference Include="ReactiveProperty" Version="8.1.2" />
-		<PackageReference Include="ReactiveUI" Version="18.2.5" />
-		<PackageReference Include="ReactiveUI.Fody" Version="18.2.5" />
+		<PackageReference Include="ReactiveUI" Version="18.2.9" />
+		<PackageReference Include="ReactiveUI.Fody" Version="18.2.9" />
 		<PackageReference Include="System.Reactive" Version="5.0.0" />
 	</ItemGroup>
 	<ItemGroup>

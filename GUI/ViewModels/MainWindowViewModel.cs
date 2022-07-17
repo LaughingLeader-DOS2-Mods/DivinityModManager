@@ -2472,6 +2472,8 @@ namespace DivinityModManager.ViewModels
 			userMods.Clear();
 			Profiles.Clear();
 			workshopMods.Clear();
+			view.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+			view.TaskbarItemInfo.ProgressValue = 0;
 			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
 		}
 

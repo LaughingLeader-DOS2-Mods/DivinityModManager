@@ -699,7 +699,7 @@ namespace DivinityModManager.Util
 											if(builtinMods.TryGetValue(modFolder, out var builtinMod))
 											{
 												hasBuiltinDirectory = true;
-												builtinModOverrides.Add(builtinMod.Folder, builtinMod);
+												builtinModOverrides[builtinMod.Folder] = builtinMod;
 												DivinityApp.Log($"Found a mod overriding a builtin directory. Pak({pakName}) Folder({modFolder}) File({f.Name}");
 											}
 										}

@@ -924,6 +924,22 @@ namespace DivinityModManager.ViewModels
 
 			Keys.DownloadScriptExtender.AddAction(() => InstallOsiExtender_Start());
 
+			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
+			Keys.OpenModsFolder.AddAction(() =>
+			{
+				Process.Start(PathwayData.DocumentsModsPath);
+			}, canOpenModsFolder);
+
+			var canOpenGameFolder = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
+			Keys.OpenGameFolder.AddAction(() =>
+			{
+				var folder = Path.GetDirectoryName(Settings.GameExecutablePath);
+				if (Directory.Exists(folder))
+				{
+					Process.Start(folder);
+				}
+			}, canOpenGameFolder);
+
 			Keys.OpenLogsFolder.AddAction(() =>
 			{
 				Process.Start(Settings.ExtenderLogDirectory);
@@ -4788,12 +4804,6 @@ Directory the zip will be extracted to:
 					ShowAlert($"Path not found.", AlertType.Danger, 30);
 				}
 			});
-
-			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
-			Keys.OpenModsFolder.AddAction(() =>
-			{
-				Process.Start(PathwayData.DocumentsModsPath);
-			}, canOpenModsFolder);
 
 			RenameSaveCommand = ReactiveCommand.Create(RenameSave_Start, canOpenDialogWindow);
 

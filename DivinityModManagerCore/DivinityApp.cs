@@ -39,7 +39,7 @@ namespace DivinityModManager
 
 		public const string EXTENDER_REPO_URL = "Norbyte/ositools";
 		public const string EXTENDER_LATEST_URL = "https://github.com/Norbyte/ositools/releases/latest";
-		public const string EXTENDER_APPDATA_DLL = "OsirisExtender/OsiExtenderEoCApp.dll";
+		public const string EXTENDER_APPDATA_DLL_OLD = "OsirisExtender/OsiExtenderEoCApp.dll";
 		public const string EXTENDER_MOD_CONFIG = "OsiToolsConfig.json";
 		public const string EXTENDER_UPDATER_FILE = "DXGI.dll";
 

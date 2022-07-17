@@ -696,6 +696,23 @@ namespace DivinityModManager.ViewModels
 					{
 						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
 						DivinityApp.Log($"Found the Extender at '{extenderUpdaterPath}'.");
+						FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderUpdaterPath);
+						if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+						{
+							var version = extenderInfo.FileVersion.Split('.')[0];
+							if (int.TryParse(version, out int intVersion))
+							{
+								if (intVersion >= 3)
+								{
+									//Assume we're at least at v56 is the updater is 3.0.0.0
+									Settings.ExtenderSettings.ExtenderVersion = 56;
+								}
+							}
+							else
+							{
+								Settings.ExtenderSettings.ExtenderVersion = -1;
+							}
+						}
 					}
 					else
 					{
@@ -720,32 +737,79 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} not found.");
 			}
 
-			string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DivinityApp.EXTENDER_APPDATA_DLL);
-			if (File.Exists(extenderAppFile))
+			string extenderDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "DOS2ScriptExtender\\ScriptExtender");
+			if(Directory.Exists(extenderDirectory))
 			{
-				Settings.ExtenderSettings.ExtenderIsAvailable = true;
-				try
+				var extenderFiles = Directory.EnumerateFiles(extenderDirectory, DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive, new DirectoryEnumerationFilters
 				{
-					FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
-					if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+					InclusionFilter = (f) => f.FileName.Equals("OsiExtenderEoCApp.dll", StringComparison.OrdinalIgnoreCase)
+				});
+				int latestVersion = -1;
+				foreach(var f in extenderFiles)
+				{
+					Settings.ExtenderSettings.ExtenderIsAvailable = true;
+					try
 					{
-						var version = extenderInfo.FileVersion.Split('.')[0];
-						if (int.TryParse(version, out int intVersion))
+						FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(f);
+						if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
 						{
-							Settings.ExtenderSettings.ExtenderVersion = intVersion;
-							DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
-						}
-						else
-						{
-							Settings.ExtenderSettings.ExtenderVersion = -1;
+							var version = extenderInfo.FileVersion.Split('.')[0];
+							if (int.TryParse(version, out int intVersion))
+							{
+								if(intVersion > latestVersion)
+								{
+									latestVersion = intVersion;
+								}
+							}
+							else
+							{
+								Settings.ExtenderSettings.ExtenderVersion = -1;
+							}
 						}
 					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error getting file info from: '{f}'\n\t{ex}");
+					}
 				}
-				catch (Exception ex)
+				if(latestVersion > -1)
 				{
-					DivinityApp.Log($"Error getting file info from: '{extenderAppFile}'\n\t{ex}");
+					Settings.ExtenderSettings.ExtenderVersion = latestVersion;
+					DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
 				}
 			}
+
+			//Look in old path
+			if (!Settings.ExtenderSettings.ExtenderIsAvailable)
+			{
+				string extenderAppFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), DivinityApp.EXTENDER_APPDATA_DLL_OLD);
+				if (File.Exists(extenderAppFile))
+				{
+					Settings.ExtenderSettings.ExtenderIsAvailable = true;
+					try
+					{
+						FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
+						if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
+						{
+							var version = extenderInfo.FileVersion.Split('.')[0];
+							if (int.TryParse(version, out int intVersion))
+							{
+								Settings.ExtenderSettings.ExtenderVersion = intVersion;
+								DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+							}
+							else
+							{
+								Settings.ExtenderSettings.ExtenderVersion = -1;
+							}
+						}
+					}
+					catch (Exception ex)
+					{
+						DivinityApp.Log($"Error getting file info from: '{extenderAppFile}'\n\t{ex}");
+					}
+				}
+			}
+
 			return Unit.Default;
 		}
 
@@ -4250,6 +4314,7 @@ namespace DivinityModManager.ViewModels
 						view.AlertBar.SetSuccessAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", 20);
 						HighlightExtenderDownload = false;
 						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
+						Settings.ExtenderSettings.ExtenderVersion = 56;
 						if (Settings.ExtenderSettings.ExtenderVersion <= -1)
 						{
 							if (!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))

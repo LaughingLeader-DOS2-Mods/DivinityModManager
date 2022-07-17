@@ -696,7 +696,7 @@ namespace DivinityModManager.Util
 										if (modFolderMatch.Success)
 										{
 											var modFolder = Path.GetFileName(modFolderMatch.Groups[2].Value.TrimEnd(Path.DirectorySeparatorChar));
-											if(builtinMods.TryGetValue(modFolder, out var builtinMod))
+											if(!builtinModOverrides.ContainsKey(modFolder) && builtinMods.TryGetValue(modFolder, out var builtinMod))
 											{
 												hasBuiltinDirectory = true;
 												builtinModOverrides[builtinMod.Folder] = builtinMod;

@@ -890,7 +890,7 @@ namespace DivinityModManager.ViewModels
 					Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(AppSettings.DefaultPathways.Steam.AppID).Replace("\\", "/");
 					if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
 					{
-						DivinityApp.Log($"Invalid workshop path set in settings file. Found workshop folder at: '{Settings.WorkshopPath}'.");
+						DivinityApp.Log($"Workshop path set to: '{Settings.WorkshopPath}'.");
 						SaveSettings();
 					}
 				}

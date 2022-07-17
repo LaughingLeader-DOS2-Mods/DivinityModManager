@@ -8,6 +8,7 @@ using Alphaleonis.Win32.Filesystem;
 using Microsoft.Win32;
 using Gameloop.Vdf;
 using Gameloop.Vdf.Linq;
+using System.Drawing.Drawing2D;
 
 namespace DivinityModManager.Util
 {
@@ -156,6 +157,7 @@ namespace DivinityModManager.Util
 						return lastGamePath;
 					}
 					string folder = Path.Combine(LastSteamInstallPath, "steamapps", "common", steamGameInstallPath);
+					DivinityApp.Log($"Looking for game at '{folder}'.");
 					if (Directory.Exists(folder))
 					{
 						DivinityApp.Log($"Found game at '{folder}'.");
@@ -165,8 +167,8 @@ namespace DivinityModManager.Util
 					}
 					else
 					{
-						DivinityApp.Log($"Game not found. Looking for Steam libraries.");
 						string libraryFile = Path.Combine(LastSteamInstallPath, PATH_Steam_LibraryFile);
+						DivinityApp.Log($"Game not found. Looking for Steam libraries in file '{libraryFile}'.");
 						if (File.Exists(libraryFile))
 						{
 							List<string> libraryFolders = new List<string>();
@@ -177,10 +179,11 @@ namespace DivinityModManager.Util
 								{
 									if (token.Key != "TimeNextStatsReport" && token.Key != "ContentStatsID")
 									{
-										if (token.Value is VValue innerValue)
+										var path = token.Value.Children().Cast<VProperty>().FirstOrDefault(x => x.Key == "path");
+										if (path != null && path.Value is VValue innerValue)
 										{
 											var p = innerValue.Value<string>();
-											if (Directory.Exists(p))
+											if (!String.IsNullOrEmpty(p) && Directory.Exists(p))
 											{
 												DivinityApp.Log($"Found steam library folder at '{p}'.");
 												libraryFolders.Add(p);
@@ -206,6 +209,10 @@ namespace DivinityModManager.Util
 									return lastGamePath;
 								}
 							}
+						}
+						else
+						{
+							DivinityApp.Log($"Steam library not found at '{libraryFile}'");
 						}
 					}
 				}

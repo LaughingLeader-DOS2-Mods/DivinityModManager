@@ -576,14 +576,15 @@
 					<Run Text="Last Updated on " /><Run Text="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />
 				</TextBlock>
 			</StackPanel>
-			<StackPanel Orientation="Vertical" Visibility="{Binding HasBuiltinOverride, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+			<StackPanel Margin="2" Orientation="Vertical" Visibility="{Binding HasBuiltinOverride, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
 				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
-				<TextBlock Margin="2" Foreground="OrangeRed">
+				<TextBlock Foreground="OrangeRed">
 					This mod overrides base game files directly.<LineBreak />
 					As long as this mod exists in the Mods folder,<LineBreak />
 					these files will be overwritten, even if the mod is disabled.</TextBlock>
-				<TextBlock Margin="2" Foreground="OrangeRed" Text="Overwritten folders:" />
-				<TextBlock Margin="2" Text="{Binding BuiltinOverrideModsText}" />
+				<TextBlock Text="If this is intended, you can ignore this warning." />
+				<TextBlock Foreground="OrangeRed" Text="Overwritten builtin folders:" />
+				<TextBlock Text="{Binding BuiltinOverrideModsText}" />
 			</StackPanel>
 		</StackPanel>
 	</controls:AutomationTooltip>

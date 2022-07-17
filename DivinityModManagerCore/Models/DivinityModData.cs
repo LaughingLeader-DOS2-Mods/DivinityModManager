@@ -126,11 +126,11 @@ namespace DivinityModManager.Models
 			}
 			if (currentVersion > -1)
 			{
-				OsirisExtenderSupportToolTipText += $"Installed Version: v{currentVersion}";
+				OsirisExtenderSupportToolTipText += $"(Currently installed version is v{currentVersion})";
 			}
 			else
 			{
-				OsirisExtenderSupportToolTipText += "(No Installed Version Found)";
+				OsirisExtenderSupportToolTipText += "(No installed extender version found)";
 			}
 			this.RaisePropertyChanged("OsirisExtenderSupportToolTipText");
 		}

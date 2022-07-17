@@ -59,7 +59,9 @@ namespace DivinityModManager.Models
 		[Reactive] public bool IsHidden { get; set; } = false;
 		[Reactive] public bool IsLarianMod { get; set; } = false;
 		[Reactive] public bool IsClassicMod { get; set; } = false;
-		[Reactive] public bool HasOverride { get; set; } = false;
+		[Reactive] public bool HasBuiltinOverride { get; set; } = false;
+		[Reactive] public string BuiltinOverrideModsText { get; set; }
+
 		[Reactive] public string HelpText { get; set; } = "";
 
 		public List<string> Tags { get; set; } = new List<string>();

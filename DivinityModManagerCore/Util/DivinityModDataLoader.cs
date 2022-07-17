@@ -435,7 +435,7 @@ namespace DivinityModManager.Util
 			if (match.Success)
 			{
 				var nameWithoutPartial = baseName.Replace(match.Groups[0].Value, "");
-				if(_AllPaksNames.Contains(nameWithoutPartial))
+				if (_AllPaksNames.Contains(nameWithoutPartial))
 				{
 					DivinityApp.Log($"Pak ({baseName}) is a partial pak for ({nameWithoutPartial}). Skipping.");
 					return false;
@@ -676,8 +676,10 @@ namespace DivinityModManager.Util
 
 							var pak = pr.Read();
 
-							var hasBuiltinDirectory = false;
 							var metaFiles = new List<AbstractFileInfo>();
+							var hasBuiltinDirectory = false;
+							var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
+							var builtinModOverrides = new Dictionary<string, DivinityModData>();
 
 							if (pak != null && pak.Files != null)
 							{
@@ -692,10 +694,11 @@ namespace DivinityModManager.Util
 										var modFolderMatch = _ModFolderPattern.Match(f.Name);
 										if (modFolderMatch.Success)
 										{
-											var modFolder = modFolderMatch.Groups[1].Value;
-											if (IgnoreModByFolder(modFolder))
+											var modFolder = Path.GetFileName(modFolderMatch.Groups[2].Value.TrimEnd(Path.DirectorySeparatorChar));
+											if(builtinMods.TryGetValue(modFolder, out var builtinMod))
 											{
 												hasBuiltinDirectory = true;
+												builtinModOverrides.Add(builtinMod.Folder, builtinMod);
 												DivinityApp.Log($"Found a mod overriding a builtin directory. Pak({pakName}) Folder({modFolder}) File({f.Name}");
 											}
 										}
@@ -729,7 +732,11 @@ namespace DivinityModManager.Util
 
 								if (modData != null && (!ignoreClassic || !modData.IsClassicMod))
 								{
-									modData.HasOverride = hasBuiltinDirectory;
+									modData.HasBuiltinOverride = hasBuiltinDirectory;
+									if (hasBuiltinDirectory)
+									{
+										modData.BuiltinOverrideModsText = String.Join(Environment.NewLine, builtinModOverrides.Values.OrderBy(x => x.Name).Select(x => $"{x.Folder} ({x.Name})"));
+									}
 									modData.FilePath = pakPath;
 									try
 									{

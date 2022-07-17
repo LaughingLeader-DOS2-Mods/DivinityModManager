@@ -277,6 +277,37 @@
 			</MultiDataTrigger>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding HasBuiltinOverride}" Value="True" />
+					<Condition Binding="{Binding IsEditorMod}" Value="False" />
+					<Condition Binding="{Binding IsSelected}" Value="False" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background">
+						<Setter.Value>
+							<SolidColorBrush Opacity="0.25" Color="OrangeRed" />
+						</Setter.Value>
+					</Setter>
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
+					<Condition Binding="{Binding HasBuiltinOverride}" Value="True" />
+					<Condition Binding="{Binding IsEditorMod}" Value="False" />
+					<Condition Binding="{Binding IsSelected}" Value="True" />
+				</MultiDataTrigger.Conditions>
+				<MultiDataTrigger.Setters>
+					<Setter Property="Background">
+						<Setter.Value>
+							<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+								<GradientStop Offset="0" Color="#FFD23900" />
+								<GradientStop Offset="1" Color="#FFC73905" />
+							</LinearGradientBrush>
+						</Setter.Value>
+					</Setter>
+				</MultiDataTrigger.Setters>
+			</MultiDataTrigger>
+			<MultiDataTrigger>
+				<MultiDataTrigger.Conditions>
 					<Condition Binding="{Binding IsClassicMod}" Value="True" />
 					<Condition Binding="{Binding IsSelected}" Value="False" />
 				</MultiDataTrigger.Conditions>
@@ -544,6 +575,15 @@
 				<TextBlock Margin="2">
 					<Run Text="Last Updated on " /><Run Text="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />
 				</TextBlock>
+			</StackPanel>
+			<StackPanel Orientation="Vertical" Visibility="{Binding HasBuiltinOverride, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}">
+				<Separator Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1HighlightBorderBrush}}" />
+				<TextBlock Margin="2" Foreground="OrangeRed">
+					This mod overrides base game files directly.<LineBreak />
+					As long as this mod exists in the Mods folder,<LineBreak />
+					these files will be overwritten, even if the mod is disabled.</TextBlock>
+				<TextBlock Margin="2" Foreground="OrangeRed" Text="Overwritten folders:" />
+				<TextBlock Margin="2" Text="{Binding BuiltinOverrideModsText}" />
 			</StackPanel>
 		</StackPanel>
 	</controls:AutomationTooltip>

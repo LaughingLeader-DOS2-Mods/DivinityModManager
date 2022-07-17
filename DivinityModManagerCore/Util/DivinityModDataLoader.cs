@@ -640,6 +640,8 @@ namespace DivinityModManager.Util
 		{
 			List<DivinityModData> mods = new List<DivinityModData>();
 
+			var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
+
 			if (Directory.Exists(modsFolderPath))
 			{
 				List<string> modPaks = new List<string>();
@@ -678,7 +680,6 @@ namespace DivinityModManager.Util
 
 							var metaFiles = new List<AbstractFileInfo>();
 							var hasBuiltinDirectory = false;
-							var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
 							var builtinModOverrides = new Dictionary<string, DivinityModData>();
 
 							if (pak != null && pak.Files != null)

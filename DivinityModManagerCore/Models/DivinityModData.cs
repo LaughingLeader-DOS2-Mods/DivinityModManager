@@ -53,19 +53,21 @@ namespace DivinityModManager.Models
 
 		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
 
+		public static int _CurrentExtenderVersion { get; set; } = -1;
+
 		public DivinityExtenderModStatus ExtenderModStatus
 		{
 			get => extenderModStatus;
 			set
 			{
 				this.RaiseAndSetIfChanged(ref extenderModStatus, value);
-				UpdateOsirisExtenderToolTip();
+				UpdateOsirisExtenderToolTip(_CurrentExtenderVersion);
 			}
 		}
 
 		public string OsirisExtenderSupportToolTipText { get; private set; }
 
-		public void UpdateOsirisExtenderToolTip()
+		public void UpdateOsirisExtenderToolTip(int currentVersion = -1)
 		{
 			switch (ExtenderModStatus)
 			{
@@ -110,13 +112,25 @@ namespace DivinityModManager.Models
 					}
 					else
 					{
-						OsirisExtenderSupportToolTipText = $"Supports the Osiris Extender";
+						OsirisExtenderSupportToolTipText = "Supports the Osiris Extender";
 					}
 					break;
 				case DivinityExtenderModStatus.NONE:
 				default:
 					OsirisExtenderSupportToolTipText = "";
 					break;
+			}
+			if (OsirisExtenderSupportToolTipText != "")
+			{
+				OsirisExtenderSupportToolTipText += Environment.NewLine;
+			}
+			if (currentVersion > -1)
+			{
+				OsirisExtenderSupportToolTipText += $"Installed Version: v{currentVersion}";
+			}
+			else
+			{
+				OsirisExtenderSupportToolTipText += "(No Installed Version Found)";
 			}
 			this.RaisePropertyChanged("OsirisExtenderSupportToolTipText");
 		}

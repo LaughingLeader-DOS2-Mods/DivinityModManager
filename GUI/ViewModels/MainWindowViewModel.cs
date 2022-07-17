@@ -2062,6 +2062,8 @@ namespace DivinityModManager.ViewModels
 		{
 			if (Settings != null && Mods.Count > 0)
 			{
+				DivinityModData._CurrentExtenderVersion = Settings.ExtenderSettings.ExtenderVersion;
+
 				foreach (var mod in Mods)
 				{
 					if (mod.OsiExtenderData != null && mod.OsiExtenderData.HasAnySettings)

@@ -18,6 +18,7 @@ using System.Reactive.Disposables;
 using System.Reactive.Concurrency;
 using System.Windows;
 using System.ComponentModel;
+using System.Collections.Specialized;
 
 namespace DivinityModManager.Controls
 {
@@ -25,28 +26,152 @@ namespace DivinityModManager.Controls
 	{
 		private MethodInfo getInfoMethod;
 		private MethodInfo updateAnchorMethod;
+		private PropertyInfo getActualIndex;
 
 		public bool Resizing { get; set; } = false;
 		public bool UserResizedColumns { get; set; } = false;
 
-		public ModListView() : base() 
+		private ModListView _copyHeaderView = null;
+
+		public bool HideHeader
+		{
+			get { return (bool)GetValue(HideHeaderProperty); }
+			set { SetValue(HideHeaderProperty, value); }
+		}
+		public static readonly DependencyProperty HideHeaderProperty =
+			DependencyProperty.Register("HideHeader", typeof(bool), typeof(ModListView), new PropertyMetadata(false));
+
+		public ModListView LinkedHeaderListView
+		{
+			get { return (ModListView)GetValue(LinkedHeaderListViewProperty); }
+			set { SetValue(LinkedHeaderListViewProperty, value); }
+		}
+
+		// Using a DependencyProperty as the backing store for LinkedHeaderListView.  This enables animation, styling, binding, etc...
+		public static readonly DependencyProperty LinkedHeaderListViewProperty =
+			DependencyProperty.Register("LinkedHeaderListView", typeof(ModListView), typeof(ModListView), new PropertyMetadata(null, new PropertyChangedCallback(OnLinkedHeaderListViewSet)));
+
+		private static void OnLinkedHeaderListViewSet(DependencyObject d, DependencyPropertyChangedEventArgs e)
+		{
+			DivinityApp.Log($"[OnLinkedHeaderListViewSet] d({d}) e.NewValue({e.NewValue})");
+			if (d is ModListView view)
+			{
+				if (e.NewValue is ModListView targetView)
+				{
+					view._copyHeaderView = targetView;
+					targetView.Loaded += view.OnTargetGridLoaded;
+					if (targetView.IsLoaded)
+					{
+						view.OnTargetGridLoaded(targetView, new EventArgs());
+					}
+				}
+				else if (e.OldValue is ModListView lastView)
+				{
+					lastView.Loaded -= view.OnTargetGridLoaded;
+				}
+			}
+		}
+
+		private void OnTargetGridLoaded(object sender, EventArgs e)
+		{
+			DivinityApp.Log($"[OnTargetGridLoaded] sender({sender}) targetView.View({((ModListView)sender)?.View})");
+			if (sender is ModListView targetView && targetView.View is GridView grid)
+			{
+				PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(GridViewColumn.WidthProperty, typeof(GridViewColumn));
+
+				grid.Columns.CollectionChanged += OnTargetGridCollectionChanged;
+
+				foreach (var col in grid.Columns)
+				{
+					pd.AddValueChanged(col, OnColumnWidthChanged_Copy);
+				}
+			}
+		}
+
+		private void OnTargetGridCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+		{
+			DivinityApp.Log($"[OnTargetGridCollectionChanged] sender({sender}) e({e.Action})");
+			if (e.Action == NotifyCollectionChangedAction.Move)
+			{
+				if (sender is GridViewColumnCollection colList)
+				{
+					var view = this.View as GridView;
+					var indexOrder = colList.Select(x => GetColumnActualIndex(x)).ToList();
+					DivinityApp.Log($"[Order] indexOrder({String.Join(";", indexOrder)})");
+					var len = view.Columns.Count;
+					for(int i = 0; i < len; i++)
+					{
+						var col = view.Columns[i];
+						var nextIndex = indexOrder.IndexOf(GetColumnActualIndex(col));
+						view.Columns.Move(i, nextIndex);
+					}
+				}
+			}
+
+			/*if (_copyHeaderView.View is GridView grid)
+			{
+				var thisView = this.View as GridView;
+				foreach (var col in grid.Columns)
+				{
+					var index = GetColumnActualIndex(col);
+					var myCol = thisView.Columns.FirstOrDefault(x => GetColumnActualIndex(x) == index);
+					if(myCol != null)
+					{
+						myCol.Width = col.Width;
+					}
+				}
+			}*/
+		}
+
+		private void OnColumnWidthChanged_Copy(object sender, EventArgs e)
+		{
+			if (sender is GridViewColumn col)
+			{
+				var thisView = this.View as GridView;
+				var index = GetColumnActualIndex(col);
+				var myCol = thisView.Columns.FirstOrDefault(x => GetColumnActualIndex(x) == index);
+				if (myCol != null)
+				{
+					myCol.Width = col.Width;
+				}
+			}
+			/*if (_copyHeaderView.View is GridView grid)
+			{
+				var thisView = this.View as GridView;
+				foreach (var col in grid.Columns)
+				{
+					var index = GetColumnActualIndex(col);
+					var myCol = thisView.Columns.FirstOrDefault(x => GetColumnActualIndex(x) == index);
+					if(myCol != null)
+					{
+						myCol.Width = col.Width;
+					}
+				}
+			}*/
+		}
+
+		public ModListView() : base()
 		{
 			getInfoMethod = typeof(ItemsControl).GetMethod("ItemInfoFromContainer", BindingFlags.NonPublic | BindingFlags.Instance);
 			updateAnchorMethod = typeof(ListBox).GetMethod("UpdateAnchorAndActionItem", BindingFlags.NonPublic | BindingFlags.Instance);
+			getActualIndex = typeof(GridViewColumn).GetProperty("ActualIndex", BindingFlags.NonPublic | BindingFlags.Instance);
 
-			Loaded += (o, e) =>
+			if (!HideHeader)
 			{
-				PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(GridViewColumn.WidthProperty, typeof(GridViewColumn));
-				if (this.View is GridView grid)
+				Loaded += (o, e) =>
 				{
-					//Capture user-resizing of the name column to disable auto-resizing
-					var nameColumn = grid.Columns[1];
-					if (nameColumn != null)
+					PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(GridViewColumn.WidthProperty, typeof(GridViewColumn));
+					if (this.View is GridView grid)
 					{
-						pd.AddValueChanged(nameColumn, NameColumnWidthChanged);
+						//Capture user-resizing of the name column to disable auto-resizing
+						var nameColumn = grid.Columns[1];
+						if (nameColumn != null)
+						{
+							pd.AddValueChanged(nameColumn, NameColumnWidthChanged);
+						}
 					}
-				}
-			};
+				};
+			}
 		}
 
 		private void NameColumnWidthChanged(object sender, EventArgs e)
@@ -66,8 +191,18 @@ namespace DivinityModManager.Controls
 			return new ModListViewAutomationPeer(this);
 		}
 
+		private int GetColumnActualIndex(GridViewColumn col)
+		{
+			return (int)getActualIndex.GetValue(col);
+		}
+
 		protected override void OnKeyDown(KeyEventArgs e)
 		{
+			if (HideHeader)
+			{
+				base.OnKeyDown(e);
+				return;
+			}
 			bool handled = false;
 
 			//DivinityApp.Log($"IsKeyboardFocused({IsKeyboardFocused}) IsKeyboardFocusWithin({IsKeyboardFocusWithin}) IsFocused({IsFocused})");
@@ -108,7 +243,7 @@ namespace DivinityModManager.Controls
 								list.Move(modIndex, nextIndex);
 							}
 						}
-						else if(key == Key.Down)
+						else if (key == Key.Down)
 						{
 							for (int i = selectedItems.Count - 1; i >= 0; i--)
 							{
@@ -129,7 +264,7 @@ namespace DivinityModManager.Controls
 							}
 						}
 
-						if(targetScrollIndex > -1)
+						if (targetScrollIndex > -1)
 						{
 							var item = Items.GetItemAt(targetScrollIndex);
 							ScrollIntoView(item);
@@ -145,7 +280,7 @@ namespace DivinityModManager.Controls
 				}
 			}
 
-			if(!handled)
+			if (!handled)
 			{
 				base.OnKeyDown(e);
 

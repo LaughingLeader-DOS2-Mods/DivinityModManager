@@ -16,6 +16,7 @@ using Alphaleonis.Win32.Filesystem;
 using DivinityModManager.Models.App;
 using System.Reactive;
 using ReactiveUI.Fody.Helpers;
+using System.ComponentModel;
 
 namespace DivinityModManager.Models
 {
@@ -136,6 +137,7 @@ namespace DivinityModManager.Models
 		[SettingsEntry("Disable Checking for Steam Workshop Tags", "The mod manager will try and find mod tags from the workshop by default")]
 		[DataMember][Reactive] public bool DisableWorkshopTagCheck { get; set; } = false;
 
+		[SettingsEntry("Export Default Values", "Export all values, even if it matches a default extender value")]
 		[DataMember][Reactive] public bool ExportDefaultExtenderSettings { get; set; } = false;
 
 		//Not saved for now

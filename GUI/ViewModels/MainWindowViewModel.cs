@@ -138,6 +138,7 @@ namespace DivinityModManager.ViewModels
 
 		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+		public ObservableCollectionExtended<DivinityModData> ForceLoadedMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
 		private readonly ObservableAsPropertyHelper<int> activeSelected;
@@ -894,6 +895,23 @@ namespace DivinityModManager.ViewModels
 
 			if (AppSettings.FeatureEnabled("Workshop"))
 			{
+				if (!String.IsNullOrWhiteSpace(Settings.WorkshopPath))
+				{
+					var baseName = Path.GetFileNameWithoutExtension(Settings.WorkshopPath);
+					if (baseName == "steamapps")
+					{
+						var newFolder = Path.Combine(Settings.WorkshopPath, "workshop/content/435150");
+						if (Directory.Exists(newFolder))
+						{
+							Settings.WorkshopPath = newFolder;
+						}
+						else
+						{
+							Settings.WorkshopPath = "";
+						}
+					}
+				}
+
 				if (String.IsNullOrEmpty(Settings.WorkshopPath) || !Directory.Exists(Settings.WorkshopPath))
 				{
 					Settings.WorkshopPath = DivinityRegistryHelper.GetWorkshopPath(AppSettings.DefaultPathways.Steam.AppID).Replace("\\", "/");
@@ -1467,43 +1485,6 @@ namespace DivinityModManager.ViewModels
 			userMods.AddRange(loadedMods);
 		}
 
-		public List<DivinityModData> LoadMods()
-		{
-			List<DivinityModData> finalMods = new List<DivinityModData>();
-			List<DivinityModData> modPakData = null;
-			List<DivinityModData> projects = null;
-			List<DivinityModData> baseMods = null;
-
-			if (Directory.Exists(PathwayData.DocumentsModsPath))
-			{
-				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
-				modPakData = DivinityModDataLoader.LoadModPackageData(PathwayData.DocumentsModsPath);
-			}
-
-			GameDirectoryFound = Directory.Exists(Settings.GameDataPath);
-
-			if (GameDirectoryFound)
-			{
-				GameDirectoryFound = true;
-				string modsDirectory = Path.Combine(Settings.GameDataPath, "Mods");
-				if (Directory.Exists(modsDirectory))
-				{
-					DivinityApp.Log($"Loading mod projects from '{modsDirectory}'.");
-					projects = DivinityModDataLoader.LoadEditorProjects(modsDirectory);
-				}
-
-				baseMods = DivinityModDataLoader.LoadBuiltinMods(Settings.GameDataPath);
-			}
-
-			if (baseMods != null) MergeModLists(finalMods, baseMods);
-			if (modPakData != null) MergeModLists(finalMods, modPakData);
-			if (projects != null) MergeModLists(finalMods, projects);
-
-			finalMods = finalMods.OrderBy(m => m.Name).ToList();
-			DivinityApp.Log($"Loaded '{finalMods.Count}' mods.");
-			return finalMods;
-		}
-
 		private void MergeModLists(List<DivinityModData> finalMods, List<DivinityModData> newMods)
 		{
 			foreach (var mod in newMods)
@@ -1571,6 +1552,7 @@ namespace DivinityModManager.ViewModels
 				await SetMainProgressTextAsync("Loading mods from documents folder...");
 				cancelTokenSource.CancelAfter(60000);
 				modPakData = await RunTask(DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath, false, cancelTokenSource.Token), null);
+				modPakData.ForEach(x => x.IsForcedLoaded = x.HasBuiltinOverride);
 				cancelTokenSource = GetCancellationToken(int.MaxValue);
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
@@ -1759,6 +1741,9 @@ namespace DivinityModManager.ViewModels
 								LoadModOrder(nextOrder, missingMods);
 							}
 
+							//Adds mods that will always be "enabled"
+							ForceLoadedMods.AddRange(Mods.Where(x => !x.IsActive && x.IsForcedLoaded));
+
 							Settings.LastOrder = nextOrder?.Name;
 						}
 						catch (Exception ex)
@@ -1925,6 +1910,7 @@ namespace DivinityModManager.ViewModels
 
 			ActiveMods.Clear();
 			InactiveMods.Clear();
+			ForceLoadedMods.Clear();
 
 			var loadFrom = order.Order;
 
@@ -1989,6 +1975,7 @@ namespace DivinityModManager.ViewModels
 			for (int i = 0; i < Mods.Count; i++)
 			{
 				var mod = Mods[i];
+
 				if (ActiveMods.Any(m => m.UUID == mod.UUID))
 				{
 					mod.IsActive = true;

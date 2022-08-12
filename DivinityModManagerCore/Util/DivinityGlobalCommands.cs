@@ -100,18 +100,12 @@ namespace DivinityModManager.Util
 				mod.DisplayFileForName = !mod.DisplayFileForName;
 				if (_viewModel != null)
 				{
-					if (_viewModel.ActiveSelected > 1 && _viewModel.ActiveMods.Contains(mod))
+					var b = mod.DisplayFileForName;
+					foreach(var m in _viewModel.Mods)
 					{
-						foreach(var m in _viewModel.ActiveMods.Where(x => x.IsSelected))
+						if(m.IsSelected)
 						{
-							m.DisplayFileForName = mod.DisplayFileForName;
-						}
-					}
-					else if (_viewModel.InactiveSelected > 1 && _viewModel.InactiveMods.Contains(mod))
-					{
-						foreach (var m in _viewModel.InactiveMods.Where(x => x.IsSelected))
-						{
-							m.DisplayFileForName = mod.DisplayFileForName;
+							m.DisplayFileForName = b;
 						}
 					}
 				}

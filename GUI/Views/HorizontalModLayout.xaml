@@ -103,19 +103,30 @@
 					<Run Text="{Binding ActiveSelected, Mode=OneWay}" />
 					<Run Text="Selected" /></TextBlock>
 			</Grid>
-			<c:ModListView x:Name="ActiveModsListView"
-			               Grid.Row="1"
-			               MaxHeight="99999"
-			               behavior:ScreenReaderHelperBehavior.Name="Active Mods"
-			               dd:DragDrop.DragHandler="{Binding DragHandler}"
-			               dd:DragDrop.DropHandler="{Binding DropHandler}"
-			               GridViewColumnHeader.Click="ListView_Click"
-			               ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
-			               ItemsSource="{Binding ActiveMods}"
-			               Style="{StaticResource ModOrderListViewWithDrag}"
-			               View="{DynamicResource ModGridView}"
-			               VirtualizingPanel.IsVirtualizing="True"
-			               VirtualizingPanel.VirtualizationMode="Recycling" />
+			<Grid Grid.Row="1">
+				<Grid.RowDefinitions>
+					<RowDefinition Height="*" />
+					<RowDefinition Height="*" />
+				</Grid.RowDefinitions>
+				<c:ModListView x:Name="ActiveModsListView"
+				               MaxHeight="99999"
+				               behavior:ScreenReaderHelperBehavior.Name="Active Mods"
+				               dd:DragDrop.DragHandler="{Binding DragHandler}"
+				               dd:DragDrop.DropHandler="{Binding DropHandler}"
+				               GridViewColumnHeader.Click="ListView_Click"
+				               ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
+				               Style="{StaticResource ModOrderListViewWithDrag}"
+				               View="{DynamicResource ModGridView}"
+				               VirtualizingPanel.IsVirtualizing="True"
+				               VirtualizingPanel.VirtualizationMode="Recycling" />
+				<c:ModListView x:Name="ForceLoadedModsListView"
+				               Grid.Row="1"
+				               MaxHeight="99999"
+				               behavior:ScreenReaderHelperBehavior.Name="Force-Loaded Mods"
+				               HideHeader="True"
+				               LinkedHeaderListView="{Binding ElementName=ActiveModsListView}"
+				               View="{DynamicResource HeaderlessModGridView}" />
+			</Grid>
 		</Grid>
 		<GridSplitter Grid.Column="1"
 		              Width="4"

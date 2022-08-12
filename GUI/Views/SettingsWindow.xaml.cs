@@ -40,6 +40,50 @@ namespace DivinityModManager.Views
 		public DivinityModManagerSettings ViewModel { get; set; }
 		object IViewFor.ViewModel { get; set; }
 
+		private int AddExportDefaultsEntry(int row, BoolToVisibilityConverter boolToVisibilityConverter)
+		{
+			var exportDefault = typeof(DivinityModManagerSettings).GetProperty(nameof(DivinityModManagerSettings.ExportDefaultExtenderSettings))
+			.GetCustomAttributes(typeof(SettingsEntryAttribute), true).Cast<SettingsEntryAttribute>().FirstOrDefault();
+			row++;
+			TextBlock tb = new TextBlock();
+			tb.Text = exportDefault.DisplayName;
+			tb.ToolTip = exportDefault.Tooltip;
+			ExtenderSettingsAutoGrid.Children.Add(tb);
+			Grid.SetRow(tb, row);
+
+			CheckBox cb = new CheckBox();
+			cb.ToolTip = exportDefault.Tooltip;
+			cb.VerticalAlignment = VerticalAlignment.Center;
+			//cb.HorizontalAlignment = HorizontalAlignment.Right;
+			cb.SetBinding(CheckBox.IsCheckedProperty, new Binding(nameof(DivinityModManagerSettings.ExportDefaultExtenderSettings))
+			{
+				Source = ViewModel,
+				Mode = BindingMode.TwoWay,
+				UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
+			});
+			ExtenderSettingsAutoGrid.Children.Add(cb);
+			Grid.SetRow(cb, row);
+			Grid.SetColumn(cb, 1);
+
+			if (exportDefault.IsDebug)
+			{
+				tb.SetBinding(TextBlock.VisibilityProperty, new Binding("DebugModeEnabled")
+				{
+					Source = ViewModel,
+					Converter = boolToVisibilityConverter,
+					FallbackValue = Visibility.Collapsed
+				});
+				cb.SetBinding(CheckBox.VisibilityProperty, new Binding("DebugModeEnabled")
+				{
+					Source = ViewModel,
+					Converter = boolToVisibilityConverter,
+					FallbackValue = Visibility.Collapsed
+				});
+			}
+
+			return row;
+		}
+
 		private void CreateExtenderSettings()
 		{
 			var props = from p in typeof(OsiExtenderSettings).GetProperties()
@@ -47,24 +91,26 @@ namespace DivinityModManager.Views
 						where attr.Length == 1
 						select new { Property = p, Attribute = attr.First() as SettingsEntryAttribute };
 
-			int count = ExtenderSettingsAutoGrid.RowCount + props.Count();
-			int row = ExtenderSettingsAutoGrid.RowCount + 1;
+			int count = props.Count() + 1;
+			int row = 0;
 
 			ExtenderSettingsAutoGrid.Children.Clear();
 
 			ExtenderSettingsAutoGrid.RowCount = count;
 			ExtenderSettingsAutoGrid.Rows = String.Join(",", Enumerable.Repeat("auto", count));
 
+			BoolToVisibilityConverter boolToVisibilityConverter = (BoolToVisibilityConverter)FindResource("BoolToVisibilityConverter");
+
+			//Add ExportDefaultExtenderSettings manually here, since it's not technically an extender setting
+			row = AddExportDefaultsEntry(row, boolToVisibilityConverter);
+
 			foreach (var prop in props)
 			{
-				row++;
 				TextBlock tb = new TextBlock();
 				tb.Text = prop.Attribute.DisplayName;
 				tb.ToolTip = prop.Attribute.Tooltip;
 				ExtenderSettingsAutoGrid.Children.Add(tb);
 				Grid.SetRow(tb, row);
-
-				BoolToVisibilityConverter boolToVisibilityConverter = (BoolToVisibilityConverter)FindResource("BoolToVisibilityConverter");
 
 				if (prop.Attribute.IsDebug)
 				{
@@ -163,6 +209,7 @@ namespace DivinityModManager.Views
 						Grid.SetColumn(ud, 1);
 						break;
 				}
+				row++;
 			}
 		}
 
@@ -229,24 +276,24 @@ namespace DivinityModManager.Views
 
 		private void SettingsWindow_KeyDown(object sender, KeyEventArgs e)
 		{
-			if(isSettingKeybinding)
+			if (isSettingKeybinding)
 			{
 				return;
 			}
-			else if(e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			else if (e.Key == Key.S && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
 			{
 				ViewModel.SaveSettingsCommand.Execute(null);
-				if(ViewModel.ExtenderTabIsVisible)
+				if (ViewModel.ExtenderTabIsVisible)
 				{
 					ViewModel.ExportExtenderSettingsCommand.Execute(null);
 				}
 				e.Handled = true;
 			}
-			else if(e.Key == Key.Left && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			else if (e.Key == Key.Left && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
 			{
 				int current = PreferencesTabControl.SelectedIndex;
 				int nextIndex = current - 1;
-				if(nextIndex < 0)
+				if (nextIndex < 0)
 				{
 					nextIndex = PreferencesTabControl.Items.Count - 1;
 				}
@@ -254,11 +301,11 @@ namespace DivinityModManager.Views
 				Keyboard.Focus((FrameworkElement)PreferencesTabControl.SelectedContent);
 				MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 			}
-			else if(e.Key == Key.Right && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
+			else if (e.Key == Key.Right && (Keyboard.Modifiers & ModifierKeys.Control) != 0)
 			{
 				int current = PreferencesTabControl.SelectedIndex;
 				int nextIndex = current + 1;
-				if(nextIndex >= PreferencesTabControl.Items.Count)
+				if (nextIndex >= PreferencesTabControl.Items.Count)
 				{
 					nextIndex = 0;
 				}

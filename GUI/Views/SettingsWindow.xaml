@@ -138,10 +138,7 @@
 						                   Columns="*,*"
 						                   RowCount="1"
 						                   RowHeight="*"
-						                   Rows="auto">
-							<TextBlock Text="Export Default Values" ToolTip="Export all values, even if it matches a default extender value" />
-							<CheckBox VerticalAlignment="Center" IsChecked="{Binding ExportDefaultExtenderSettings, UpdateSourceTrigger=PropertyChanged}" ToolTip="Default: False (Unchecked)" />
-						</autogrid:AutoGrid>
+						                   Rows="auto" />
 					</ScrollViewer>
 				</Grid>
 			</TabItem>

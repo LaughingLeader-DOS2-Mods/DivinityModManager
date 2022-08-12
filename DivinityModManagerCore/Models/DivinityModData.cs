@@ -196,6 +196,7 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		[Reactive] public bool CanDelete { get; set; }
 		[Reactive] public bool CanDrag { get; set; } = true;
 
 		[Reactive] public bool DeveloperMode { get; set; } = false;
@@ -220,7 +221,7 @@ namespace DivinityModManager.Models
 		{
 			if (WorkshopData != null && WorkshopData.ID != "")
 			{
-				if(!asSteamBrowserProtocol)
+				if (!asSteamBrowserProtocol)
 				{
 					return $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
 				}
@@ -287,7 +288,7 @@ namespace DivinityModManager.Models
 			dependencyVisibility = this.WhenAnyValue(x => x.HasDependencies, b => b ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(DependencyVisibility));
 			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod, x => x.IsForcedLoaded).Subscribe((b) =>
 			{
-				if(b.Item3)
+				if (b.Item3)
 				{
 					CanDrag = false;
 				}
@@ -307,19 +308,19 @@ namespace DivinityModManager.Models
 
 			this.WhenAnyValue(x => x.IsClassicMod, x => x.IsForcedLoaded, x => x.IsEditorMod).Subscribe((b) =>
 			{
-				if(b.Item1)
+				if (b.Item1)
 				{
 					this.SelectedColor = "#32BF0808";
 					this.ListColor = "#32FA0202";
 					HasColorOverride = true;
 				}
-				else if(b.Item2)
+				else if (b.Item2)
 				{
 					this.SelectedColor = "#32F38F00";
 					this.ListColor = "#32C17200";
 					HasColorOverride = true;
 				}
-				else if(b.Item3)
+				else if (b.Item3)
 				{
 					this.SelectedColor = "#0C00C13B";
 					this.ListColor = "#0C00FF4D";
@@ -355,6 +356,9 @@ namespace DivinityModManager.Models
 			hasToolTip = this.WhenAnyValue(x => x.Description, x => x.HasDependencies, x => x.UUID).
 				Select(x => !DivinityApp.IsScreenReaderActive() && (
 				!String.IsNullOrEmpty(x.Item1) || x.Item2 || !String.IsNullOrEmpty(x.Item3))).StartWith(true).ToProperty(this, nameof(HasToolTip));
+
+			this.WhenAnyValue(x => x.IsEditorMod, x => x.IsLarianMod, x => x.FilePath, (a, b, c) => a == false && b == false && File.Exists(c))
+				.StartWith(false).ToProperty(this, nameof(CanDelete));
 		}
 	}
 }

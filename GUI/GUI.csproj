@@ -1,564 +1,571 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-	<Import Project="..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props" Condition="Exists('..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props')" />
-	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-	<PropertyGroup>
-		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-		<Platform Condition=" '$(Platform)' == '' ">x64</Platform>
-		<ProjectGuid>{14BD698D-2A4F-44BB-A41E-6E36D80A8459}</ProjectGuid>
-		<OutputType>WinExe</OutputType>
-		<RootNamespace>DivinityModManager</RootNamespace>
-		<AssemblyName>DivinityModManager</AssemblyName>
-		<TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<FileAlignment>512</FileAlignment>
-		<ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
-		<WarningLevel>4</WarningLevel>
-		<AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-		<Deterministic>true</Deterministic>
-		<IsWebBootstrapper>false</IsWebBootstrapper>
-		<PublishUrl>publish\</PublishUrl>
-		<Install>true</Install>
-		<InstallFrom>Disk</InstallFrom>
-		<UpdateEnabled>false</UpdateEnabled>
-		<UpdateMode>Foreground</UpdateMode>
-		<UpdateInterval>7</UpdateInterval>
-		<UpdateIntervalUnits>Days</UpdateIntervalUnits>
-		<UpdatePeriodically>false</UpdatePeriodically>
-		<UpdateRequired>false</UpdateRequired>
-		<MapFileExtensions>true</MapFileExtensions>
-		<ApplicationRevision>5</ApplicationRevision>
-		<ApplicationVersion>1.1.0.%2a</ApplicationVersion>
-		<UseApplicationTrust>false</UseApplicationTrust>
-		<BootstrapperEnabled>true</BootstrapperEnabled>
-		<SupportedCultures>en-US</SupportedCultures>
-		<NuGetPackageImportStamp>
-		</NuGetPackageImportStamp>
-	</PropertyGroup>
-	<PropertyGroup>
-		<ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
-		<DebugSymbols>true</DebugSymbols>
-		<OutputPath>..\bin\Debug\</OutputPath>
-		<DefineConstants>DEBUG;TRACE</DefineConstants>
-		<DebugType>full</DebugType>
-		<PlatformTarget>x64</PlatformTarget>
-		<LangVersion>7.3</LangVersion>
-		<ErrorReport>prompt</ErrorReport>
-		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<Prefer32Bit>true</Prefer32Bit>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
-		<OutputPath>..\bin\Release\</OutputPath>
-		<DefineConstants>TRACE</DefineConstants>
-		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
-		<PlatformTarget>x64</PlatformTarget>
-		<LangVersion>7.3</LangVersion>
-		<ErrorReport>prompt</ErrorReport>
-		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<Prefer32Bit>true</Prefer32Bit>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
-		<OutputPath>..\bin\Publish\</OutputPath>
-		<DefineConstants>TRACE</DefineConstants>
-		<Optimize>true</Optimize>
-		<DebugType>pdbonly</DebugType>
-		<PlatformTarget>x64</PlatformTarget>
-		<LangVersion>7.3</LangVersion>
-		<ErrorReport>prompt</ErrorReport>
-		<CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-		<Prefer32Bit>true</Prefer32Bit>
-		<!-- <PostBuildEvent>powershell start-process python -WindowStyle hidden -argumentlist "$(SolutionDir)BuildRelease.py","@(VersionNumber)"</PostBuildEvent> -->
-	</PropertyGroup>
-	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-	<ItemGroup>
-		<Reference Include="AdonisUI, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\AdonisUI.1.17.1\lib\net45\AdonisUI.dll</HintPath>
-		</Reference>
-		<Reference Include="AdonisUI.ClassicTheme, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\AdonisUI.ClassicTheme.1.17.1\lib\net45\AdonisUI.ClassicTheme.dll</HintPath>
-		</Reference>
-		<Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
-			<HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
-		</Reference>
-		<Reference Include="AutoUpdater.NET, Version=1.7.4.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
-			<HintPath>..\packages\Autoupdater.NET.Official.1.7.4\lib\net45\AutoUpdater.NET.dll</HintPath>
-		</Reference>
-		<Reference Include="DynamicData, Version=7.9.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\DynamicData.7.9.5\lib\net462\DynamicData.dll</HintPath>
-		</Reference>
-		<Reference Include="GongSolutions.WPF.DragDrop, Version=3.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
-			<HintPath>..\packages\gong-wpf-dragdrop.3.1.1\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
-			<HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Core.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Web.WebView2.WinForms, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
-			<HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.WinForms.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Web.WebView2.Wpf, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
-			<HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Wpf.dll</HintPath>
-		</Reference>
-		<Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
-		</Reference>
-		<Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-			<HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
-			<Private>True</Private>
-		</Reference>
-		<Reference Include="Ookii.Dialogs.Wpf, Version=5.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
-			<HintPath>..\packages\Ookii.Dialogs.Wpf.5.0.1\lib\net462\Ookii.Dialogs.Wpf.dll</HintPath>
-		</Reference>
-		<Reference Include="PresentationFramework.Classic" />
-		<Reference Include="ReactiveUI, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\ReactiveUI.18.2.9\lib\net472\ReactiveUI.dll</HintPath>
-		</Reference>
-		<Reference Include="ReactiveUI.Fody.Helpers, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\ReactiveUI.Fody.18.2.9\lib\net472\ReactiveUI.Fody.Helpers.dll</HintPath>
-		</Reference>
-		<Reference Include="ReactiveUI.Wpf, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\ReactiveUI.WPF.18.2.9\lib\net472\ReactiveUI.Wpf.dll</HintPath>
-		</Reference>
-		<Reference Include="SharpCompress, Version=0.32.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
-			<HintPath>..\packages\SharpCompress.0.32.1\lib\net461\SharpCompress.dll</HintPath>
-		</Reference>
-		<Reference Include="Splat, Version=14.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\Splat.14.4.1\lib\netstandard2.0\Splat.dll</HintPath>
-		</Reference>
-		<Reference Include="Splat.Drawing, Version=14.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\Splat.Drawing.14.4.1\lib\net472\Splat.Drawing.dll</HintPath>
-		</Reference>
-		<Reference Include="System" />
-		<Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Data" />
-		<Reference Include="System.Design" />
-		<Reference Include="System.Drawing" />
-		<Reference Include="System.Drawing.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Drawing.Primitives.4.3.0\lib\net45\System.Drawing.Primitives.dll</HintPath>
-			<Private>True</Private>
-			<Private>True</Private>
-		</Reference>
-		<Reference Include="System.IO.Compression" />
-		<Reference Include="System.IO.Compression.FileSystem" />
-		<Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Numerics" />
-		<Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Reactive, Version=5.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Reactive.5.0.0\lib\net472\System.Reactive.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Runtime.Extensions, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Runtime.Extensions.4.3.1\lib\net462\System.Runtime.Extensions.dll</HintPath>
-			<Private>True</Private>
-			<Private>True</Private>
-		</Reference>
-		<Reference Include="System.Runtime.Serialization" />
-		<Reference Include="System.Security" />
-		<Reference Include="System.Security.AccessControl, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Security.AccessControl.6.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Text.Encoding.CodePages, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Text.Encoding.CodePages.6.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Transactions" />
-		<Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-			<HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
-		</Reference>
-		<Reference Include="System.Windows" />
-		<Reference Include="System.Windows.Forms" />
-		<Reference Include="System.Xml" />
-		<Reference Include="Microsoft.CSharp" />
-		<Reference Include="System.Core" />
-		<Reference Include="System.Xml.Linq" />
-		<Reference Include="System.Data.DataSetExtensions" />
-		<Reference Include="System.Net.Http" />
-		<Reference Include="System.Xaml">
-			<RequiredTargetFramework>4.0</RequiredTargetFramework>
-		</Reference>
-		<Reference Include="WindowsBase" />
-		<Reference Include="PresentationCore" />
-		<Reference Include="PresentationFramework" />
-		<Reference Include="WpfAutoGrid, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
-			<HintPath>..\packages\WpfAutoGrid.1.4.0.0\lib\net45\WpfAutoGrid.dll</HintPath>
-		</Reference>
-		<Reference Include="Xceed.Wpf.Toolkit, Version=4.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
-			<HintPath>..\packages\Extended.Wpf.Toolkit.4.3.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
-		</Reference>
-	</ItemGroup>
-	<ItemGroup>
-		<ApplicationDefinition Include="App.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</ApplicationDefinition>
-		<Compile Include="Controls\AlertBar.xaml.cs">
-			<DependentUpon>AlertBar.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Controls\AutoGrayableImage.cs" />
-		<Compile Include="Controls\AutomationTooltip.cs" />
-		<Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
-		<Compile Include="Controls\Behavior\ScreenReaderHelperBehavior.cs" />
-		<Compile Include="Controls\Behavior\TextBlockSettingsEntryAttributeBehavior.cs" />
-		<Compile Include="Controls\Behavior\ToolTipHelperBehavior.cs" />
-		<Compile Include="Controls\BusyIndicator.xaml.cs">
-			<DependentUpon>BusyIndicator.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Controls\CircleDecorator.cs" />
-		<Compile Include="Controls\Extensions\EnumExtension.cs" />
-		<Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
-		<Compile Include="Controls\HotkeyEditorControl.xaml.cs">
-			<DependentUpon>HotkeyEditorControl.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Controls\HyperlinkText.xaml.cs">
-			<DependentUpon>HyperlinkText.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Controls\Markdown.cs" />
-		<Compile Include="Controls\ModEntryGrid.cs" />
-		<Compile Include="Controls\ModListView.cs" />
-		<Compile Include="Controls\SelectableTextBlock.cs" />
-		<Compile Include="Controls\TemplateSelectors\TagTemplateSelector.cs" />
-		<Compile Include="Controls\UnfocusableTextBox.cs" />
-		<Compile Include="Converters\EnumToStringConverter.cs" />
-		<Compile Include="Converters\IntToVisibilityConverter.cs" />
-		<Compile Include="Converters\ModIsAvailableConverter.cs" />
-		<Compile Include="Converters\StringNotEmptyToVisibilityConverter.cs" />
-		<Compile Include="Converters\StringToUriConverter.cs" />
-		<Compile Include="Extensions\DependencyObjectExtensions.cs" />
-		<Compile Include="MainWindow.xaml.cs">
-			<DependentUpon>MainWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Util\FocusHelper.cs" />
-		<Compile Include="Util\NativeLibraryHelper.cs" />
-		<Compile Include="Util\ScreenReader\ScreenReaderHelper.cs" />
-		<Compile Include="Util\ScreenReader\Tolk.cs" />
-		<Compile Include="ViewModels\AppKeys.cs" />
-		<Compile Include="Themes\DivinityColors.cs" />
-		<Compile Include="Themes\ResourceAliasHelper.cs" />
-		<Compile Include="Util\AutomationTooltipPeer.cs" />
-		<Compile Include="Util\BindingHelper.cs" />
-		<Compile Include="Util\CustomPropertyResolver.cs" />
-		<Compile Include="Util\ElementHelper.cs" />
-		<Compile Include="Util\ScreenReader\MainWindowAutomationPeer.cs" />
-		<Compile Include="Util\ScreenReader\CachedAutomationPeer.cs" />
-		<Compile Include="Util\RxExceptionHandler.cs" />
-		<Compile Include="Util\ScreenReader\AlertBarAutomationPeer.cs" />
-		<Compile Include="Util\ScreenReader\ModEntryGridAutomationPeer.cs" />
-		<Compile Include="Util\ScreenReader\ModListViewAutomationPeer.cs" />
-		<Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
-		<Compile Include="ViewModels\MainWindowViewModel.cs" />
-		<Compile Include="ViewModels\ModListDragHandler.cs" />
-		<Compile Include="ViewModels\ModListDropHandler.cs" />
-		<Compile Include="ViewModels\ModUpdatesViewData.cs" />
-		<Compile Include="Views\AboutWindow.xaml.cs">
-			<DependentUpon>AboutWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\AppUpdateWindow.xaml.cs">
-			<DependentUpon>AppUpdateWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\HideWindowBase.cs" />
-		<Compile Include="Views\HorizontalModLayout.xaml.cs">
-			<DependentUpon>HorizontalModLayout.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\LeaderLibSettingsWindow.xaml.cs">
-			<DependentUpon>LeaderLibSettingsWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\ModUpdatesLayout.xaml.cs">
-			<DependentUpon>ModUpdatesLayout.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\SettingsWindow.xaml.cs">
-			<DependentUpon>SettingsWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\VersionGeneratorWindow.xaml.cs">
-			<DependentUpon>VersionGeneratorWindow.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="Views\VerticalModLayout.xaml.cs">
-			<DependentUpon>VerticalModLayout.xaml</DependentUpon>
-		</Compile>
-		<Compile Include="WinForms\WindowWrapper.cs" />
-		<Page Include="Controls\AlertBar.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Controls\BusyIndicator.xaml">
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Controls\HotkeyEditorControl.xaml">
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Controls\HyperlinkText.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="MainWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Themes\Dark.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="Themes\DefaultStyles\MarkdownStyle.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="Themes\Light.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="Themes\MainResourceDictionary.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Compile Include="App.xaml.cs">
-			<DependentUpon>App.xaml</DependentUpon>
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Include="Converters\BoolToVisibilityConverter.cs" />
-		<Page Include="Views\AboutWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\AppUpdateWindow.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-		<Page Include="Views\HorizontalModLayout.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\LeaderLibSettingsWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\ModUpdatesLayout.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\SettingsWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\VersionGeneratorWindow.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-		<Page Include="Views\VerticalModLayout.xaml">
-			<Generator>MSBuild:Compile</Generator>
-			<SubType>Designer</SubType>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<Compile Include="Properties\AssemblyInfo.cs">
-			<SubType>Code</SubType>
-		</Compile>
-		<Compile Include="Properties\Settings.Designer.cs">
-			<AutoGen>True</AutoGen>
-			<DependentUpon>Settings.settings</DependentUpon>
-			<DesignTimeSharedInput>True</DesignTimeSharedInput>
-		</Compile>
-		<None Include="..\.editorconfig">
-			<Link>.editorconfig</Link>
-		</None>
-		<None Include="App.config" />
-		<None Include="packages.config" />
-		<None Include="Properties\Settings.settings">
-			<Generator>SettingsSingleFileGenerator</Generator>
-			<LastGenOutput>Settings.Designer.cs</LastGenOutput>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<ProjectReference Include="..\DivinityModManagerCore\DivinityModManagerCore.csproj">
-			<Project>{e24cfb13-f468-4b1d-bc4d-245cd4bd1a23}</Project>
-			<Name>DivinityModManagerCore</Name>
-		</ProjectReference>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="Resources\AppFeatures.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<None Include="Resources\DefaultPathways.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-		<Resource Include="Resources\Icons\AddItem_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExportData_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Save_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\SaveAs_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\SaveGrey_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Folder_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\OpenFile_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\OpenFolder_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Refresh_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExpandChevronDown_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExpandChevronDown_lightGray_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExpandChevronUp_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExpandChevronUp_lightGrey_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\DivinityOS2_EoCApp_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Steam_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Kofi_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Github_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ExportScript_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ZipFileAs_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\ZipFile_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\StatusWarning_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Close.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Close_Hover.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Danger_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Information_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Success_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\AlertBar_Warning_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\DivinityEngineGlasses_64x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\DefaultIcon_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\DivinityEngine2_64x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\CopyToClipboard_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Rename_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-		<Resource Include="Resources\Icons\Log_Normal_32x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-	</ItemGroup>
-	<ItemGroup>
-		<BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
-			<Visible>False</Visible>
-			<ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
-			<Install>true</Install>
-		</BootstrapperPackage>
-		<BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-			<Visible>False</Visible>
-			<ProductName>.NET Framework 3.5 SP1</ProductName>
-			<Install>false</Install>
-		</BootstrapperPackage>
-	</ItemGroup>
-	<ItemGroup>
-		<WCFMetadata Include="Connected Services\" />
-	</ItemGroup>
-	<ItemGroup>
-		<Resource Include="DivinityModManager.ico" />
-	</ItemGroup>
-	<ItemGroup>
-		<Page Include="Themes\DefaultStyles\ComboBox.xaml">
-			<SubType>Designer</SubType>
-			<Generator>MSBuild:Compile</Generator>
-		</Page>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="Resources\IgnoredMods.json">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</None>
-	</ItemGroup>
-	<ItemGroup>
-		<Resource Include="Resources\Icons\LoadCampaignOrder_16x.png">
-			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
-		</Resource>
-	</ItemGroup>
-	<ItemGroup>
-		<None Include="FodyWeavers.xml" />
-	</ItemGroup>
-	<PropertyGroup>
-		<PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>
-	</PropertyGroup>
-	<Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
-		<ItemGroup>
-			<MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml ; $(OutputPath)runtimes/win-x64/native/*.dll" />
-		</ItemGroup>
-		<Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
-		<RemoveDir Directories="$(OutputPath)de;$(OutputPath)en;$(OutputPath)es;$(OutputPath)fr;$(OutputPath)it;$(OutputPath)ja;$(OutputPath)ko;$(OutputPath)ru;$(OutputPath)zh-Hans;$(OutputPath)zh-Hant;$(OutputPath)cs-CZ;$(OutputPath)hu;$(OutputPath)ja-JP;$(OutputPath)pt-BR;$(OutputPath)ro;$(OutputPath)runtimes;$(OutputPath)sv" />
-	</Target>
-	<Target Name="AfterAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
-		<GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
-			<Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
-		</GetAssemblyIdentity>
-		<Exec Command="python &quot;BuildRelease.py&quot; &quot;%(AssemblyVersion.Version)&quot;" WorkingDirectory="$(SolutionDir)" />
-	</Target>
-	<Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-		<PropertyGroup>
-			<ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-		</PropertyGroup>
-		<Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets'))" />
-		<Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets'))" />
-		<Error Condition="!Exists('..\packages\Fody.6.6.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.6.3\build\Fody.targets'))" />
-		<Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets'))" />
-		<Error Condition="!Exists('..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props'))" />
-	</Target>
-	<Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
-	<Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />
-	<Import Project="..\packages\Fody.6.6.3\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.3\build\Fody.targets')" />
-	<Import Project="..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" />
+  <Import Project="..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props" Condition="Exists('..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProjectGuid>{14BD698D-2A4F-44BB-A41E-6E36D80A8459}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <RootNamespace>DivinityModManager</RootNamespace>
+    <AssemblyName>DivinityModManager</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <WarningLevel>4</WarningLevel>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <Deterministic>true</Deterministic>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>5</ApplicationRevision>
+    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <SupportedCultures>en-US</SupportedCultures>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>DivinityModManager.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>..\bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>..\bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
+    <OutputPath>..\bin\Publish\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>true</Prefer32Bit>
+    <!-- <PostBuildEvent>powershell start-process python -WindowStyle hidden -argumentlist "$(SolutionDir)BuildRelease.py","@(VersionNumber)"</PostBuildEvent> -->
+  </PropertyGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Reference Include="AdonisUI, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdonisUI.1.17.1\lib\net45\AdonisUI.dll</HintPath>
+    </Reference>
+    <Reference Include="AdonisUI.ClassicTheme, Version=1.17.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\AdonisUI.ClassicTheme.1.17.1\lib\net45\AdonisUI.ClassicTheme.dll</HintPath>
+    </Reference>
+    <Reference Include="AlphaFS, Version=2.2.0.0, Culture=neutral, PublicKeyToken=4d31a58f7d7ad5c9, processorArchitecture=MSIL">
+      <HintPath>..\packages\AlphaFS.2.2.6\lib\net452\AlphaFS.dll</HintPath>
+    </Reference>
+    <Reference Include="AutoUpdater.NET, Version=1.7.4.0, Culture=neutral, PublicKeyToken=501435c91b35f4bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Autoupdater.NET.Official.1.7.4\lib\net45\AutoUpdater.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="DynamicData, Version=7.9.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DynamicData.7.9.5\lib\net462\DynamicData.dll</HintPath>
+    </Reference>
+    <Reference Include="GongSolutions.WPF.DragDrop, Version=3.0.0.0, Culture=neutral, PublicKeyToken=91f1945125b7a587, processorArchitecture=MSIL">
+      <HintPath>..\packages\gong-wpf-dragdrop.3.1.1\lib\net47\GongSolutions.WPF.DragDrop.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Core, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.WinForms, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.WinForms.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Web.WebView2.Wpf, Version=1.0.1264.42, Culture=neutral, PublicKeyToken=2a8ab48044d2601e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Web.WebView2.1.0.1264.42\lib\net45\Microsoft.Web.WebView2.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Ookii.Dialogs.Wpf, Version=5.0.0.0, Culture=neutral, PublicKeyToken=66aa232afad40158, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ookii.Dialogs.Wpf.5.0.1\lib\net462\Ookii.Dialogs.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationFramework.Classic" />
+    <Reference Include="ReactiveUI, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.18.2.9\lib\net472\ReactiveUI.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Fody.Helpers, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.Fody.18.2.9\lib\net472\ReactiveUI.Fody.Helpers.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Wpf, Version=18.2.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\ReactiveUI.WPF.18.2.9\lib\net472\ReactiveUI.Wpf.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpCompress, Version=0.32.1.0, Culture=neutral, PublicKeyToken=afb0a02973931d96, processorArchitecture=MSIL">
+      <HintPath>..\packages\SharpCompress.0.32.1\lib\net461\SharpCompress.dll</HintPath>
+    </Reference>
+    <Reference Include="Splat, Version=14.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.14.4.1\lib\netstandard2.0\Splat.dll</HintPath>
+    </Reference>
+    <Reference Include="Splat.Drawing, Version=14.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Splat.Drawing.14.4.1\lib\net472\Splat.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Drawing.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Drawing.Primitives.4.3.0\lib\net45\System.Drawing.Primitives.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Reactive, Version=5.0.0.0, Culture=neutral, PublicKeyToken=94bc3704cddfc263, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Reactive.5.0.0\lib\net472\System.Reactive.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.6.0.0\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Extensions, Version=4.1.1.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.Extensions.4.3.1\lib\net462\System.Runtime.Extensions.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Security.AccessControl, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.AccessControl.6.0.0\lib\net461\System.Security.AccessControl.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Security.Principal.Windows, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Security.Principal.Windows.5.0.0\lib\net461\System.Security.Principal.Windows.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Text.Encoding.CodePages, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Text.Encoding.CodePages.6.0.0\lib\net461\System.Text.Encoding.CodePages.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xaml">
+      <RequiredTargetFramework>4.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase" />
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="WpfAutoGrid, Version=1.4.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\WpfAutoGrid.1.4.0.0\lib\net45\WpfAutoGrid.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=4.3.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>..\packages\Extended.Wpf.Toolkit.4.3.0\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+    <Compile Include="Controls\AlertBar.xaml.cs">
+      <DependentUpon>AlertBar.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AutoGrayableImage.cs" />
+    <Compile Include="Controls\AutomationTooltip.cs" />
+    <Compile Include="Controls\Behavior\GridViewAutoSizeColumnsBehavior.cs" />
+    <Compile Include="Controls\Behavior\ScreenReaderHelperBehavior.cs" />
+    <Compile Include="Controls\Behavior\TextBlockSettingsEntryAttributeBehavior.cs" />
+    <Compile Include="Controls\Behavior\ToolTipHelperBehavior.cs" />
+    <Compile Include="Controls\BusyIndicator.xaml.cs">
+      <DependentUpon>BusyIndicator.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\CircleDecorator.cs" />
+    <Compile Include="Controls\Extensions\EnumExtension.cs" />
+    <Compile Include="Controls\Extensions\HyperlinkExtensions.cs" />
+    <Compile Include="Controls\HotkeyEditorControl.xaml.cs">
+      <DependentUpon>HotkeyEditorControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\HyperlinkText.xaml.cs">
+      <DependentUpon>HyperlinkText.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\Markdown.cs" />
+    <Compile Include="Controls\ModEntryGrid.cs" />
+    <Compile Include="Controls\ModListView.cs" />
+    <Compile Include="Controls\SelectableTextBlock.cs" />
+    <Compile Include="Controls\TemplateSelectors\TagTemplateSelector.cs" />
+    <Compile Include="Controls\UnfocusableTextBox.cs" />
+    <Compile Include="Converters\EnumToStringConverter.cs" />
+    <Compile Include="Converters\IntToVisibilityConverter.cs" />
+    <Compile Include="Converters\ModIsAvailableConverter.cs" />
+    <Compile Include="Converters\StringNotEmptyToVisibilityConverter.cs" />
+    <Compile Include="Converters\StringToLinearBrushConverter.cs" />
+    <Compile Include="Converters\StringToSolidBrushConverter.cs" />
+    <Compile Include="Converters\StringToUriConverter.cs" />
+    <Compile Include="Extensions\DependencyObjectExtensions.cs" />
+    <Compile Include="MainWindow.xaml.cs">
+      <DependentUpon>MainWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Util\FocusHelper.cs" />
+    <Compile Include="Util\NativeLibraryHelper.cs" />
+    <Compile Include="Util\ScreenReader\ScreenReaderHelper.cs" />
+    <Compile Include="Util\ScreenReader\Tolk.cs" />
+    <Compile Include="ViewModels\AppKeys.cs" />
+    <Compile Include="Themes\DivinityColors.cs" />
+    <Compile Include="Themes\ResourceAliasHelper.cs" />
+    <Compile Include="Util\AutomationTooltipPeer.cs" />
+    <Compile Include="Util\BindingHelper.cs" />
+    <Compile Include="Util\CustomPropertyResolver.cs" />
+    <Compile Include="Util\ElementHelper.cs" />
+    <Compile Include="Util\ScreenReader\MainWindowAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\CachedAutomationPeer.cs" />
+    <Compile Include="Util\RxExceptionHandler.cs" />
+    <Compile Include="Util\ScreenReader\AlertBarAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\ModEntryGridAutomationPeer.cs" />
+    <Compile Include="Util\ScreenReader\ModListViewAutomationPeer.cs" />
+    <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
+    <Compile Include="ViewModels\MainWindowViewModel.cs" />
+    <Compile Include="ViewModels\ModListDragHandler.cs" />
+    <Compile Include="ViewModels\ModListDropHandler.cs" />
+    <Compile Include="ViewModels\ModUpdatesViewData.cs" />
+    <Compile Include="Views\AboutWindow.xaml.cs">
+      <DependentUpon>AboutWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\AppUpdateWindow.xaml.cs">
+      <DependentUpon>AppUpdateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\HideWindowBase.cs" />
+    <Compile Include="Views\HorizontalModLayout.xaml.cs">
+      <DependentUpon>HorizontalModLayout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\LeaderLibSettingsWindow.xaml.cs">
+      <DependentUpon>LeaderLibSettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ModUpdatesLayout.xaml.cs">
+      <DependentUpon>ModUpdatesLayout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SettingsWindow.xaml.cs">
+      <DependentUpon>SettingsWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VersionGeneratorWindow.xaml.cs">
+      <DependentUpon>VersionGeneratorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\VerticalModLayout.xaml.cs">
+      <DependentUpon>VerticalModLayout.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="WinForms\WindowWrapper.cs" />
+    <Page Include="Controls\AlertBar.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\BusyIndicator.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\HotkeyEditorControl.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Controls\HyperlinkText.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MainWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Themes\Dark.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\DefaultStyles\MarkdownStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\Light.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Themes\MainResourceDictionary.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="App.xaml.cs">
+      <DependentUpon>App.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Converters\BoolToVisibilityConverter.cs" />
+    <Page Include="Views\AboutWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\AppUpdateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\HorizontalModLayout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\LeaderLibSettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ModUpdatesLayout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SettingsWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\VersionGeneratorWindow.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\VerticalModLayout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DivinityModManagerCore\DivinityModManagerCore.csproj">
+      <Project>{e24cfb13-f468-4b1d-bc4d-245cd4bd1a23}</Project>
+      <Name>DivinityModManagerCore</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\AppFeatures.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\DefaultPathways.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Resource Include="Resources\Icons\AddItem_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExportData_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Save_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\SaveAs_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\SaveGrey_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Folder_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\OpenFile_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\OpenFolder_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Refresh_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronDown_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronDown_lightGray_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronUp_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExpandChevronUp_lightGrey_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\DivinityOS2_EoCApp_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Steam_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Kofi_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Github_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ExportScript_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ZipFileAs_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\ZipFile_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\StatusWarning_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Close.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Close_Hover.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Danger_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Information_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Success_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\AlertBar_Warning_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\DivinityEngineGlasses_64x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\DefaultIcon_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\DivinityEngine2_64x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\CopyToClipboard_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Rename_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\Log_Normal_32x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.7.2 %28x86 and x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="DivinityModManager.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="Themes\DefaultStyles\ComboBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\IgnoredMods.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\LoadCampaignOrder_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FodyWeavers.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\BrowserLink_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+  </ItemGroup>
+  <PropertyGroup>
+    <PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>
+  </PropertyGroup>
+  <Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
+    <ItemGroup>
+      <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml ; $(OutputPath)runtimes/win-x64/native/*.dll" />
+    </ItemGroup>
+    <Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)_Lib" OverwriteReadOnlyFiles="true" />
+    <RemoveDir Directories="$(OutputPath)de;$(OutputPath)en;$(OutputPath)es;$(OutputPath)fr;$(OutputPath)it;$(OutputPath)ja;$(OutputPath)ko;$(OutputPath)ru;$(OutputPath)zh-Hans;$(OutputPath)zh-Hant;$(OutputPath)cs-CZ;$(OutputPath)hu;$(OutputPath)ja-JP;$(OutputPath)pt-BR;$(OutputPath)ro;$(OutputPath)runtimes;$(OutputPath)sv" />
+  </Target>
+  <Target Name="AfterAfterBuild" AfterTargets="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="AssemblyVersion" />
+    </GetAssemblyIdentity>
+    <Exec Command="python &quot;BuildRelease.py&quot; &quot;%(AssemblyVersion.Version)&quot;" WorkingDirectory="$(SolutionDir)" />
+  </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets'))" />
+    <Error Condition="!Exists('..\packages\Fody.6.6.3\build\Fody.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Fody.6.6.3\build\Fody.targets'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets'))" />
+    <Error Condition="!Exists('..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ReactiveUI.Fody.18.2.9\build\ReactiveUI.Fody.props'))" />
+  </Target>
+  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net472.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net472.targets')" />
+  <Import Project="..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets" Condition="Exists('..\packages\Microsoft.NETFramework.ReferenceAssemblies.net48.1.0.2\build\Microsoft.NETFramework.ReferenceAssemblies.net48.targets')" />
+  <Import Project="..\packages\Fody.6.6.3\build\Fody.targets" Condition="Exists('..\packages\Fody.6.6.3\build\Fody.targets')" />
+  <Import Project="..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets" Condition="Exists('..\packages\Microsoft.Web.WebView2.1.0.1264.42\build\Microsoft.Web.WebView2.targets')" />
 </Project>

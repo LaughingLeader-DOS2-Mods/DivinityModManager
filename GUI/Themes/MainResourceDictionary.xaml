@@ -30,6 +30,8 @@
 	<conv:DivinityGameLaunchWindowActionToStringConverter x:Key="GameLaunchActionToStringConverter" />
 	<conv:IntToVisibilityConverter x:Key="IntToVisibilityConverter" />
 	<conv:StringNotEmptyToVisibilityConverter x:Key="StringNotEmptyToVisibilityConverter" />
+	<conv:StringToSolidBrushConverter x:Key="StringToSolidBrushConverter" />
+	<conv:StringToLinearBrushConverter x:Key="StringToLinearBrushConverter" />
 	<xconv:ProgressBarWidthConverter x:Key="ProgressBarWidthConverter" />
 	<templateSelectors:TagTemplateSelector x:Key="TagTemplateSelector" />
 	<BitmapImage x:Key="SaveImage" UriSource="pack://application:,,,/Resources/Icons/Save_16x.png" />
@@ -45,6 +47,7 @@
 	<BitmapImage x:Key="ExpandUpImageDisabled" UriSource="pack://application:,,,/Resources/Icons/ExpandChevronUp_lightGrey_16x.png" />
 	<BitmapImage x:Key="OpenGameImage" UriSource="pack://application:,,,/Resources/Icons/DivinityOS2_EoCApp_16x.png" />
 	<BitmapImage x:Key="OpenSteamWorkshopFolderImage" UriSource="pack://application:,,,/Resources/Icons/Steam_16x.png" />
+	<BitmapImage x:Key="OpenInBrowserImage" UriSource="pack://application:,,,/Resources/Icons/BrowserLink_16x.png" />
 	<BitmapImage x:Key="LogImage" UriSource="pack://application:,,,/Resources/Icons/Log_Normal_32x.png" />
 	<BitmapImage x:Key="OpenDonationLinkImage" UriSource="pack://application:,,,/Resources/Icons/Kofi_16x.png" />
 	<BitmapImage x:Key="OpenRepoLinkImage" UriSource="pack://application:,,,/Resources/Icons/Github_16x.png" />
@@ -186,7 +189,12 @@
 							<Image Source="{StaticResource OpenFolderImage}" />
 						</MenuItem.Icon>
 					</MenuItem>
-					<MenuItem Command="{Binding OpenWorkshopPageCommand}" Header="Open Steam Workshop Page...">
+					<MenuItem Command="{Binding OpenWorkshopPageCommand}" Header="Open Steam Workshop Page (Browser)...">
+						<MenuItem.Icon>
+							<Image Source="{StaticResource OpenInBrowserImage}" />
+						</MenuItem.Icon>
+					</MenuItem>
+					<MenuItem Command="{Binding OpenWorkshopPageInSteamCommand}" Header="Open Steam Workshop Page (Steam)...">
 						<MenuItem.Icon>
 							<Image Source="{StaticResource OpenSteamWorkshopFolderImage}" />
 						</MenuItem.Icon>
@@ -248,91 +256,20 @@
 		<Style.Triggers>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsEditorMod}" Value="True" />
+					<Condition Binding="{Binding HasColorOverride}" Value="True" />
 					<Condition Binding="{Binding IsSelected}" Value="False" />
 				</MultiDataTrigger.Conditions>
 				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<SolidColorBrush Opacity="0.05" Color="Lime" />
-						</Setter.Value>
-					</Setter>
+					<Setter Property="Background" Value="{Binding ListColor, Converter={StaticResource StringToSolidBrushConverter}}" />
 				</MultiDataTrigger.Setters>
 			</MultiDataTrigger>
 			<MultiDataTrigger>
 				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsEditorMod}" Value="True" />
+					<Condition Binding="{Binding HasColorOverride}" Value="True" />
 					<Condition Binding="{Binding IsSelected}" Value="True" />
 				</MultiDataTrigger.Conditions>
 				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-								<GradientStop Offset="0" Color="#FF02740C" />
-								<GradientStop Offset="1" Color="#FF00990D" />
-							</LinearGradientBrush>
-						</Setter.Value>
-					</Setter>
-				</MultiDataTrigger.Setters>
-			</MultiDataTrigger>
-			<MultiDataTrigger>
-				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding HasBuiltinOverride}" Value="True" />
-					<Condition Binding="{Binding IsEditorMod}" Value="False" />
-					<Condition Binding="{Binding IsSelected}" Value="False" />
-				</MultiDataTrigger.Conditions>
-				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<SolidColorBrush Opacity="0.25" Color="OrangeRed" />
-						</Setter.Value>
-					</Setter>
-				</MultiDataTrigger.Setters>
-			</MultiDataTrigger>
-			<MultiDataTrigger>
-				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding HasBuiltinOverride}" Value="True" />
-					<Condition Binding="{Binding IsEditorMod}" Value="False" />
-					<Condition Binding="{Binding IsSelected}" Value="True" />
-				</MultiDataTrigger.Conditions>
-				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-								<GradientStop Offset="0" Color="#FFD23900" />
-								<GradientStop Offset="1" Color="#FFC73905" />
-							</LinearGradientBrush>
-						</Setter.Value>
-					</Setter>
-				</MultiDataTrigger.Setters>
-			</MultiDataTrigger>
-			<MultiDataTrigger>
-				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsClassicMod}" Value="True" />
-					<Condition Binding="{Binding IsSelected}" Value="False" />
-				</MultiDataTrigger.Conditions>
-				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<SolidColorBrush Opacity="0.15" Color="Red" />
-						</Setter.Value>
-					</Setter>
-				</MultiDataTrigger.Setters>
-			</MultiDataTrigger>
-			<MultiDataTrigger>
-				<MultiDataTrigger.Conditions>
-					<Condition Binding="{Binding IsClassicMod}" Value="True" />
-					<Condition Binding="{Binding IsSelected}" Value="True" />
-				</MultiDataTrigger.Conditions>
-				<MultiDataTrigger.Setters>
-					<Setter Property="Background">
-						<Setter.Value>
-							<LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
-								<GradientStop Offset="0" Color="#FFBF0808" />
-								<GradientStop Offset="1" Color="#FF990000" />
-							</LinearGradientBrush>
-						</Setter.Value>
-					</Setter>
+					<Setter Property="Background" Value="{Binding SelectedColor, Converter={StaticResource StringToLinearBrushConverter}}" />
 				</MultiDataTrigger.Setters>
 			</MultiDataTrigger>
 		</Style.Triggers>
@@ -343,7 +280,16 @@
 			<Setter.Value>
 				<ContextMenu DataContext="{Binding RelativeSource={RelativeSource Mode=Self}, Path=PlacementTarget.Tag}">
 					<MenuItem Command="{Binding Path=OpenInFileExplorerCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding FilePath}" Header="Open in File Explorer..." />
-					<MenuItem Command="{Binding Path=OpenWorkshopPageCommand}" Header="Open Steam Workshop Page..." />
+					<MenuItem Command="{Binding OpenWorkshopPageCommand}" Header="Open Steam Workshop Page (Browser)...">
+						<MenuItem.Icon>
+							<Image Source="{StaticResource OpenInBrowserImage}" />
+						</MenuItem.Icon>
+					</MenuItem>
+					<MenuItem Command="{Binding OpenWorkshopPageInSteamCommand}" Header="Open Steam Workshop Page (Steam)...">
+						<MenuItem.Icon>
+							<Image Source="{StaticResource OpenSteamWorkshopFolderImage}" />
+						</MenuItem.Icon>
+					</MenuItem>
 					<MenuItem Command="{Binding Path=ToggleNameDisplayCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding}">
 						<MenuItem.Header>
 							<TextBlock>
@@ -870,6 +816,55 @@
 	          x:Shared="False"
 	          AllowsColumnReorder="True"
 	          ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
+		<GridView.Columns>
+			<GridViewColumn Width="40"
+			                behavior:ScreenReaderHelperBehavior.HelpText="The mod order index column"
+			                behavior:ScreenReaderHelperBehavior.Name="Index"
+			                Header="#"
+			                HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Margin="2,0,2,0" Background="Transparent" Text="{Binding Index}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="400" CellTemplate="{StaticResource ModNameTemplate}">
+				<GridViewColumn.Header>
+					<TextBlock Text="Name" />
+				</GridViewColumn.Header>
+			</GridViewColumn>
+			<GridViewColumn Width="80" Header="Version" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Version.Version}" ToolTip="{Binding Version.Version}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="100" Header="Author" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding Author}" ToolTip="{Binding Author}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+			<GridViewColumn Width="Auto" Header="Last Updated" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+				<GridViewColumn.CellTemplate>
+					<DataTemplate>
+						<TextBlock Text="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeColumnFormat}}" ToolTip="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />
+					</DataTemplate>
+				</GridViewColumn.CellTemplate>
+			</GridViewColumn>
+		</GridView.Columns>
+	</GridView>
+	<Style x:Key="GridViewHiddenLeftContainerStyle" BasedOn="{StaticResource {x:Type GridViewColumnHeader}}" TargetType="{x:Type GridViewColumnHeader}">
+		<Setter Property="HorizontalContentAlignment" Value="Left" />
+		<Setter Property="Margin" Value="4,0,0,0" />
+		<Setter Property="Visibility" Value="Collapsed" />
+	</Style>
+	<GridView x:Key="HeaderlessModGridView"
+	          x:Shared="False"
+	          AllowsColumnReorder="False"
+	          ColumnHeaderContainerStyle="{StaticResource GridViewHiddenLeftContainerStyle}">
 		<GridView.Columns>
 			<GridViewColumn Width="40"
 			                behavior:ScreenReaderHelperBehavior.HelpText="The mod order index column"

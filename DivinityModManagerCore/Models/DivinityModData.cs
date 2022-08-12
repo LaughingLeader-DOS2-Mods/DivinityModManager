@@ -177,6 +177,7 @@ namespace DivinityModManager.Models
 		[Reactive] public bool HasOsirisExtenderSettings { get; set; } = false;
 
 		[Reactive] public bool IsEditorMod { get; set; } = false;
+		[Reactive] public bool IsForcedLoaded { get; set; } = false;
 
 		[Reactive] public bool IsActive { get; set; } = false;
 
@@ -199,6 +200,10 @@ namespace DivinityModManager.Models
 
 		[Reactive] public bool DeveloperMode { get; set; } = false;
 
+		[Reactive] public bool HasColorOverride { get; set; } = false;
+		[Reactive] public string SelectedColor { get; set; }
+		[Reactive] public string ListColor { get; set; }
+
 		private DivinityModWorkshopData workshopData = new DivinityModWorkshopData();
 
 		public DivinityModWorkshopData WorkshopData
@@ -209,12 +214,20 @@ namespace DivinityModManager.Models
 
 		//public DivinityModWorkshopData WorkshopData { get; private set; } = new DivinityModWorkshopData();
 		public ICommand OpenWorkshopPageCommand { get; private set; }
+		public ICommand OpenWorkshopPageInSteamCommand { get; private set; }
 
-		public string GetURL()
+		public string GetURL(bool asSteamBrowserProtocol = false)
 		{
 			if (WorkshopData != null && WorkshopData.ID != "")
 			{
-				return $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
+				if(!asSteamBrowserProtocol)
+				{
+					return $"https://steamcommunity.com/sharedfiles/filedetails/?id={WorkshopData.ID}";
+				}
+				else
+				{
+					return $"steam://url/CommunityFilePage/{WorkshopData.ID}";
+				}
 			}
 			return "";
 		}
@@ -225,6 +238,17 @@ namespace DivinityModManager.Models
 			if (!String.IsNullOrEmpty(url))
 			{
 				System.Diagnostics.Process.Start(url);
+
+			}
+		}
+
+		public void OpenSteamWorkshopPageInSteam()
+		{
+			var url = GetURL(true);
+			if (!String.IsNullOrEmpty(url))
+			{
+				System.Diagnostics.Process.Start(url);
+
 			}
 		}
 
@@ -261,16 +285,49 @@ namespace DivinityModManager.Models
 			dependencyCount = connection.Count().StartWith(0).ToProperty(this, nameof(TotalDependencies));
 			hasDependencies = this.WhenAnyValue(x => x.TotalDependencies, c => c > 0).StartWith(false).ToProperty(this, nameof(HasDependencies));
 			dependencyVisibility = this.WhenAnyValue(x => x.HasDependencies, b => b ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Collapsed).ToProperty(this, nameof(DependencyVisibility));
-			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod).Subscribe((b) =>
+			this.WhenAnyValue(x => x.IsActive, x => x.IsClassicMod, x => x.IsForcedLoaded).Subscribe((b) =>
 			{
-				if (b.Item1)
+				if(b.Item3)
 				{
-					//Allow removing a classic mod from the active list.
-					CanDrag = true;
+					CanDrag = false;
 				}
 				else
 				{
-					CanDrag = !b.Item2;
+					if (b.Item1)
+					{
+						//Allow removing a classic mod from the active list.
+						CanDrag = true;
+					}
+					else
+					{
+						CanDrag = !b.Item2;
+					}
+				}
+			});
+
+			this.WhenAnyValue(x => x.IsClassicMod, x => x.IsForcedLoaded, x => x.IsEditorMod).Subscribe((b) =>
+			{
+				if(b.Item1)
+				{
+					this.SelectedColor = "#32BF0808";
+					this.ListColor = "#32FA0202";
+					HasColorOverride = true;
+				}
+				else if(b.Item2)
+				{
+					this.SelectedColor = "#32F38F00";
+					this.ListColor = "#32C17200";
+					HasColorOverride = true;
+				}
+				else if(b.Item3)
+				{
+					this.SelectedColor = "#0C00C13B";
+					this.ListColor = "#0C00FF4D";
+					HasColorOverride = true;
+				}
+				else
+				{
+					HasColorOverride = false;
 				}
 			});
 
@@ -286,6 +343,7 @@ namespace DivinityModManager.Models
 			{
 				var canOpenWorkshopLink = this.WhenAnyValue(x => x.WorkshopData.ID, (id) => !String.IsNullOrEmpty(id));
 				OpenWorkshopPageCommand = ReactiveCommand.Create(OpenSteamWorkshopPage, canOpenWorkshopLink);
+				OpenWorkshopPageInSteamCommand = ReactiveCommand.Create(OpenSteamWorkshopPageInSteam, canOpenWorkshopLink);
 			}
 			else
 			{

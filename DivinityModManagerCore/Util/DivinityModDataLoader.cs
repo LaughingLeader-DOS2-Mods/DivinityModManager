@@ -635,6 +635,12 @@ namespace DivinityModManager.Util
 		}
 
 		private static Regex _ModFolderPattern = new Regex("^(Mods|Public)/(.+?)/.+$");
+		private static string[] _IgnoredRecursiveFolders = new string[]
+		{
+			"DefEd\\Data",
+			"Divinity Original Sin 2\\bin",
+			"Localization",
+		};
 
 		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false, CancellationToken? token = null)
 		{
@@ -651,7 +657,8 @@ namespace DivinityModManager.Util
 					var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
 					new DirectoryEnumerationFilters()
 					{
-						InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase)
+						InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase),
+						RecursionFilter = (f) => !_IgnoredRecursiveFolders.Any(x => f.FullPath.Contains(x))
 					}).ToList();
 					allPaks.ForEach((p) => _AllPaksNames.Add(Path.GetFileNameWithoutExtension(p)));
 					modPaks.AddRange(allPaks.Where(PakIsNotPartial));

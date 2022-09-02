@@ -1,8 +1,11 @@
 ﻿using Alphaleonis.Win32.Filesystem;
+
 using DivinityModManager.Models;
 using DivinityModManager.Models.App;
 using DivinityModManager.ViewModels;
+
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -29,6 +32,7 @@ namespace DivinityModManager.Util
 		public ICommand ClearMissingModsCommand { get; private set; }
 		public ReactiveCommand<DivinityModData, Unit> ToggleNameDisplayCommand { get; private set; }
 		public ReactiveCommand<string, Unit> CopyToClipboardCommand { get; private set; }
+		public ReactiveCommand<DivinityModData, Unit> DeleteModCommand { get; private set; }
 
 		public void OpenFile(string path)
 		{
@@ -38,7 +42,7 @@ namespace DivinityModManager.Util
 				{
 					Process.Start(Path.GetFullPath(path));
 				}
-				catch(System.ComponentModel.Win32Exception ex) // No File Association
+				catch (System.ComponentModel.Win32Exception ex) // No File Association
 				{
 					Process.Start("explorer.exe", $"\"{Path.GetFullPath(path)}\"");
 				}
@@ -55,11 +59,11 @@ namespace DivinityModManager.Util
 
 		public void OpenInFileExplorer(string path)
 		{
-			if(File.Exists(path))
+			if (File.Exists(path))
 			{
 				Process.Start("explorer.exe", $"/select, \"{Path.GetFullPath(path)}\"");
 			}
-			else if(Directory.Exists(path))
+			else if (Directory.Exists(path))
 			{
 				Process.Start("explorer.exe", $"\"{Path.GetFullPath(path)}\"");
 			}
@@ -101,9 +105,9 @@ namespace DivinityModManager.Util
 				if (_viewModel != null)
 				{
 					var b = mod.DisplayFileForName;
-					foreach(var m in _viewModel.Mods)
+					foreach (var m in _viewModel.Mods)
 					{
-						if(m.IsSelected)
+						if (m.IsSelected)
 						{
 							m.DisplayFileForName = b;
 						}
@@ -111,6 +115,13 @@ namespace DivinityModManager.Util
 				}
 			});
 			CopyToClipboardCommand = ReactiveCommand.Create<string>(CopyToClipboard);
+			DeleteModCommand = ReactiveCommand.Create<DivinityModData>((mod) =>
+			{
+				if (mod.CanDelete && _viewModel != null)
+				{
+					_viewModel.ConfirmDeleteMod(mod);
+				}
+			});
 		}
 	}
 }

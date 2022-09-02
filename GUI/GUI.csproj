@@ -261,6 +261,7 @@
     <Compile Include="Util\ScreenReader\AlertBarAutomationPeer.cs" />
     <Compile Include="Util\ScreenReader\ModEntryGridAutomationPeer.cs" />
     <Compile Include="Util\ScreenReader\ModListViewAutomationPeer.cs" />
+    <Compile Include="ViewModels\DeleteFilesViewData.cs" />
     <Compile Include="ViewModels\MainWindowExceptionHandler.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />
     <Compile Include="ViewModels\ModListDragHandler.cs" />
@@ -271,6 +272,9 @@
     </Compile>
     <Compile Include="Views\AppUpdateWindow.xaml.cs">
       <DependentUpon>AppUpdateWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\DeleteFilesConfirmationView.xaml.cs">
+      <DependentUpon>DeleteFilesConfirmationView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\HideWindowBase.cs" />
     <Compile Include="Views\HorizontalModLayout.xaml.cs">
@@ -336,6 +340,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\AppUpdateWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\DeleteFilesConfirmationView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -537,6 +545,9 @@
     <Resource Include="Resources\Icons\BrowserLink_16x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Resources\Icons\DeleteAzureResource_16x.png" />
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>

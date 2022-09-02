@@ -1,5 +1,7 @@
 ﻿using DivinityModManager.Models;
+
 using DynamicData.Binding;
+
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -15,11 +17,13 @@ namespace DivinityModManager.ViewModels
 		ObservableCollectionExtended<DivinityModData> InactiveMods { get; }
 		ObservableCollectionExtended<DivinityProfileData> Profiles { get; }
 		ReadOnlyObservableCollection<DivinityModData> Mods { get; }
+		ReadOnlyObservableCollection<DivinityModData> WorkshopMods { get; }
 
 		int ActiveSelected { get; }
 		int InactiveSelected { get; }
 
 		void ShowAlert(string message, AlertType alertType = AlertType.Info, int timeout = 0);
+		void ConfirmDeleteMod(DivinityModData mod);
 		void ClearMissingMods();
 	}
 }

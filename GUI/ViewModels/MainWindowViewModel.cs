@@ -3273,7 +3273,7 @@ namespace DivinityModManager.ViewModels
 					{
 						baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
 					}
-					outputPath = $"Export/{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
+					outputPath = $"Export/{baseOrderName}-{DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
 
 					var exportDirectory = Path.Combine(appDir, "Export");
 					if (!Directory.Exists(exportDirectory))
@@ -3426,7 +3426,7 @@ namespace DivinityModManager.ViewModels
 				{
 					baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
 				}
-				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
+				string outputName = $"{baseOrderName}-{DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
 
 				//dialog.RestoreDirectory = true;
 				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
@@ -3477,7 +3477,7 @@ namespace DivinityModManager.ViewModels
 				{
 					baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
 				}
-				string outputName = $"{baseOrderName}-{ DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.txt";
+				string outputName = $"{baseOrderName}-{DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.txt";
 
 				//dialog.RestoreDirectory = true;
 				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
@@ -4006,6 +4006,15 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 			return Unit.Default;
+		}
+
+		public void ConfirmDeleteMod(DivinityModData mod)
+		{
+			var workshopMod = WorkshopMods.FirstOrDefault(x => x.UUID == mod.UUID);
+			if (workshopMod != null && File.Exists(workshopMod.FilePath))
+			{
+
+			}
 		}
 
 		private void ExtractSelectedMods_ChooseFolder()
@@ -4755,6 +4764,35 @@ Directory the zip will be extracted to:
 					{
 						m.DisplayFileForName = !m.DisplayFileForName;
 					}
+				}
+			});
+
+			Keys.DeleteSelectedMods.AddAction(() =>
+			{
+				List<DivinityModData> selectedEligableMods = null;
+				if (DivinityApp.IsKeyboardNavigating)
+				{
+					var modLayout = view.GetModLayout();
+					if (modLayout != null)
+					{
+						if (modLayout.ActiveModsListView.IsKeyboardFocusWithin)
+						{
+							selectedEligableMods = ActiveMods.Where(x => !x.IsEditorMod && x.IsSelected).ToList();
+						}
+						else
+						{
+							selectedEligableMods = InactiveMods.Where(x => !x.IsEditorMod && x.IsSelected).ToList();
+						}
+					}
+				}
+				else
+				{
+					selectedEligableMods = Mods.Where(x => !x.IsEditorMod && x.IsSelected).ToList();
+				}
+
+				if (selectedEligableMods != null)
+				{
+
 				}
 			});
 

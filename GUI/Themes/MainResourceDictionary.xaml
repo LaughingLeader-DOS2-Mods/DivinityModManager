@@ -67,6 +67,7 @@
 	<BitmapImage x:Key="CopyToClipboardImage" UriSource="pack://application:,,,/Resources/Icons/CopyToClipboard_16x.png" />
 	<BitmapImage x:Key="RenameFileImage" UriSource="pack://application:,,,/Resources/Icons/Rename_16x.png" />
 	<BitmapImage x:Key="LoadCampaignOrderImage" UriSource="pack://application:,,,/Resources/Icons/LoadCampaignOrder_16x.png" />
+	<BitmapImage x:Key="DeleteModImage" UriSource="pack://application:,,,/Resources/Icons/DeleteAzureResource_16x.png" />
 	<!--  Overrides the default context menu open animation to remove flickering.  -->
 	<PopupAnimation x:Key="{x:Static SystemParameters.MenuPopupAnimationKey}">None</PopupAnimation>
 	<Style x:Key="IconButtonStyle" BasedOn="{StaticResource {x:Type Button}}" TargetType="Button">
@@ -197,6 +198,14 @@
 					<MenuItem Command="{Binding OpenWorkshopPageInSteamCommand}" Header="Open Steam Workshop Page (Steam)...">
 						<MenuItem.Icon>
 							<Image Source="{StaticResource OpenSteamWorkshopFolderImage}" />
+						</MenuItem.Icon>
+					</MenuItem>
+					<MenuItem Command="{Binding Path=DeleteModCommand, Source={x:Static dapp:DivinityApp.Commands}}"
+					          CommandParameter="{Binding}"
+					          Header="Delete Mod..."
+					          IsEnabled="{Binding CanDelete}">
+						<MenuItem.Icon>
+							<Image Source="{StaticResource DeleteModImage}" />
 						</MenuItem.Icon>
 					</MenuItem>
 					<MenuItem Command="{Binding Path=ToggleNameDisplayCommand, Source={x:Static dapp:DivinityApp.Commands}}" CommandParameter="{Binding}">

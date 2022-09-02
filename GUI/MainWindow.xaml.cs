@@ -64,6 +64,11 @@ namespace DivinityModManager.Views
 		private Dictionary<string, MenuItem> menuItems = new Dictionary<string, MenuItem>();
 		public Dictionary<string, MenuItem> MenuItems => menuItems;
 
+		public HorizontalModLayout GetModLayout()
+		{
+			return MainContentPresenter.FindVisualChildren<HorizontalModLayout>().FirstOrDefault();
+		}
+
 		public MainWindow()
 		{
 			InitializeComponent();
@@ -86,7 +91,7 @@ namespace DivinityModManager.Views
 			};
 			SettingsWindow.Closed += delegate
 			{
-				if(ViewModel?.Settings != null)
+				if (ViewModel?.Settings != null)
 				{
 					ViewModel.Settings.SettingsWindowIsOpen = false;
 				}
@@ -114,7 +119,7 @@ namespace DivinityModManager.Views
 			AutoUpdater.CheckForUpdateEvent += UpdateWindow.AutoUpdaterOnCheckForUpdateEvent;
 
 			var res = this.TryFindResource("ModUpdaterPanel");
-			if(res != null && res is ModUpdatesLayout modUpdaterPanel)
+			if (res != null && res is ModUpdatesLayout modUpdaterPanel)
 			{
 				Binding binding = new Binding("ModUpdatesViewData");
 				binding.Source = ViewModel;
@@ -221,9 +226,9 @@ namespace DivinityModManager.Views
 			foreach (var key in ViewModel.Keys.All)
 			{
 				var keyBinding = new KeyBinding(key.Command, key.Key, key.Modifiers);
-				BindingOperations.SetBinding(keyBinding, InputBinding.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source=key });
-				BindingOperations.SetBinding(keyBinding, KeyBinding.KeyProperty, new Binding { Path = new PropertyPath("Key"), Source=key });
-				BindingOperations.SetBinding(keyBinding, KeyBinding.ModifiersProperty, new Binding { Path = new PropertyPath("Modifiers"), Source=key });
+				BindingOperations.SetBinding(keyBinding, InputBinding.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source = key });
+				BindingOperations.SetBinding(keyBinding, KeyBinding.KeyProperty, new Binding { Path = new PropertyPath("Key"), Source = key });
+				BindingOperations.SetBinding(keyBinding, KeyBinding.ModifiersProperty, new Binding { Path = new PropertyPath("Modifiers"), Source = key });
 				this.InputBindings.Add(keyBinding);
 			}
 
@@ -232,11 +237,7 @@ namespace DivinityModManager.Views
 			{
 				if (!DivinityApp.IsKeyboardNavigating && this.ViewModel.ActiveSelected == 0 && this.ViewModel.InactiveSelected == 0)
 				{
-					var modLayout = MainContentPresenter.FindVisualChildren<HorizontalModLayout>().FirstOrDefault();
-					if (modLayout != null)
-					{
-						modLayout.FocusInitialActiveSelected();
-					}
+					GetModLayout()?.FocusInitialActiveSelected();
 				}
 			});
 			this.InputBindings.Add(new KeyBinding(setInitialFocusCommand, Key.Up, ModifierKeys.None));
@@ -244,7 +245,7 @@ namespace DivinityModManager.Views
 
 			foreach (var item in TopMenuBar.Items)
 			{
-				if(item is MenuItem entry)
+				if (item is MenuItem entry)
 				{
 					if (entry.Header is string label)
 					{
@@ -262,7 +263,7 @@ namespace DivinityModManager.Views
 			.GetRuntimeProperties()
 			.Where(prop => Attribute.IsDefined(prop, typeof(MenuSettingsAttribute)))
 			.Select(prop => typeof(AppKeys).GetProperty(prop.Name));
-			foreach(var prop in menuKeyProperties)
+			foreach (var prop in menuKeyProperties)
 			{
 				Hotkey key = (Hotkey)prop.GetValue(ViewModel.Keys);
 				MenuSettingsAttribute menuSettings = prop.GetCustomAttribute<MenuSettingsAttribute>();
@@ -284,20 +285,20 @@ namespace DivinityModManager.Views
 				newEntry.Command = key.Command;
 				BindingOperations.SetBinding(newEntry, MenuItem.CommandProperty, new Binding { Path = new PropertyPath("Command"), Source = key });
 				parentMenuItem.Items.Add(newEntry);
-				if(!String.IsNullOrWhiteSpace(menuSettings.Tooltip))
+				if (!String.IsNullOrWhiteSpace(menuSettings.Tooltip))
 				{
 					newEntry.ToolTip = menuSettings.Tooltip;
 				}
-				if(!String.IsNullOrWhiteSpace(menuSettings.Style))
+				if (!String.IsNullOrWhiteSpace(menuSettings.Style))
 				{
 					Style style = (Style)TryFindResource(menuSettings.Style);
-					if(style != null)
+					if (style != null)
 					{
 						newEntry.Style = style;
 					}
 				}
 
-				if(menuSettings.AddSeparator)
+				if (menuSettings.AddSeparator)
 				{
 					parentMenuItem.Items.Add(new Separator());
 				}
@@ -315,15 +316,15 @@ namespace DivinityModManager.Views
 		{
 			ResourceLocator.SetColorScheme(this.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			ResourceLocator.SetColorScheme(SettingsWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
-			if(AboutWindow != null)
+			if (AboutWindow != null)
 			{
 				ResourceLocator.SetColorScheme(AboutWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
-			if(VersionGeneratorWindow != null)
+			if (VersionGeneratorWindow != null)
 			{
 				ResourceLocator.SetColorScheme(VersionGeneratorWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
-			if(UpdateWindow != null)
+			if (UpdateWindow != null)
 			{
 				ResourceLocator.SetColorScheme(UpdateWindow.Resources, !darkMode ? DivinityApp.LightTheme : DivinityApp.DarkTheme);
 			}
@@ -364,7 +365,7 @@ namespace DivinityModManager.Views
 			}
 
 			TextBlock lblMessage = grdParent.FindVisualChildren<TextBlock>().FirstOrDefault();
-			if(lblMessage != null)
+			if (lblMessage != null)
 			{
 				DivinityApp.Log(lblMessage.Text);
 			}
@@ -378,7 +379,7 @@ namespace DivinityModManager.Views
 		private void ComboBox_KeyDown_LoseFocus(object sender, KeyEventArgs e)
 		{
 			bool loseFocus = false;
-			if((e.Key == Key.Enter || e.Key == Key.Return))
+			if ((e.Key == Key.Enter || e.Key == Key.Return))
 			{
 				UIElement elementWithFocus = Keyboard.FocusedElement as UIElement;
 				elementWithFocus.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
@@ -386,13 +387,13 @@ namespace DivinityModManager.Views
 				loseFocus = true;
 				e.Handled = true;
 			}
-			else if(e.Key == Key.Escape)
+			else if (e.Key == Key.Escape)
 			{
 				ViewModel.StopRenaming(true);
 				loseFocus = true;
 			}
 
-			if(loseFocus && sender is ComboBox comboBox)
+			if (loseFocus && sender is ComboBox comboBox)
 			{
 				var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
 				if (tb != null)
@@ -404,11 +405,11 @@ namespace DivinityModManager.Views
 
 		private void OrdersComboBox_LostFocus(object sender, RoutedEventArgs e)
 		{
-			if(sender is ComboBox comboBox && comboBox.IsEditable)
+			if (sender is ComboBox comboBox && comboBox.IsEditable)
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), _ =>
 				{
-					if(ViewModel.IsRenamingOrder)
+					if (ViewModel.IsRenamingOrder)
 					{
 						var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
 						if (tb != null && !tb.IsFocused)
@@ -439,10 +440,10 @@ namespace DivinityModManager.Views
 
 		private void OrdersComboBox_Loaded(object sender, RoutedEventArgs e)
 		{
-			if(sender is ComboBox ordersComboBox)
+			if (sender is ComboBox ordersComboBox)
 			{
 				var tb = ordersComboBox.FindVisualChildren<TextBox>().FirstOrDefault();
-				if(tb != null)
+				if (tb != null)
 				{
 					tb.ContextMenu = ordersComboBox.ContextMenu;
 					tb.ContextMenu.DataContext = ViewModel;
@@ -462,14 +463,14 @@ namespace DivinityModManager.Views
 		private void ModOrderPanel_Loaded(object sender, RoutedEventArgs e)
 		{
 			//var orderPanel = (Grid)this.FindResource("ModOrderPanel");
-			if(sender is Grid orderPanel)
+			if (sender is Grid orderPanel)
 			{
 				var buttons = orderPanel.FindVisualChildren<Button>();
-				foreach(var button in buttons)
+				foreach (var button in buttons)
 				{
-					if(_shortcutButtonBindings.TryGetValue(button.Name, out string path))
+					if (_shortcutButtonBindings.TryGetValue(button.Name, out string path))
 					{
-						if(button.Command == null)
+						if (button.Command == null)
 						{
 							BindingHelper.CreateCommandBinding(button, path, ViewModel);
 						}

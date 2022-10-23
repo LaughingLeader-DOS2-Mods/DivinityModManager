@@ -692,7 +692,7 @@ namespace DivinityModManager.Views
 						if (!String.IsNullOrEmpty(longestName))
 						{
 							//DivinityApp.LogMessage($"Autosizing active mods grid for name {longestName}");
-							var targetWidth = MeasureText(longestName,
+							var targetWidth = MeasureText(ActiveModsListView, longestName,
 								ActiveModsListView.FontFamily,
 								ActiveModsListView.FontStyle,
 								ActiveModsListView.FontWeight,
@@ -719,7 +719,7 @@ namespace DivinityModManager.Views
 				{
 					InactiveModsListView.Resizing = true;
 					//DivinityApp.LogMessage($"Autosizing inactive mods grid for name {longestName}");
-					gridView.Columns[0].Width = MeasureText(longestName,
+					gridView.Columns[0].Width = MeasureText(InactiveModsListView, longestName,
 						InactiveModsListView.FontFamily,
 						InactiveModsListView.FontStyle,
 						InactiveModsListView.FontWeight,
@@ -730,15 +730,15 @@ namespace DivinityModManager.Views
 		}
 
 		// Source: https://stackoverflow.com/a/22420728
-		private static Size MeasureTextSize(string text, FontFamily fontFamily, FontStyle fontStyle,
+		private static Size MeasureTextSize(Visual target, string text, FontFamily fontFamily, FontStyle fontStyle,
 			FontWeight fontWeight, FontStretch fontStretch, double fontSize)
 		{
 			var typeFace = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
-			FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, fontSize, Brushes.Black);
+			var ft = new FormattedText(text, CultureInfo.GetCultureInfo("en-us"), FlowDirection.LeftToRight, typeFace, fontSize, Brushes.Black, VisualTreeHelper.GetDpi(target).PixelsPerDip);
 			return new Size(ft.Width, ft.Height);
 		}
 
-		private static Size MeasureText(string text,
+		private static Size MeasureText(Visual target, string text,
 			FontFamily fontFamily,
 			FontStyle fontStyle,
 			FontWeight fontWeight,
@@ -749,7 +749,7 @@ namespace DivinityModManager.Views
 
 			if (!typeface.TryGetGlyphTypeface(out glyphTypeface))
 			{
-				return MeasureTextSize(text, fontFamily, fontStyle, fontWeight, fontStretch, fontSize);
+				return MeasureTextSize(target, text, fontFamily, fontStyle, fontWeight, fontStretch, fontSize);
 			}
 
 			double totalWidth = 0;

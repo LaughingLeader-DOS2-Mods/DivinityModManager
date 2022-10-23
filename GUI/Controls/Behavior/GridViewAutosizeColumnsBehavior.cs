@@ -91,7 +91,7 @@ namespace DivinityModManager.Controls.Behavior
 						if (listView.ItemsSource is IEnumerable<DivinityModData> mods && mods.Count() > 0)
 						{
 							var longestName = mods.OrderByDescending(m => m.Name.Length).FirstOrDefault()?.Name;
-							gridView.Columns[1].Width = MeasureText(longestName,
+							gridView.Columns[1].Width = MeasureText(listView, longestName,
 								listView.FontFamily,
 								listView.FontStyle,
 								listView.FontWeight,
@@ -103,15 +103,15 @@ namespace DivinityModManager.Controls.Behavior
 			}
 		}
 
-		private static Size MeasureTextSize(string text, FontFamily fontFamily, FontStyle fontStyle, 
+		private static Size MeasureTextSize(Visual target, string text, FontFamily fontFamily, FontStyle fontStyle, 
 			FontWeight fontWeight, FontStretch fontStretch, double fontSize)
 		{
 			var typeFace = new Typeface(fontFamily, fontStyle, fontWeight, fontStretch);
-			FormattedText ft = new FormattedText(text, CultureInfo.CurrentCulture, FlowDirection.LeftToRight, typeFace, fontSize, Brushes.Black);
+			var ft = new FormattedText(text, CultureInfo.GetCultureInfo("en-us"), FlowDirection.LeftToRight, typeFace, fontSize, Brushes.Black, VisualTreeHelper.GetDpi(target).PixelsPerDip);
 			return new Size(ft.Width, ft.Height);
 		}
 
-		private static Size MeasureText(string text,
+		private static Size MeasureText(Visual target, string text,
 			FontFamily fontFamily,
 			FontStyle fontStyle,
 			FontWeight fontWeight,
@@ -122,7 +122,7 @@ namespace DivinityModManager.Controls.Behavior
 
 			if (!typeface.TryGetGlyphTypeface(out glyphTypeface))
 			{
-				return MeasureTextSize(text, fontFamily, fontStyle, fontWeight, fontStretch, fontSize);
+				return MeasureTextSize(target, text, fontFamily, fontStyle, fontWeight, fontStretch, fontSize);
 			}
 
 			double totalWidth = 0;

@@ -70,15 +70,8 @@ namespace DivinityModManager.ViewModels
 			set { this.RaiseAndSetIfChanged(ref dragHandler, value); }
 		}
 
-		private string title;
-
-		public string Title
-		{
-			get => title;
-			set { this.RaiseAndSetIfChanged(ref title, value); }
-		}
-
-		public string Version { get; set; } = "";
+		[Reactive] public string Title { get; set; }
+		[Reactive] public string Version { get; set; }
 
 		public AppKeys Keys { get; private set; } = new AppKeys();
 
@@ -149,21 +142,8 @@ namespace DivinityModManager.ViewModels
 
 		public int InactiveSelected => inactiveSelected.Value;
 
-		private string activeModFilterText = "";
-
-		public string ActiveModFilterText
-		{
-			get => activeModFilterText;
-			set { this.RaiseAndSetIfChanged(ref activeModFilterText, value); }
-		}
-
-		private string inactiveModFilterText = "";
-
-		public string InactiveModFilterText
-		{
-			get => inactiveModFilterText;
-			set { this.RaiseAndSetIfChanged(ref inactiveModFilterText, value); }
-		}
+		[Reactive] public string ActiveModFilterText { get; set; }
+		[Reactive] public string InactiveModFilterText { get; set; }
 
 		private int selectedProfileIndex = 0;
 
@@ -206,110 +186,27 @@ namespace DivinityModManager.ViewModels
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
 
-		private int layoutMode = 0;
+		[Reactive] public int LayoutMode { get; set; } = 0;
+		[Reactive] public bool CanSaveOrder { get; set; } = true;
+		[Reactive] public bool LoadingOrder { get; set; }
 
-		public int LayoutMode
-		{
-			get => layoutMode;
-			set { this.RaiseAndSetIfChanged(ref layoutMode, value); }
-		}
+		[Reactive] public string StatusText { get; set; }
+		[Reactive] public string StatusBarRightText { get; set; }
+		[Reactive] public bool ModUpdatesAvailable { get; set; }
+		[Reactive] public bool ModUpdatesViewVisible { get; set; }
+		[Reactive] public bool CheckingForWorkshopUpdates { get; set; }
+		[Reactive] public bool HighlightExtenderDownload { get; set; }
+		[Reactive] public bool GameDirectoryFound { get; set; }
 
-		private bool canSaveOrder = true;
+		private readonly ObservableAsPropertyHelper<bool> hideModList;
 
-		public bool CanSaveOrder
-		{
-			get => canSaveOrder;
-			set { this.RaiseAndSetIfChanged(ref canSaveOrder, value); }
-		}
-
-		private bool loadingOrder = false;
-
-		public bool LoadingOrder
-		{
-			get => loadingOrder;
-			set { this.RaiseAndSetIfChanged(ref loadingOrder, value); }
-		}
-
-		private string statusText;
-
-		public string StatusText
-		{
-			get => statusText;
-			set { this.RaiseAndSetIfChanged(ref statusText, value); }
-		}
-
-		private bool modUpdatesAvailable = false;
-
-		public bool ModUpdatesAvailable
-		{
-			get => modUpdatesAvailable;
-			set { this.RaiseAndSetIfChanged(ref modUpdatesAvailable, value); }
-		}
-
-		private bool modUpdatesViewVisible = false;
-
-		public bool ModUpdatesViewVisible
-		{
-			get => modUpdatesViewVisible;
-			set { this.RaiseAndSetIfChanged(ref modUpdatesViewVisible, value); }
-		}
-
-		private bool checkingForWorkshopUpdates = false;
-
-		public bool CheckingForWorkshopUpdates
-		{
-			get => checkingForWorkshopUpdates;
-			set { this.RaiseAndSetIfChanged(ref checkingForWorkshopUpdates, value); }
-		}
-
-		private bool highlightExtenderDownload = false;
-
-		public bool HighlightExtenderDownload
-		{
-			get => highlightExtenderDownload;
-			set { this.RaiseAndSetIfChanged(ref highlightExtenderDownload, value); }
-		}
-
-		private bool gameDirectoryFound = false;
-
-		public bool GameDirectoryFound
-		{
-			get => gameDirectoryFound;
-			set { this.RaiseAndSetIfChanged(ref gameDirectoryFound, value); }
-		}
+		public bool HideModList => hideModList.Value;
 
 		#region Progress
-		private string mainProgressTitle;
-
-		public string MainProgressTitle
-		{
-			get => mainProgressTitle;
-			set { this.RaiseAndSetIfChanged(ref mainProgressTitle, value); }
-		}
-
-		private string mainProgressWorkText;
-
-		public string MainProgressWorkText
-		{
-			get => mainProgressWorkText;
-			set { this.RaiseAndSetIfChanged(ref mainProgressWorkText, value); }
-		}
-
-		private bool mainProgressIsActive = true;
-
-		public bool MainProgressIsActive
-		{
-			get => mainProgressIsActive;
-			set { this.RaiseAndSetIfChanged(ref mainProgressIsActive, value); }
-		}
-
-		private double mainProgressValue = 0d;
-
-		public double MainProgressValue
-		{
-			get => mainProgressValue;
-			set { this.RaiseAndSetIfChanged(ref mainProgressValue, value); }
-		}
+		[Reactive] public string MainProgressTitle { get; set; }
+		[Reactive] public string MainProgressWorkText { get; set; }
+		[Reactive] public bool MainProgressIsActive { get; set; }
+		[Reactive] public double MainProgressValue { get; set; } = 0d;
 
 		public void IncreaseMainProgressValue(double val, string message = "")
 		{
@@ -330,54 +227,14 @@ namespace DivinityModManager.ViewModels
 			}, RxApp.MainThreadScheduler);
 		}
 
-		private CancellationTokenSource mainProgressToken;
+		[Reactive] public CancellationTokenSource MainProgressToken { get; set; }
+		[Reactive] public bool CanCancelProgress { get; set; } = true;
 
-		public CancellationTokenSource MainProgressToken
-		{
-			get => mainProgressToken;
-			set { this.RaiseAndSetIfChanged(ref mainProgressToken, value); }
-		}
-
-		private bool canCancelProgress = true;
-
-		public bool CanCancelProgress
-		{
-			get => canCancelProgress;
-			set { this.RaiseAndSetIfChanged(ref canCancelProgress, value); }
-		}
 		#endregion
-
-		private bool isRenamingOrder = false;
-
-		public bool IsRenamingOrder
-		{
-			get => isRenamingOrder;
-			set { this.RaiseAndSetIfChanged(ref isRenamingOrder, value); }
-		}
-
-		private string statusBarRightText = "";
-
-		public string StatusBarRightText
-		{
-			get => statusBarRightText;
-			set { this.RaiseAndSetIfChanged(ref statusBarRightText, value); }
-		}
-
-		private Visibility statusBarBusyIndicatorVisibility = Visibility.Collapsed;
-
-		public Visibility StatusBarBusyIndicatorVisibility
-		{
-			get => statusBarBusyIndicatorVisibility;
-			set { this.RaiseAndSetIfChanged(ref statusBarBusyIndicatorVisibility, value); }
-		}
-
-		private bool workshopSupportEnabled;
-
-		public bool WorkshopSupportEnabled
-		{
-			get => workshopSupportEnabled;
-			set { this.RaiseAndSetIfChanged(ref workshopSupportEnabled, value); }
-		}
+		[Reactive] public bool IsRenamingOrder { get; set; }
+		[Reactive] public Visibility StatusBarBusyIndicatorVisibility { get; set; } = Visibility.Collapsed;
+		[Reactive] public bool WorkshopSupportEnabled { get; set; }
+		[Reactive] public bool IsDeletingFiles { get; set; }
 
 		public IObservable<bool> canRenameOrder;
 
@@ -4789,11 +4646,6 @@ Directory the zip will be extracted to:
 				{
 					selectedEligableMods = Mods.Where(x => !x.IsEditorMod && x.IsSelected).ToList();
 				}
-
-				if (selectedEligableMods != null)
-				{
-
-				}
 			});
 
 			#endregion
@@ -5143,6 +4995,7 @@ Directory the zip will be extracted to:
 				}
 			});
 			#endregion
+
 		}
 	}
 }

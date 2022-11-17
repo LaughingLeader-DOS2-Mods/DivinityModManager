@@ -56,7 +56,7 @@ namespace DivinityModManager.ViewModels
 			TargetCollection = targetCollection;
 			Data = data;
 			var scrollViewer = visualTarget.FindVisualChildren<ScrollViewer>().FirstOrDefault();
-			if(scrollViewer != null)
+			if (scrollViewer != null)
 			{
 				_targetScrollViewer = scrollViewer;
 				_targetScrollingMode = ScrollingMode.VerticalOnly;
@@ -189,7 +189,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			_viewModel.OnOrderChanged?.Invoke(_viewModel, new EventArgs());
+			_viewModel.OrderJustChanged = true;
 		}
 
 		private MainWindowViewModel _viewModel;

@@ -53,7 +53,6 @@ namespace DivinityModManager.Controls
 
 		private static void OnLinkedHeaderListViewSet(DependencyObject d, DependencyPropertyChangedEventArgs e)
 		{
-			DivinityApp.Log($"[OnLinkedHeaderListViewSet] d({d}) e.NewValue({e.NewValue})");
 			if (d is ModListView view)
 			{
 				if (e.NewValue is ModListView targetView)

@@ -1,5 +1,6 @@
 ﻿using AutoUpdaterDotNET;
 
+using DivinityModManager.Converters;
 using DivinityModManager.ViewModels;
 
 using ReactiveUI;
@@ -41,7 +42,12 @@ namespace DivinityModManager.Views
 			{
 				if (this.ViewModel != null)
 				{
+					d(this.OneWayBind(ViewModel, vm => vm.IsActive, view => view.Visibility, BoolToVisibilityConverter.FromBool));
 					d(this.OneWayBind(ViewModel, vm => vm.Files, v => v.FilesListView.ItemsSource));
+					d(this.OneWayBind(ViewModel, vm => vm.IsRunning, v => v.ProgressIndicator.IsBusy));
+					//d(this.BindCommand(ViewModel, vm => vm.SelectAllCommand, v => v.ConfirmButton));
+					d(this.BindCommand(ViewModel, vm => vm.RunCommand, v => v.ConfirmButton));
+					d(this.BindCommand(ViewModel, vm => vm.CancelCommand, v => v.CancelButton));
 				}
 			});
 		}

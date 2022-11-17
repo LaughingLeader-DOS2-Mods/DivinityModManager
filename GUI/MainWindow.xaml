@@ -428,7 +428,7 @@
 					<Grid Grid.Column="3" />
 				</Grid>
 				<Separator Grid.Row="1" Height="1" Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BorderBrush}}" />
-				<local:HorizontalModLayout x:Name="ModLayout" Grid.Row="2" DataContext="{Binding}" />
+				<local:HorizontalModLayout x:Name="ModLayout" Grid.Row="2" ViewModel="{Binding}" />
 			</Grid>
 			<Style BasedOn="{StaticResource {x:Type Button}}" TargetType="{x:Type Button}" />
 			<Style TargetType="{x:Type xc:MessageBox}">
@@ -475,13 +475,13 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
-				<local:DeleteFilesConfirmationView x:Name="DeleteFilesView" Grid.RowSpan="3" />
-				<Rectangle Grid.RowSpan="3"
+				<local:DeleteFilesConfirmationView x:Name="DeleteFilesView" Grid.RowSpan="3" Panel.ZIndex="99" />
+				<Rectangle x:Name="ModListRectangle"
+				           Grid.RowSpan="3"
 				           HorizontalAlignment="Stretch"
 				           VerticalAlignment="Stretch"
-				           Panel.ZIndex="99"
-				           Fill="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
-				           Visibility="{Binding HideModList, Converter={StaticResource BoolToVisibilityConverter}}" />
+				           Panel.ZIndex="98"
+				           Fill="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}" />
 				<Grid Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}">
 					<Grid.Resources>
 						<!--<Color x:Key="WhiteColor">White</Color>

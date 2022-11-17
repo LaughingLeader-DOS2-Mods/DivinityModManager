@@ -184,7 +184,7 @@ namespace DivinityModManager.Views
 
 		private void RegisterBindings()
 		{
-			this.OneWayBind(ViewModel, vm => vm.IsDeletingFiles, view => view.DeleteFilesView.Visibility, BoolToVisibilityConverter.FromBool);
+			this.OneWayBind(ViewModel, vm => vm.HideModList, view => view.ModListRectangle.Visibility, BoolToVisibilityConverter.FromBool);
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
 			ViewModel.Keys.OpenPreferences.AddAction(() => OpenPreferences(false));

@@ -27,7 +27,7 @@ namespace DivinityModManager.Util
 		public IObservable<IObservedChange<object, object>> GetNotificationForProperty(object sender, System.Linq.Expressions.Expression expression, string propertyName, bool beforeChanged = false, bool suppressWarnings = false)
 		{
 			var foo = (FrameworkElement)sender;
-			var value = sender.GetType().GetProperty(propertyName).GetValue(sender, null);
+			var value = sender.GetType().GetProperty(propertyName)?.GetValue(sender, null);
 			return Observable.Return(new ObservedChange<object, object>(sender, expression, value), new DispatcherScheduler(foo.Dispatcher))
 				.Concat(Observable.Never<IObservedChange<object, object>>());
 		}

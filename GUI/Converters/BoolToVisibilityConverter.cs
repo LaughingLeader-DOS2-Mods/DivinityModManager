@@ -12,10 +12,12 @@ namespace DivinityModManager.Converters
 {
 	public class BoolToVisibilityConverter : IValueConverter
 	{
+		public static Visibility FromBool(bool b) => b ? Visibility.Visible : Visibility.Collapsed;
+
 		public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
 		{
 			bool reverse = false;
-			if(parameter != null)
+			if (parameter != null)
 			{
 				if (parameter is int reverseInt)
 				{
@@ -27,10 +29,10 @@ namespace DivinityModManager.Converters
 				}
 				DivinityApp.Log($"BoolToVisibilityConverter param: {parameter} | {parameter.GetType()}");
 			}
-			
-			if(value is bool b)
+
+			if (value is bool b)
 			{
-				if(!reverse)
+				if (!reverse)
 				{
 					return b ? Visibility.Visible : Visibility.Collapsed;
 				}
@@ -44,9 +46,9 @@ namespace DivinityModManager.Converters
 
 		public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
 		{
-			if(value is Visibility visbility)
+			if (value is Visibility visbility)
 			{
-				if(visbility == Visibility.Visible)
+				if (visbility == Visibility.Visible)
 				{
 					return true;
 				}

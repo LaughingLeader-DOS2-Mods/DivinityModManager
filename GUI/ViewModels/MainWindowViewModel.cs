@@ -198,9 +198,11 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public bool HighlightExtenderDownload { get; set; }
 		[Reactive] public bool GameDirectoryFound { get; set; }
 
-		private readonly ObservableAsPropertyHelper<bool> hideModList;
+		private readonly ObservableAsPropertyHelper<bool> _hideModList;
+		public bool HideModList => _hideModList.Value;
 
-		public bool HideModList => hideModList.Value;
+		private readonly ObservableAsPropertyHelper<bool> _hasForceLoadedMods;
+		public bool HasForceLoadedMods => _hasForceLoadedMods.Value;
 
 		#region Progress
 		[Reactive] public string MainProgressTitle { get; set; }
@@ -5005,7 +5007,10 @@ Directory the zip will be extracted to:
 			});
 			#endregion
 
-			this.WhenAnyValue(x => x.MainProgressIsActive, x => x.IsDeletingFiles, (a, b) => a || b).ToProperty(this, x => x.HideModList, out hideModList);
+			_hideModList = this.WhenAnyValue(x => x.MainProgressIsActive, x => x.IsDeletingFiles, (a, b) => a || b).ToProperty(this, nameof(HideModList));
+
+			var forceLoadedModsConnection = this.ForceLoadedMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
+			_hasForceLoadedMods = forceLoadedModsConnection.Count().StartWith(0).Select(x => x > 0).ToProperty(this, nameof(HasForceLoadedMods));
 
 			DivinityInteractions.ConfirmModDeletion.RegisterHandler(async interaction =>
 			{

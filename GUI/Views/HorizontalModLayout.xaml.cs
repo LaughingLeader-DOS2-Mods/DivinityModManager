@@ -1,34 +1,26 @@
-﻿using DivinityModManager.ViewModels;
+﻿using DivinityModManager.Converters;
+using DivinityModManager.Models;
+using DivinityModManager.ViewModels;
+
+using DynamicData.Binding;
+
 using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reactive;
+using System.Reactive.Concurrency;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using System.Windows;
+using System.Windows.Automation.Peers;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Reactive;
-using System.Reactive.Disposables;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using DivinityModManager.Models;
-using DynamicData.Binding;
-using GongSolutions.Wpf.DragDrop;
-using System.Windows.Automation.Peers;
-using DivinityModManager.Util;
-using System.Timers;
-using DivinityModManager.Controls;
-using GongSolutions.Wpf.DragDrop.Utilities;
 
 namespace DivinityModManager.Views
 {
@@ -431,13 +423,26 @@ namespace DivinityModManager.Views
 				}
 			};
 
-			this.WhenActivated((d) =>
+			this.WhenActivated(d =>
 			{
 				if (ViewModel != null)
 				{
-					ViewModel.OnOrderChanged += AutoSizeNameColumn_ActiveMods;
-					ViewModel.OnOrderChanged += AutoSizeNameColumn_InactiveMods;
+					var updateSizeCommand = ReactiveCommand.Create<System.Reactive.EventPattern<EventArgs>, Unit>((e) =>
+					{
+						this.AutoSizeNameColumn_ActiveMods(e.Sender, e.EventArgs);
+						this.AutoSizeNameColumn_InactiveMods(e.Sender, e.EventArgs);
+						return Unit.Default;
+					});
+					d(updateSizeCommand);
+
+					d(Observable.FromEventPattern<EventHandler, EventArgs>(
+						e => ViewModel.OnOrderChanged += e,
+						e => ViewModel.OnOrderChanged -= e).InvokeCommand(updateSizeCommand));
+
 					ViewModel.Layout = this;
+
+					d(this.OneWayBind(ViewModel, vm => vm.HasForceLoadedMods, v => v.ForceLoadedModsListView.Visibility, BoolToVisibilityConverter.FromBool));
+					d(this.OneWayBind(ViewModel, vm => vm.HasForceLoadedMods, v => v.ActiveModListViewGridSplitter.Visibility, BoolToVisibilityConverter.FromBool));
 
 					//ViewModel.Keys.Confirm.AddAction(() =>
 					//{
@@ -523,7 +528,7 @@ namespace DivinityModManager.Views
 
 					//ActiveModsListView.InputBindings.Add(new InputBinding(ViewModel.MoveRightCommand, new KeyGesture(Key.Right)));
 
-					ViewModel.WhenAnyValue(x => x.ActiveSelected).Subscribe((c) =>
+					d(ViewModel.WhenAnyValue(x => x.ActiveSelected).Subscribe((c) =>
 					{
 						if (c > 1 && DivinityApp.IsScreenReaderActive())
 						{
@@ -534,9 +539,9 @@ namespace DivinityModManager.Views
 							}
 							peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
 						}
-					}).DisposeWith(d);
+					}));
 
-					ViewModel.WhenAnyValue(x => x.InactiveSelected).Subscribe((c) =>
+					d(ViewModel.WhenAnyValue(x => x.InactiveSelected).Subscribe((c) =>
 					{
 						if (c > 1 && DivinityApp.IsScreenReaderActive())
 						{
@@ -547,20 +552,9 @@ namespace DivinityModManager.Views
 							}
 							peer.RaiseAutomationEvent(AutomationEvents.LiveRegionChanged);
 						}
-					}).DisposeWith(d);
+					}));
 				}
 				//BindingHelper.CreateCommandBinding(ViewModel.View.EditFocusActiveListMenuItem, "MoveLeftCommand", ViewModel);
-
-
-				// when the ViewModel gets deactivated
-				Disposable.Create(() =>
-				{
-					if (ViewModel != null)
-					{
-						ViewModel.OnOrderChanged -= AutoSizeNameColumn_ActiveMods;
-						ViewModel.OnOrderChanged -= AutoSizeNameColumn_InactiveMods;
-					}
-				}).DisposeWith(d);
 			});
 		}
 

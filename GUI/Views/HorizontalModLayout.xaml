@@ -105,8 +105,9 @@
 			</Grid>
 			<Grid Grid.Row="1">
 				<Grid.RowDefinitions>
-					<RowDefinition Height="*" />
-					<RowDefinition Height="*" />
+					<RowDefinition Height="10*" />
+					<RowDefinition Height="Auto" />
+					<RowDefinition Height="1*" />
 				</Grid.RowDefinitions>
 				<c:ModListView x:Name="ActiveModsListView"
 				               MaxHeight="99999"
@@ -119,8 +120,13 @@
 				               View="{DynamicResource ModGridView}"
 				               VirtualizingPanel.IsVirtualizing="True"
 				               VirtualizingPanel.VirtualizationMode="Recycling" />
+				<GridSplitter x:Name="ActiveModListViewGridSplitter"
+				              Grid.Row="1"
+				              Height="4"
+				              HorizontalAlignment="Stretch"
+				              VerticalAlignment="Stretch" />
 				<c:ModListView x:Name="ForceLoadedModsListView"
-				               Grid.Row="1"
+				               Grid.Row="2"
 				               MaxHeight="99999"
 				               behavior:ScreenReaderHelperBehavior.Name="Force-Loaded Mods"
 				               HideHeader="True"

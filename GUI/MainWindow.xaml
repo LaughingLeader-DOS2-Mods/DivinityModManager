@@ -475,7 +475,7 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
-				<local:DeleteFilesConfirmationView x:Name="DeleteFilesView" Grid.RowSpan="3" Visibility="{Binding IsDeletingFiles, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+				<local:DeleteFilesConfirmationView x:Name="DeleteFilesView" Grid.RowSpan="3" />
 				<Rectangle Grid.RowSpan="3"
 				           HorizontalAlignment="Stretch"
 				           VerticalAlignment="Stretch"

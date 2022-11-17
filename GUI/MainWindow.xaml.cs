@@ -5,6 +5,7 @@ using Alphaleonis.Win32.Filesystem;
 
 using AutoUpdaterDotNET;
 
+using DivinityModManager.Converters;
 using DivinityModManager.Models.App;
 using DivinityModManager.Util;
 using DivinityModManager.Util.ScreenReader;
@@ -183,6 +184,7 @@ namespace DivinityModManager.Views
 
 		private void RegisterBindings()
 		{
+			this.OneWayBind(ViewModel, vm => vm.IsDeletingFiles, view => view.DeleteFilesView.Visibility, BoolToVisibilityConverter.FromBool);
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
 			ViewModel.Keys.OpenPreferences.AddAction(() => OpenPreferences(false));

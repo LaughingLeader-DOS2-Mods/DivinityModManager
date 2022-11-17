@@ -44,7 +44,7 @@
 				           TextAlignment="Center" />
 				<Rectangle Height="2" Fill="LightGray" />
 			</StackPanel>
-			<ListView x:Name="FilesListView" BorderThickness="0" ItemsSource="{Binding Files}" />
+			<ListView x:Name="FilesListView" BorderThickness="0" />
 			<Grid Grid.Row="2" Margin="4">
 				<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
 					<Button x:Name="CancelButton" Padding="8,2" Content="Cancel" />

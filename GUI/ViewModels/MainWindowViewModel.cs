@@ -2903,6 +2903,7 @@ namespace DivinityModManager.ViewModels
 		{
 			int successes = 0;
 			int total = 0;
+			stream.Position = 0;
 			using (var archiveStream = SevenZipArchive.Open(stream))
 			{
 				foreach (var entry in archiveStream.Entries)
@@ -2963,6 +2964,7 @@ namespace DivinityModManager.ViewModels
 		{
 			int successes = 0;
 			int total = 0;
+			stream.Position = 0;
 			using (var reader = SharpCompress.Readers.ReaderFactory.Open(stream))
 			{
 				while (reader.MoveToNextEntry())

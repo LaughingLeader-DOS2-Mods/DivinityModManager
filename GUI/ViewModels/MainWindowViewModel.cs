@@ -4648,6 +4648,13 @@ Directory the zip will be extracted to:
 				{
 					selectedEligableMods = Mods.Where(x => !x.IsEditorMod && x.IsSelected).ToList();
 				}
+
+				if (selectedEligableMods != null)
+				{
+					var deleteFilesData = selectedEligableMods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true });
+					this.View.DeleteFilesView.ViewModel.Files.AddRange(deleteFilesData);
+					IsDeletingFiles = true;
+				}
 			});
 
 			#endregion
@@ -4998,6 +5005,28 @@ Directory the zip will be extracted to:
 			});
 			#endregion
 
+			this.WhenAnyValue(x => x.MainProgressIsActive, x => x.IsDeletingFiles, (a, b) => a || b).ToProperty(this, x => x.HideModList, out hideModList);
+
+			DivinityInteractions.ConfirmModDeletion.RegisterHandler(async interaction =>
+			{
+				var sentenceStart = interaction.Input.PermanentlyDelete ? "Permanently delete" : "Delete";
+				var msg = $"{sentenceStart} {interaction.Input.Total} mod files?";
+
+				bool confirmed = false;
+
+				await Observable.Start(() =>
+				{
+					MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show(view.SettingsWindow, msg, "Confirm Mod Deletion",
+					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, view.MainWindowMessageBox_OK.Style);
+					if (result == MessageBoxResult.Yes)
+					{
+						confirmed = true;
+					}
+					return Unit.Default;
+				}, RxApp.MainThreadScheduler);
+
+				interaction.SetOutput(confirmed);
+			});
 		}
 	}
 }

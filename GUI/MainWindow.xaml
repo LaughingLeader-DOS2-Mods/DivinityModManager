@@ -475,12 +475,13 @@
 					<RowDefinition Height="Auto" />
 					<RowDefinition Height="*" />
 				</Grid.RowDefinitions>
+				<local:DeleteFilesConfirmationView x:Name="DeleteFilesView" Grid.RowSpan="3" Visibility="{Binding IsDeletingFiles, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 				<Rectangle Grid.RowSpan="3"
 				           HorizontalAlignment="Stretch"
 				           VerticalAlignment="Stretch"
 				           Panel.ZIndex="99"
 				           Fill="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}"
-				           Visibility="{Binding MainProgressIsActive, Converter={StaticResource BoolToVisibilityConverter}}" />
+				           Visibility="{Binding HideModList, Converter={StaticResource BoolToVisibilityConverter}}" />
 				<Grid Background="{DynamicResource {x:Static adonisUI:Brushes.Layer3BackgroundBrush}}">
 					<Grid.Resources>
 						<!--<Color x:Key="WhiteColor">White</Color>

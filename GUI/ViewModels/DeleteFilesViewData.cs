@@ -1,4 +1,7 @@
-﻿using DivinityModManager.Models;
+﻿using Alphaleonis.Win32.Filesystem;
+
+using DivinityModManager.Models;
+using DivinityModManager.Util;
 
 using DynamicData;
 using DynamicData.Binding;
@@ -33,14 +36,26 @@ namespace DivinityModManager.ViewModels
 		public ReactiveCommand<Unit, Unit> RunCommand { get; private set; }
 		public ReactiveCommand<Unit, Unit> CancelCommand { get; set; }
 
-		public void Run()
+		public async Task Run()
 		{
+			var targetFiles = Files.Where(x => x.IsSelected).ToList();
 
+			if (await DivinityInteractions.ConfirmModDeletion.Handle(new DeleteFilesViewConfirmationData { Total = targetFiles.Count, PermanentlyDelete = PermanentlyDelete }))
+			{
+				foreach (var f in targetFiles)
+				{
+					if (File.Exists(f.FilePath))
+					{
+						//RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete);
+						DivinityApp.Log($"Deleted mod file '${f.FilePath}'");
+					}
+				}
+			}
 		}
 
 		public void Cancel()
 		{
-
+			Files.Clear();
 		}
 
 		public DeleteFilesViewData()
@@ -48,7 +63,7 @@ namespace DivinityModManager.ViewModels
 			PermanentlyDelete = false;
 			var anySelected = this.Files.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).ToCollection().Select(x => x.All(y => y.IsSelected));
 			anySelected.ToProperty(this, nameof(AnySelected));
-			RunCommand = ReactiveCommand.Create(Run, anySelected);
+			RunCommand = ReactiveCommand.CreateFromTask(Run, anySelected);
 		}
 	}
 }

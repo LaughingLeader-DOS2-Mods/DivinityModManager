@@ -564,7 +564,7 @@
   <PropertyGroup>
     <PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>
   </PropertyGroup>
-  <Target Name="AfterBuild" Condition="'$(Configuration)|$(Platform)' == 'Publish|x64'">
+  <Target Name="AfterBuild">
     <ItemGroup>
       <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml ; $(OutputPath)runtimes/win-x64/native/*.dll" />
     </ItemGroup>

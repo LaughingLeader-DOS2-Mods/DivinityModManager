@@ -93,7 +93,7 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public Hotkey ToggleFileNameDisplay { get; set; } = new Hotkey(Key.None);
 
 		[MenuSettings("Edit", "Delete Selected Mods...", AddSeparator = true)]
-		[Reactive] public Hotkey DeleteSelectedMods { get; set; } = new Hotkey(Key.None);
+		[Reactive] public Hotkey DeleteSelectedMods { get; set; } = new Hotkey(Key.Delete);
 
 		[MenuSettings("Settings", "Open Preferences")]
 		[Reactive] public Hotkey OpenPreferences { get; set; } = new Hotkey(Key.P, ModifierKeys.Control);

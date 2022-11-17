@@ -29,6 +29,8 @@ namespace DivinityModManager.Views
 		public DeleteFilesConfirmationView()
 		{
 			InitializeComponent();
+
+			this.ViewModel = new DeleteFilesViewData();
 		}
 	}
 }

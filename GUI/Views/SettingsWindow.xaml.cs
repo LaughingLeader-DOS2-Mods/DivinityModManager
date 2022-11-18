@@ -27,18 +27,17 @@ using DivinityModManager.Converters;
 
 namespace DivinityModManager.Views
 {
+	public class SettingsWindowBase : HideWindowBase<DivinityModManagerSettings> { }
+
 	/// <summary>
 	/// Interaction logic for SettingsWindow.xaml
 	/// </summary>
-	public partial class SettingsWindow : HideWindowBase, IViewFor<DivinityModManagerSettings>
+	public partial class SettingsWindow : SettingsWindowBase
 	{
 		public SettingsWindow()
 		{
 			InitializeComponent();
 		}
-
-		public DivinityModManagerSettings ViewModel { get; set; }
-		object IViewFor.ViewModel { get; set; }
 
 		private int AddExportDefaultsEntry(int row, BoolToVisibilityConverter boolToVisibilityConverter)
 		{

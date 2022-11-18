@@ -3650,7 +3650,7 @@ namespace DivinityModManager.ViewModels
 				AutoUpdater.Start(DivinityApp.URL_UPDATE);
 				Settings.LastUpdateCheck = DateTimeOffset.Now.ToUnixTimeSeconds();
 				SaveSettings();
-				Task.Delay(1000).ContinueWith(_ =>
+				RxApp.MainThreadScheduler.ScheduleAsync(TimeSpan.FromSeconds(10), async (s, cts) =>
 				{
 					AutoUpdater.ReportErrors = false;
 				});

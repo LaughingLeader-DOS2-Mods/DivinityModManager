@@ -1,4 +1,9 @@
 ﻿using AdonisUI.Controls;
+
+using DivinityModManager.ViewModels;
+
+using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -14,8 +19,36 @@ using System.Windows.Interop;
 
 namespace DivinityModManager.Views
 {
-	public class HideWindowBase : AdonisWindow
+	public class HideWindowBase<TViewModel> : AdonisWindow, IViewFor<TViewModel> where TViewModel : class
 	{
+		/// <summary>
+		/// The view model dependency property.
+		/// </summary>
+		public static readonly DependencyProperty ViewModelProperty =
+			DependencyProperty.Register("ViewModel",
+			typeof(TViewModel),
+			typeof(HideWindowBase<TViewModel>),
+			new PropertyMetadata(null));
+
+		/// <summary>
+		/// Gets the binding root view model.
+		/// </summary>
+		public TViewModel BindingRoot => ViewModel;
+
+		/// <inheritdoc/>
+		public TViewModel ViewModel
+		{
+			get => (TViewModel)GetValue(ViewModelProperty);
+			set => SetValue(ViewModelProperty, value);
+		}
+
+		/// <inheritdoc/>
+		object IViewFor.ViewModel
+		{
+			get => ViewModel;
+			set => ViewModel = (TViewModel)value;
+		}
+
 		public HideWindowBase()
 		{
 			Closing += HideWindow_Closing;

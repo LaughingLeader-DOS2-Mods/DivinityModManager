@@ -13,40 +13,76 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Documents;
+using System.Windows.Input;
 
 namespace DivinityModManager.Views
 {
-	public partial class AppUpdateWindow : HideWindowBase
+	public class AppUpdateWindowBase : HideWindowBase<AppUpdateWindowViewModel> { }
+
+	public class AppUpdateWindowViewModel : ReactiveObject
 	{
 		public UpdateInfoEventArgs UpdateArgs { get; set; }
 
-		private readonly Lazy<Markdown> _fallbackMarkdown = new Lazy<Markdown>(() => new Markdown());
-		private Markdown _defaultMarkdown;
+		[Reactive] public bool Visible { get; set; }
+		[Reactive] public bool CanConfirm { get; set; }
+		[Reactive] public bool CanSkip { get; set; }
+		[Reactive] public string SkipButtonText { get; set; }
+		[Reactive] public string UpdateDescription { get; set; }
+		[Reactive] public string UpdateChangelogView { get; set; }
 
-		private FlowDocument StringToMarkdown(string text)
+		public ICommand ConfirmCommand { get; private set; }
+		public ICommand SkipCommand { get; private set; }
+		public ReactiveCommand<UpdateInfoEventArgs, Unit> CheckForUpdatesCommand { get; private set; }
+
+		public void CheckArgs(UpdateInfoEventArgs args)
 		{
-			var markdown = _defaultMarkdown ?? _fallbackMarkdown.Value;
-			var doc = markdown.Transform(text);
-			return doc;
-		}
+			UpdateArgs = args;
+			//Title = $"{AutoUpdater.AppTitle} {args.CurrentVersion}";
 
-		public AppUpdateWindow()
-		{
-			InitializeComponent();
+			string markdownText;
 
-			var obj = TryFindResource("DefaultMarkdown");
-			if (obj != null && obj is Markdown markdown)
+			if (!args.ChangelogURL.EndsWith(".md"))
 			{
-				_defaultMarkdown = markdown;
+				markdownText = WebHelper.DownloadUrlAsString(DivinityApp.URL_CHANGELOG_RAW);
+			}
+			else
+			{
+				markdownText = WebHelper.DownloadUrlAsString(args.ChangelogURL);
+			}
+			if (!String.IsNullOrEmpty(markdownText))
+			{
+				markdownText = Regex.Replace(markdownText, @"^\s+$[\r\n]*", string.Empty, RegexOptions.Multiline);
+				UpdateChangelogView = markdownText;
 			}
 
-			ConfirmButton.Click += (o, e) =>
+			if (args.IsUpdateAvailable)
+			{
+				UpdateDescription = $"{AutoUpdater.AppTitle} {args.CurrentVersion} is now available.{Environment.NewLine}You have version {args.InstalledVersion} installed.";
+
+				CanConfirm = true;
+				SkipButtonText = "Skip";
+				CanSkip = args.Mandatory?.Value != true;
+			}
+			else
+			{
+				UpdateDescription = $"{AutoUpdater.AppTitle} is up-to-date.";
+				CanConfirm = false;
+				CanSkip = true;
+				SkipButtonText = "Close";
+			}
+		}
+
+		public AppUpdateWindowViewModel()
+		{
+			var canConfirm = this.WhenAnyValue(x => x.CanConfirm);
+			ConfirmCommand = ReactiveCommand.Create(() =>
 			{
 				try
 				{
@@ -64,146 +100,110 @@ namespace DivinityModManager.Views
 						Icon = MessageBoxImage.Error,
 						Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
 					});
-					Hide();
+					Visible = false;
 				}
-			};
+			}, canConfirm, RxApp.MainThreadScheduler);
 
-			SkipButton.Click += (o, e) =>
-			{
-				Hide();
-			};
-		}
-		public void Init(UpdateInfoEventArgs args)
-		{
-			UpdateArgs = args;
-			//Title = $"{AutoUpdater.AppTitle} {args.CurrentVersion}";
+			var canSkip = this.WhenAnyValue(x => x.CanSkip);
+			SkipCommand = ReactiveCommand.Create(() => Visible = false, canSkip);
 
-			string markdownText = "";
-
-			if (!args.ChangelogURL.EndsWith(".md"))
+			CheckForUpdatesCommand = ReactiveCommand.Create<UpdateInfoEventArgs, Unit>(e =>
 			{
-				markdownText = WebHelper.DownloadUrlAsString(DivinityApp.URL_CHANGELOG_RAW);
-			}
-			else
-			{
-				markdownText = WebHelper.DownloadUrlAsString(args.ChangelogURL);
-			}
-			if (!String.IsNullOrEmpty(markdownText))
-			{
-				markdownText = Regex.Replace(markdownText, @"^\s+$[\r\n]*", string.Empty, RegexOptions.Multiline);
-				UpdateChangelogView.Document = StringToMarkdown(markdownText);
-			}
-
-			if (args.IsUpdateAvailable)
-			{
-				UpdateDescription.Text = $"{AutoUpdater.AppTitle} {args.CurrentVersion} is now available.{Environment.NewLine}You have version {args.InstalledVersion} installed.";
-
-				ConfirmButton.IsEnabled = true;
-				SkipButton.Content = "Skip";
-				SkipButton.IsEnabled = args.Mandatory?.Value != true;
-			}
-			else
-			{
-				UpdateDescription.Text = $"{AutoUpdater.AppTitle} is up-to-date.";
-				ConfirmButton.IsEnabled = false;
-				SkipButton.Content = "Close";
-			}
-
-			/*
-			if (args.IsUpdateAvailable)
-			{
-				MessageBoxResult dialogResult;
-				if (args.Mandatory.Value)
+				DivinityApp.Log("CheckForUpdatesCommand");
+				if (e.Error == null)
 				{
-					dialogResult = MessageBox.Show(new MessageBoxModel
+					CheckArgs(e);
+
+					if (MainWindow.Self.UserInvokedUpdate || e.IsUpdateAvailable)
 					{
-						Caption = "Update Available",
-						Text = $@"There is new version {args.CurrentVersion} available. You are using version {args.InstalledVersion}. This is required update. Press Ok to begin updating the application.",
-						Icon = MessageBoxImage.Information,
-						Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
-					});
+						Visible = true;
+						MainWindow.Self.UserInvokedUpdate = false;
+					}
 				}
 				else
 				{
-					dialogResult = MessageBox.Show(new MessageBoxModel
-					{
-						Caption = "Update Available",
-						Text = $@"There is new version {args.CurrentVersion} available. You are using version {args.InstalledVersion}. Do you want to update the application now?",
-						Icon = MessageBoxImage.Information,
-						Buttons = MessageBoxButtons.YesNo(),
-					});
-				}
-
-				if (dialogResult.Equals(MessageBoxResult.Yes) || dialogResult.Equals(MessageBoxResult.OK))
-				{
-					try
-					{
-						if (AutoUpdater.DownloadUpdate(args))
-						{
-							System.Windows.Application.Current.Shutdown();
-						}
-					}
-					catch (Exception exception)
+					if (e.Error is System.Net.WebException)
 					{
 						MessageBox.Show(new MessageBoxModel
 						{
-							Caption = exception.GetType().ToString(),
-							Text = exception.Message,
+							Caption = "Update Check Failed",
+							Text = "There is a problem reaching update server. Please check your internet connection and try again later.",
+							Icon = MessageBoxImage.Error,
+							Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
+						});
+					}
+					else
+					{
+						MessageBox.Show(new MessageBoxModel
+						{
+							Caption = e.Error.GetType().ToString(),
+							Text = e.Error.Message,
 							Icon = MessageBoxImage.Error,
 							Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
 						});
 					}
 				}
-			}
-			else
-			{
-				MessageBox.Show(new MessageBoxModel
-				{
-					Caption = "No Update Available",
-					Text = @"There is no update available please try again later.",
-					Icon = MessageBoxImage.Information,
-					Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
-				});
-			}
-			*/
+				return Unit.Default;
+			});
+		}
+	}
+
+	public partial class AppUpdateWindow : AppUpdateWindowBase
+	{
+		private readonly Lazy<Markdown> _fallbackMarkdown = new Lazy<Markdown>(() => new Markdown());
+		private Markdown _defaultMarkdown;
+
+		private FlowDocument StringToMarkdown(string text)
+		{
+			var markdown = _defaultMarkdown ?? _fallbackMarkdown.Value;
+			var doc = markdown.Transform(text);
+			return doc;
 		}
 
-		public void AutoUpdaterOnCheckForUpdateEvent(UpdateInfoEventArgs args)
+		public AppUpdateWindow()
 		{
-			if (args.Error == null)
-			{
-				Init(args);
+			InitializeComponent();
 
-				if(MainWindow.Self.UserInvokedUpdate || args.IsUpdateAvailable)
-				{
-					Owner = MainWindow.Self;
-					Show();
-					MainWindow.Self.UserInvokedUpdate = false;
-				}
-			}
-			else
+			ViewModel = new AppUpdateWindowViewModel();
+
+			this.ViewModel.WhenAnyValue(x => x.Visible).ObserveOn(RxApp.MainThreadScheduler).Subscribe(b =>
 			{
-				if (args.Error is System.Net.WebException)
+				if (b)
 				{
-					MessageBox.Show(new MessageBoxModel
+					if (!this.IsVisible)
 					{
-						Caption = "Update Check Failed",
-						Text = "There is a problem reaching update server. Please check your internet connection and try again later.",
-						Icon = MessageBoxImage.Error,
-						Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
-					});
+						Owner = MainWindow.Self;
+						Show();
+					}
 				}
 				else
 				{
-					MessageBox.Show(new MessageBoxModel
+					if (this.IsVisible)
 					{
-						Caption = args.Error.GetType().ToString(),
-						Text = args.Error.Message,
-						Icon = MessageBoxImage.Error,
-						Buttons = new IMessageBoxButtonModel[1] { MessageBoxButtons.Ok() },
-					});
+						Hide();
+					}
 				}
-			}
+			});
+
+			Observable.FromEvent<AutoUpdater.CheckForUpdateEventHandler, UpdateInfoEventArgs>(
+				e => AutoUpdater.CheckForUpdateEvent += e,
+				e => AutoUpdater.CheckForUpdateEvent -= e)
+			.InvokeCommand(ViewModel.CheckForUpdatesCommand);
+
+			this.WhenActivated(d =>
+			{
+				var obj = TryFindResource("DefaultMarkdown");
+				if (obj != null && obj is Markdown markdown)
+				{
+					_defaultMarkdown = markdown;
+				}
+
+				d(this.BindCommand(ViewModel, vm => vm.ConfirmCommand, v => v.ConfirmButton));
+				d(this.BindCommand(ViewModel, vm => vm.SkipCommand, v => v.SkipButton));
+				d(this.OneWayBind(ViewModel, vm => vm.SkipButtonText, v => v.SkipButton.Content));
+				d(this.OneWayBind(ViewModel, vm => vm.UpdateDescription, v => v.UpdateDescription.Text));
+				d(this.OneWayBind(ViewModel, vm => vm.UpdateChangelogView, v => v.UpdateChangelogView.Document, StringToMarkdown));
+			});
 		}
 	}
 }

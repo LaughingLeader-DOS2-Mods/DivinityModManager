@@ -117,7 +117,6 @@ namespace DivinityModManager.Views
 
 			AutoUpdater.ApplicationExitEvent += AutoUpdater_ApplicationExitEvent;
 			AutoUpdater.HttpUserAgent = "DivinityModManagerUser";
-			AutoUpdater.CheckForUpdateEvent += UpdateWindow.AutoUpdaterOnCheckForUpdateEvent;
 
 			var res = this.TryFindResource("ModUpdaterPanel");
 			if (res != null && res is ModUpdatesLayout modUpdaterPanel)

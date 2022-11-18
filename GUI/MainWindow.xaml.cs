@@ -186,6 +186,8 @@ namespace DivinityModManager.Views
 			this.OneWayBind(ViewModel, vm => vm.HideModList, view => view.ModListRectangle.Visibility, BoolToVisibilityConverter.FromBool);
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
 
+
+
 			ViewModel.Keys.OpenPreferences.AddAction(() => OpenPreferences(false));
 			ViewModel.Keys.OpenKeybindings.AddAction(() => OpenPreferences(true));
 			ViewModel.Keys.OpenAboutWindow.AddAction(ToggleAboutWindow);
@@ -420,11 +422,6 @@ namespace DivinityModManager.Views
 					}
 				});
 			}
-		}
-
-		private void MenuItem_Click(object sender, RoutedEventArgs e)
-		{
-
 		}
 
 		private void OrderComboBox_OnUserClick(object sender, MouseButtonEventArgs e)

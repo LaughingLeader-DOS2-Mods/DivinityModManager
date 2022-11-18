@@ -33,6 +33,7 @@ namespace DivinityModManager.Views
 
 		public ICommand CopyCommand { get; private set; }
 		public ICommand ResetCommand { get; private set; }
+		public ReactiveCommand<KeyboardFocusChangedEventArgs, Unit> UpdateVersionFromTextCommand { get; private set; }
 
 		public VersionGeneratorViewModel(AlertBar alert)
 		{
@@ -51,6 +52,19 @@ namespace DivinityModManager.Views
 				alert.SetWarningAlert($"Reset version number.");
 			});
 
+			UpdateVersionFromTextCommand = ReactiveCommand.Create<KeyboardFocusChangedEventArgs, Unit>(e =>
+			{
+				if (Int32.TryParse(Text, out int version))
+				{
+					Version.ParseInt(version);
+				}
+				else
+				{
+					Version.ParseInt(268435456);
+				}
+				return Unit.Default;
+			});
+
 			this.WhenAnyValue(x => x.Version.VersionInt).Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(v =>
 			{
 				Text = v.ToString();
@@ -65,7 +79,7 @@ namespace DivinityModManager.Views
 	/// </summary>
 	public partial class VersionGeneratorWindow : VersionGeneratorWindowBase
 	{
-		private static Regex _numberOnlyRegex = new Regex("[^0-9]+");
+		private static readonly Regex _numberOnlyRegex = new Regex("[^0-9]+");
 
 		public VersionGeneratorWindow()
 		{
@@ -84,18 +98,7 @@ namespace DivinityModManager.Views
 				d(this.BindCommand(ViewModel, vm => vm.ResetCommand, v => v.ResetButton));
 
 				var tbEvents = this.VersionNumberTextBox.Events();
-				d(tbEvents.LostFocus.ObserveOn(RxApp.MainThreadScheduler).Subscribe((e) =>
-				{
-					if (Int32.TryParse(VersionNumberTextBox.Text, out int version))
-					{
-						ViewModel.Version.ParseInt(version);
-					}
-					else
-					{
-						ViewModel.Version.ParseInt(268435456);
-					}
-				}));
-
+				d(tbEvents.LostKeyboardFocus.ObserveOn(RxApp.MainThreadScheduler).InvokeCommand(ViewModel.UpdateVersionFromTextCommand));
 				d(tbEvents.PreviewTextInput.ObserveOn(RxApp.MainThreadScheduler).Subscribe((e) =>
 				{
 					e.Handled = _numberOnlyRegex.IsMatch(e.Text);

@@ -10,6 +10,7 @@
                                   Title="Version Generator"
                                   Width="600"
                                   Height="300"
+                                  Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}"
                                   TitleBarBackground="#4e38c9"
                                   TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
                                   WindowStartupLocation="CenterOwner"
@@ -19,7 +20,7 @@
 			<ResourceDictionary.MergedDictionaries>
 				<ResourceDictionary Source="../Themes/MainResourceDictionary.xaml" />
 			</ResourceDictionary.MergedDictionaries>
-			<Style x:Key="IntegerUpDownStyle" BasedOn="{StaticResource {x:Type xc:IntegerUpDown}}" TargetType="xc:IntegerUpDown">
+			<Style BasedOn="{StaticResource {x:Type xc:IntegerUpDown}}" TargetType="xc:IntegerUpDown">
 				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />
 				<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
 				<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
@@ -51,31 +52,19 @@
 			<StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Horizontal">
 				<StackPanel>
 					<TextBlock Text="Major" />
-					<xc:IntegerUpDown x:Name="MajorIntegerUpDown"
-					                  Maximum="7"
-					                  Minimum="0"
-					                  Style="{StaticResource IntegerUpDownStyle}" />
+					<xc:IntegerUpDown x:Name="MajorIntegerUpDown" Maximum="7" Minimum="0" />
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Minor" />
-					<xc:IntegerUpDown x:Name="MinorIntegerUpDown"
-					                  Maximum="15"
-					                  Minimum="0"
-					                  Style="{StaticResource IntegerUpDownStyle}" />
+					<xc:IntegerUpDown x:Name="MinorIntegerUpDown" Maximum="15" Minimum="0" />
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Revision" />
-					<xc:IntegerUpDown x:Name="RevisionIntegerUpDown"
-					                  Maximum="255"
-					                  Minimum="0"
-					                  Style="{StaticResource IntegerUpDownStyle}" />
+					<xc:IntegerUpDown x:Name="RevisionIntegerUpDown" Maximum="255" Minimum="0" />
 				</StackPanel>
 				<StackPanel>
 					<TextBlock Text="Build" />
-					<xc:IntegerUpDown x:Name="BuildIntegerUpDown"
-					                  Maximum="65354"
-					                  Minimum="0"
-					                  Style="{StaticResource IntegerUpDownStyle}" />
+					<xc:IntegerUpDown x:Name="BuildIntegerUpDown" Maximum="65354" Minimum="0" />
 				</StackPanel>
 			</StackPanel>
 			<StackPanel Grid.Row="1"

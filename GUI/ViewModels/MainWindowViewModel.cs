@@ -1654,7 +1654,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				success = await ImportOrderZipFileAsync(filePath, t);
+				success = await ImportOrderZipFileAsync(filePath, true, t);
 			}
 			return success;
 		}
@@ -1665,7 +1665,7 @@ namespace DivinityModManager.ViewModels
 			dialog.CheckFileExists = true;
 			dialog.CheckPathExists = true;
 			dialog.DefaultExt = ".zip";
-			dialog.Filter = "All formats (*.pak;*.zip;*.7z)|*.pak;.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|Mod package (*.pak)|*.pak|Archive file (*.zip;*.7z)|*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|All files (*.*)|*.*";
+			dialog.Filter = "All formats (*.pak;*.zip;*.7z)|*.pak;*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|Mod package (*.pak)|*.pak|Archive file (*.zip;*.7z)|*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|All files (*.*)|*.*";
 			dialog.Title = "Import Mods from Archive...";
 			dialog.ValidateNames = true;
 			dialog.ReadOnlyChecked = true;
@@ -2886,7 +2886,7 @@ namespace DivinityModManager.ViewModels
 				RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 				{
 					MainProgressToken = new CancellationTokenSource();
-					bool success = await ImportOrderZipFileAsync(dialog.FileName, MainProgressToken.Token);
+					bool success = await ImportOrderZipFileAsync(dialog.FileName, false, MainProgressToken.Token);
 					await ctrl.Yield();
 					RxApp.MainThreadScheduler.Schedule(_ =>
 					{
@@ -3023,7 +3023,7 @@ namespace DivinityModManager.ViewModels
 			return successes >= total;
 		}
 
-		private async Task<bool> ImportOrderZipFileAsync(string archivePath, CancellationToken t)
+		private async Task<bool> ImportOrderZipFileAsync(string archivePath, bool onlyMods, CancellationToken t)
 		{
 			System.IO.FileStream fileStream = null;
 			string outputDirectory = PathwayData.DocumentsModsPath;
@@ -3072,7 +3072,7 @@ namespace DivinityModManager.ViewModels
 				if (fileStream != null) fileStream.Close();
 				IncreaseMainProgressValue(taskStepAmount);
 
-				if (jsonFiles.Count > 0)
+				if (!onlyMods && jsonFiles.Count > 0)
 				{
 					RxApp.MainThreadScheduler.Schedule(_ =>
 					{

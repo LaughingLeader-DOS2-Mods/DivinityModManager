@@ -196,7 +196,10 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		[Reactive] public bool CanDelete { get; set; }
+		private ObservableAsPropertyHelper<bool> canDelete;
+		public bool CanDelete => canDelete.Value;
+
+
 		[Reactive] public bool CanDrag { get; set; } = true;
 
 		[Reactive] public bool DeveloperMode { get; set; } = false;
@@ -357,7 +360,7 @@ namespace DivinityModManager.Models
 				Select(x => !DivinityApp.IsScreenReaderActive() && (
 				!String.IsNullOrEmpty(x.Item1) || x.Item2 || !String.IsNullOrEmpty(x.Item3))).StartWith(true).ToProperty(this, nameof(HasToolTip));
 
-			this.WhenAnyValue(x => x.IsEditorMod, x => x.IsLarianMod, x => x.FilePath, (a, b, c) => a == false && b == false && File.Exists(c))
+			canDelete = this.WhenAnyValue(x => x.IsEditorMod, x => x.IsLarianMod, x => x.FilePath, (a, b, c) => !a && !b && File.Exists(c))
 				.StartWith(false).ToProperty(this, nameof(CanDelete));
 		}
 	}

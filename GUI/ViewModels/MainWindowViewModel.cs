@@ -3869,13 +3869,21 @@ namespace DivinityModManager.ViewModels
 			return Unit.Default;
 		}
 
+		private void DeleteMods(List<DivinityModData> mods)
+		{
+			if (!IsDeletingFiles)
+			{
+				var deleteFilesData = mods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true });
+				this.View.DeleteFilesView.ViewModel.Files.AddRange(deleteFilesData);
+				this.View.DeleteFilesView.ViewModel.IsActive = true;
+			}
+		}
+
 		public void ConfirmDeleteMod(DivinityModData mod)
 		{
-			var workshopMod = WorkshopMods.FirstOrDefault(x => x.UUID == mod.UUID);
-			if (workshopMod != null && File.Exists(workshopMod.FilePath))
-			{
-
-			}
+			var targetMods = new List<DivinityModData>() { mod };
+			targetMods.AddRange(WorkshopMods.Where(wm => wm.UUID == mod.UUID && File.Exists(wm.FilePath));
+			DeleteMods(targetMods);
 		}
 
 		private void ExtractSelectedMods_ChooseFolder()
@@ -4673,18 +4681,21 @@ Directory the zip will be extracted to:
 				if (targetList != null)
 				{
 					var selectedMods = targetList.Where(x => x.IsSelected);
-					var selectedEligableMods = selectedMods.Where(x => !x.IsEditorMod && !x.IsLarianMod).ToList();
+					var selectedEligableMods = selectedMods.Where(x => x.CanDelete).ToList();
+					HashSet<string> selectedUUIDs = new HashSet<string>(selectedEligableMods.Select(x => x.UUID));
 
 					if (selectedEligableMods.Count > 0)
 					{
-						var deleteFilesData = selectedEligableMods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true });
-						this.View.DeleteFilesView.ViewModel.Files.AddRange(deleteFilesData);
-						this.View.DeleteFilesView.ViewModel.IsActive = true;
+						selectedEligableMods.AddRange(WorkshopMods.Where(x => selectedUUIDs.Contains(x.UUID) && File.Exists(x.FilePath)));
+						DeleteMods(selectedEligableMods);
 					}
-					else if (selectedMods.All(x => x.IsEditorMod))
+					else
+					{
+						this.View.DeleteFilesView.ViewModel.Close();
+					}
+					if (selectedMods.Any(x => x.IsEditorMod))
 					{
 						ShowAlert("Editor mods cannot be deleted with the Mod Manager.", AlertType.Warning, 60);
-						this.View.DeleteFilesView.ViewModel.Close();
 					}
 				}
 			}));
@@ -5038,6 +5049,8 @@ Directory the zip will be extracted to:
 				}), RxApp.MainThreadScheduler);
 				interaction.SetOutput((bool)confirmed);
 			}));
+
+			MainProgressIsActive = true;
 		}
 	}
 }

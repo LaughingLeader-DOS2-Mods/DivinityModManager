@@ -3882,7 +3882,7 @@ namespace DivinityModManager.ViewModels
 		public void ConfirmDeleteMod(DivinityModData mod)
 		{
 			var targetMods = new List<DivinityModData>() { mod };
-			targetMods.AddRange(WorkshopMods.Where(wm => wm.UUID == mod.UUID && File.Exists(wm.FilePath));
+			targetMods.AddRange(WorkshopMods.Where(wm => wm.UUID == mod.UUID && File.Exists(wm.FilePath)));
 			DeleteMods(targetMods);
 		}
 
@@ -4563,6 +4563,7 @@ Directory the zip will be extracted to:
 
 		public MainWindowViewModel() : base()
 		{
+			MainProgressIsActive = true;
 			exceptionHandler = new MainWindowExceptionHandler(this);
 			RxApp.DefaultExceptionHandler = exceptionHandler;
 
@@ -5049,8 +5050,6 @@ Directory the zip will be extracted to:
 				}), RxApp.MainThreadScheduler);
 				interaction.SetOutput((bool)confirmed);
 			}));
-
-			MainProgressIsActive = true;
 		}
 	}
 }

@@ -254,7 +254,7 @@ namespace DivinityModManager.Util
 		}
 
 		//BOM
-		private static string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
+		private static readonly string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
 
 		public static List<DivinityModData> LoadEditorProjects(string modsFolderPath)
 		{

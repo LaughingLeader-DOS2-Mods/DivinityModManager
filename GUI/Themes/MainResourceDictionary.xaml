@@ -1096,43 +1096,6 @@
 		</GridView.Columns>
 	</GridView>
 	<Style x:Key="BusyIndicatorProgressStyle" TargetType="{x:Type xc:BusyIndicator}">
-		<Setter Property="BusyContentTemplate">
-			<Setter.Value>
-				<DataTemplate>
-					<Grid Margin="4" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-						<Grid.RowDefinitions>
-							<RowDefinition Height="Auto" />
-							<RowDefinition Height="*" />
-							<RowDefinition Height="Auto" />
-						</Grid.RowDefinitions>
-						<TextBlock HorizontalAlignment="Center"
-						           FontSize="16"
-						           FontWeight="Bold"
-						           Text="{Binding MainProgressTitle, FallbackValue='Archiving...'}" />
-						<DockPanel Grid.Row="1" Margin="8">
-							<TextBlock HorizontalAlignment="Center"
-							           VerticalAlignment="Center"
-							           DockPanel.Dock="Bottom"
-							           Text="{Binding MainProgressWorkText, FallbackValue='Archiving pak 4/10...'}"
-							           TextAlignment="Center" />
-							<ProgressBar MinHeight="15"
-							             VerticalAlignment="Center"
-							             DockPanel.Dock="Top"
-							             Maximum="1"
-							             Value="{Binding MainProgressValue, FallbackValue='0'}" />
-						</DockPanel>
-						<Button Grid.Row="2"
-						        Margin="8,0,8,8"
-						        Padding="20,4"
-						        HorizontalAlignment="Center"
-						        VerticalAlignment="Center"
-						        Command="{Binding CancelMainProgressCommand}"
-						        Content="Cancel"
-						        Visibility="{Binding CanCancelProgress, Converter={StaticResource BoolToVisibilityConverter}}" />
-					</Grid>
-				</DataTemplate>
-			</Setter.Value>
-		</Setter>
 		<Setter Property="OverlayStyle">
 			<Setter.Value>
 				<Style TargetType="Rectangle">

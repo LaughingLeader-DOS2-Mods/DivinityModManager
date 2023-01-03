@@ -19,6 +19,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Concurrency;
+using System.Reactive.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
@@ -130,6 +131,10 @@ namespace DivinityModManager.Views
 
 			this.WhenActivated(d =>
 			{
+				this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Take(1).Delay(TimeSpan.FromMilliseconds(25)).ObserveOn(RxApp.MainThreadScheduler).Subscribe(b =>
+				{
+					this.MainBusyIndicator.Visibility = Visibility.Visible;
+				});
 				ViewModel.OnViewActivated(this);
 				RegisterBindings();
 			});
@@ -181,28 +186,21 @@ namespace DivinityModManager.Views
 			}
 		}
 
+		private static System.Windows.Shell.TaskbarItemProgressState BoolToTaskbarItemProgressState(bool b)
+		{
+			return b ? System.Windows.Shell.TaskbarItemProgressState.Normal : System.Windows.Shell.TaskbarItemProgressState.None;
+		}
+
 		private void RegisterBindings()
 		{
 			this.OneWayBind(ViewModel, vm => vm.HideModList, view => view.ModListRectangle.Visibility, BoolToVisibilityConverter.FromBool);
 			this.WhenAnyValue(x => x.ViewModel.Title).BindTo(this, view => view.Title);
-
-
+			this.OneWayBind(ViewModel, vm => vm.MainProgressIsActive, view => view.TaskbarItemInfo.ProgressState, BoolToTaskbarItemProgressState);
+			this.OneWayBind(ViewModel, vm => vm.MainProgressIsActive, view => view.MainBusyIndicator.IsBusy);
 
 			ViewModel.Keys.OpenPreferences.AddAction(() => OpenPreferences(false));
 			ViewModel.Keys.OpenKeybindings.AddAction(() => OpenPreferences(true));
 			ViewModel.Keys.OpenAboutWindow.AddAction(ToggleAboutWindow);
-
-			this.WhenAnyValue(x => x.ViewModel.MainProgressIsActive).Subscribe((b) =>
-			{
-				if (b)
-				{
-					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
-				}
-				else
-				{
-					this.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.None;
-				}
-			});
 
 			ViewModel.Keys.ToggleVersionGeneratorWindow.AddAction(() =>
 			{

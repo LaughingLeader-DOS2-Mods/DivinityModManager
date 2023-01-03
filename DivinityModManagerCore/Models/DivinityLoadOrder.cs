@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.Runtime.Serialization;
 using System.Windows.Input;
 using Alphaleonis.Win32.Filesystem;
+using ReactiveUI.Fody.Helpers;
 
 namespace DivinityModManager.Models
 {
@@ -32,47 +33,17 @@ namespace DivinityModManager.Models
 	[DataContract]
 	public class DivinityLoadOrder : ReactiveObject
 	{
-		private string name;
-		public string Name
-		{
-			get => name;
-			set 
-			{
-				string lastName = name;
-				this.RaiseAndSetIfChanged(ref name, value);
-				if(!String.IsNullOrEmpty(lastName) && lastName != name)
-				{
-					DivinityApp.Events.OnOrderNameChanged(lastName, name);
-				}
-			}
-		}
+		private string _lastName;
 
+		[Reactive] public string Name { get; set; } 
+		[Reactive] public string FilePath { get; set; } 
+		[Reactive] public DateTime LastModifiedDate { get; set; }
 
-		private string filePath = "";
-		public string FilePath
-		{
-			get => filePath;
-			set { this.RaiseAndSetIfChanged(ref filePath, value); }
-		}
+		[Reactive] public bool IsModSettings { get; set; }
 
-		private DateTime lastModifiedDate;
+		private readonly ObservableAsPropertyHelper<string> _lastModified;
 
-		public DateTime LastModifiedDate
-		{
-			get => lastModifiedDate;
-			set {
-				this.RaiseAndSetIfChanged(ref lastModifiedDate, value);
-				LastModified = lastModifiedDate.ToString("g");
-			}
-		}
-
-		private string lastModified;
-
-		public string LastModified
-		{
-			get => lastModified;
-			set { this.RaiseAndSetIfChanged(ref lastModified, value); }
-		}
+		public string LastModified => _lastModified.Value;
 
 		[DataMember]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
@@ -194,43 +165,20 @@ namespace DivinityModManager.Models
 		{
 			return new DivinityLoadOrder()
 			{
-				Name = this.name,
+				Name = this.Name,
 				Order = this.Order.ToList(),
 				LastModifiedDate = this.LastModifiedDate
 			};
 		}
 
-		public IDisposable ActiveModBinding { get; set; }
-
-		public void CreateActiveOrderBind(IObservable<IChangeSet<DivinityModData>> changeSet)
-		{
-			/*
-			ActiveModBinding = changeSet.AutoRefresh(m => m.Index).Transform(m => new DivinityLoadOrderEntry { Name = m.Name, UUID = m.UUID }).Buffer(TimeSpan.FromMilliseconds(250)).
-					FlattenBufferResult().Bind(Order).
-					Subscribe(c =>
-					{
-						//newOrder.Order = c.ToList();
-
-						DivinityApp.LogMessage($"Load order {Name} changed.");
-						DivinityApp.LogMessage("=========================");
-						DivinityApp.LogMessage($"{String.Join(Environment.NewLine + "	", Order.Select(e => e.Name))}");
-						DivinityApp.LogMessage("=========================");
-					});
-			*/
-		}
-
-		public void DisposeBinding()
-		{
-			if(ActiveModBinding != null)
-			{
-				//savedList = new List<DivinityLoadOrderEntry>(Order);
-				ActiveModBinding.Dispose();
-			}
-		}
-
 		public DivinityLoadOrder()
 		{
-			
+			this.WhenAnyValue(x => x.Name, (name) => !String.IsNullOrEmpty(name) && name != _lastName).Subscribe(_ =>
+			{
+				DivinityApp.Events.OnOrderNameChanged(_lastName, Name);
+				_lastName = Name;
+			});
+			_lastModified = this.WhenAnyValue(x => x.LastModifiedDate).Select(x => x.ToString("g")).ToProperty(this, nameof(LastModified));
 		}
 	}
 }

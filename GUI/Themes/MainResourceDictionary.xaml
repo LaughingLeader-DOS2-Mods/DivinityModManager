@@ -19,6 +19,7 @@
                     xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
                     xmlns:xconv="clr-namespace:Xceed.Wpf.Toolkit.Converters;assembly=Xceed.Wpf.Toolkit"
                     xmlns:xcthemes="clr-namespace:Xceed.Wpf.Toolkit.Themes;assembly=Xceed.Wpf.Toolkit"
+                    xmlns:chrome="clr-namespace:Xceed.Wpf.Toolkit.Chromes;assembly=Xceed.Wpf.Toolkit"
                     x:Name="MainResources">
 	<ResourceDictionary.MergedDictionaries>
 		<ResourceDictionary Source="DefaultStyles/ComboBox.xaml" />
@@ -1496,12 +1497,19 @@
 	<DataTemplate x:Key="HotkeyTemplate" DataType="{x:Type appdata:IHotkey}">
 		<controls:HotkeyEditorControl Hotkey="{Binding}" />
 	</DataTemplate>
+
+	<!-- Xceed WPF Toolkit -->
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlDisabledBackgroundKey}" Color="{DynamicResource {x:Static adonisUI:Colors.Layer0BackgroundColor}}" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlDisabledBorderKey}" Color="{DynamicResource {x:Static adonisUI:Colors.Layer0BorderColor}}" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlNormalBackgroundKey}" Color="{DynamicResource {x:Static adonisUI:Colors.Layer1BackgroundColor}}" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlNormalBorderKey}" Color="{DynamicResource {x:Static adonisUI:Colors.Layer1BorderColor}}" />
+
 	<DataTemplate x:Key="DefaultXCWatermarkTemplate">
 		<ContentControl Margin="0,0,3,0"
-		                Background="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}"
 		                BorderBrush="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}"
 		                Content="{Binding}"
 		                Focusable="False"
+						BorderThickness="0"
 		                Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
 	</DataTemplate>
 	<Style BasedOn="{StaticResource {x:Type xc:IntegerUpDown}}" TargetType="{x:Type xc:IntegerUpDown}">
@@ -1525,18 +1533,45 @@
 		<Setter Property="WatermarkTemplate" Value="{StaticResource DefaultXCWatermarkTemplate}" />
 		<Setter Property="BorderThickness" Value="0" />
 	</Style>
-	<Style x:Key="{x:Static xcthemes:ResourceKeys.SpinnerButtonStyleKey}" TargetType="RepeatButton">
-		<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer2BackgroundBrush}}" />
+	<Style x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=SpinnerButtonStyleKey}" TargetType="RepeatButton">
+		<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BackgroundBrush}}" />
 		<Setter Property="Foreground" Value="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}" />
-		<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer2BorderBrush}}" />
+		<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1BorderBrush}}" />
 		<Setter Property="BorderThickness" Value="0" />
-		<Style.Triggers>
-			<Trigger Property="IsMouseOver" Value="True">
-				<Setter Property="Background" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer2InteractionBrush}}" />
-				<Setter Property="BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer2InteractionBorderBrush}}" />
-				<Setter Property="adonisExtensions:CursorSpotlightExtension.BackgroundBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1IntenseHighlightBrush}}" />
-				<Setter Property="adonisExtensions:CursorSpotlightExtension.BorderBrush" Value="{DynamicResource {x:Static adonisUI:Brushes.Layer1IntenseHighlightBorderBrush}}" />
-			</Trigger>
-		</Style.Triggers>
+		<Setter Property="Padding" Value="2,2" />
+		<Setter Property="Template">
+			<Setter.Value>
+				<ControlTemplate TargetType="RepeatButton">
+					<Grid>
+						<chrome:ButtonChrome x:Name="Chrome"
+											 BorderThickness="0"
+                                       BorderBrush="{TemplateBinding BorderBrush}" 
+                                       Background="{TemplateBinding Background}"                                                                  
+                                       CornerRadius="{DynamicResource {x:Static xcthemes:ResourceKeys.SpinButtonCornerRadiusKey}}"
+                                       RenderEnabled="{TemplateBinding IsEnabled}"
+                                       RenderMouseOver="{TemplateBinding IsMouseOver}"
+                                       RenderNormal="True"
+                                       RenderPressed="{TemplateBinding IsPressed}"
+                                       SnapsToDevicePixels="true" />
+
+						<ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                    VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                    Margin="{TemplateBinding Padding}" />
+					</Grid>
+				</ControlTemplate>
+			</Setter.Value>
+		</Setter>
 	</Style>
+	<!--
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlDisabledBackgroundKey}" Color="Red" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ControlNormalBackgroundKey}" Color="Red" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ButtonNormalBackgroundKey}" Color="Red" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ButtonMouseOverBackgroundKey}" Color="Red" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=ButtonFocusedBackgroundKey}" Color="Red" />
+	<Style x:Key="{x:Static xcthemes:ResourceKeys.SpinnerButtonStyleKey}" TargetType="RepeatButton">
+		<Setter Property="Background" Value="Red" />
+		<Setter Property="BorderBrush" Value="Pink" />
+	</Style>
+	-->
+
 </ResourceDictionary>

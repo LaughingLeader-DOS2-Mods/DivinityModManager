@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
-                    xmlns:local="clr-namespace:DivinityModManager.Themes">
+                    xmlns:local="clr-namespace:DivinityModManager.Themes"
+                    xmlns:xcthemes="clr-namespace:Xceed.Wpf.Toolkit.Themes;assembly=Xceed.Wpf.Toolkit">
 	<ResourceDictionary.MergedDictionaries>
 		<ResourceDictionary Source="pack://application:,,,/AdonisUI;component/ColorSchemes/Light.xaml" />
 	</ResourceDictionary.MergedDictionaries>
@@ -19,4 +20,6 @@
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.CustomTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.CustomTagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ModeTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ModeTagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ListInactiveBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ListInactiveColor}}" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=GlyphNormalForegroundKey}" Color="#FF575757" />
+	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=GlyphDisabledForegroundKey}" Color="#FFC5C5C5" />
 </ResourceDictionary>

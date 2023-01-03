@@ -20,6 +20,12 @@
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.CustomTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.CustomTagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ModeTagBackgroundBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ModeTagBackgroundColor}}" />
 	<SolidColorBrush x:Key="{x:Static local:DivinityColors.ListInactiveBrush}" Color="{DynamicResource {x:Static local:DivinityColors.ListInactiveColor}}" />
+	
+	<!-- System Colors -->
+	<!--<SolidColorBrush x:Key="{x:Static SystemColors.GrayTextBrushKey}" Color="Red" />-->
+	
+	<!-- Xceed WPF Toolkit -->
 	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=GlyphNormalForegroundKey}" Color="#FFF0F0F0" />
 	<SolidColorBrush x:Key="{ComponentResourceKey TypeInTargetAssembly={x:Type xcthemes:ResourceKeys}, ResourceId=GlyphDisabledForegroundKey}" Color="#FF8E8E8E" />
+
 </ResourceDictionary>

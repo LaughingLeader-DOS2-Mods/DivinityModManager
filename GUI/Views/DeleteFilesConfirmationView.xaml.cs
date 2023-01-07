@@ -45,9 +45,15 @@ namespace DivinityModManager.Views
 					d(this.OneWayBind(ViewModel, vm => vm.IsActive, view => view.Visibility, BoolToVisibilityConverter.FromBool));
 					d(this.OneWayBind(ViewModel, vm => vm.Files, v => v.FilesListView.ItemsSource));
 					d(this.OneWayBind(ViewModel, vm => vm.IsRunning, v => v.ProgressIndicator.IsBusy));
+
+					d(this.OneWayBind(ViewModel, vm => vm.ProgressTitle, v => v.TaskProgressTitleText.Text));
+					d(this.OneWayBind(ViewModel, vm => vm.ProgressWorkText, v => v.TaskProgressWorkText.Text));
+					d(this.OneWayBind(ViewModel, vm => vm.ProgressValue, v => v.TaskProgressBar.Value));
+
 					//d(this.BindCommand(ViewModel, vm => vm.SelectAllCommand, v => v.ConfirmButton));
 					d(this.BindCommand(ViewModel, vm => vm.RunCommand, v => v.ConfirmButton));
 					d(this.BindCommand(ViewModel, vm => vm.CancelCommand, v => v.CancelButton));
+					d(this.BindCommand(ViewModel, vm => vm.StopRunningCommand, v => v.CancelProgressButton));
 				}
 			});
 		}

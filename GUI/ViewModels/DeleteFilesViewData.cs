@@ -48,17 +48,39 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public string ProgressWorkText { get; set; }
 		[Reactive] public double ProgressValue { get; set; }
 
+		private async Task<Unit> UpdateProgress(string title = "", string workText = "", double value = -1)
+		{
+			await Observable.Start(() =>
+			{
+				if(!String.IsNullOrEmpty(title))
+				{
+					ProgressTitle = title;
+				}
+				if(!String.IsNullOrEmpty(workText))
+				{
+					ProgressWorkText = workText;
+				}
+				if(value > -1)
+				{
+					DivinityApp.Log($"ProgressValue({value})");
+					ProgressValue = value;
+				}
+			}, RxApp.MainThreadScheduler);
+			return Unit.Default;
+		}
+
 		public async Task<bool> Run(CancellationToken cts)
 		{
 			var targetFiles = Files.Where(x => x.IsSelected).ToList();
 
-			ProgressTitle = $"Deleting {targetFiles} mod file(s)...";
-			ProgressValue = 0;
-			var progressInc = 1 / targetFiles.Count;
+			await UpdateProgress($"Confirming deletion...", "", 0d);
 
 			var result = await DivinityInteractions.ConfirmModDeletion.Handle(new DeleteFilesViewConfirmationData { Total = targetFiles.Count, PermanentlyDelete = PermanentlyDelete, Token = cts });
 			if (result)
 			{
+				await UpdateProgress($"Deleting {targetFiles.Count} mod file(s)...", "", 0d);
+				double progressInc = 1d / targetFiles.Count;
+				DivinityApp.Log($"progressInc: {progressInc}");
 				foreach (var f in targetFiles)
 				{
 					try
@@ -70,18 +92,19 @@ namespace DivinityModManager.ViewModels
 						}
 						if (File.Exists(f.FilePath))
 						{
-							ProgressWorkText = $"Deleting {f.FilePath}...";
+							await UpdateProgress("", $"Deleting {f.FilePath}...");
 							//RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete);
-							DivinityApp.Log($"Deleted mod file '${f.FilePath}'");
+							DivinityApp.Log($"Deleted mod file '{f.FilePath}'");
 						}
 					}
 					catch (Exception ex)
 					{
 						DivinityApp.Log($"Error deleting file '${f.FilePath}':\n{ex}");
 					}
-					ProgressValue += progressInc;
+					await UpdateProgress("", "", ProgressValue + progressInc);
 				}
-				ProgressValue = 1d;
+				await UpdateProgress("", "", 1d);
+				await Task.Delay(500);
 				Close();
 			}
 			return true;

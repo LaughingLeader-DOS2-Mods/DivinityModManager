@@ -137,6 +137,16 @@ namespace DivinityModManager.Views
 				});
 				ViewModel.OnViewActivated(this);
 				RegisterBindings();
+
+				this.DeleteFilesView.ViewModel.FileDeletionComplete += (o, e) =>
+				{
+					if(e.TotalFilesDeleted > 0)
+					{
+						ViewModel.RemoveDeletedMods(e.DeletedFiles);
+						//ViewModel.RefreshAsync_Start();
+						this.Activate();
+					}
+				};
 			});
 
 			AddHandler(UIElement.GotFocusEvent, new RoutedEventHandler(OnGotFocus));

@@ -21,6 +21,12 @@ using System.Threading.Tasks;
 
 namespace DivinityModManager.ViewModels
 {
+	public class FileDeletionCompleteEventArgs : EventArgs
+	{
+		public int TotalFilesDeleted { get; set; }
+		public List<ModFileDeletionData> DeletedFiles { get; set; }
+	}
+
 	public class DeleteFilesViewData : ReactiveObject
 	{
 		public ObservableCollectionExtended<ModFileDeletionData> Files { get; set; } = new ObservableCollectionExtended<ModFileDeletionData>();
@@ -44,9 +50,12 @@ namespace DivinityModManager.ViewModels
 		public ReactiveCommand<Unit, Unit> CancelCommand { get; private set; }
 
 		[Reactive] public bool IsActive{ get; set; }
+		[Reactive] public bool IsProgressActive { get; set; }
 		[Reactive] public string ProgressTitle { get; set; }
 		[Reactive] public string ProgressWorkText { get; set; }
 		[Reactive] public double ProgressValue { get; set; }
+
+		public event EventHandler<FileDeletionCompleteEventArgs> FileDeletionComplete;
 
 		private async Task<Unit> UpdateProgress(string title = "", string workText = "", double value = -1)
 		{
@@ -62,7 +71,6 @@ namespace DivinityModManager.ViewModels
 				}
 				if(value > -1)
 				{
-					DivinityApp.Log($"ProgressValue({value})");
 					ProgressValue = value;
 				}
 			}, RxApp.MainThreadScheduler);
@@ -78,9 +86,11 @@ namespace DivinityModManager.ViewModels
 			var result = await DivinityInteractions.ConfirmModDeletion.Handle(new DeleteFilesViewConfirmationData { Total = targetFiles.Count, PermanentlyDelete = PermanentlyDelete, Token = cts });
 			if (result)
 			{
+				var deletedFiles = new List<ModFileDeletionData>();
+
+				await Observable.Start(() => IsProgressActive = true, RxApp.MainThreadScheduler);
 				await UpdateProgress($"Deleting {targetFiles.Count} mod file(s)...", "", 0d);
 				double progressInc = 1d / targetFiles.Count;
-				DivinityApp.Log($"progressInc: {progressInc}");
 				foreach (var f in targetFiles)
 				{
 					try
@@ -88,13 +98,17 @@ namespace DivinityModManager.ViewModels
 						if (cts.IsCancellationRequested)
 						{
 							DivinityApp.Log("Deletion stopped.");
-							return false;
+							break;
 						}
 						if (File.Exists(f.FilePath))
 						{
 							await UpdateProgress("", $"Deleting {f.FilePath}...");
-							//RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete);
-							DivinityApp.Log($"Deleted mod file '{f.FilePath}'");
+							deletedFiles.Add(f);
+							//if (RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete))
+							//{
+							//	deletedFiles.Add(f);
+							//	DivinityApp.Log($"Deleted mod file '{f.FilePath}'");
+							//}
 						}
 					}
 					catch (Exception ex)
@@ -105,13 +119,18 @@ namespace DivinityModManager.ViewModels
 				}
 				await UpdateProgress("", "", 1d);
 				await Task.Delay(500);
-				Close();
+				RxApp.MainThreadScheduler.Schedule(() =>
+				{
+					Close();
+					FileDeletionComplete?.Invoke(this, new FileDeletionCompleteEventArgs() { TotalFilesDeleted = deletedFiles.Count, DeletedFiles = deletedFiles });
+				});
 			}
 			return true;
 		}
 
 		public void Close()
 		{
+			IsProgressActive = false;
 			IsActive = false;
 			Files.Clear();
 		}

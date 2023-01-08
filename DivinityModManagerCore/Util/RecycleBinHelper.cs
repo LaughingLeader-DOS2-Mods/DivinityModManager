@@ -47,24 +47,21 @@ namespace DivinityModManager.Util
 		}
 
 		// Delete a file or move it to the recycle bin.
-		public static void DeleteFile(string filename, bool confirm,
-			bool delete_permanently)
+		public static bool DeleteFile(string filename, bool confirm, bool deletePermanently = false)
 		{
-			UIOption ui_option = UIOption.OnlyErrorDialogs;
-			if (confirm) ui_option = UIOption.AllDialogs;
+			UIOption uiDisplayOptions = confirm ? UIOption.AllDialogs : UIOption.OnlyErrorDialogs;
+			RecycleOption reyclingOptions = deletePermanently ? RecycleOption.DeletePermanently : RecycleOption.SendToRecycleBin;
 
-			RecycleOption recycle_option =
-				recycle_option = RecycleOption.SendToRecycleBin;
-			if (delete_permanently)
-				recycle_option = RecycleOption.DeletePermanently;
 			try
 			{
-				Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(filename, ui_option, recycle_option);
+				Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(filename, uiDisplayOptions, reyclingOptions);
+				return true;
 			}
 			catch (Exception ex)
 			{
 				DivinityApp.Log("Error deleting file.\n" + ex.ToString());
 			}
+			return false;
 		}
 
 		// Empty the wastebasket.

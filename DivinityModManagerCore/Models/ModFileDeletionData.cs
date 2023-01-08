@@ -14,5 +14,6 @@ namespace DivinityModManager.Models
 		[Reactive] public bool IsSelected { get; set; }
 		[Reactive] public string FilePath { get; set; }
 		[Reactive] public string DisplayName { get; set; }
+		[Reactive] public string UUID { get; set; }
 	}
 }

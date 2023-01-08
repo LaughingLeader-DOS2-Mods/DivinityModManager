@@ -3860,21 +3860,33 @@ namespace DivinityModManager.ViewModels
 			return Unit.Default;
 		}
 
-		private void DeleteMods(List<DivinityModData> mods)
+		private void DeleteMods(List<DivinityModData> targetMods)
 		{
 			if (!IsDeletingFiles)
 			{
-				var deleteFilesData = mods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true });
+				var deleteFilesData = targetMods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true, UUID = x.UUID });
 				this.View.DeleteFilesView.ViewModel.Files.AddRange(deleteFilesData);
 				this.View.DeleteFilesView.ViewModel.IsActive = true;
 			}
 		}
 
-		public void ConfirmDeleteMod(DivinityModData mod)
+		public void DeleteMod(DivinityModData mod)
 		{
 			var targetMods = new List<DivinityModData>() { mod };
 			targetMods.AddRange(WorkshopMods.Where(wm => wm.UUID == mod.UUID && File.Exists(wm.FilePath)));
 			DeleteMods(targetMods);
+		}
+
+		public void RemoveDeletedMods(List<ModFileDeletionData> deletedMods)
+		{
+			var deletedUUIDs = deletedMods.Select(x => x.UUID).ToHashSet();
+			mods.RemoveMany(mods.Items.Where(x => deletedUUIDs.Contains(x.UUID)));
+			workshopMods.RemoveMany(workshopMods.Items.Where(x => deletedUUIDs.Contains(x.UUID)));
+			SelectedModOrder.Order.RemoveAll(x => deletedUUIDs.Contains(x.UUID));
+			ActiveMods.RemoveMany(ActiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
+			InactiveMods.RemoveMany(InactiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
+			SelectedProfile.ModOrder.RemoveMany(deletedUUIDs);
+			SelectedProfile.ActiveMods.RemoveMany(SelectedProfile.ActiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
 		}
 
 		private void ExtractSelectedMods_ChooseFolder()

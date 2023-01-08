@@ -147,20 +147,35 @@
 					</GridView>
 				</ListView.View>
 			</ListView>
-			<Grid Grid.Row="2" Margin="4">
-				<StackPanel
-					HorizontalAlignment="Center"
-					VerticalAlignment="Center"
-					Orientation="Horizontal">
-					<Button
-						x:Name="CancelButton"
-						Padding="8,2"
-						Content="Cancel" />
-					<Button
-						x:Name="ConfirmButton"
-						Padding="8,2"
-						Content="Confirm Deletion" />
-				</StackPanel>
+			<Grid
+				Grid.Row="2"
+				Margin="4"
+				HorizontalAlignment="Center"
+				VerticalAlignment="Center">
+				<Grid>
+					<Grid.RowDefinitions>
+						<RowDefinition Height="Auto" />
+						<RowDefinition Height="Auto" />
+					</Grid.RowDefinitions>
+					<CheckBox
+						x:Name="DeletionOptionCheckbox"
+						Margin="8"
+						HorizontalAlignment="Center"
+						Content="Permanent"
+						ToolTip="Deleted files permanently, instead of moving them to the Reycling Bin." />
+					<StackPanel Grid.Row="2" Orientation="Horizontal">
+						<Button
+							x:Name="ConfirmButton"
+							Margin="4,0"
+							Padding="12,2"
+							Content="Delete" />
+						<Button
+							x:Name="CancelButton"
+							Margin="4,0"
+							Padding="12,2"
+							Content="Cancel" />
+					</StackPanel>
+				</Grid>
 			</Grid>
 		</Grid>
 	</xc:BusyIndicator>

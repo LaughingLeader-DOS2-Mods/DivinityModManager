@@ -119,7 +119,7 @@ namespace DivinityModManager.Util
 			{
 				if (mod.CanDelete && _viewModel != null)
 				{
-					_viewModel.ConfirmDeleteMod(mod);
+					_viewModel.DeleteMod(mod);
 				}
 			});
 		}

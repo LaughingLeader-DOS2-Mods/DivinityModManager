@@ -142,8 +142,9 @@ namespace DivinityModManager.Views
 				{
 					if(e.TotalFilesDeleted > 0)
 					{
-						ViewModel.RemoveDeletedMods(e.DeletedFiles);
-						//ViewModel.RefreshAsync_Start();
+						var deletedUUIDs = e.DeletedFiles.Where(x => !x.IsWorkshop).Select(x => x.UUID).ToHashSet();
+						var deletedWorkshopUUIDs = e.DeletedFiles.Where(x => x.IsWorkshop).Select(x => x.UUID).ToHashSet();
+						ViewModel.RemoveDeletedMods(deletedUUIDs, deletedWorkshopUUIDs);
 						this.Activate();
 					}
 				};

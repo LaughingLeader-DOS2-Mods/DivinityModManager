@@ -3864,29 +3864,36 @@ namespace DivinityModManager.ViewModels
 		{
 			if (!IsDeletingFiles)
 			{
-				var deleteFilesData = targetMods.Select(x => new ModFileDeletionData { FilePath = x.FilePath, DisplayName = x.DisplayName, IsSelected = true, UUID = x.UUID });
+				var targetUUIDs = targetMods.Select(x => x.UUID).ToHashSet();
+
+				var deleteFilesData = targetMods.Select(x => ModFileDeletionData.FromMod(x));
 				this.View.DeleteFilesView.ViewModel.Files.AddRange(deleteFilesData);
+
+				var workshopMods = WorkshopMods.Where(wm => targetUUIDs.Contains(wm.UUID) && File.Exists(wm.FilePath)).Select(x => ModFileDeletionData.FromMod(x, true));
+				this.View.DeleteFilesView.ViewModel.Files.AddRange(workshopMods);
+
 				this.View.DeleteFilesView.ViewModel.IsActive = true;
 			}
 		}
 
 		public void DeleteMod(DivinityModData mod)
 		{
-			var targetMods = new List<DivinityModData>() { mod };
-			targetMods.AddRange(WorkshopMods.Where(wm => wm.UUID == mod.UUID && File.Exists(wm.FilePath)));
-			DeleteMods(targetMods);
+			DeleteMods(new List<DivinityModData>() { mod });
 		}
 
-		public void RemoveDeletedMods(List<ModFileDeletionData> deletedMods)
+		public void RemoveDeletedMods(HashSet<string> deletedMods, HashSet<string> deletedWorkshopMods = null)
 		{
-			var deletedUUIDs = deletedMods.Select(x => x.UUID).ToHashSet();
-			mods.RemoveMany(mods.Items.Where(x => deletedUUIDs.Contains(x.UUID)));
-			workshopMods.RemoveMany(workshopMods.Items.Where(x => deletedUUIDs.Contains(x.UUID)));
-			SelectedModOrder.Order.RemoveAll(x => deletedUUIDs.Contains(x.UUID));
-			ActiveMods.RemoveMany(ActiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
-			InactiveMods.RemoveMany(InactiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
-			SelectedProfile.ModOrder.RemoveMany(deletedUUIDs);
-			SelectedProfile.ActiveMods.RemoveMany(SelectedProfile.ActiveMods.Where(x => deletedUUIDs.Contains(x.UUID)));
+			mods.RemoveMany(mods.Items.Where(x => deletedMods.Contains(x.UUID)));
+			ActiveMods.RemoveMany(ActiveMods.Where(x => deletedMods.Contains(x.UUID)));
+			InactiveMods.RemoveMany(InactiveMods.Where(x => deletedMods.Contains(x.UUID)));
+			SelectedModOrder.Order.RemoveAll(x => deletedMods.Contains(x.UUID));
+			SelectedProfile.ModOrder.RemoveMany(deletedMods);
+			SelectedProfile.ActiveMods.RemoveAll(x => deletedMods.Contains(x.UUID));
+
+			if(deletedWorkshopMods != null && deletedWorkshopMods.Count > 0)
+			{
+				workshopMods.RemoveMany(workshopMods.Items.Where(x => deletedWorkshopMods.Contains(x.UUID)));
+			}
 		}
 
 		private void ExtractSelectedMods_ChooseFolder()
@@ -4686,11 +4693,9 @@ Directory the zip will be extracted to:
 				{
 					var selectedMods = targetList.Where(x => x.IsSelected);
 					var selectedEligableMods = selectedMods.Where(x => x.CanDelete).ToList();
-					HashSet<string> selectedUUIDs = new HashSet<string>(selectedEligableMods.Select(x => x.UUID));
 
 					if (selectedEligableMods.Count > 0)
 					{
-						selectedEligableMods.AddRange(WorkshopMods.Where(x => selectedUUIDs.Contains(x.UUID) && File.Exists(x.FilePath)));
 						DeleteMods(selectedEligableMods);
 					}
 					else

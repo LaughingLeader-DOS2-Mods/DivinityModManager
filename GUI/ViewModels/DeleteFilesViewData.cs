@@ -23,8 +23,13 @@ namespace DivinityModManager.ViewModels
 {
 	public class FileDeletionCompleteEventArgs : EventArgs
 	{
-		public int TotalFilesDeleted { get; set; }
+		public int TotalFilesDeleted => DeletedFiles?.Count ?? 0;
 		public List<ModFileDeletionData> DeletedFiles { get; set; }
+
+		public FileDeletionCompleteEventArgs()
+		{
+			DeletedFiles = new List<ModFileDeletionData>();
+		}
 	}
 
 	public class DeleteFilesViewData : ReactiveObject
@@ -86,7 +91,7 @@ namespace DivinityModManager.ViewModels
 			var result = await DivinityInteractions.ConfirmModDeletion.Handle(new DeleteFilesViewConfirmationData { Total = targetFiles.Count, PermanentlyDelete = PermanentlyDelete, Token = cts });
 			if (result)
 			{
-				var deletedFiles = new List<ModFileDeletionData>();
+				var eventArgs = new FileDeletionCompleteEventArgs();
 
 				await Observable.Start(() => IsProgressActive = true, RxApp.MainThreadScheduler);
 				await UpdateProgress($"Deleting {targetFiles.Count} mod file(s)...", "", 0d);
@@ -103,12 +108,15 @@ namespace DivinityModManager.ViewModels
 						if (File.Exists(f.FilePath))
 						{
 							await UpdateProgress("", $"Deleting {f.FilePath}...");
-							deletedFiles.Add(f);
-							//if (RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete))
-							//{
-							//	deletedFiles.Add(f);
-							//	DivinityApp.Log($"Deleted mod file '{f.FilePath}'");
-							//}
+#if DEBUG
+							eventArgs.DeletedFiles.Add(f);
+#else
+							if (RecycleBinHelper.DeleteFile(f.FilePath, false, PermanentlyDelete))
+							{
+								eventArgs.DeletedFiles.Add(f);
+								DivinityApp.Log($"Deleted mod file '{f.FilePath}'");
+							}
+#endif
 						}
 					}
 					catch (Exception ex)
@@ -122,7 +130,7 @@ namespace DivinityModManager.ViewModels
 				RxApp.MainThreadScheduler.Schedule(() =>
 				{
 					Close();
-					FileDeletionComplete?.Invoke(this, new FileDeletionCompleteEventArgs() { TotalFilesDeleted = deletedFiles.Count, DeletedFiles = deletedFiles });
+					FileDeletionComplete?.Invoke(this, eventArgs);
 				});
 			}
 			return true;

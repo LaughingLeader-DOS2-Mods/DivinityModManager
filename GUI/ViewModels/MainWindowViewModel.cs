@@ -2372,10 +2372,7 @@ namespace DivinityModManager.ViewModels
 
 		private void SaveLoadOrder()
 		{
-			View.Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Normal, new Action(async () =>
-			{
-				await SaveLoadOrderAsync();
-			}));
+			RxApp.MainThreadScheduler.ScheduleAsync(async (sch, cts) => await SaveLoadOrderAsync());
 		}
 
 		private async Task<bool> SaveLoadOrderAsync()
@@ -2397,6 +2394,7 @@ namespace DivinityModManager.ViewModels
 
 				string outputPath = SelectedModOrder.FilePath;
 				string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
+
 				if (String.IsNullOrWhiteSpace(SelectedModOrder.FilePath))
 				{
 					SelectedModOrder.FilePath = Path.Combine(Settings.LoadOrderPath, outputName);
@@ -2413,47 +2411,7 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						// Renaming existing files
-						if (!String.IsNullOrWhiteSpace(outputPath) && !String.IsNullOrWhiteSpace(SelectedModOrder.Name) && File.Exists(outputPath))
-						{
-							string baseName = Path.GetFileNameWithoutExtension(outputPath);
-							if (baseName != SelectedModOrder.Name)
-							{
-								var lastPath = outputPath;
-								outputPath = Path.Combine(outputDirectory, outputName);
-								try
-								{
-									if (File.Exists(outputPath))
-									{
-										MessageBoxResult messageBoxResult = Xceed.Wpf.Toolkit.MessageBox.Show(View, $"Overwrite saved load order file with new name?{Environment.NewLine}Renaming {baseName}.json to {SelectedModOrder.Name}.json", "Confirm Overwrite",
-											MessageBoxButton.OKCancel, MessageBoxImage.Warning, MessageBoxResult.Cancel, View.MainWindowMessageBox_OK.Style);
-										if (messageBoxResult == MessageBoxResult.OK)
-										{
-											DivinityApp.Log($"Renaming load order file '{lastPath}' to '{outputPath}'.");
-											File.Move(lastPath, outputPath);
-										}
-									}
-									else
-									{
-										DivinityApp.Log($"Renaming load order file '{lastPath}' to '{outputPath}'.");
-										File.Move(lastPath, outputPath);
-									}
-								}
-								catch (Exception ex)
-								{
-									DivinityApp.Log($"Error renaming file:\n{ex}");
-								}
-							}
-						}
-
-						// Save mods that aren't missing
-						var tempOrder = new DivinityLoadOrder
-						{
-							Name = SelectedModOrder.Name,
-						};
-						tempOrder.Order.AddRange(SelectedModOrder.Order.Where(x => Mods.Any(y => y.UUID == x.UUID)));
-
-						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, tempOrder);
+						result = await DivinityModDataLoader.ExportLoadOrderToFileAsync(outputPath, SelectedModOrder);
 					}
 				}
 				catch (Exception ex)
@@ -3881,14 +3839,19 @@ namespace DivinityModManager.ViewModels
 			DeleteMods(new List<DivinityModData>() { mod });
 		}
 
-		public void RemoveDeletedMods(HashSet<string> deletedMods, HashSet<string> deletedWorkshopMods = null)
+		public void RemoveDeletedMods(HashSet<string> deletedMods, HashSet<string> deletedWorkshopMods = null, bool removeFromLoadOrder = true)
 		{
 			mods.RemoveMany(mods.Items.Where(x => deletedMods.Contains(x.UUID)));
 			ActiveMods.RemoveMany(ActiveMods.Where(x => deletedMods.Contains(x.UUID)));
 			InactiveMods.RemoveMany(InactiveMods.Where(x => deletedMods.Contains(x.UUID)));
-			SelectedModOrder.Order.RemoveAll(x => deletedMods.Contains(x.UUID));
-			SelectedProfile.ModOrder.RemoveMany(deletedMods);
-			SelectedProfile.ActiveMods.RemoveAll(x => deletedMods.Contains(x.UUID));
+
+			if(removeFromLoadOrder)
+			{
+				SelectedModOrder.Order.RemoveAll(x => deletedMods.Contains(x.UUID));
+				SelectedProfile.ModOrder.RemoveMany(deletedMods);
+				SelectedProfile.ActiveMods.RemoveAll(x => deletedMods.Contains(x.UUID));
+				SaveLoadOrder();
+			}
 
 			if(deletedWorkshopMods != null && deletedWorkshopMods.Count > 0)
 			{
@@ -4389,10 +4352,6 @@ Directory the zip will be extracted to:
 						tb.Select(0, 0);
 					}
 				}
-				else
-				{
-					DivinityApp.Log("Can't find OrdersComboBox!");
-				}
 			});
 			return Unit.Default;
 		}
@@ -4891,7 +4850,7 @@ Directory the zip will be extracted to:
 
 			canRenameOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, (i) => i > 0);
 
-			ToggleOrderRenamingCommand = ReactiveUI.ReactiveCommand.CreateFromTask<object, Unit>(ToggleRenamingLoadOrder, canRenameOrder);
+			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object, Unit>(ToggleRenamingLoadOrder, canRenameOrder);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
 

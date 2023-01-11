@@ -144,7 +144,7 @@ namespace DivinityModManager.Views
 					{
 						var deletedUUIDs = e.DeletedFiles.Where(x => !x.IsWorkshop).Select(x => x.UUID).ToHashSet();
 						var deletedWorkshopUUIDs = e.DeletedFiles.Where(x => x.IsWorkshop).Select(x => x.UUID).ToHashSet();
-						ViewModel.RemoveDeletedMods(deletedUUIDs, deletedWorkshopUUIDs);
+						ViewModel.RemoveDeletedMods(deletedUUIDs, deletedWorkshopUUIDs, e.RemoveFromLoadOrder);
 						this.Activate();
 					}
 				};
@@ -417,17 +417,20 @@ namespace DivinityModManager.Views
 
 		private void OrdersComboBox_LostFocus(object sender, RoutedEventArgs e)
 		{
-			if (sender is ComboBox comboBox && comboBox.IsEditable)
+			if (sender is ComboBox comboBox && ViewModel.IsRenamingOrder)
 			{
 				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), _ =>
 				{
-					if (ViewModel.IsRenamingOrder)
+					var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
+					if (tb != null && !tb.IsFocused)
 					{
-						var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
-						if (tb != null && !tb.IsFocused)
-						{
-							ViewModel.StopRenaming(false);
-						}
+						ViewModel.StopRenaming(false);
+						ViewModel.SelectedModOrder.Name = tb.Text;
+						var directory = Path.GetDirectoryName(ViewModel.SelectedModOrder.FilePath);
+						var ext = Path.GetExtension(ViewModel.SelectedModOrder.FilePath);
+						string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(ViewModel.SelectedModOrder.Name + ext), '_');
+						ViewModel.SelectedModOrder.FilePath = Path.Combine(directory, outputName);
+						AlertBar.SetSuccessAlert($"Renamed load order name/path to '{ViewModel.SelectedModOrder.FilePath}'", 20);
 					}
 				});
 			}

@@ -157,12 +157,20 @@
 						<RowDefinition Height="Auto" />
 						<RowDefinition Height="Auto" />
 					</Grid.RowDefinitions>
-					<CheckBox
-						x:Name="DeletionOptionCheckbox"
-						Margin="8"
-						HorizontalAlignment="Center"
-						Content="Permanent"
-						ToolTip="Deleted files permanently, instead of moving them to the Reycling Bin." />
+					<StackPanel Orientation="Horizontal">
+						<CheckBox
+							x:Name="DeletionOptionCheckbox"
+							Margin="8"
+							HorizontalAlignment="Center"
+							Content="Permanent"
+							ToolTip="Delete files permanently, instead of moving them to the Reycling Bin." />
+						<CheckBox
+							x:Name="RemoveFromLoadOrderCheckbox"
+							Margin="8"
+							HorizontalAlignment="Center"
+							Content="Remove from Load Order"
+							ToolTip="Remove deleted mods from the active load order." />
+					</StackPanel>
 					<StackPanel Grid.Row="2" Orientation="Horizontal">
 						<Button
 							x:Name="ConfirmButton"

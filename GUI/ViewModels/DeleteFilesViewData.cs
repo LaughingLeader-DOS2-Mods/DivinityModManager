@@ -25,6 +25,7 @@ namespace DivinityModManager.ViewModels
 	{
 		public int TotalFilesDeleted => DeletedFiles?.Count ?? 0;
 		public List<ModFileDeletionData> DeletedFiles { get; set; }
+		public bool RemoveFromLoadOrder { get; set; }
 
 		public FileDeletionCompleteEventArgs()
 		{
@@ -41,7 +42,6 @@ namespace DivinityModManager.ViewModels
 
 		private readonly ObservableAsPropertyHelper<bool> _allSelected;
 		public bool AllSelected => _allSelected.Value;
-		[Reactive] public bool PermanentlyDelete { get; set; }
 
 		private readonly ObservableAsPropertyHelper<bool> _isRunning;
 		public bool IsRunning => _isRunning.Value;
@@ -53,6 +53,9 @@ namespace DivinityModManager.ViewModels
 		public ReactiveCommand<Unit, bool> RunCommand { get; private set; }
 		public ReactiveCommand<Unit, Unit> StopRunningCommand { get; private set; }
 		public ReactiveCommand<Unit, Unit> CancelCommand { get; private set; }
+
+		[Reactive] public bool PermanentlyDelete { get; set; }
+		[Reactive] public bool RemoveFromLoadOrder { get; set; } = true;
 
 		[Reactive] public bool IsActive{ get; set; }
 		[Reactive] public bool IsProgressActive { get; set; }
@@ -92,6 +95,7 @@ namespace DivinityModManager.ViewModels
 			if (result)
 			{
 				var eventArgs = new FileDeletionCompleteEventArgs();
+				eventArgs.RemoveFromLoadOrder = RemoveFromLoadOrder;
 
 				await Observable.Start(() => IsProgressActive = true, RxApp.MainThreadScheduler);
 				await UpdateProgress($"Deleting {targetFiles.Count} mod file(s)...", "", 0d);

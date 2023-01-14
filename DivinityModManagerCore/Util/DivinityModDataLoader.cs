@@ -17,6 +17,7 @@ using System.Threading;
 using Newtonsoft.Json.Linq;
 using DynamicData;
 using DivinityModManager.Extensions;
+using ReactiveUI;
 
 namespace DivinityModManager.Util
 {
@@ -643,10 +644,127 @@ namespace DivinityModManager.Util
 			"Localization",
 		};
 
-		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, bool ignoreClassic = false, CancellationToken? token = null)
+		private static async Task<DivinityModData> LoadModDataFromPakAsync(string pakPath, Dictionary<string, DivinityModData> builtinMods)
 		{
-			List<DivinityModData> mods = new List<DivinityModData>();
+			using (var pr = new LSLib.LS.PackageReader(pakPath))
+			{
+				DivinityModData modData = null;
 
+				string pakName = Path.GetFileNameWithoutExtension(pakPath);
+
+				var pak = pr.Read();
+
+				var metaFiles = new List<AbstractFileInfo>();
+				var hasBuiltinDirectory = false;
+				var builtinModOverrides = new Dictionary<string, DivinityModData>();
+
+				if (pak != null && pak.Files != null)
+				{
+					foreach (var f in pak.Files)
+					{
+						if (IsModMetaFile(pakName, f))
+						{
+							metaFiles.Add(f);
+						}
+						else if (!hasBuiltinDirectory)
+						{
+							var modFolderMatch = _ModFolderPattern.Match(f.Name);
+							if (modFolderMatch.Success)
+							{
+								var modFolder = Path.GetFileName(modFolderMatch.Groups[2].Value.TrimEnd(Path.DirectorySeparatorChar));
+								if (!builtinModOverrides.ContainsKey(modFolder) && builtinMods.TryGetValue(modFolder, out var builtinMod))
+								{
+									hasBuiltinDirectory = true;
+									builtinModOverrides[builtinMod.Folder] = builtinMod;
+									DivinityApp.Log($"Found a mod overriding a builtin directory. Pak({pakName}) Folder({modFolder}) File({f.Name}");
+								}
+							}
+						}
+					}
+				}
+
+				AbstractFileInfo metaFile = null;
+				foreach (var f in metaFiles)
+				{
+					var parentDir = Directory.GetParent(f.Name);
+					// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
+					if (pakName.Contains(parentDir.Name))
+					{
+						metaFile = f;
+						break;
+					}
+				}
+				if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
+				if (metaFile != null)
+				{
+					//DivinityApp.LogMessage($"Parsing meta.lsx for mod pak '{pakPath}'.");
+					using (var stream = metaFile.MakeStream())
+					{
+						using (var sr = new System.IO.StreamReader(stream))
+						{
+							string text = await sr.ReadToEndAsync();
+							modData = ParseMetaFile(text);
+						}
+					}
+
+					if (modData != null && (!modData.IsClassicMod))
+					{
+						modData.HasBuiltinOverride = hasBuiltinDirectory;
+						if (hasBuiltinDirectory)
+						{
+							modData.BuiltinOverrideModsText = String.Join(Environment.NewLine, builtinModOverrides.Values.OrderBy(x => x.Name).Select(x => $"{x.Folder} ({x.Name})"));
+						}
+						modData.FilePath = pakPath;
+						try
+						{
+							modData.LastModified = File.GetChangeTime(pakPath);
+							modData.LastUpdated = modData.LastModified.Value;
+						}
+						catch (PlatformNotSupportedException ex)
+						{
+							DivinityApp.Log($"Error getting pak last modified date for '{pakPath}': {ex}");
+						}
+
+						modData.IsUserMod = true;
+
+						var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
+						if (osiConfigInfo != null)
+						{
+							var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
+							if (osiToolsConfig != null)
+							{
+								modData.OsiExtenderData = osiToolsConfig;
+								if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+							}
+							else
+							{
+								DivinityApp.Log($"Failed to parse OsiToolsConfig.json for '{pakPath}'.");
+							}
+						}
+
+						return modData;
+					}
+				}
+				else
+				{
+					DivinityApp.Log($"Error: No meta.lsx for mod pak '{pakPath}'.");
+				}
+			}
+
+			return null;
+		}
+
+		private static async Task<DivinityModData> LoadModDataFromPakAsync(string pakPath, Dictionary<string, DivinityModData> builtinMods, CancellationToken cts)
+		{
+			while (!cts.IsCancellationRequested)
+			{
+				return await LoadModDataFromPakAsync(pakPath, builtinMods);
+			}
+			return null;
+		}
+
+		public static async Task<List<DivinityModData>> LoadModPackageDataAsync(string modsFolderPath, CancellationToken cts)
+		{
 			var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
 
 			if (Directory.Exists(modsFolderPath))
@@ -670,130 +788,11 @@ namespace DivinityModManager.Util
 				}
 
 				DivinityApp.Log("Mod Packages: " + modPaks.Count());
-				foreach (var pakPath in modPaks)
-				{
-					try
-					{
-						if (token.HasValue && token.Value.IsCancellationRequested)
-						{
-							return mods;
-						}
-						using (var pr = new LSLib.LS.PackageReader(pakPath))
-						{
-							DivinityModData modData = null;
 
-							string pakName = Path.GetFileNameWithoutExtension(pakPath);
-
-							var pak = pr.Read();
-
-							var metaFiles = new List<AbstractFileInfo>();
-							var hasBuiltinDirectory = false;
-							var builtinModOverrides = new Dictionary<string, DivinityModData>();
-
-							if (pak != null && pak.Files != null)
-							{
-								foreach (var f in pak.Files)
-								{
-									if (IsModMetaFile(pakName, f))
-									{
-										metaFiles.Add(f);
-									}
-									else if (!hasBuiltinDirectory)
-									{
-										var modFolderMatch = _ModFolderPattern.Match(f.Name);
-										if (modFolderMatch.Success)
-										{
-											var modFolder = Path.GetFileName(modFolderMatch.Groups[2].Value.TrimEnd(Path.DirectorySeparatorChar));
-											if(!builtinModOverrides.ContainsKey(modFolder) && builtinMods.TryGetValue(modFolder, out var builtinMod))
-											{
-												hasBuiltinDirectory = true;
-												builtinModOverrides[builtinMod.Folder] = builtinMod;
-												DivinityApp.Log($"Found a mod overriding a builtin directory. Pak({pakName}) Folder({modFolder}) File({f.Name}");
-											}
-										}
-									}
-								}
-							}
-
-							AbstractFileInfo metaFile = null;
-							foreach (var f in metaFiles)
-							{
-								var parentDir = Directory.GetParent(f.Name);
-								// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
-								if (pakName.Contains(parentDir.Name))
-								{
-									metaFile = f;
-									break;
-								}
-							}
-							if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
-							if (metaFile != null)
-							{
-								//DivinityApp.LogMessage($"Parsing meta.lsx for mod pak '{pakPath}'.");
-								using (var stream = metaFile.MakeStream())
-								{
-									using (var sr = new System.IO.StreamReader(stream))
-									{
-										string text = await sr.ReadToEndAsync();
-										modData = ParseMetaFile(text);
-									}
-								}
-
-								if (modData != null && (!ignoreClassic || !modData.IsClassicMod))
-								{
-									modData.HasBuiltinOverride = hasBuiltinDirectory;
-									if (hasBuiltinDirectory)
-									{
-										modData.BuiltinOverrideModsText = String.Join(Environment.NewLine, builtinModOverrides.Values.OrderBy(x => x.Name).Select(x => $"{x.Folder} ({x.Name})"));
-									}
-									modData.FilePath = pakPath;
-									try
-									{
-										modData.LastModified = File.GetChangeTime(pakPath);
-										modData.LastUpdated = modData.LastModified.Value;
-									}
-									catch (PlatformNotSupportedException ex)
-									{
-										DivinityApp.Log($"Error getting pak last modified date for '{pakPath}': {ex}");
-									}
-
-									modData.IsUserMod = true;
-									mods.Add(modData);
-
-									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
-									if (osiConfigInfo != null)
-									{
-										var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
-										if (osiToolsConfig != null)
-										{
-											modData.OsiExtenderData = osiToolsConfig;
-											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
-#if DEBUG
-											//DivinityApp.LogMessage($"Loaded OsiToolsConfig.json for '{pakPath}':");
-											//DivinityApp.LogMessage($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											//if (modData.OsiExtenderData.FeatureFlags != null) DivinityApp.LogMessage($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
-#endif
-										}
-										else
-										{
-											DivinityApp.Log($"Failed to parse OsiToolsConfig.json for '{pakPath}'.");
-										}
-									}
-								}
-							}
-							else
-							{
-								DivinityApp.Log($"Error: No meta.lsx for mod pak '{pakPath}'.");
-							}
-						}
-					}
-					catch (Exception ex)
-					{
-						DivinityApp.Log($"Error loading pak '{pakPath}': {ex}");
-					}
-				}
+				var loadedMods = await Task.WhenAll(modPaks.Select(pakPath => LoadModDataFromPakAsync(pakPath, builtinMods, cts)));
+				return loadedMods.Where(x => x != null).ToList();
 			}
-			return mods;
+			return new List<DivinityModData>();
 		}
 
 		private static string GetNodeAttribute(Node node, string key, string defaultValue)

@@ -248,14 +248,16 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public AppKeys()
+		public AppKeys(MainWindowViewModel vm)
 		{
+			var baseCanExecute = vm.WhenAnyValue(x => x.IsLocked, b => !b);
 			Type t = typeof(AppKeys);
 			// Building a list of keys / key names from properties, because lazy
 			var keyProps = t.GetRuntimeProperties().Where(prop => Attribute.IsDefined(prop, typeof(ReactiveAttribute)) && prop.GetGetMethod() != null).ToList();
 			foreach (var prop in keyProps)
 			{
 				var hotkey = (Hotkey)t.GetProperty(prop.Name).GetValue(this);
+				hotkey.AddCanExecuteCondition(baseCanExecute);
 				hotkey.ID = prop.Name;
 				keyMap.AddOrUpdate(hotkey);
 			}

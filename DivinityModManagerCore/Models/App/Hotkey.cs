@@ -1,5 +1,9 @@
-﻿using Newtonsoft.Json;
+﻿using DynamicData.Binding;
+
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+
+using Reactive.Bindings.Extensions;
 
 using ReactiveUI;
 using ReactiveUI.Fody.Helpers;
@@ -10,6 +14,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +26,7 @@ namespace DivinityModManager.Models.App
 	{
 		Key Key { get; set; }
 		ModifierKeys Modifiers { get; set; }
-		ICommand Command { get; set; }
+		ICommand Command { get; }
 		bool Enabled { get; set; }
 		string DisplayName { get; set; }
 	}
@@ -66,15 +71,17 @@ namespace DivinityModManager.Models.App
 		[JsonConverter(typeof(StringEnumConverter))]
 		[Reactive] public ModifierKeys Modifiers { get; set; }
 
-		[Reactive] public ICommand Command { get; set; }
+		public ReactiveCommand<Unit, Unit> Command { get; set; }
+		ICommand IHotkey.Command => this.Command;
+
 		[Reactive] public ICommand ResetCommand { get; private set; }
 		[Reactive] public ICommand ClearCommand { get; private set; }
 
-		[Reactive] public bool Enabled { get; set; } = true;
-		[Reactive] public bool CanEdit { get; set; } = true;
-		[Reactive] public bool IsDefault { get; set; } = true;
-		[Reactive] public bool IsSelected { get; set; } = false;
-		[Reactive] public string ModifiedText { get; set; } = "";
+		[Reactive] public bool Enabled { get; set; }
+		[Reactive] public bool CanEdit { get; set; }
+		[Reactive] public bool IsDefault { get; set; }
+		[Reactive] public bool IsSelected { get; set; }
+		[Reactive] public string ModifiedText { get; set; }
 
 		private Key _defaultKey;
 		private ModifierKeys _defaultModifiers;
@@ -82,10 +89,12 @@ namespace DivinityModManager.Models.App
 		public Key DefaultKey => _defaultKey;
 		public ModifierKeys DefaultModifiers => _defaultModifiers;
 
-		[Reactive] public IObservable<bool> CanExecute { get; private set; }
+		private readonly ObservableAsPropertyHelper<bool> _canExecuteCommand;
+		public bool CanExecuteCommand => _canExecuteCommand.Value;
 
-		private List<Action> actions = new List<Action>();
-		private List<IObservable<bool>> canExecuteList = new List<IObservable<bool>>();
+		private IObservable<bool> _canExecuteConditions;
+
+		private readonly List<Action> _actions;
 
 		public void AddAction(Action action, IObservable<bool> actionCanExecute = null, bool clearAllFirst = false)
 		{
@@ -93,33 +102,31 @@ namespace DivinityModManager.Models.App
 			{
 				ClearActions();
 			}
-			if (!actions.Contains(action))
+			if (!_actions.Contains(action))
 			{
-				actions.Add(action);
+				_actions.Add(action);
 			}
 
-			if (actionCanExecute != null && !canExecuteList.Contains(actionCanExecute))
+			if (actionCanExecute != null)
 			{
-				canExecuteList.Add(actionCanExecute);
-				CanExecute = Observable.Merge(canExecuteList);
-				Command = ReactiveCommand.Create(Invoke, CanExecute);
+				AddCanExecuteCondition(actionCanExecute);
 			}
+		}
+
+		public void AddCanExecuteCondition(IObservable<bool> canExecute)
+		{
+			_canExecuteConditions = _canExecuteConditions.CombineLatest(canExecute, (b1, b2) => b1 && b2);
+			this.RaisePropertyChanged("_canExecuteConditions");
 		}
 
 		public void ClearActions()
 		{
-			actions.Clear();
-			canExecuteList.Clear();
-
-			var canExecuteInitial = this.WhenAnyValue(x => x.Enabled, (b) => b == true);
-			canExecuteList.Add(canExecuteInitial);
-			CanExecute = Observable.Merge(canExecuteList);
-			Command = ReactiveCommand.Create(Invoke, CanExecute);
+			_actions.Clear();
 		}
 
 		public void Invoke()
 		{
-			actions.ForEach(a => a.Invoke());
+			_actions.ForEach(a => a.Invoke());
 		}
 
 		public void ResetToDefault()
@@ -141,22 +148,22 @@ namespace DivinityModManager.Models.App
 			DisplayBindingText = ToString();
 		}
 
-		private void Init(Key key, ModifierKeys modifiers)
+		public Hotkey()
 		{
-			Key = key;
-			Modifiers = modifiers;
-			_defaultKey = key;
-			_defaultModifiers = modifiers;
+			Enabled = true;
+			CanEdit = true;
+			IsDefault = true;
+			ModifiedText = "";
 
-			var canExecuteInitial = this.WhenAnyValue(x => x.Enabled, (b) => b == true);
-			canExecuteList.Add(canExecuteInitial);
-			CanExecute = Observable.Merge(canExecuteList);
-			//var canExecute = this.WhenAnyValue(x => x.canExecuteList, (list) => list.Count == 0 || list.All(b => b.Latest().All(b2 => b2 == true)));
-			Command = ReactiveCommand.Create(Invoke, CanExecute);
+			_actions = new List<Action>();
 
 			DisplayBindingText = ToString();
 
-			var canReset = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k,m) => k != _defaultKey || m != _defaultModifiers).StartWith(false);
+			_canExecuteConditions = this.WhenAnyValue(x => x.Enabled);
+			_canExecuteCommand = this.WhenAnyObservable(x => x._canExecuteConditions).ToProperty(this, nameof(CanExecuteCommand), false, RxApp.MainThreadScheduler);
+			Command = ReactiveCommand.Create(Invoke, this.WhenAnyValue(x => x.CanExecuteCommand));
+
+			var canReset = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != _defaultKey || m != _defaultModifiers).StartWith(false);
 			ResetCommand = ReactiveCommand.Create(ResetToDefault, canReset);
 			var canClear = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != Key.None).StartWith(false);
 			ClearCommand = ReactiveCommand.Create(Clear, canClear);
@@ -171,20 +178,24 @@ namespace DivinityModManager.Models.App
 			isDefaultChanged.Select(b => !b ? "*" : "").BindTo(this, x => x.ModifiedText);
 		}
 
-		public Hotkey(Key key)
+		private void Init(Key key, ModifierKeys modifiers)
+		{
+			Key = key;
+			Modifiers = modifiers;
+			_defaultKey = key;
+			_defaultModifiers = modifiers;
+		}
+
+		public Hotkey(Key key) : this()
 		{
 			Init(key, ModifierKeys.None);
 		}
 
-		public Hotkey(Key key, ModifierKeys modifiers)
+		public Hotkey(Key key, ModifierKeys modifiers) : this()
 		{
 			Init(key, modifiers);
 		}
-		
-		public Hotkey()
-		{
-			Init(Key.None, ModifierKeys.None);
-		}
+	
 
 		public override string ToString()
 		{

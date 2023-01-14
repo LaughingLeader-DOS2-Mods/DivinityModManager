@@ -36,7 +36,7 @@ namespace DivinityModManager.Models
 		public string DOS2DEGameExecutable { set => GameExecutablePath = value; }
 
 		[SettingsEntry("Enable Story Log", "When launching the game, enable the Osiris story log (osiris.log)")]
-		[DataMember][Reactive] public bool GameStoryLogEnabled { get; set; } = false;
+		[DataMember][Reactive] public bool GameStoryLogEnabled { get; set; }
 
 
 		[SettingsEntry("Workshop Path", "The Steam Workshop folder for Divinity: Original Sin 2\nUsed for detecting mod updates and new mods to be copied into the local mods folder\nExample: Steam/steamapps/workshop/content/435150")]
@@ -48,7 +48,7 @@ namespace DivinityModManager.Models
 
 
 		[SettingsEntry("Enable Internal Log", "Enable the log for the mod manager")]
-		[DataMember][Reactive] public bool LogEnabled { get; set; } = false;
+		[DataMember][Reactive] public bool LogEnabled { get; set; }
 
 		[SettingsEntry("Auto Add Missing Dependencies When Exporting", "Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order")]
 		[DataMember][Reactive] public bool AutoAddDependenciesWhenExporting { get; set; } = true;
@@ -57,7 +57,7 @@ namespace DivinityModManager.Models
 		[DataMember][Reactive] public bool CheckForUpdates { get; set; } = true;
 
 		[SettingsEntry("Automatically Load GM Campaign Mods", "When a GM campaign is selected, its dependency mods will automatically be loaded without needing to manually import them")]
-		[DataMember][Reactive] public bool AutomaticallyLoadGMCampaignMods { get; set; } = false;
+		[DataMember][Reactive] public bool AutomaticallyLoadGMCampaignMods { get; set; }
 
 		[DataMember][Reactive] public long LastUpdateCheck { get; set; } = -1;
 		private string lastOrder = "";
@@ -97,7 +97,7 @@ namespace DivinityModManager.Models
 		}
 
 		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well")]
-		[DataMember][Reactive] public bool ShiftListFocusOnSwap { get; set; } = false;
+		[DataMember][Reactive] public bool ShiftListFocusOnSwap { get; set; }
 
 		private OsiExtenderSettings extenderSettings;
 
@@ -132,13 +132,13 @@ namespace DivinityModManager.Models
 		}
 
 		[SettingsEntry("Disable Missing Mod Warnings", "If a load order is missing mods, no warnings will be displayed")]
-		[DataMember][Reactive] public bool DisableMissingModWarnings { get; set; } = false;
+		[DataMember][Reactive] public bool DisableMissingModWarnings { get; set; }
 
 		[SettingsEntry("Disable Checking for Steam Workshop Tags", "The mod manager will try and find mod tags from the workshop by default")]
-		[DataMember][Reactive] public bool DisableWorkshopTagCheck { get; set; } = false;
+		[DataMember][Reactive] public bool DisableWorkshopTagCheck { get; set; }
 
 		[SettingsEntry("Export Default Values", "Export all values, even if it matches a default extender value")]
-		[DataMember][Reactive] public bool ExportDefaultExtenderSettings { get; set; } = false;
+		[DataMember][Reactive] public bool ExportDefaultExtenderSettings { get; set; }
 
 		//Not saved for now
 
@@ -166,10 +166,10 @@ namespace DivinityModManager.Models
 
 		[Reactive][DataMember] public string GameLaunchParams { get; set; }
 
-		[Reactive][DataMember] public bool GameMasterModeEnabled { get; set; } = false;
-		[Reactive] public bool ExtenderTabIsVisible { get; set; } = false;
+		[Reactive][DataMember] public bool GameMasterModeEnabled { get; set; }
+		[Reactive] public bool ExtenderTabIsVisible { get; set; }
 
-		[Reactive] public bool KeybindingsTabIsVisible { get; set; } = false;
+		[Reactive] public bool KeybindingsTabIsVisible { get; set; }
 
 		private Hotkey selectedHotkey;
 
@@ -200,7 +200,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref canSaveSettings, value); }
 		}
 
-		public bool SettingsWindowIsOpen { get; set; } = false;
+		public bool SettingsWindowIsOpen { get; set; }
 
 		public void Dispose()
 		{

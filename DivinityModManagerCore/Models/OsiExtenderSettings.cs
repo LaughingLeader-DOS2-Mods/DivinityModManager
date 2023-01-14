@@ -49,7 +49,7 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool CreateConsole { get; set; } = false;
+		public bool CreateConsole { get; set; }
 
 		[SettingsEntry("Log Working Story Errors", "Log errors during Osiris story compilation to a log file (LogFailedCompile)")]
 		[Reactive]
@@ -61,13 +61,13 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool EnableLogging { get; set; } = false;
+		public bool EnableLogging { get; set; }
 
 		[SettingsEntry("Log Script Compilation", "Log Osiris story compilation to a log file")]
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool LogCompile { get; set; } = false;
+		public bool LogCompile { get; set; }
 
 		[SettingsEntry("Log Directory", "Directory where the generated Osiris logs will be stored\nDefault is Documents\\OsirisLogs")]
 		[Reactive]
@@ -78,7 +78,7 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool LogRuntime { get; set; } = false;
+		public bool LogRuntime { get; set; }
 
 		[SettingsEntry("Disable Mod Validation", "Disable module hashing when loading mods\nSpeeds up mod loading with no drawbacks")]
 		[Reactive]
@@ -102,7 +102,7 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool EnableDebugger { get; set; } = false;
+		public bool EnableDebugger { get; set; }
 
 		[SettingsEntry("Osiris Debugger Port", "Port number the Osiris debugger will listen on\nDefault: 9999", true)]
 		[Reactive]
@@ -114,7 +114,7 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool DumpNetworkStrings { get; set; } = false;
+		public bool DumpNetworkStrings { get; set; }
 
 		[SettingsEntry("Osiris Debugger Flags", "Debugger flags to set\nDefault: 0")]
 		[Reactive]
@@ -126,13 +126,13 @@ namespace DivinityModManager.Models
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool DeveloperMode { get; set; } = false;
+		public bool DeveloperMode { get; set; }
 
 		[SettingsEntry("Enable Lua Debugger", "Enables the Lua debugger interface (vscode extension)", true)]
 		[Reactive]
 		[DataMember]
 		[DefaultValue(false)]
-		public bool EnableLuaDebugger { get; set; } = false;
+		public bool EnableLuaDebugger { get; set; }
 
 		[SettingsEntry("Lua Builtin Directory", "An additional directory where the Script Extender will check for builtin scripts\nThis setting is meant for ositools developers, to make it easier to test builtin script changes.", true)]
 		[Reactive]

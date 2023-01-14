@@ -20,7 +20,7 @@ namespace DivinityModManager.Models
 		[DataMember] public List<DivinityModWorkshopCachedData> Mods { get; set; } = new List<DivinityModWorkshopCachedData>();
 		[DataMember] public List<string> NonWorkshopMods { get; set; } = new List<string>();
 
-		public bool CacheUpdated { get; set; } = false;
+		public bool CacheUpdated { get; set; }
 
 		public void AddOrUpdate(string uuid, IWorkshopPublishFileDetails d, List<string> tags)
 		{

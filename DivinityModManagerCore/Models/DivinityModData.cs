@@ -174,12 +174,12 @@ namespace DivinityModManager.Models
 		private ObservableAsPropertyHelper<Visibility> dependencyVisibility;
 		public Visibility DependencyVisibility => dependencyVisibility.Value;
 
-		[Reactive] public bool HasOsirisExtenderSettings { get; set; } = false;
+		[Reactive] public bool HasOsirisExtenderSettings { get; set; }
 
-		[Reactive] public bool IsEditorMod { get; set; } = false;
-		[Reactive] public bool IsForcedLoaded { get; set; } = false;
+		[Reactive] public bool IsEditorMod { get; set; }
+		[Reactive] public bool IsForcedLoaded { get; set; }
 
-		[Reactive] public bool IsActive { get; set; } = false;
+		[Reactive] public bool IsActive { get; set; }
 
 		private bool isSelected = false;
 
@@ -202,9 +202,9 @@ namespace DivinityModManager.Models
 
 		[Reactive] public bool CanDrag { get; set; } = true;
 
-		[Reactive] public bool DeveloperMode { get; set; } = false;
+		[Reactive] public bool DeveloperMode { get; set; }
 
-		[Reactive] public bool HasColorOverride { get; set; } = false;
+		[Reactive] public bool HasColorOverride { get; set; }
 		[Reactive] public string SelectedColor { get; set; }
 		[Reactive] public string ListColor { get; set; }
 

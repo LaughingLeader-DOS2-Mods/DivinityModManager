@@ -12,7 +12,7 @@ namespace DivinityModManager.Models
 		public int Index { get; set; }
 		public string UUID { get; set; }
 		public string Author { get; set; }
-		public bool Dependency { get; set; } = false;
+		public bool Dependency { get; set; }
 
 		public override string ToString()
 		{

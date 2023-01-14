@@ -28,8 +28,8 @@ namespace DivinityModManager.Controls
 		private MethodInfo updateAnchorMethod;
 		private PropertyInfo getActualIndex;
 
-		public bool Resizing { get; set; } = false;
-		public bool UserResizedColumns { get; set; } = false;
+		public bool Resizing { get; set; }
+		public bool UserResizedColumns { get; set; }
 
 		private ModListView _copyHeaderView = null;
 

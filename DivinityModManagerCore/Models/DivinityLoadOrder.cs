@@ -22,7 +22,7 @@ namespace DivinityModManager.Models
 
 		[DataMember]
 		public string Name { get; set; }
-		public bool Missing { get; set; } = false;
+		public bool Missing { get; set; }
 
 		public DivinityLoadOrderEntry Clone()
 		{

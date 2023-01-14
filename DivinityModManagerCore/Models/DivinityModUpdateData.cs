@@ -39,7 +39,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref isSelected, value); }
 		}
 
-		public bool IsEditorMod { get; set; } = false;
+		public bool IsEditorMod { get; set; }
 		public bool CanDrag { get; set; } = true;
 		public Visibility Visibility { get; set; } = Visibility.Visible;
 

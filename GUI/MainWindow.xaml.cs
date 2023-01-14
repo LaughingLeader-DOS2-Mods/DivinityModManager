@@ -41,7 +41,7 @@ namespace DivinityModManager.Views
 		public VersionGeneratorWindow VersionGeneratorWindow { get; set; }
 		public AppUpdateWindow UpdateWindow { get; set; }
 
-		public bool UserInvokedUpdate { get; set; } = false;
+		public bool UserInvokedUpdate { get; set; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
 

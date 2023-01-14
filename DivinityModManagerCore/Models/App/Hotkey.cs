@@ -96,16 +96,9 @@ namespace DivinityModManager.Models.App
 
 		private readonly List<Action> _actions;
 
-		public void AddAction(Action action, IObservable<bool> actionCanExecute = null, bool clearAllFirst = false)
+		public void AddAction(Action action, IObservable<bool> actionCanExecute = null)
 		{
-			if (clearAllFirst)
-			{
-				ClearActions();
-			}
-			if (!_actions.Contains(action))
-			{
-				_actions.Add(action);
-			}
+			_actions.Add(action);
 
 			if (actionCanExecute != null)
 			{
@@ -117,11 +110,6 @@ namespace DivinityModManager.Models.App
 		{
 			_canExecuteConditions = _canExecuteConditions.CombineLatest(canExecute, (b1, b2) => b1 && b2);
 			this.RaisePropertyChanged("_canExecuteConditions");
-		}
-
-		public void ClearActions()
-		{
-			_actions.Clear();
 		}
 
 		public void Invoke()

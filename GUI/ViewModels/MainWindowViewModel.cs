@@ -183,8 +183,12 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public bool LoadingOrder { get; set; }
 		[Reactive] public bool OrderJustLoaded { get; set; }
 		[Reactive] public bool IsDragging { get; set; }
-		[Reactive] public bool IsRefreshing { get; set; }
-		[Reactive] public bool IsRefreshingWorkshop { get; set; }
+
+		private readonly ObservableAsPropertyHelper<bool> _isRefreshing;
+		public bool IsRefreshing => _isRefreshing.Value;
+
+		private readonly ObservableAsPropertyHelper<bool> _isRefreshingWorkshop;
+		public bool IsRefreshingWorkshop => _isRefreshingWorkshop.Value;
 
 		private readonly ObservableAsPropertyHelper<bool> _isLocked;
 
@@ -244,13 +248,11 @@ namespace DivinityModManager.ViewModels
 
 		public IObservable<bool> canRenameOrder;
 
-		//private IObservable<bool> canSaveSettings;
 		private IObservable<bool> canOpenWorkshopFolder;
 		private IObservable<bool> canOpenGameExe;
 		private IObservable<bool> canOpenDialogWindow;
-		private IObservable<bool> gameExeFoundObservable;
-		//private IObservable<bool> canInstallOsiExtender;
 		private IObservable<bool> canOpenLogDirectory;
+		private IObservable<bool> gameExeFoundObservable;
 
 		private bool OpenRepoLinkToDownload { get; set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
@@ -266,6 +268,8 @@ namespace DivinityModManager.ViewModels
 		public ICommand SaveSettingsSilentlyCommand { get; private set; }
 		public ReactiveCommand<DivinityLoadOrder, Unit> DeleteOrderCommand { get; private set; }
 		public ReactiveCommand<object, Unit> ToggleOrderRenamingCommand { get; set; }
+		public ReactiveCommand<Unit, Unit> RefreshCommand { get; private set; }
+		public ReactiveCommand<Unit, Unit> RefreshWorkshopCommand { get; private set; }
 
 		private DivinityGameLaunchWindowAction actionOnGameLaunch = DivinityGameLaunchWindowAction.None;
 		public DivinityGameLaunchWindowAction ActionOnGameLaunch
@@ -1126,14 +1130,14 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		public async Task<List<DivinityModData>> LoadWorkshopModsAsync(CancellationToken? token = null)
+		public async Task<List<DivinityModData>> LoadWorkshopModsAsync(CancellationToken cts)
 		{
 			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
 
 			if (Directory.Exists(Settings.WorkshopPath))
 			{
-				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.WorkshopPath, true, token);
-				if (token.HasValue && token.Value.IsCancellationRequested)
+				newWorkshopMods = await DivinityModDataLoader.LoadModPackageDataAsync(Settings.WorkshopPath, cts);
+				if (cts.IsCancellationRequested)
 				{
 					return newWorkshopMods;
 				}
@@ -1152,14 +1156,14 @@ namespace DivinityModManager.ViewModels
 			return newWorkshopMods;
 		}
 
-		public void CheckForModUpdates(CancellationToken? token = null)
+		public void CheckForModUpdates(CancellationToken cts)
 		{
 			ModUpdatesViewData.Clear();
 
 			int count = 0;
 			foreach (var workshopMod in WorkshopMods)
 			{
-				if (token.HasValue && token.Value.IsCancellationRequested)
+				if (cts.IsCancellationRequested)
 				{
 					break;
 				}
@@ -1408,8 +1412,8 @@ namespace DivinityModManager.ViewModels
 			{
 				DivinityApp.Log($"Loading mods from '{PathwayData.DocumentsModsPath}'.");
 				await SetMainProgressTextAsync("Loading mods from documents folder...");
-				cancelTokenSource.CancelAfter(60000);
-				modPakData = await RunTask(DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath, false, cancelTokenSource.Token), null);
+				cancelTokenSource.CancelAfter(TimeSpan.FromMinutes(10));
+				modPakData = await RunTask(DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath, cancelTokenSource.Token), null);
 				modPakData.ForEach(x => x.IsForcedLoaded = x.HasBuiltinOverride);
 				cancelTokenSource = GetCancellationToken(int.MaxValue);
 				await IncreaseMainProgressValueAsync(taskStepAmount);
@@ -1965,7 +1969,7 @@ namespace DivinityModManager.ViewModels
 			}, RxApp.MainThreadScheduler);
 		}
 
-		private CancellationToken? workshopModLoadingCancelToken;
+		private CancellationToken workshopModLoadingCancelToken;
 
 		private List<string> ignoredModProjectNames = new List<string> { "Test", "Debug" };
 		private bool CanFetchWorkshopData(DivinityModData mod)
@@ -2033,7 +2037,6 @@ namespace DivinityModManager.ViewModels
 
 		private void LoadWorkshopModDataBackground()
 		{
-			IsRefreshingWorkshop = true;
 			bool workshopCacheFound = false;
 			CheckingForWorkshopUpdates = true;
 
@@ -2045,7 +2048,7 @@ namespace DivinityModManager.ViewModels
 				{
 					workshopMods.AddOrUpdate(loadedWorkshopMods);
 					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
-					if (!workshopModLoadingCancelToken.Value.IsCancellationRequested)
+					if (!workshopModLoadingCancelToken.IsCancellationRequested)
 					{
 						CheckForModUpdates(workshopModLoadingCancelToken);
 					}
@@ -2110,7 +2113,6 @@ namespace DivinityModManager.ViewModels
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
 						this.View.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
-						IsRefreshingWorkshop = false;
 					});
 
 					if (CachedWorkshopData.CacheUpdated)
@@ -2277,7 +2279,6 @@ namespace DivinityModManager.ViewModels
 
 				DivinityApp.Log($"Finalizing refresh operation.");
 
-				IsRefreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
 
@@ -2303,54 +2304,8 @@ namespace DivinityModManager.ViewModels
 				LoadWorkshopModDataBackground();
 			}
 
-			/*
-			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
-			{
-				OnFilterTextChanged(ActiveModFilterText, ActiveMods);
-				OnFilterTextChanged(InactiveModFilterText, InactiveMods);
-			});
-			*/
-#if DEBUG
-			//DivinityApp.Log("Mods (" + mods.Count + ")");
-			//DivinityApp.Log(String.Join("\n", mods.Items.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			//DivinityApp.Log("Ignored Mods (" + DivinityApp.IgnoredMods.Count + ")");
-			//DivinityApp.Log(String.Join("\n", DivinityApp.IgnoredMods.Select(x => $"{x.UUID}|{x.Name}|{x.Type}")));
-			//DivinityApp.Log("Adventure Mods (" + AdventureMods.Count + ")");
-			//DivinityApp.Log(String.Join("\n", AdventureMods.Select(x => $"{x.UUID}|{x.Name}")));
-#endif
+			IsInitialized = true;
 			return Disposable.Empty;
-		}
-
-		public void RefreshAsync_Start(string title = "Refreshing...")
-		{
-			if (ModUpdatesViewData != null)
-			{
-				ModUpdatesViewData.Clear();
-			}
-			ModUpdatesViewVisible = ModUpdatesAvailable = false;
-			MainProgressTitle = title;
-			MainProgressValue = 0d;
-			CanCancelProgress = false;
-			MainProgressIsActive = true;
-			IsRefreshing = true;
-			mods.Clear();
-			gameMasterCampaigns.Clear();
-			Profiles.Clear();
-			workshopMods.Clear();
-			View.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
-			View.TaskbarItemInfo.ProgressValue = 0;
-			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
-		}
-
-		public void RefreshWorkshopAsync_Start()
-		{
-			if (ModUpdatesViewData != null)
-			{
-				ModUpdatesViewData.Clear();
-			}
-			ModUpdatesViewVisible = ModUpdatesAvailable = false;
-			workshopMods.Clear();
-			LoadWorkshopModDataBackground();
 		}
 
 		private async Task<List<DivinityLoadOrder>> LoadExternalLoadOrdersAsync()
@@ -3637,10 +3592,8 @@ namespace DivinityModManager.ViewModels
 			{
 				CheckForUpdates();
 			}
-			RefreshAsync_Start("Loading...");
-			//Refresh();
-			SaveSettings(); // New values
-			IsInitialized = true;
+			SaveSettings();
+			RefreshCommand.Execute(Unit.Default).Subscribe();
 		}
 
 		public bool AutoChangedOrder { get; set; }
@@ -4544,6 +4497,8 @@ Directory the zip will be extracted to:
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
 
+			_isRefreshing = this.WhenAnyObservable(x => x.RefreshCommand.IsExecuting).ToProperty(this, nameof(IsRefreshing));
+			_isRefreshingWorkshop = this.WhenAnyObservable(x => x.RefreshWorkshopCommand.IsExecuting).ToProperty(this, nameof(IsRefreshingWorkshop));
 			_isLocked = this.WhenAnyValue(x => x.IsDragging, x => x.IsRefreshing, (b1, b2) => b1 || b2).ToProperty(this, nameof(IsLocked));
 
 			_keys = new AppKeys(this);
@@ -4560,11 +4515,41 @@ Directory the zip will be extracted to:
 			Keys.NewOrder.AddAction(() => AddNewModOrder());
 			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
 
-			var canRefreshObservable = this.WhenAnyValue(x => x.IsRefreshing, (r) => r == false).StartWith(true);
-			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
+			var canRefreshObservable = this.WhenAnyValue(x => x.IsRefreshing, b => !b).StartWith(true);
+			RefreshCommand = ReactiveCommand.Create(() =>
+			{
+				ModUpdatesViewData?.Clear();
+				ModUpdatesViewVisible = ModUpdatesAvailable = false;
+				MainProgressTitle = !IsInitialized ? "Loading..." : "Refreshing...";
+				MainProgressValue = 0d;
+				CanCancelProgress = false;
+				MainProgressIsActive = true;
+				mods.Clear();
+				gameMasterCampaigns.Clear();
+				Profiles.Clear();
+				workshopMods.Clear();
+				View.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+				View.TaskbarItemInfo.ProgressValue = 0;
+				RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
+			}, canRefreshObservable, RxApp.MainThreadScheduler);
 
-			var canRefreshWorkshop = this.WhenAnyValue(x => x.IsRefreshing, x => x.IsRefreshingWorkshop, (r1, r2) => r1 == false && r2 == false && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
-			Keys.RefreshWorkshop.AddAction(RefreshWorkshopAsync_Start, canRefreshWorkshop);
+
+			Keys.Refresh.AddAction(() => RefreshCommand.Execute(Unit.Default).Subscribe(), canRefreshObservable);
+
+			var canRefreshWorkshop = this.WhenAnyValue(x => x.IsRefreshing, x => x.IsRefreshingWorkshop, (r1, r2) => !r1 && !r2 && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
+
+			RefreshWorkshopCommand = ReactiveCommand.Create(() =>
+			{
+				if (ModUpdatesViewData != null)
+				{
+					ModUpdatesViewData.Clear();
+				}
+				ModUpdatesViewVisible = ModUpdatesAvailable = false;
+				workshopMods.Clear();
+				LoadWorkshopModDataBackground();
+			}, canRefreshWorkshop, RxApp.MainThreadScheduler);
+
+			Keys.RefreshWorkshop.AddAction(() => RefreshWorkshopCommand.Execute(Unit.Default).Subscribe(), canRefreshWorkshop);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
 			Keys.ExportOrderToZip.AddAction(ExportLoadOrderToArchive_Start, canStartExport);
@@ -4932,7 +4917,7 @@ Directory the zip will be extracted to:
 			ModUpdatesViewData.CloseView = new Action<bool>((bool refresh) =>
 			{
 				ModUpdatesViewData.Clear();
-				if (refresh) RefreshAsync_Start();
+				if (refresh) RefreshCommand.Execute(Unit.Default).Subscribe();
 				ModUpdatesViewVisible = false;
 				View.Activate();
 			});

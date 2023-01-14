@@ -3,10 +3,13 @@
 using GongSolutions.Wpf.DragDrop;
 using GongSolutions.Wpf.DragDrop.Utilities;
 
+using ReactiveUI;
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reactive.Concurrency;
 using System.Reactive.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -154,10 +157,11 @@ namespace DivinityModManager.ViewModels
 			}
 
 			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
+			var selectedUUIDs = data.Select(x => x.UUID).ToHashSet();
 
 			foreach (var mod in _viewModel.Mods)
 			{
-				if (data.Contains(mod))
+				if (selectedUUIDs.Contains(mod.UUID))
 				{
 					mod.IsActive = isActive;
 					mod.IsSelected = true;
@@ -168,15 +172,18 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
+			RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(20), () =>
+			{
+				_viewModel.Layout.SelectMods(data, isActive);
+			});
+
 			if (isActive)
 			{
-				_viewModel.Layout.UpdateViewSelection(_viewModel.ActiveMods);
 				_viewModel.OnFilterTextChanged(_viewModel.ActiveModFilterText, _viewModel.ActiveMods);
 				//_viewModel.Layout.FixActiveModsScrollbar();
 			}
 			else
 			{
-				_viewModel.Layout.UpdateViewSelection(_viewModel.InactiveMods);
 				_viewModel.OnFilterTextChanged(_viewModel.InactiveModFilterText, _viewModel.InactiveMods);
 			}
 
@@ -188,8 +195,6 @@ namespace DivinityModManager.ViewModels
 					_viewModel.SelectedModOrder.Add(x);
 				}
 			}
-
-			_viewModel.OrderJustChanged = true;
 		}
 
 		private MainWindowViewModel _viewModel;

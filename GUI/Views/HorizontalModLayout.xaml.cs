@@ -28,6 +28,7 @@ namespace DivinityModManager.Views
 	public interface ModViewLayout
 	{
 		void UpdateViewSelection(IEnumerable<ISelectable> dataList, ListView listView = null);
+		void SelectMods(IEnumerable<ISelectable> dataList, bool activeMods);
 		void FixActiveModsScrollbar();
 	}
 
@@ -184,7 +185,7 @@ namespace DivinityModManager.Views
 						var listItem = (ListViewItem)listView.ItemContainerGenerator.ContainerFromItem(mod);
 						if (listItem != null)
 						{
-							if (mod.Visibility == Visibility.Visible)
+							if(mod.Visibility == Visibility.Visible)
 							{
 								listItem.IsSelected = mod.IsSelected;
 							}
@@ -198,17 +199,39 @@ namespace DivinityModManager.Views
 			}
 		}
 
-		private void UpdateIsSelected(SelectionChangedEventArgs e, ObservableCollectionExtended<DivinityModData> list)
+		public void SelectMods(IEnumerable<ISelectable> dataList, bool activeMods)
+		{
+			if (dataList != null)
+			{
+				var listView = activeMods ? ActiveModsListView : InactiveModsListView;
+				foreach (var mod in dataList)
+				{
+					var listItem = (ListViewItem)listView.ItemContainerGenerator.ContainerFromItem(mod);
+					if (listItem != null)
+					{
+						listItem.IsSelected = mod.Visibility == Visibility.Visible;
+					}
+				}
+			}
+		}
+
+		private void UpdateIsSelected(SelectionChangedEventArgs e, IEnumerable<DivinityModData> list)
 		{
 			if (e != null && list != null)
 			{
+				var targetUUIDs = list.Select(x => x.UUID).ToHashSet();
+
 				if (e.RemovedItems != null && e.RemovedItems.Count > 0)
 				{
 					foreach (var removedItem in e.RemovedItems.Cast<DivinityModData>())
 					{
-						if (list != null && list.Contains(removedItem)) removedItem.IsSelected = false;
+						if(targetUUIDs.Contains(removedItem.UUID))
+						{
+							removedItem.IsSelected = false;
+						}
 					}
 				}
+
 				if (e.AddedItems != null && e.AddedItems.Count > 0)
 				{
 					foreach (var addedItem in e.AddedItems.Cast<DivinityModData>())
@@ -260,16 +283,9 @@ namespace DivinityModManager.Views
 			List<DivinityModData> selectedMods = new List<DivinityModData>();
 			int nextIndex = -1;
 			DivinityModData targetMod = null;
-			//DivinityApp.Log($"ListHasFocus(ActiveModsListView) = {ListHasFocus(ActiveModsListView)} | ListHasFocus(InactiveModsListView) = {ListHasFocus(InactiveModsListView)}");
+
 			if (ListHasFocus(ActiveModsListView))
 			{
-				//var selectedMods = ViewModel.ActiveMods.Where(x => x.IsSelected).ToList();
-				//for (int i = 0; i < selectedMods.Count; i++)
-				//{
-				//	ViewModel.ActiveMods.Remove(selectedMods[i]);
-				//	ViewModel.InactiveMods.Add(selectedMods[i]);
-				//}
-
 				foreach (var m in ViewModel.ActiveMods.Where(x => x.IsSelected))
 				{
 					nextIndex = Math.Min(m.Index + 1, ViewModel.ActiveMods.Count - 1);
@@ -278,7 +294,6 @@ namespace DivinityModManager.Views
 				if (nextIndex > -1)
 				{
 					targetMod = ViewModel.ActiveMods.ElementAtOrDefault(nextIndex);
-					DivinityApp.Log($"nextIndex({nextIndex}) targetMod({targetMod})");
 				}
 
 				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
@@ -308,12 +323,6 @@ namespace DivinityModManager.Views
 			}
 			else if (ListHasFocus(InactiveModsListView))
 			{
-				//var selectedMods = ViewModel.InactiveMods.Where(x => x.IsSelected).ToList();
-				//for (int i = 0; i < selectedMods.Count; i++)
-				//{
-				//	ViewModel.InactiveMods.Remove(selectedMods[i]);
-				//	ViewModel.ActiveMods.Add(selectedMods[i]);
-				//}
 				foreach (var m in ViewModel.InactiveMods.Where(x => x.IsSelected))
 				{
 					nextIndex = Math.Min(ViewModel.InactiveMods.IndexOf(m) + 1, ViewModel.InactiveMods.Count - 1);
@@ -408,8 +417,6 @@ namespace DivinityModManager.Views
 					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe((e) =>
 					{
-						DivinityApp.Log("SelectionChanged");
-						if (ActiveModsListView.Items.Count == 0) return;
 						UpdateIsSelected(e.EventArgs, ViewModel.ActiveMods);
 					}));
 
@@ -417,16 +424,16 @@ namespace DivinityModManager.Views
 					.ObserveOn(RxApp.MainThreadScheduler)
 					.Subscribe((e) =>
 					{
-						if (InactiveModsListView.Items.Count == 0) return;
 						UpdateIsSelected(e.EventArgs, ViewModel.InactiveMods);
 					}));
 
-					d(this.ViewModel.WhenAnyValue(x => x.OrderJustChanged, b => b == true).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+					d(this.ViewModel.WhenAnyValue(x => x.OrderJustLoaded).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
 					{
-						this.AutoSizeNameColumn_ActiveMods();
-						this.AutoSizeNameColumn_InactiveMods();
-
-						ViewModel.OrderJustChanged = false;
+						if(b)
+						{
+							this.AutoSizeNameColumn_ActiveMods();
+							this.AutoSizeNameColumn_InactiveMods();
+						}
 					}));
 
 					ViewModel.Layout = this;

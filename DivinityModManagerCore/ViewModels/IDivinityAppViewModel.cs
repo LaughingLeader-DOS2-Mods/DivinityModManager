@@ -13,8 +13,8 @@ namespace DivinityModManager.ViewModels
 {
 	public interface IDivinityAppViewModel
 	{
-		ObservableCollectionExtended<DivinityModData> ActiveMods { get; }
-		ObservableCollectionExtended<DivinityModData> InactiveMods { get; }
+		IEnumerable<DivinityModData> ActiveMods { get; }
+		IEnumerable<DivinityModData> InactiveMods { get; }
 		ObservableCollectionExtended<DivinityProfileData> Profiles { get; }
 		ReadOnlyObservableCollection<DivinityModData> Mods { get; }
 		ReadOnlyObservableCollection<DivinityModData> WorkshopMods { get; }

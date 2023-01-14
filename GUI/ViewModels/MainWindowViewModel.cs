@@ -8,6 +8,7 @@ using DivinityModManager.Views;
 
 using DynamicData;
 using DynamicData.Binding;
+using DynamicData.Aggregation;
 
 using Microsoft.Win32;
 
@@ -44,6 +45,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Readers;
+using System.Reactive.Subjects;
+using System.Windows.Markup;
 
 namespace DivinityModManager.ViewModels
 {
@@ -128,9 +131,18 @@ namespace DivinityModManager.ViewModels
 
 		[Reactive] public DivinityModManagerSettings Settings { get; set; }
 
-		public ObservableCollectionExtended<DivinityModData> ActiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
-		public ObservableCollectionExtended<DivinityModData> InactiveMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
-		public ObservableCollectionExtended<DivinityModData> ForceLoadedMods { get; set; } = new ObservableCollectionExtended<DivinityModData>();
+		private readonly ObservableCollectionExtended<DivinityModData> _activeMods = new ObservableCollectionExtended<DivinityModData>();
+		public ObservableCollectionExtended<DivinityModData> ActiveMods => _activeMods;
+
+		private readonly ObservableCollectionExtended<DivinityModData> _inactiveMods = new ObservableCollectionExtended<DivinityModData>();
+		public ObservableCollectionExtended<DivinityModData> InactiveMods => _inactiveMods;
+
+		private readonly ReadOnlyObservableCollection<DivinityModData> _forceLoadedMods;
+		public ReadOnlyObservableCollection<DivinityModData> ForceLoadedMods => _forceLoadedMods;
+
+		IEnumerable<DivinityModData> IDivinityAppViewModel.ActiveMods => this.ActiveMods;
+		IEnumerable<DivinityModData> IDivinityAppViewModel.InactiveMods => this.InactiveMods;
+
 		public ObservableCollectionExtended<DivinityProfileData> Profiles { get; set; } = new ObservableCollectionExtended<DivinityProfileData>();
 
 		private readonly ObservableAsPropertyHelper<int> _activeSelected;
@@ -162,7 +174,8 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public int LayoutMode { get; set; } = 0;
 		[Reactive] public bool CanSaveOrder { get; set; } = true;
 		[Reactive] public bool LoadingOrder { get; set; }
-		[Reactive] public bool OrderJustChanged { get; set; }
+		[Reactive] public bool OrderJustLoaded { get; set; }
+		[Reactive] public bool IsDragging { get; set; }
 
 		[Reactive] public string StatusText { get; set; }
 		[Reactive] public string StatusBarRightText { get; set; }
@@ -226,7 +239,6 @@ namespace DivinityModManager.ViewModels
 		private IObservable<bool> canOpenLogDirectory;
 
 		private bool OpenRepoLinkToDownload { get; set; } = false;
-		public ICommand DebugCommand { get; private set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
@@ -329,7 +341,7 @@ namespace DivinityModManager.ViewModels
 					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
 					if (mod != null && !mod.IsClassicMod)
 					{
-						ActiveMods.Add(mod);
+						mod.IsActive = true;
 						if (mod.Dependencies.Count > 0)
 						{
 							foreach (var dependency in mod.Dependencies.Items)
@@ -1588,7 +1600,7 @@ namespace DivinityModManager.ViewModels
 							}
 
 							//Adds mods that will always be "enabled"
-							ForceLoadedMods.AddRange(Mods.Where(x => !x.IsActive && x.IsForcedLoaded));
+							//ForceLoadedMods.AddRange(Mods.Where(x => !x.IsActive && x.IsForcedLoaded));
 
 							Settings.LastOrder = nextOrder?.Name;
 						}
@@ -1756,11 +1768,15 @@ namespace DivinityModManager.ViewModels
 
 			LoadingOrder = true;
 
-			ActiveMods.Clear();
-			InactiveMods.Clear();
-			ForceLoadedMods.Clear();
-
 			var loadFrom = order.Order;
+
+			var suspend = ActiveMods.SuspendNotifications();
+			foreach (var mod in ActiveMods.ToList())
+			{
+				mod.IsActive = false;
+				mod.Index = -1;
+				mod.IsSelected = false;
+			}
 
 			DivinityApp.Log($"Loading mod order '{order.Name}'.");
 			Dictionary<string, DivinityMissingModData> missingMods = new Dictionary<string, DivinityMissingModData>();
@@ -1771,6 +1787,8 @@ namespace DivinityModManager.ViewModels
 			}
 
 			var installedMods = mods.Items.Select(x => x.UUID).ToHashSet();
+
+			var loadOrderIndex = 0;
 
 			for (int i = 0; i < loadFrom.Count; i++)
 			{
@@ -1791,7 +1809,9 @@ namespace DivinityModManager.ViewModels
 					var mod = mods.Items.First(m => m.UUID == entry.UUID && !m.IsClassicMod);
 					if (mod.Type != "Adventure")
 					{
-						ActiveMods.Add(mod);
+						mod.IsActive = true;
+						mod.Index = loadOrderIndex;
+						loadOrderIndex += 1;
 					}
 					else
 					{
@@ -1819,30 +1839,10 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			List<DivinityModData> inactive = new List<DivinityModData>();
-
-			for (int i = 0; i < Mods.Count; i++)
-			{
-				var mod = Mods[i];
-
-				if (ActiveMods.Any(m => m.UUID == mod.UUID))
-				{
-					mod.IsActive = true;
-				}
-				else
-				{
-					mod.IsActive = false;
-					mod.Index = -1;
-					inactive.Add(mod);
-				}
-			}
-
-			InactiveMods.AddRange(inactive.OrderBy(m => m.Name));
+			suspend.Dispose();
 
 			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 			OnFilterTextChanged(InactiveModFilterText, InactiveMods);
-
-			OrderJustChanged = true;
 
 			if (missingMods.Count > 0)
 			{
@@ -1861,6 +1861,8 @@ namespace DivinityModManager.ViewModels
 						"Missing Mods in Load Order", MessageBoxButton.OK);
 				}
 			}
+
+			OrderJustLoaded = true;
 
 			LoadingOrder = false;
 			return true;
@@ -2776,12 +2778,6 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
-		private void MainProgressStart()
-		{
-			MainProgressValue = 0d;
-			MainProgressIsActive = true;
-		}
-
 		private void OnMainProgressComplete(double delay = 0)
 		{
 			DivinityApp.Log($"Main progress is complete.");
@@ -3384,7 +3380,7 @@ namespace DivinityModManager.ViewModels
 				var newOrder = DivinityModDataLoader.GetLoadOrderFromSave(dialog.FileName, Settings.LoadOrderPath);
 				if (newOrder != null)
 				{
-					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
+					DivinityApp.Log($"Imported mod order: {String.Join(Environment.NewLine + "\t", newOrder.Order.Select(x => x.Name))}");
 					return newOrder;
 				}
 				else
@@ -3842,8 +3838,6 @@ namespace DivinityModManager.ViewModels
 		public void RemoveDeletedMods(HashSet<string> deletedMods, HashSet<string> deletedWorkshopMods = null, bool removeFromLoadOrder = true)
 		{
 			mods.RemoveMany(mods.Items.Where(x => deletedMods.Contains(x.UUID)));
-			ActiveMods.RemoveMany(ActiveMods.Where(x => deletedMods.Contains(x.UUID)));
-			InactiveMods.RemoveMany(InactiveMods.Where(x => deletedMods.Contains(x.UUID)));
 
 			if(removeFromLoadOrder)
 			{
@@ -4798,10 +4792,50 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			var modsConnecton = mods.Connect();
-			modsConnecton.Filter(x => !x.IsLarianMod && x.Type != "Adventure").Bind(out allMods).DisposeMany().Subscribe();
+			var modsConnection = mods.Connect();
+			modsConnection.Publish();
 
-			modsConnecton.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.UUID == DivinityApp.ORIGINS_UUID)).Bind(out adventureMods).DisposeMany().Subscribe();
+			Func<DivinityModData, bool> isLoadOrderMod = x => !x.IsLarianMod && x.Type != "Adventure" & !x.IsForcedLoaded;
+
+			modsConnection.Filter(isLoadOrderMod).Bind(out allMods).Subscribe();
+
+			Func<DivinityModData, bool> isValidActiveMod = x => isLoadOrderMod(x) && x.IsActive;
+			Func<DivinityModData, bool> isValidInactiveMod = x => isLoadOrderMod(x) && !x.IsActive;
+			var activeModSort = SortExpressionComparer<DivinityModData>.Ascending(x => x.Index);
+
+			//Lists bound to the UI
+			var orderWasLoaded = this.WhenAnyValue(x => x.OrderJustLoaded, b => b == true).ObserveOn(RxApp.MainThreadScheduler);
+			orderWasLoaded.Throttle(TimeSpan.FromMilliseconds(50)).Subscribe((b) =>
+			{
+				OrderJustLoaded = false;
+			});
+			var uiModsConnection = modsConnection.ObserveOn(RxApp.MainThreadScheduler).AutoRefreshOnObservable(m => orderWasLoaded, TimeSpan.FromMilliseconds(5), RxApp.MainThreadScheduler);
+			uiModsConnection.Filter(isValidActiveMod).Sort(activeModSort).Bind(_activeMods).Subscribe();
+			uiModsConnection.Filter(isValidInactiveMod).Bind(_inactiveMods).Subscribe();
+			uiModsConnection.Filter(x => x.IsForcedLoaded).Bind(out _forceLoadedMods).Subscribe();
+
+			//ActiveMods.ActOnEveryObject(mod => mod.Index = ActiveMods.IndexOf(mod), mod => mod.Index = -1);
+
+			//Throttle filters so they only happen when typing stops for 500ms
+
+			this.WhenAnyValue(x => x.ActiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnFilterTextChanged(s, ActiveMods); });
+
+			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
+				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
+
+			ActiveMods.WhenAnyPropertyChanged(nameof(DivinityModData.Index)).Throttle(TimeSpan.FromMilliseconds(25)).Subscribe(_ =>
+			{
+				SelectedModOrder?.Sort(SortModOrder);
+			});
+
+			var selectedModsConnection = modsConnection.AutoRefresh(x => x.IsSelected, TimeSpan.FromMilliseconds(25));
+			_activeSelected = selectedModsConnection.Filter(x => x.IsSelected && x.IsActive).Count().ToProperty(this, x => x.ActiveSelected, true, RxApp.MainThreadScheduler);
+			_inactiveSelected = selectedModsConnection.Filter(x => x.IsSelected && !x.IsActive).Count().ToProperty(this, x => x.InactiveSelected, true, RxApp.MainThreadScheduler);
+
+			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
+
+			modsConnection.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.UUID == DivinityApp.ORIGINS_UUID)).Bind(out adventureMods).DisposeMany().Subscribe();
 			_selectedAdventureMod = this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod).DisposeWith(this.Disposables);
@@ -4859,12 +4893,12 @@ Directory the zip will be extracted to:
 			//	mod.UpdateDisplayName();
 			//});
 
-			modsConnecton.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
+			modsConnection.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 
 			// Blinky animation on the tools/download buttons if the extender is required by mods and is missing
 			if (AppSettings.FeatureEnabled("ScriptExtender"))
 			{
-				modsConnecton.ObserveOn(RxApp.MainThreadScheduler).AutoRefresh(x => x.ExtenderModStatus).
+				modsConnection.ObserveOn(RxApp.MainThreadScheduler).AutoRefresh(x => x.ExtenderModStatus).
 					Filter(x => x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING || x.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED).
 					Select(x => x.Count).Subscribe(totalWithRequirements =>
 					{
@@ -4902,44 +4936,6 @@ Directory the zip will be extracted to:
 				ModUpdatesViewVisible = false;
 				View.Activate();
 			});
-
-			DebugCommand = ReactiveCommand.Create(() => InactiveMods.Add(new DivinityModData() { Name = "Test" }));
-
-			//Throttle filters so they only happen when typing stops for 500ms
-
-			this.WhenAnyValue(x => x.ActiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnFilterTextChanged(s, ActiveMods); });
-
-			this.WhenAnyValue(x => x.InactiveModFilterText).Throttle(TimeSpan.FromMilliseconds(500)).ObserveOn(RxApp.MainThreadScheduler).
-				Subscribe((s) => { OnFilterTextChanged(s, InactiveMods); });
-
-			var activeModsConnection = this.ActiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
-			var inactiveModsConnection = this.InactiveMods.ToObservableChangeSet().ObserveOn(RxApp.MainThreadScheduler);
-
-			activeModsConnection.Subscribe((x) =>
-			{
-				for (int i = 0; i < ActiveMods.Count; i++)
-				{
-					var mod = ActiveMods[i];
-					mod.Index = i;
-				}
-			});
-
-			activeModsConnection.WhenAnyPropertyChanged("Index").Throttle(TimeSpan.FromMilliseconds(25)).Subscribe(mod =>
-			{
-				if (SelectedModOrder != null)
-				{
-					SelectedModOrder.Sort(SortModOrder);
-				}
-			});
-
-			_activeSelected = activeModsConnection.AutoRefresh(x => x.IsSelected).
-				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.ActiveSelected, true, RxApp.MainThreadScheduler);
-
-			_inactiveSelected = inactiveModsConnection.AutoRefresh(x => x.IsSelected).
-				ToCollection().Select(x => x.Count(y => y.IsSelected)).ToProperty(this, x => x.InactiveSelected, true, RxApp.MainThreadScheduler);
-
-			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
 
 			//var canSpeakOrder = this.WhenAnyValue(x => x.ActiveMods.Count, (c) => c > 0);
 

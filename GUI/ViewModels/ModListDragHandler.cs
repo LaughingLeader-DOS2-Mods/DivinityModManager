@@ -45,7 +45,6 @@ namespace DivinityModManager.ViewModels
 
 		public override void StartDrag(IDragInfo dragInfo)
 		{
-			//base.StartDrag(dragInfo);
 			if (dragInfo != null)
 			{
 				dragInfo.Data = null;
@@ -53,16 +52,24 @@ namespace DivinityModManager.ViewModels
 				{
 					var selected = _viewModel.ActiveMods.Where(x => x.IsSelected && x.Visibility == Visibility.Visible);
 					dragInfo.Data = selected;
-					//DivinityApp.LogMessage($"Drag source is ActiveMods | {selected.Count()}");
 				}
 				else if (dragInfo.SourceCollection == _viewModel.InactiveMods)
 				{
 					var selected = _viewModel.InactiveMods.Where(x => x.IsSelected && x.Visibility == Visibility.Visible && x.CanDrag);
 					dragInfo.Data = selected;
-					//DivinityApp.LogMessage($"Drag source is InactiveMods | {selected.Count()} | Classic: {selected.Where(x => x.IsClassicMod && x.CanDrag).Count()}");
+				}
+				if(dragInfo.Data != null)
+				{
+					_viewModel.IsDragging = true;
 				}
 				dragInfo.Effects = dragInfo.Data != null ? DragDropEffects.Copy | DragDropEffects.Move : DragDropEffects.None;
 			}
+		}
+
+		public override void DragDropOperationFinished(DragDropEffects operationResult, IDragInfo dragInfo)
+		{
+			base.DragDropOperationFinished(operationResult, dragInfo);
+			_viewModel.IsDragging = false;
 		}
 
 		public override bool CanStartDrag(IDragInfo dragInfo)

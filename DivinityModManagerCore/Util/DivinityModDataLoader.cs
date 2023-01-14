@@ -373,6 +373,7 @@ namespace DivinityModManager.Util
 									if (modData != null)
 									{
 										modData.IsEditorMod = true;
+										modData.IsUserMod = true;
 										modData.FilePath = folder;
 										try
 										{
@@ -755,6 +756,8 @@ namespace DivinityModManager.Util
 									{
 										DivinityApp.Log($"Error getting pak last modified date for '{pakPath}': {ex}");
 									}
+
+									modData.IsUserMod = true;
 									mods.Add(modData);
 
 									var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));

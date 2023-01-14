@@ -19,6 +19,10 @@ namespace DivinityModManager.ViewModels
 		ReadOnlyObservableCollection<DivinityModData> Mods { get; }
 		ReadOnlyObservableCollection<DivinityModData> WorkshopMods { get; }
 
+		bool IsDragging { get; }
+		bool IsRefreshing { get; }
+		bool IsLocked { get; }
+
 		int ActiveSelected { get; }
 		int InactiveSelected { get; }
 

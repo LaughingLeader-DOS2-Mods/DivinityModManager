@@ -55,11 +55,20 @@ namespace DivinityModManager.Models
 		[Reactive] public DivinityModVersion PublishVersion { get; set; }
 		[Reactive] public DateTime? LastModified { get; set; }
 
-		[Reactive] public bool DisplayFileForName { get; set; } = false;
-		[Reactive] public bool IsHidden { get; set; } = false;
-		[Reactive] public bool IsLarianMod { get; set; } = false;
-		[Reactive] public bool IsClassicMod { get; set; } = false;
-		[Reactive] public bool HasBuiltinOverride { get; set; } = false;
+		[Reactive] public bool DisplayFileForName { get; set; }
+		[Reactive] public bool IsHidden { get; set; }
+
+		/// <summary>True if this mod is in DivinityApp.IgnoredMods, or the author is Larian. Larian mods are hidden from the load order.</summary>
+		[Reactive] public bool IsLarianMod { get; set; }
+
+		/// <summary>Mods with a header version from the non-DE version are considered "classic", and can't be loaded in the DE version.</summary>
+		[Reactive] public bool IsClassicMod { get; set; }
+
+		/// <summary>Whether the mod was loaded from the user's mods directory.</summary>
+		[Reactive] public bool IsUserMod { get; set; }
+
+		/// <summary>True if the mod has a base game mod directory. This data is always loaded regardless if the mod is enabled or not.</summary>
+		[Reactive] public bool HasBuiltinOverride { get; set; }
 		[Reactive] public string BuiltinOverrideModsText { get; set; }
 
 		[Reactive] public string HelpText { get; set; } = "";

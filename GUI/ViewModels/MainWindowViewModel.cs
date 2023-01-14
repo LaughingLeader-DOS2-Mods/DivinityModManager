@@ -75,13 +75,17 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public string Title { get; set; }
 		[Reactive] public string Version { get; set; }
 
-		public AppKeys Keys { get; private set; } = new AppKeys();
+		private readonly AppKeys _keys;
+		public AppKeys Keys => _keys;
 
-		private bool IsInitialized { get; set; } = false;
+		private bool IsInitialized { get; set; }
 
-		protected SourceList<DivinityModData> mods = new SourceList<DivinityModData>();
+		protected readonly SourceCache<DivinityModData, string> mods = new SourceCache<DivinityModData, string>(mod => mod.UUID);
 
-		private List<DivinityModData> userMods = new List<DivinityModData>();
+		public bool ModExists(string uuid)
+		{
+			return mods.Lookup(uuid) != null;
+		}
 
 		protected ReadOnlyObservableCollection<DivinityModData> allMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
@@ -110,7 +114,7 @@ namespace DivinityModManager.ViewModels
 		protected ReadOnlyObservableCollection<DivinityModData> selectedPakMods;
 		public ReadOnlyObservableCollection<DivinityModData> SelectedPakMods => selectedPakMods;
 
-		protected SourceList<DivinityModData> workshopMods = new SourceList<DivinityModData>();
+		protected readonly SourceCache<DivinityModData, string> workshopMods = new SourceCache<DivinityModData, string>(mod => mod.UUID);
 
 		protected ReadOnlyObservableCollection<DivinityModData> workshopModsCollection;
 		public ReadOnlyObservableCollection<DivinityModData> WorkshopMods => workshopModsCollection;
@@ -139,6 +143,9 @@ namespace DivinityModManager.ViewModels
 
 		private readonly ReadOnlyObservableCollection<DivinityModData> _forceLoadedMods;
 		public ReadOnlyObservableCollection<DivinityModData> ForceLoadedMods => _forceLoadedMods;
+
+		private readonly ReadOnlyObservableCollection<DivinityModData> _userMods;
+		public ReadOnlyObservableCollection<DivinityModData> UserMods => _userMods;
 
 		IEnumerable<DivinityModData> IDivinityAppViewModel.ActiveMods => this.ActiveMods;
 		IEnumerable<DivinityModData> IDivinityAppViewModel.InactiveMods => this.InactiveMods;
@@ -176,6 +183,13 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public bool LoadingOrder { get; set; }
 		[Reactive] public bool OrderJustLoaded { get; set; }
 		[Reactive] public bool IsDragging { get; set; }
+		[Reactive] public bool IsRefreshing { get; set; }
+		[Reactive] public bool IsRefreshingWorkshop { get; set; }
+
+		private readonly ObservableAsPropertyHelper<bool> _isLocked;
+
+		/// <summary>Used to locked certain functionality when data is loading or the user is dragging an item.</summary>
+		public bool IsLocked => _isLocked.Value;
 
 		[Reactive] public string StatusText { get; set; }
 		[Reactive] public string StatusBarRightText { get; set; }
@@ -238,7 +252,7 @@ namespace DivinityModManager.ViewModels
 		//private IObservable<bool> canInstallOsiExtender;
 		private IObservable<bool> canOpenLogDirectory;
 
-		private bool OpenRepoLinkToDownload { get; set; } = false;
+		private bool OpenRepoLinkToDownload { get; set; }
 		public ICommand ToggleUpdatesViewCommand { get; private set; }
 		public ICommand CheckForAppUpdatesCommand { get; set; }
 		public ICommand CancelMainProgressCommand { get; set; }
@@ -282,7 +296,7 @@ namespace DivinityModManager.ViewModels
 				this.RaisePropertyChanged("SelectedGameMasterCampaign");
 			}
 		}
-		public bool UserChangedSelectedGMCampaign { get; set; } = false;
+		public bool UserChangedSelectedGMCampaign { get; set; }
 
 		private readonly ObservableAsPropertyHelper<DivinityGameMasterCampaign> _selectedGameMasterCampaign;
 		public DivinityGameMasterCampaign SelectedGameMasterCampaign => _selectedGameMasterCampaign.Value;
@@ -425,7 +439,7 @@ namespace DivinityModManager.ViewModels
 			DivinityApp.Log("========================================");
 		}
 
-		public bool DebugMode { get; set; } = false;
+		public bool DebugMode { get; set; }
 
 		private TextWriterTraceListener debugLogListener;
 		public void ToggleLogging(bool enabled)
@@ -1105,7 +1119,7 @@ namespace DivinityModManager.ViewModels
 					//Ignore Classic mods since they share the same workshop folder
 					var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
 					workshopMods.Clear();
-					workshopMods.AddRange(sortedWorkshopMods);
+					workshopMods.AddOrUpdate(sortedWorkshopMods);
 
 					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 				}
@@ -1299,7 +1313,7 @@ namespace DivinityModManager.ViewModels
 			mods.Clear();
 			foreach (var m in DivinityApp.IgnoredMods)
 			{
-				mods.Add(m);
+				mods.AddOrUpdate(m);
 				DivinityApp.Log($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
 			}
 			foreach (var m in loadedMods)
@@ -1316,20 +1330,17 @@ namespace DivinityModManager.ViewModels
 				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
 				if (existingMod == null)
 				{
-					mods.Add(m);
+					mods.AddOrUpdate(m);
 				}
 				else
 				{
 					if (m.Version.VersionInt > existingMod.Version.VersionInt)
 					{
-						mods.Remove(existingMod);
-						mods.Add(m);
+						mods.AddOrUpdate(m);
 						DivinityApp.Log($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
 					}
 				}
 			}
-			userMods.Clear();
-			userMods.AddRange(loadedMods);
 		}
 
 		private void MergeModLists(List<DivinityModData> finalMods, List<DivinityModData> newMods)
@@ -1786,14 +1797,12 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"Missing mods (from profile): {String.Join(";", missingModsFromProfileOrder)}");
 			}
 
-			var installedMods = mods.Items.Select(x => x.UUID).ToHashSet();
-
 			var loadOrderIndex = 0;
 
 			for (int i = 0; i < loadFrom.Count; i++)
 			{
 				var entry = loadFrom[i];
-				if(!DivinityModDataLoader.IgnoreMod(entry.UUID) && !installedMods.Contains(entry.UUID))
+				if(!DivinityModDataLoader.IgnoreMod(entry.UUID) && !ModExists(entry.UUID))
 				{
 					var x = new DivinityMissingModData
 					{
@@ -1823,7 +1832,7 @@ namespace DivinityModManager.ViewModels
 					{
 						foreach (var dependency in mod.Dependencies.Items)
 						{
-							if (!String.IsNullOrWhiteSpace(dependency.UUID) && !DivinityModDataLoader.IgnoreMod(dependency.UUID) && !installedMods.Contains(dependency.UUID))
+							if (!String.IsNullOrWhiteSpace(dependency.UUID) && !DivinityModDataLoader.IgnoreMod(dependency.UUID) && !ModExists(dependency.UUID))
 							{
 								var x = new DivinityMissingModData
 								{
@@ -1876,8 +1885,6 @@ namespace DivinityModManager.ViewModels
 				messageBox.Closed -= MainWindowMessageBox_Closed_ResetColor;
 			}
 		}
-		[Reactive] public bool Refreshing { get; set; } = false;
-		[Reactive] public bool RefreshingWorkshop { get; set; } = false;
 
 		private List<DivinityLoadOrder> LoadExternalLoadOrders()
 		{
@@ -1984,7 +1991,8 @@ namespace DivinityModManager.ViewModels
 			var success = await DivinityWorkshopDataLoader.GetAllWorkshopDataAsync(CachedWorkshopData, AppSettings.DefaultPathways.Steam.AppID);
 			if (success)
 			{
-				var nonWorkshopMods = userMods.Where(x => !CachedWorkshopData.Mods.Any(y => y.UUID == x.UUID)).ToList();
+				var cachedGUIDs = CachedWorkshopData.Mods.Select(x => x.UUID).ToHashSet();
+				var nonWorkshopMods = UserMods.Where(x => !cachedGUIDs.Contains(x.UUID)).ToList();
 				if (nonWorkshopMods.Count > 0)
 				{
 					foreach (var m in nonWorkshopMods)
@@ -1999,7 +2007,7 @@ namespace DivinityModManager.ViewModels
 
 		private void UpdateModDataWithCachedData()
 		{
-			foreach (var mod in userMods)
+			foreach (var mod in UserMods)
 			{
 				var cachedMods = CachedWorkshopData.Mods.Where(x => x.UUID == mod.UUID);
 				if (cachedMods != null)
@@ -2025,7 +2033,7 @@ namespace DivinityModManager.ViewModels
 
 		private void LoadWorkshopModDataBackground()
 		{
-			RefreshingWorkshop = true;
+			IsRefreshingWorkshop = true;
 			bool workshopCacheFound = false;
 			CheckingForWorkshopUpdates = true;
 
@@ -2035,7 +2043,7 @@ namespace DivinityModManager.ViewModels
 				var loadedWorkshopMods = await LoadWorkshopModsAsync(workshopModLoadingCancelToken);
 				await Observable.Start(() =>
 				{
-					workshopMods.AddRange(loadedWorkshopMods);
+					workshopMods.AddOrUpdate(loadedWorkshopMods);
 					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
 					if (!workshopModLoadingCancelToken.Value.IsCancellationRequested)
 					{
@@ -2078,7 +2086,7 @@ namespace DivinityModManager.ViewModels
 					else
 					{
 						DivinityApp.Log("Checking for mods missing workshop data.");
-						var targetMods = userMods.Where(x => CanFetchWorkshopData(x)).ToList();
+						var targetMods = UserMods.Where(x => CanFetchWorkshopData(x)).ToList();
 						if (targetMods.Count > 0)
 						{
 							RxApp.MainThreadScheduler.Schedule(() =>
@@ -2102,7 +2110,7 @@ namespace DivinityModManager.ViewModels
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
 						this.View.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
-						RefreshingWorkshop = false;
+						IsRefreshingWorkshop = false;
 					}));
 
 					if (CachedWorkshopData.CacheUpdated)
@@ -2269,7 +2277,7 @@ namespace DivinityModManager.ViewModels
 
 				DivinityApp.Log($"Finalizing refresh operation.");
 
-				Refreshing = false;
+				IsRefreshing = false;
 				OnMainProgressComplete();
 				OnRefreshed?.Invoke(this, new EventArgs());
 
@@ -2324,10 +2332,9 @@ namespace DivinityModManager.ViewModels
 			MainProgressValue = 0d;
 			CanCancelProgress = false;
 			MainProgressIsActive = true;
-			Refreshing = true;
+			IsRefreshing = true;
 			mods.Clear();
 			gameMasterCampaigns.Clear();
-			userMods.Clear();
 			Profiles.Clear();
 			workshopMods.Clear();
 			View.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
@@ -3636,7 +3643,7 @@ namespace DivinityModManager.ViewModels
 			IsInitialized = true;
 		}
 
-		public bool AutoChangedOrder { get; set; } = false;
+		public bool AutoChangedOrder { get; set; }
 		public ViewModelActivator Activator { get; }
 
 		private Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
@@ -3837,7 +3844,7 @@ namespace DivinityModManager.ViewModels
 
 		public void RemoveDeletedMods(HashSet<string> deletedMods, HashSet<string> deletedWorkshopMods = null, bool removeFromLoadOrder = true)
 		{
-			mods.RemoveMany(mods.Items.Where(x => deletedMods.Contains(x.UUID)));
+			mods.RemoveKeys(deletedMods);
 
 			if(removeFromLoadOrder)
 			{
@@ -3849,7 +3856,7 @@ namespace DivinityModManager.ViewModels
 
 			if(deletedWorkshopMods != null && deletedWorkshopMods.Count > 0)
 			{
-				workshopMods.RemoveMany(workshopMods.Items.Where(x => deletedWorkshopMods.Contains(x.UUID)));
+				workshopMods.RemoveKeys(deletedWorkshopMods);
 			}
 		}
 
@@ -4368,20 +4375,7 @@ Directory the zip will be extracted to:
 			//	}
 			//}
 
-			int totalRemoved = 0;
-
-			if (SelectedModOrder != null)
-			{
-				foreach (var entry in SelectedModOrder.Order.ToList())
-				{
-					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-					if (mod == null)
-					{
-						SelectedModOrder.Order.Remove(entry);
-						totalRemoved++;
-					}
-				}
-			}
+			var totalRemoved = SelectedModOrder != null ? SelectedModOrder.Order.RemoveAll(x => !ModExists(x.UUID)) : 0;
 
 			if (totalRemoved > 0)
 			{
@@ -4550,6 +4544,10 @@ Directory the zip will be extracted to:
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
 
+			_isLocked = this.WhenAnyValue(x => x.IsDragging, x => x.IsRefreshing, (b1, b2) => b1 || b2).ToProperty(this, nameof(IsLocked));
+
+			_keys = new AppKeys(this);
+
 			#region Keys Setup
 			Keys.SaveDefaultKeybindings();
 
@@ -4562,10 +4560,10 @@ Directory the zip will be extracted to:
 			Keys.NewOrder.AddAction(() => AddNewModOrder());
 			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
 
-			var canRefreshObservable = this.WhenAnyValue(x => x.Refreshing, (r) => r == false).StartWith(true);
+			var canRefreshObservable = this.WhenAnyValue(x => x.IsRefreshing, (r) => r == false).StartWith(true);
 			Keys.Refresh.AddAction(() => RefreshAsync_Start(), canRefreshObservable);
 
-			var canRefreshWorkshop = this.WhenAnyValue(x => x.Refreshing, x => x.RefreshingWorkshop, (r1, r2) => r1 == false && r2 == false && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
+			var canRefreshWorkshop = this.WhenAnyValue(x => x.IsRefreshing, x => x.IsRefreshingWorkshop, (r1, r2) => r1 == false && r2 == false && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
 			Keys.RefreshWorkshop.AddAction(RefreshWorkshopAsync_Start, canRefreshWorkshop);
 
 			IObservable<bool> canStartExport = this.WhenAny(x => x.MainProgressToken, (t) => t != null).StartWith(false);
@@ -4754,7 +4752,7 @@ Directory the zip will be extracted to:
 			//Throttle in case the index changes quickly in a short timespan
 			this.WhenAnyValue(vm => vm.SelectedModOrderIndex).ObserveOn(RxApp.MainThreadScheduler).Subscribe((_) =>
 			{
-				if (!this.Refreshing && SelectedModOrderIndex > -1)
+				if (!this.IsRefreshing && SelectedModOrderIndex > -1)
 				{
 					if (SelectedModOrder != null && !LoadingOrder)
 					{
@@ -4779,7 +4777,7 @@ Directory the zip will be extracted to:
 
 			this.WhenAnyValue(vm => vm.SelectedProfileIndex, (index) => index > -1 && index < Profiles.Count).Subscribe((b) =>
 			{
-				if (!this.Refreshing && b)
+				if (!this.IsRefreshing && b)
 				{
 					if (SelectedModOrder != null)
 					{
@@ -4794,6 +4792,8 @@ Directory the zip will be extracted to:
 
 			var modsConnection = mods.Connect();
 			modsConnection.Publish();
+
+			modsConnection.Filter(x => x.IsUserMod).Bind(out _userMods).Subscribe();
 
 			Func<DivinityModData, bool> isLoadOrderMod = x => !x.IsLarianMod && x.Type != "Adventure" & !x.IsForcedLoaded;
 
@@ -4971,7 +4971,7 @@ Directory the zip will be extracted to:
 			Keys.ImportOrderFromSelectedGMCampaign.AddAction(() => LoadGameMasterCampaignModOrder(SelectedGameMasterCampaign), gmModeChanged);
 			justSelectedGameMasterCampaign.ObserveOn(RxApp.MainThreadScheduler).Subscribe((d) =>
 			{
-				if (!this.Refreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoadGMCampaignMods) && d.Item1 > -1)
+				if (!this.IsRefreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoadGMCampaignMods) && d.Item1 > -1)
 				{
 					var selectedCampaign = GameMasterCampaigns.ElementAtOrDefault(d.Item1);
 					if (selectedCampaign != null && !LoadingOrder)

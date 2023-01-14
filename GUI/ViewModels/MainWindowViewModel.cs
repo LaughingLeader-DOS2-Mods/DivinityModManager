@@ -822,7 +822,7 @@ namespace DivinityModManager.ViewModels
 			Keys.OpenLogsFolder.AddAction(() =>
 			{
 				Process.Start(Settings.ExtenderLogDirectory);
-			}, canOpenLogDirectory, true);
+			}, canOpenLogDirectory);
 
 			Keys.OpenWorkshopFolder.AddAction(() =>
 			{
@@ -831,9 +831,9 @@ namespace DivinityModManager.ViewModels
 				{
 					Process.Start(Settings.WorkshopPath);
 				}
-			}, canOpenWorkshopFolder, true);
+			}, canOpenWorkshopFolder);
 
-			Keys.LaunchGame.AddAction((Action)(() =>
+			Keys.LaunchGame.AddAction(() =>
 			{
 				if (!File.Exists(Settings.GameExecutablePath))
 				{
@@ -882,7 +882,7 @@ namespace DivinityModManager.ViewModels
 					}
 				}
 
-			}), canOpenGameExe, true);
+			}, canOpenGameExe);
 
 			Settings.SaveSettingsCommand = ReactiveCommand.Create(() =>
 			{
@@ -959,7 +959,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}, canResetExtenderSettingsObservable).DisposeWith(Settings.Disposables);
 
-			Settings.ResetKeybindingsCommand = ReactiveCommand.Create((Action)(() =>
+			Settings.ResetKeybindingsCommand = ReactiveCommand.Create(() =>
 			{
 				MessageBoxResult result = Xceed.Wpf.Toolkit.MessageBox.Show((Window)this.View.SettingsWindow, $"Reset Keybindings to Default?\nCurrent keybindings may be lost.", "Confirm Reset",
 					MessageBoxButton.YesNo, MessageBoxImage.Warning, MessageBoxResult.No, (Style)this.View.MainWindowMessageBox_OK.Style);
@@ -967,7 +967,7 @@ namespace DivinityModManager.ViewModels
 				{
 					Keys.SetToDefault();
 				}
-			}));
+			});
 
 			Settings.ClearWorkshopCacheCommand = ReactiveCommand.Create(() =>
 			{
@@ -2104,14 +2104,14 @@ namespace DivinityModManager.ViewModels
 
 					CachedWorkshopData.LastVersion = this.Version;
 
-					RxApp.MainThreadScheduler.Schedule((Action)(() =>
+					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						StatusBarRightText = "";
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
 						this.View.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
 						IsRefreshingWorkshop = false;
-					}));
+					});
 
 					if (CachedWorkshopData.CacheUpdated)
 					{
@@ -3156,33 +3156,33 @@ namespace DivinityModManager.ViewModels
 						}
 					}
 
-					RxApp.MainThreadScheduler.Schedule((Action)(() =>
+					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						var dir = Path.GetDirectoryName(outputPath);
 						Process.Start(dir);
 						this.View.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.", 15);
-					}));
+					});
 
 					success = true;
 				}
 				catch (Exception ex)
 				{
-					RxApp.MainThreadScheduler.Schedule((Action)(() =>
+					RxApp.MainThreadScheduler.Schedule(() =>
 					{
 						string msg = $"Error writing load order archive '{outputPath}': {ex}";
 						DivinityApp.Log(msg);
 						this.View.AlertBar.SetDangerAlert(msg);
-					}));
+					});
 				}
 
 				Directory.Delete(tempDir);
 			}
 			else
 			{
-				RxApp.MainThreadScheduler.Schedule((Action)(() =>
+				RxApp.MainThreadScheduler.Schedule(() =>
 				{
 					this.View.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
-				}));
+				});
 			}
 
 			return success;
@@ -4175,7 +4175,7 @@ namespace DivinityModManager.ViewModels
 				await ctrl.Yield();
 				RxApp.MainThreadScheduler.Schedule(_ => OnMainProgressComplete());
 
-				RxApp.MainThreadScheduler.Schedule((Action)(() =>
+				RxApp.MainThreadScheduler.Schedule(() =>
 				{
 					if (successes >= 3)
 					{
@@ -4218,7 +4218,7 @@ namespace DivinityModManager.ViewModels
 					{
 						this.View.AlertBar.SetDangerAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", 30);
 					}
-				}));
+				});
 
 				return Disposable.Empty;
 			}));
@@ -4617,7 +4617,7 @@ Directory the zip will be extracted to:
 				}
 			});
 
-			Keys.DeleteSelectedMods.AddAction((Action)(() =>
+			Keys.DeleteSelectedMods.AddAction(() =>
 			{
 				IEnumerable<DivinityModData> targetList = null;
 				if (DivinityApp.IsKeyboardNavigating)
@@ -4658,7 +4658,7 @@ Directory the zip will be extracted to:
 						ShowAlert("Editor mods cannot be deleted with the Mod Manager.", AlertType.Warning, 60);
 					}
 				}
-			}));
+			});
 
 			#endregion
 
@@ -4698,7 +4698,7 @@ Directory the zip will be extracted to:
 
 			RenameSaveCommand = ReactiveCommand.Create(RenameSave_Start, canOpenDialogWindow);
 
-			CopyOrderToClipboardCommand = ReactiveCommand.Create((Action)(() =>
+			CopyOrderToClipboardCommand = ReactiveCommand.Create(() =>
 			{
 				try
 				{
@@ -4723,7 +4723,7 @@ Directory the zip will be extracted to:
 				{
 					this.View.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex}", 15);
 				}
-			}));
+			});
 
 			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count).Select(x => Profiles.ElementAtOrDefault(x.Item1));
 			_selectedProfile = profileChanged.ToProperty(this, nameof(SelectedProfile)).DisposeWith(this.Disposables);

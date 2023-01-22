@@ -86,7 +86,7 @@
 									Width="16"
 									Height="16"
 									Margin="2"
-									Visibility="{Binding CheckingForWorkshopUpdates, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
+									Visibility="{Binding IsRefreshingWorkshop, FallbackValue=Collapsed, Converter={StaticResource BoolToVisibilityConverter}}" />
 								<TextBlock
 									x:Name="UpdateCountTextBlock"
 									Grid.Column="1"
@@ -96,7 +96,7 @@
 									Foreground="{DynamicResource {x:Static adonisUI:Brushes.ForegroundBrush}}"
 									Text="{Binding ModUpdatesViewData.TotalUpdates, FallbackValue='0'}"
 									TextAlignment="Center"
-									Visibility="{Binding CheckingForWorkshopUpdates, FallbackValue=Visible, Converter={StaticResource BoolToVisibilityConverterReversed}}">
+									Visibility="{Binding IsRefreshingWorkshop, FallbackValue=Visible, Converter={StaticResource BoolToVisibilityConverterReversed}}">
 									<TextBlock.Effect>
 										<DropShadowEffect
 											BlurRadius="4"

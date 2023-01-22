@@ -183,12 +183,9 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public bool LoadingOrder { get; set; }
 		[Reactive] public bool OrderJustLoaded { get; set; }
 		[Reactive] public bool IsDragging { get; set; }
-
-		private readonly ObservableAsPropertyHelper<bool> _isRefreshing;
-		public bool IsRefreshing => _isRefreshing.Value;
-
-		private readonly ObservableAsPropertyHelper<bool> _isRefreshingWorkshop;
-		public bool IsRefreshingWorkshop => _isRefreshingWorkshop.Value;
+		[Reactive] public bool AppSettingsLoaded { get; set; }
+		[Reactive] public bool IsRefreshing { get; private set; }
+		[Reactive] public bool IsRefreshingWorkshop { get; private set; }
 
 		private readonly ObservableAsPropertyHelper<bool> _isLocked;
 
@@ -199,7 +196,6 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public string StatusBarRightText { get; set; }
 		[Reactive] public bool ModUpdatesAvailable { get; set; }
 		[Reactive] public bool ModUpdatesViewVisible { get; set; }
-		[Reactive] public bool CheckingForWorkshopUpdates { get; set; }
 		[Reactive] public bool HighlightExtenderDownload { get; set; }
 		[Reactive] public bool GameDirectoryFound { get; set; }
 
@@ -1203,7 +1199,7 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"'{count}' mod updates pending.");
 			}
 			ModUpdatesViewData.OnLoaded?.Invoke();
-			CheckingForWorkshopUpdates = false;
+			IsRefreshingWorkshop = false;
 		}
 
 		private void SetGamePathways(string currentGameDataPath)
@@ -2038,7 +2034,7 @@ namespace DivinityModManager.ViewModels
 		private void LoadWorkshopModDataBackground()
 		{
 			bool workshopCacheFound = false;
-			CheckingForWorkshopUpdates = true;
+			IsRefreshingWorkshop = true;
 
 			RxApp.TaskpoolScheduler.ScheduleAsync((Func<IScheduler, CancellationToken, Task>)(async (s, token) =>
 			{
@@ -2295,6 +2291,8 @@ namespace DivinityModManager.ViewModels
 						CheckExtenderData();
 					}
 				}
+
+				IsRefreshing = false;
 
 				return Unit.Default;
 			}, RxApp.MainThreadScheduler);
@@ -3593,7 +3591,9 @@ namespace DivinityModManager.ViewModels
 				CheckForUpdates();
 			}
 			SaveSettings();
-			RefreshCommand.Execute(Unit.Default).Subscribe();
+
+			IsRefreshing = true;
+			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
 		}
 
 		public bool AutoChangedOrder { get; set; }
@@ -4338,6 +4338,8 @@ Directory the zip will be extracted to:
 
 		private void LoadAppConfig()
 		{
+			AppSettingsLoaded = false;
+
 			if (File.Exists(DivinityApp.PATH_APP_FEATURES))
 			{
 				var appFeaturesDict = DivinityJsonUtils.SafeDeserializeFromPath<Dictionary<string, bool>>(DivinityApp.PATH_APP_FEATURES);
@@ -4449,6 +4451,8 @@ Directory the zip will be extracted to:
 					//DivinityApp.LogMessage("Ignored mods:\n" + String.Join("\n", DivinityApp.IgnoredMods.Select(x => x.Name)));
 				}
 			}
+
+			AppSettingsLoaded = true;
 		}
 		public void OnKeyDown(Key key)
 		{
@@ -4497,8 +4501,6 @@ Directory the zip will be extracted to:
 				if (!disposables.Contains(this.Disposables)) disposables.Add(this.Disposables);
 			});
 
-			_isRefreshing = this.WhenAnyObservable(x => x.RefreshCommand.IsExecuting).ToProperty(this, nameof(IsRefreshing));
-			_isRefreshingWorkshop = this.WhenAnyObservable(x => x.RefreshWorkshopCommand.IsExecuting).ToProperty(this, nameof(IsRefreshingWorkshop));
 			_isLocked = this.WhenAnyValue(x => x.IsDragging, x => x.IsRefreshing, (b1, b2) => b1 || b2).ToProperty(this, nameof(IsLocked));
 
 			_keys = new AppKeys(this);
@@ -4530,13 +4532,14 @@ Directory the zip will be extracted to:
 				workshopMods.Clear();
 				View.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
 				View.TaskbarItemInfo.ProgressValue = 0;
+				IsRefreshing = true;
 				RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
 			}, canRefreshObservable, RxApp.MainThreadScheduler);
 
 
 			Keys.Refresh.AddAction(() => RefreshCommand.Execute(Unit.Default).Subscribe(), canRefreshObservable);
 
-			var canRefreshWorkshop = this.WhenAnyValue(x => x.IsRefreshing, x => x.IsRefreshingWorkshop, (r1, r2) => !r1 && !r2 && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
+			var canRefreshWorkshop = this.WhenAnyValue(x => x.IsRefreshing, x => x.IsRefreshingWorkshop, x => x.AppSettingsLoaded, (b1, b2, b3) => !b1 && !b2 && b3 && AppSettings.FeatureEnabled("Workshop")).StartWith(false);
 
 			RefreshWorkshopCommand = ReactiveCommand.Create(() =>
 			{

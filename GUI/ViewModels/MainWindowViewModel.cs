@@ -3391,7 +3391,7 @@ namespace DivinityModManager.ViewModels
 			dialog.CheckFileExists = true;
 			dialog.CheckPathExists = true;
 			dialog.DefaultExt = ".json";
-			dialog.Filter = "JSON file (*.json)|*.json";
+			dialog.Filter = "All formats (*.json;*.txt;*.tsv)|*.json;*.txt;*.tsv|JSON file (*.json)|*.json|Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv";
 			dialog.Title = "Load Mod Order From File...";
 
 			if (!String.IsNullOrEmpty(Settings.LastLoadedOrderFilePath) && (Directory.Exists(Settings.LastLoadedOrderFilePath) | File.Exists(Settings.LastLoadedOrderFilePath)))
@@ -3422,7 +3422,7 @@ namespace DivinityModManager.ViewModels
 				Settings.LastLoadedOrderFilePath = Path.GetDirectoryName(dialog.FileName);
 				SaveSettings();
 				DivinityApp.Log($"Loading order from '{dialog.FileName}'.");
-				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName);
+				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName, allMods);
 				if (newOrder != null)
 				{
 					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");

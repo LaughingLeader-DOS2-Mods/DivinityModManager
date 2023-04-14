@@ -64,5 +64,35 @@ namespace DivinityModManager.Util
 			}
 			return default(T);
 		}
+
+		public static bool TrySafeDeserialize<T>(string text, out T result)
+		{
+			result = JsonConvert.DeserializeObject<T>(text, new JsonSerializerSettings
+			{
+				Error = delegate (object sender, ErrorEventArgs args)
+				{
+					args.ErrorContext.Handled = true;
+				}
+			});
+			return result != null;
+		}
+
+		public static bool TrySafeDeserializeFromPath<T>(string path, out T result)
+		{
+			if (File.Exists(path))
+			{
+				string contents = File.ReadAllText(path);
+				result = JsonConvert.DeserializeObject<T>(contents, new JsonSerializerSettings
+				{
+					Error = delegate (object sender, ErrorEventArgs args)
+					{
+						args.ErrorContext.Handled = true;
+					}
+				});
+				return result != null;
+			}
+			result = default(T);
+			return false;
+		}
 	}
 }

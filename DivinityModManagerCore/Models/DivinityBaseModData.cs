@@ -124,6 +124,17 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		public bool PakEquals(string fileName, StringComparison comparison = StringComparison.Ordinal)
+		{
+			string outputPackage = Path.ChangeExtension(Folder, "pak");
+			//Imported Classic Projects
+			if (!Folder.Contains(UUID))
+			{
+				outputPackage = Path.ChangeExtension(Path.Combine(Folder + "_" + UUID), "pak");
+			}
+			return outputPackage.Equals(fileName, comparison);
+		}
+
 		public DivinityBaseModData()
 		{
 			fileName = this.WhenAnyValue(x => x.FilePath).Select(f => Path.GetFileName(f)).ToProperty(this, nameof(FileName));

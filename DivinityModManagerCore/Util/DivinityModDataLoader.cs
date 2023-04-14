@@ -1501,21 +1501,75 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		public static DivinityLoadOrder LoadOrderFromFile(string loadOrderFile)
+		public static DivinityLoadOrder LoadOrderFromFile(string loadOrderFile, IEnumerable<DivinityModData> allMods)
 		{
-			if (File.Exists(loadOrderFile))
+			var ext = Path.GetExtension(loadOrderFile).ToLower();
+			DivinityLoadOrder order = null;
+			switch (ext)
 			{
-				try
-				{
-					DivinityLoadOrder order = DivinityJsonUtils.SafeDeserialize<DivinityLoadOrder>(File.ReadAllText(loadOrderFile));
-					return order;
-				}
-				catch (Exception ex)
-				{
-					DivinityApp.Log($"Error reading '{loadOrderFile}': {ex}");
-				}
+				case ".json":
+					if (DivinityJsonUtils.TrySafeDeserializeFromPath<DivinityLoadOrder>(loadOrderFile, out var savedOrder))
+					{
+						return savedOrder;
+					}
+					else
+					{
+						if (DivinityJsonUtils.TrySafeDeserializeFromPath<List<DivinityModData>>(loadOrderFile, out var exportedOrder))
+						{
+							order = new DivinityLoadOrder();
+							exportedOrder.ForEach((mod) => order.Add(mod));
+							order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
+							return order;
+						}
+					}
+					break;
+				case ".txt":
+					var textPattern = new Regex(@"\((\S+\.pak)\)", RegexOptions.IgnoreCase);
+					var textLines = File.ReadAllLines(loadOrderFile);
+					order = new DivinityLoadOrder();
+					foreach (var line in textLines)
+					{
+						var match = textPattern.Match(line);
+						if(match.Success)
+						{
+							var pakName = Path.GetFileName(match.Groups[1].Value);
+							DivinityApp.Log(pakName);
+							var mod = allMods.FirstOrDefault(x => x.PakEquals(pakName, StringComparison.OrdinalIgnoreCase));
+							if(mod != null)
+							{
+								order.Add(mod);
+							}
+						}
+					}
+					break;
+				case ".tsv":
+					var tsvLines = File.ReadAllLines(loadOrderFile);
+					var header = tsvLines[0].Split('\t');
+					var fileIndex = header.IndexOf("FileName");
+					if (fileIndex > -1)
+					{
+						order = new DivinityLoadOrder();
+						for(var i = 1; i < tsvLines.Length; i++)
+						{
+							var lineData = tsvLines[i].Split('\t');
+							if (lineData.Length > fileIndex)
+							{
+								var fileName = Path.GetFileName(lineData[fileIndex]);
+								var mod = allMods.FirstOrDefault(x => x.PakEquals(fileName, StringComparison.OrdinalIgnoreCase));
+								if (mod != null)
+								{
+									order.Add(mod);
+								}
+							}
+						}
+					}
+					break;
 			}
-			return null;
+			if(order != null)
+			{
+				order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
+			}
+			return order;
 		}
 
 		public static async Task<bool> ExportModSettingsToFileAsync(string folder, IEnumerable<DivinityModData> order)

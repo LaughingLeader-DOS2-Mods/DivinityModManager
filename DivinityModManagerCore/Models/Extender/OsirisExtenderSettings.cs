@@ -134,13 +134,25 @@ namespace DivinityModManager.Models.Extender
         [DefaultValue(false)]
         public bool EnableLuaDebugger { get; set; }
 
-        [SettingsEntry("Lua Builtin Directory", "An additional directory where the Script Extender will check for builtin scripts\nThis setting is meant for ositools developers, to make it easier to test builtin script changes.", true)]
+        [SettingsEntry("Lua Builtin Directory", "An additional directory where the Script Extender will check for builtin scripts\nThis setting is meant for ositools developers, to make it easier to test builtin script changes", true)]
         [Reactive]
         [DataMember]
         [DefaultValue("")]
         public string LuaBuiltinResourceDirectory { get; set; } = "";
 
-        public static OsirisExtenderSettings DefaultSettings = new OsirisExtenderSettings();
+		[SettingsEntry("Default to Client Side", "Defaults the extender console to the client-side\nThis is setting is intended for developers", true)]
+		[Reactive]
+		[DataMember]
+		[DefaultValue(false)]
+		public bool DefaultToClientConsole { get; set; }
+
+		[SettingsEntry("Show Performance Warnings", "Print warnings to the extender console window, which indicates when the server-side part of the game lags behind (a.k.a. warnings about ticks taking too long).", true)]
+		[Reactive]
+		[DataMember]
+		[DefaultValue(false)]
+		public bool ShowPerfWarnings { get; set; }
+
+		public static OsirisExtenderSettings DefaultSettings = new OsirisExtenderSettings();
 
         public void SetToDefault()
         {

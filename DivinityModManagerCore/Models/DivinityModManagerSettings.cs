@@ -17,10 +17,11 @@ using DivinityModManager.Models.App;
 using System.Reactive;
 using ReactiveUI.Fody.Helpers;
 using System.ComponentModel;
+using DivinityModManager.Models.Extender;
 
 namespace DivinityModManager.Models
 {
-	[DataContract]
+    [DataContract]
 	public class DivinityModManagerSettings : ReactiveObject, IDisposable
 	{
 		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods\nExample: Divinity Original Sin 2/DefEd/Data")]
@@ -99,10 +100,10 @@ namespace DivinityModManager.Models
 		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well")]
 		[DataMember][Reactive] public bool ShiftListFocusOnSwap { get; set; }
 
-		private OsiExtenderSettings extenderSettings;
+		private OsirisExtenderSettings extenderSettings;
 
 		[DataMember]
-		public OsiExtenderSettings ExtenderSettings
+		public OsirisExtenderSettings ExtenderSettings
 		{
 			get => extenderSettings;
 			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
@@ -211,7 +212,7 @@ namespace DivinityModManager.Models
 		public DivinityModManagerSettings()
 		{
 			Disposables = new CompositeDisposable();
-			ExtenderSettings = new OsiExtenderSettings();
+			ExtenderSettings = new OsirisExtenderSettings();
 
 			var properties = typeof(DivinityModManagerSettings)
 			.GetRuntimeProperties()
@@ -224,7 +225,7 @@ namespace DivinityModManager.Models
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 			}).DisposeWith(Disposables);
 
-			var extender_properties = typeof(OsiExtenderSettings)
+			var extender_properties = typeof(OsirisExtenderSettings)
 			.GetRuntimeProperties()
 			.Where(prop => Attribute.IsDefined(prop, typeof(DataMemberAttribute)))
 			.Select(prop => prop.Name)

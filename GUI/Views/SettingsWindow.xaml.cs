@@ -24,10 +24,11 @@ using System.Globalization;
 using DivinityModManager.Controls;
 using Xceed.Wpf.Toolkit;
 using DivinityModManager.Converters;
+using DivinityModManager.Models.Extender;
 
 namespace DivinityModManager.Views
 {
-	public class SettingsWindowBase : HideWindowBase<DivinityModManagerSettings> { }
+    public class SettingsWindowBase : HideWindowBase<DivinityModManagerSettings> { }
 
 	/// <summary>
 	/// Interaction logic for SettingsWindow.xaml
@@ -85,7 +86,7 @@ namespace DivinityModManager.Views
 
 		private void CreateExtenderSettings()
 		{
-			var props = from p in typeof(OsiExtenderSettings).GetProperties()
+			var props = from p in typeof(OsirisExtenderSettings).GetProperties()
 						let attr = p.GetCustomAttributes(typeof(SettingsEntryAttribute), true)
 						where attr.Length == 1
 						select new { Property = p, Attribute = attr.First() as SettingsEntryAttribute };

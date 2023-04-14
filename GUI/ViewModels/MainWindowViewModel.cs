@@ -47,10 +47,11 @@ using SharpCompress.Archives.SevenZip;
 using SharpCompress.Readers;
 using System.Reactive.Subjects;
 using System.Windows.Markup;
+using DivinityModManager.Models.Extender;
 
 namespace DivinityModManager.ViewModels
 {
-	public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
+    public class MainWindowViewModel : BaseHistoryViewModel, IActivatableViewModel, IDivinityAppViewModel
 	{
 		[Reactive] public MainWindow View { get; private set; }
 
@@ -536,7 +537,7 @@ namespace DivinityModManager.ViewModels
 					string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
 					if (extenderSettingsJson.IsExistingFile())
 					{
-						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsiExtenderSettings>(extenderSettingsJson);
+						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsirisExtenderSettings>(extenderSettingsJson);
 						if (osirisExtenderSettings != null)
 						{
 							DivinityApp.Log($"Loaded extender settings from '{extenderSettingsJson}'.");

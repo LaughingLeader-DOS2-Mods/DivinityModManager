@@ -135,6 +135,24 @@ namespace DivinityModManager.Models
 			return outputPackage.Equals(fileName, comparison);
 		}
 
+		public bool IsNewerThan(DateTime date)
+		{
+			if(LastModified.HasValue)
+			{
+				return LastModified.Value > date;
+			}
+			return false;
+		}
+
+		public bool IsNewerThan(DivinityBaseModData mod)
+		{
+			if(LastModified.HasValue && mod.LastModified.HasValue)
+			{
+				return LastModified.Value > mod.LastModified.Value;
+			}
+			return false;
+		}
+
 		public DivinityBaseModData()
 		{
 			fileName = this.WhenAnyValue(x => x.FilePath).Select(f => Path.GetFileName(f)).ToProperty(this, nameof(FileName));

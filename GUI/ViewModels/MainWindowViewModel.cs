@@ -1171,9 +1171,17 @@ namespace DivinityModManager.ViewModels
 					pakMod.WorkshopData.ID = workshopMod.WorkshopData.ID;
 					if (!pakMod.IsEditorMod)
 					{
-						//DivinityApp.LogMessage($"Comparing versions for ({pakMod.Name}): Workshop({workshopMod.Version.VersionInt})({workshopMod.Version.Version}) Local({pakMod.Version.VersionInt})({pakMod.Version.Version})");
-						if (!File.Exists(pakMod.FilePath) || workshopMod.Version.VersionInt > pakMod.Version.VersionInt || workshopMod.LastModified > pakMod.LastModified)
+						if (!File.Exists(pakMod.FilePath) || workshopMod.Version > pakMod.Version || workshopMod.IsNewerThan(pakMod))
 						{
+							if (workshopMod.Version.VersionInt > pakMod.Version.VersionInt)
+							{
+								DivinityApp.Log($"Update available for ({pakMod.FileName}): Workshop({workshopMod.Version.VersionInt}|{pakMod.Version.Version})({workshopMod.Version.Version}) > Local({pakMod.Version.VersionInt}|{pakMod.Version.Version})");
+							}
+							else
+							{
+								DivinityApp.Log($"Update available for ({pakMod.FileName}): Workshop({workshopMod.LastModified}) > Local({pakMod.LastModified})");
+							}
+							
 							ModUpdatesViewData.Updates.Add(new DivinityModUpdateData()
 							{
 								LocalMod = pakMod,

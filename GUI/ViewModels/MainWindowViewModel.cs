@@ -2341,12 +2341,12 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private void SaveLoadOrder()
+		private void SaveLoadOrder(bool skipSaveConfirmation = false)
 		{
-			RxApp.MainThreadScheduler.ScheduleAsync(async (sch, cts) => await SaveLoadOrderAsync());
+			RxApp.MainThreadScheduler.ScheduleAsync(async (sch, cts) => await SaveLoadOrderAsync(skipSaveConfirmation));
 		}
 
-		private async Task<bool> SaveLoadOrderAsync()
+		private async Task<bool> SaveLoadOrderAsync(bool skipSaveConfirmation = false)
 		{
 			bool result = false;
 			if (SelectedProfile != null && SelectedModOrder != null)
@@ -2391,7 +2391,7 @@ namespace DivinityModManager.ViewModels
 					result = false;
 				}
 
-				if (result)
+				if (result && !skipSaveConfirmation)
 				{
 					View.AlertBar.SetSuccessAlert($"Saved mod load order to '{outputPath}'", 10);
 				}
@@ -3813,7 +3813,7 @@ namespace DivinityModManager.ViewModels
 				SelectedModOrder.Order.RemoveAll(x => deletedMods.Contains(x.UUID));
 				SelectedProfile.ModOrder.RemoveMany(deletedMods);
 				SelectedProfile.ActiveMods.RemoveAll(x => deletedMods.Contains(x.UUID));
-				SaveLoadOrder();
+				SaveLoadOrder(true);
 			}
 
 			if(deletedWorkshopMods != null && deletedWorkshopMods.Count > 0)
@@ -4518,7 +4518,7 @@ Directory the zip will be extracted to:
 			Keys.SaveDefaultKeybindings();
 
 			var canExecuteSaveCommand = this.WhenAnyValue(x => x.CanSaveOrder, (canSave) => canSave == true);
-			Keys.Save.AddAction(SaveLoadOrder, canExecuteSaveCommand);
+			Keys.Save.AddAction(() => SaveLoadOrder(), canExecuteSaveCommand);
 
 			var canExecuteSaveAsCommand = this.WhenAnyValue(x => x.CanSaveOrder, x => x.MainProgressIsActive, (canSave, p) => canSave && !p);
 			Keys.SaveAs.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
@@ -5008,7 +5008,7 @@ Directory the zip will be extracted to:
 					}
 					return false;
 				}), RxApp.MainThreadScheduler);
-				interaction.SetOutput((bool)confirmed);
+				interaction.SetOutput(confirmed);
 			}));
 		}
 	}

@@ -3258,7 +3258,7 @@ namespace DivinityModManager.ViewModels
 					string outputText = "";
 					if (fileType.Equals(".json", StringComparison.OrdinalIgnoreCase))
 					{
-						outputText = JsonConvert.SerializeObject(ActiveMods, Formatting.Indented, new JsonSerializerSettings
+						outputText = JsonConvert.SerializeObject(ActiveMods.Select(x => DivinitySerializedModData.FromMod(x)).ToList(), Formatting.Indented, new JsonSerializerSettings
 						{
 							NullValueHandling = NullValueHandling.Ignore
 						});

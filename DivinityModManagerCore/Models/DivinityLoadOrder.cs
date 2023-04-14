@@ -82,7 +82,57 @@ namespace DivinityModManager.Models
 			}
 		}
 
+		public void Add(IDivinityModData mod)
+		{
+			try
+			{
+				if (Order != null && mod != null)
+				{
+					if (Order.Count > 0)
+					{
+						bool alreadyInOrder = false;
+						foreach (var x in Order)
+						{
+							if (x != null && x.UUID == mod.UUID)
+							{
+								alreadyInOrder = true;
+								break;
+							}
+						}
+						if (!alreadyInOrder)
+						{
+							Order.Add(new DivinityLoadOrderEntry
+							{
+								UUID = mod.UUID,
+								Name = mod.Name,
+							});
+						}
+					}
+					else
+					{
+						Order.Add(new DivinityLoadOrderEntry
+						{
+							UUID = mod.UUID,
+							Name = mod.Name,
+						});
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error adding mod to order:\n{ex}");
+			}
+		}
+
 		public void AddRange(IEnumerable<DivinityModData> mods)
+		{
+			foreach (var mod in mods)
+			{
+				Add(mod);
+			}
+		}
+
+		public void AddRange(IEnumerable<IDivinityModData> mods)
 		{
 			foreach (var mod in mods)
 			{

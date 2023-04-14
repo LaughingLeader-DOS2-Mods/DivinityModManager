@@ -1514,10 +1514,19 @@ namespace DivinityModManager.Util
 					}
 					else
 					{
-						if (DivinityJsonUtils.TrySafeDeserializeFromPath<List<DivinityModData>>(loadOrderFile, out var exportedOrder))
+						if (DivinityJsonUtils.TrySafeDeserializeFromPath<List<DivinitySerializedModData>>(loadOrderFile, out var exportedOrder))
 						{
 							order = new DivinityLoadOrder();
-							exportedOrder.ForEach((mod) => order.Add(mod));
+							order.AddRange(exportedOrder);
+							DivinityApp.Log(String.Join("\n", order.Order.Select(x => x.UUID)));
+							var modGUIDs = allMods.Select(x => x.UUID).ToHashSet();
+							foreach (var entry in order.Order)
+							{
+								if(!modGUIDs.Contains(entry.UUID))
+								{
+									entry.Missing = true;
+								}
+							}
 							order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
 							return order;
 						}
@@ -1539,6 +1548,15 @@ namespace DivinityModManager.Util
 							{
 								order.Add(mod);
 							}
+							else
+							{
+								order.Order.Add(new DivinityLoadOrderEntry
+								{
+									Missing = true,
+									Name = pakName,
+									UUID = "",
+								});
+							}
 						}
 					}
 					break;
@@ -1546,6 +1564,8 @@ namespace DivinityModManager.Util
 					var tsvLines = File.ReadAllLines(loadOrderFile);
 					var header = tsvLines[0].Split('\t');
 					var fileIndex = header.IndexOf("FileName");
+					var nameIndex = header.IndexOf("Name");
+					var urlIndex = header.IndexOf("URL");
 					if (fileIndex > -1)
 					{
 						order = new DivinityLoadOrder();
@@ -1559,6 +1579,24 @@ namespace DivinityModManager.Util
 								if (mod != null)
 								{
 									order.Add(mod);
+								}
+								else
+								{
+									var name = fileName;
+									if (nameIndex > -1)
+									{
+										name = lineData[nameIndex];
+									}
+									if (urlIndex > -1 && lineData.Length > urlIndex)
+									{
+										name = $"{name} {lineData[urlIndex]}";
+									}
+									order.Order.Add(new DivinityLoadOrderEntry
+									{
+										Missing = true,
+										Name = name,
+										UUID = "",
+									});
 								}
 							}
 						}

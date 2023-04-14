@@ -71,6 +71,26 @@ namespace DivinityModManager.Models
 			ParseInt(vInt);
 		}
 
+		public static bool operator> (DivinityModVersion a, DivinityModVersion b)
+		{
+			return a.VersionInt > b.VersionInt;
+		}
+
+		public static bool operator< (DivinityModVersion a, DivinityModVersion b)
+		{
+			return a.VersionInt < b.VersionInt;
+		}
+
+		public static bool operator>= (DivinityModVersion a, DivinityModVersion b)
+		{
+			return a.VersionInt >= b.VersionInt;
+		}
+
+		public static bool operator<= (DivinityModVersion a, DivinityModVersion b)
+		{
+			return a.VersionInt <= b.VersionInt;
+		}
+
 		public DivinityModVersion(int headerMajor, int headerMinor, int headerRevision, int headerBuild) : this()
 		{
 			Major = headerMajor;

@@ -89,7 +89,7 @@ namespace DivinityModManager.Views
 			SettingsWindow = new SettingsWindow();
 			SettingsWindow.OnWorkshopPathChanged += delegate
 			{
-				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(50), _ => ViewModel.LoadWorkshopMods());
+				RxApp.TaskpoolScheduler.ScheduleAsync(TimeSpan.FromMilliseconds(50), async (sch,cts) => await ViewModel.LoadWorkshopModsAsync(cts));
 			};
 			SettingsWindow.Closed += delegate
 			{

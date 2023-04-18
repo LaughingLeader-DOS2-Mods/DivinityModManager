@@ -18,6 +18,8 @@ using Newtonsoft.Json.Linq;
 using DynamicData;
 using DivinityModManager.Extensions;
 using ReactiveUI;
+using LSLib.Granny;
+using System.Collections.Concurrent;
 
 namespace DivinityModManager.Util
 {
@@ -658,10 +660,17 @@ namespace DivinityModManager.Util
 				var hasBuiltinDirectory = false;
 				var builtinModOverrides = new Dictionary<string, DivinityModData>();
 
+				AbstractFileInfo osiConfigInfo = null;
+
 				if (pak != null && pak.Files != null)
 				{
-					foreach (var f in pak.Files)
+					for (int i = 0; i < pak.Files.Count; i++)
 					{
+						var f = pak.Files[i];
+						if(f.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG))
+						{
+							osiConfigInfo = f;
+						}
 						if (IsModMetaFile(pakName, f))
 						{
 							metaFiles.Add(f);
@@ -684,17 +693,25 @@ namespace DivinityModManager.Util
 				}
 
 				AbstractFileInfo metaFile = null;
-				foreach (var f in metaFiles)
+				for (int i = 0; i < metaFiles.Count; i++)
 				{
-					var parentDir = Directory.GetParent(f.Name);
-					// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
-					if (pakName.Contains(parentDir.Name))
+					var f = metaFiles[i];
+					if (metaFile == null)
 					{
 						metaFile = f;
-						break;
+					}	
+					else
+					{
+						var parentDir = Directory.GetParent(f.Name);
+						// A pak may have multiple meta.lsx files for overriding NumPlayers or something. Match against the pak name in that case.
+						if (pakName.Contains(parentDir.Name))
+						{
+							metaFile = f;
+							break;
+						}
 					}
 				}
-				if (metaFile == null) metaFile = metaFiles.FirstOrDefault();
+
 				if (metaFile != null)
 				{
 					//DivinityApp.LogMessage($"Parsing meta.lsx for mod pak '{pakPath}'.");
@@ -707,7 +724,7 @@ namespace DivinityModManager.Util
 						}
 					}
 
-					if (modData != null && (!modData.IsClassicMod))
+					if (modData != null)
 					{
 						modData.HasBuiltinOverride = hasBuiltinDirectory;
 						if (hasBuiltinDirectory)
@@ -727,7 +744,6 @@ namespace DivinityModManager.Util
 
 						modData.IsUserMod = true;
 
-						var osiConfigInfo = pak.Files?.FirstOrDefault(pf => pf.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG));
 						if (osiConfigInfo != null)
 						{
 							var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
@@ -742,6 +758,7 @@ namespace DivinityModManager.Util
 							}
 						}
 
+						//DivinityApp.Log($"Loaded mod '{modData.Name}'.");
 						return modData;
 					}
 				}
@@ -767,32 +784,45 @@ namespace DivinityModManager.Util
 		{
 			var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
 
-			if (Directory.Exists(modsFolderPath))
+			List<string> modPaks = new List<string>();
+			try
 			{
-				List<string> modPaks = new List<string>();
-				try
+				var dirOptions = DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive;
+				var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
+				new DirectoryEnumerationFilters()
 				{
-					var dirOptions = DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive;
-					var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
-					new DirectoryEnumerationFilters()
-					{
-						InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase),
-						RecursionFilter = (f) => !_IgnoredRecursiveFolders.Any(x => f.FullPath.Contains(x))
-					}).ToList();
-					allPaks.ForEach((p) => _AllPaksNames.Add(Path.GetFileNameWithoutExtension(p)));
-					modPaks.AddRange(allPaks.Where(PakIsNotPartial));
-				}
-				catch (Exception ex)
-				{
-					DivinityApp.Log($"Error enumerating pak folder '{modsFolderPath}': {ex}");
-				}
-
-				DivinityApp.Log("Mod Packages: " + modPaks.Count());
-
-				var loadedMods = await Task.WhenAll(modPaks.Select(pakPath => LoadModDataFromPakAsync(pakPath, builtinMods, cts)));
-				return loadedMods.Where(x => x != null).ToList();
+					InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase),
+					RecursionFilter = (f) => !_IgnoredRecursiveFolders.Any(x => f.FullPath.Contains(x))
+				});
+				_AllPaksNames.UnionWith(allPaks.Select(p => Path.GetFileNameWithoutExtension(p)));
+				modPaks.AddRange(allPaks.Where(PakIsNotPartial));
 			}
-			return new List<DivinityModData>();
+			catch (Exception ex)
+			{
+				DivinityApp.Log($"Error enumerating pak folder '{modsFolderPath}': {ex}");
+			}
+
+			DivinityApp.Log($"Mod Packages: {modPaks.Count()}");
+
+			var loadedMods = new List<DivinityModData>();
+
+			async Task AwaitPartition(IEnumerator<string> partition)
+			{
+				using (partition)
+				{
+					while (partition.MoveNext())
+					{
+						await Task.Yield(); // prevents a sync/hot thread hangup
+						var modData = await LoadModDataFromPakAsync(partition.Current, builtinMods, cts);
+						loadedMods.Add(modData);
+					}
+				}
+			}
+
+			var time = DateTime.Now;
+			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
+			DivinityApp.Log($"Took {(DateTime.Now - time).Seconds} second(s) to load mod paks.");
+			return loadedMods;
 		}
 
 		private static string GetNodeAttribute(Node node, string key, string defaultValue)

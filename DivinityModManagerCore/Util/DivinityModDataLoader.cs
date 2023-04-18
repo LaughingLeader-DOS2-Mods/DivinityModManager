@@ -259,7 +259,76 @@ namespace DivinityModManager.Util
 		//BOM
 		private static readonly string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
 
-		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath, CancellationToken? token = null)
+		private static System.IO.FileStream _GetAsyncStream(string filePath)
+		{
+			return new System.IO.FileStream(filePath,
+					System.IO.FileMode.Open,
+					System.IO.FileAccess.Read,
+					System.IO.FileShare.Read,
+					2048,
+					System.IO.FileOptions.Asynchronous);
+		}
+
+		private static async Task<DivinityModData> LoadEditorProjectFolderAsync(string folder, CancellationToken token)
+		{
+			var metaFile = Path.Combine(folder, "meta.lsx");
+			if (File.Exists(metaFile))
+			{
+				using (var fileStream = _GetAsyncStream(metaFile))
+				{
+					var result = new byte[fileStream.Length];
+					await fileStream.ReadAsync(result, 0, (int)fileStream.Length, token);
+
+					string str = Encoding.UTF8.GetString(result, 0, result.Length);
+
+					if (!String.IsNullOrEmpty(str))
+					{
+						//XML parsing doesn't like the BOM for some reason
+						if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
+						{
+							str = str.Remove(0, _byteOrderMarkUtf8.Length);
+						}
+
+						DivinityModData modData = ParseMetaFile(str);
+						if (modData != null)
+						{
+							modData.IsEditorMod = true;
+							modData.IsUserMod = true;
+							modData.FilePath = folder;
+							try
+							{
+								modData.LastModified = File.GetChangeTime(metaFile);
+								modData.LastUpdated = modData.LastModified.Value;
+							}
+							catch (PlatformNotSupportedException ex)
+							{
+								DivinityApp.Log($"Error getting last modified date for '{metaFile}': {ex}");
+							}
+
+							var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
+							if (File.Exists(osiConfigFile))
+							{
+								var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
+								if (osiToolsConfig != null)
+								{
+									modData.OsiExtenderData = osiToolsConfig;
+									if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+								}
+								else
+								{
+									DivinityApp.Log($"Failed to parse {DivinityApp.EXTENDER_MOD_CONFIG} for '{folder}'.");
+								}
+							}
+
+							return modData;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath, CancellationToken token)
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
 
@@ -270,74 +339,27 @@ namespace DivinityModManager.Util
 					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
 					var filteredFolders = projectDirectories.Where(f => !IgnoreModByFolder(f));
 					Console.WriteLine($"Project Folders: {filteredFolders.Count()} / {projectDirectories.Count()}");
-					foreach (var folder in filteredFolders)
+
+					async Task AwaitPartition(IEnumerator<string> partition)
 					{
-						if (token != null && token.Value.IsCancellationRequested)
+						using (partition)
 						{
-							return projects;
-						}
-						//DivinityApp.LogMessage($"Reading meta file from folder: {folder}");
-						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
-						var metaFile = Path.Combine(folder, "meta.lsx");
-						if (File.Exists(metaFile))
-						{
-							using (var fileStream = new System.IO.FileStream(metaFile,
-								System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read))
+							while (partition.MoveNext())
 							{
-								var result = new byte[fileStream.Length];
-								await fileStream.ReadAsync(result, 0, (int)fileStream.Length);
-
-								string str = Encoding.UTF8.GetString(result, 0, result.Length);
-
-								if (!String.IsNullOrEmpty(str))
+								if (token.IsCancellationRequested) return;
+								await Task.Yield(); // prevents a sync/hot thread hangup
+								var modData = await LoadEditorProjectFolderAsync(partition.Current, token);
+								if (modData != null)
 								{
-									//XML parsing doesn't like the BOM for some reason
-									if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
-									{
-										str = str.Remove(0, _byteOrderMarkUtf8.Length);
-									}
-
-									DivinityModData modData = ParseMetaFile(str);
-									if (modData != null)
-									{
-										modData.IsEditorMod = true;
-										modData.IsUserMod = true;
-										modData.FilePath = folder;
-										try
-										{
-											modData.LastModified = File.GetChangeTime(metaFile);
-											modData.LastUpdated = modData.LastModified.Value;
-										}
-										catch (PlatformNotSupportedException ex)
-										{
-											DivinityApp.Log($"Error getting last modified date for '{metaFile}': {ex}");
-										}
-										projects.Add(modData);
-
-										var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
-										if (File.Exists(osiConfigFile))
-										{
-											var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
-											if (osiToolsConfig != null)
-											{
-												modData.OsiExtenderData = osiToolsConfig;
-												if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
-#if DEBUG
-												//DivinityApp.LogMessage($"Loaded OsiToolsConfig.json for '{folder}':");
-												//DivinityApp.LogMessage($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-												//if (modData.OsiExtenderData.FeatureFlags != null) DivinityApp.LogMessage($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
-#endif
-											}
-											else
-											{
-												DivinityApp.Log($"Failed to parse {DivinityApp.EXTENDER_MOD_CONFIG} for '{folder}'.");
-											}
-										}
-									}
+									projects.Add(modData);
 								}
 							}
 						}
 					}
+
+					var currenTime = DateTime.Now;
+					await Task.WhenAll(Partitioner.Create(filteredFolders).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
+					DivinityApp.Log($"Took {DateTime.Now - currenTime:s\\.ff} seconds(s) to load editor mods.");
 				}
 			}
 			catch (Exception ex)
@@ -572,7 +594,7 @@ namespace DivinityModManager.Util
 			DivinityApp.Log($"Split mod loading into {Environment.ProcessorCount} partitions.");
 			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
 
-			DivinityApp.Log($"Took {(DateTime.Now - currenTime).Seconds} second(s) to load mod paks.");
+			DivinityApp.Log($"Took {DateTime.Now - currenTime:s\\.ff} second(s) to load mod paks.");
 			return loadedMods;
 		}
 
@@ -1796,50 +1818,61 @@ namespace DivinityModManager.Util
 			return baseMods;
 		}
 
-		public static async Task<List<DivinityModData>> LoadBuiltinModsAsync(string gameDataPath, CancellationToken? token = null)
+		private static async Task<DivinityModData> LoadModFromModInfo(ModInfo modInfo, CancellationToken token)
+		{
+			var metaFile = modInfo.Meta;
+			if (metaFile != null)
+			{
+				using (var stream = metaFile.MakeStream())
+				{
+					using (var sr = new System.IO.StreamReader(stream))
+					{
+						if (token.IsCancellationRequested) return null;
+						string text = await sr.ReadToEndAsync();
+						var modData = ParseMetaFile(text, true);
+						if (modData != null)
+						{
+							DivinityApp.Log($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
+							modData.IsLarianMod = DivinityApp.IgnoredMods.Any(x => x.UUID == modData.UUID) || modData.Author.Contains("Larian");
+							modData.IsHidden = modData.IsLarianMod;
+							return modData;
+						}
+					}
+				}
+			}
+			return null;
+		}
+
+		public static async Task<List<DivinityModData>> LoadBuiltinModsAsync(string gameDataPath, CancellationToken token)
 		{
 			List<DivinityModData> baseMods = new List<DivinityModData>();
 
 			try
 			{
 				var modResources = new ModResources();
-				var modHelper = new ModPathVisitor(modResources);
-				modHelper.Game = LSLib.LS.Story.Compiler.TargetGame.DOS2DE;
-				modHelper.CollectGlobals = false;
-				modHelper.CollectLevels = false;
-				modHelper.CollectStoryGoals = false;
-				modHelper.CollectStats = false;
+				var modHelper = new ModPathVisitor(modResources)
+				{
+					Game = LSLib.LS.Story.Compiler.TargetGame.DOS2DE,
+					CollectGlobals = false,
+					CollectLevels = false,
+					CollectStoryGoals = false,
+					CollectStats = false
+				};
 
 				modHelper.DiscoverBuiltinPackages(gameDataPath);
 
 				if (modResources.Mods != null && modResources.Mods.Values != null)
 				{
-					foreach (var modInfo in modResources.Mods.Values)
+					var currentTime = DateTime.Now;
+					foreach(var modInfo in modResources.Mods.Values)
 					{
-						if (token != null && token.Value.IsCancellationRequested)
+						var modData = await LoadModFromModInfo(modInfo, token);
+						if (modData != null)
 						{
-							return baseMods;
-						}
-						var metaFile = modInfo.Meta;
-						if (metaFile != null)
-						{
-							using (var stream = metaFile.MakeStream())
-							{
-								using (var sr = new System.IO.StreamReader(stream))
-								{
-									string text = await sr.ReadToEndAsync();
-									var modData = ParseMetaFile(text, true);
-									if (modData != null)
-									{
-										DivinityApp.Log($"Added base mod: Name({modData.Name}) UUID({modData.UUID}) Author({modData.Author}) Version({modData.Version.VersionInt})");
-										modData.IsLarianMod = DivinityApp.IgnoredMods.Any(x => x.UUID == modData.UUID) || modData.Author.Contains("Larian");
-										modData.IsHidden = modData.IsLarianMod;
-										baseMods.Add(modData);
-									}
-								}
-							}
+							baseMods.Add(modData);
 						}
 					}
+					DivinityApp.Log($"Took {DateTime.Now - currentTime:s\\.ff} seconds(s) to load builtin mods.");
 				}
 			}
 			catch (Exception ex)

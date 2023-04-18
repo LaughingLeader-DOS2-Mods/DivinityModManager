@@ -259,81 +259,6 @@ namespace DivinityModManager.Util
 		//BOM
 		private static readonly string _byteOrderMarkUtf8 = Encoding.UTF8.GetString(Encoding.UTF8.GetPreamble());
 
-		public static List<DivinityModData> LoadEditorProjects(string modsFolderPath)
-		{
-			List<DivinityModData> projects = new List<DivinityModData>();
-
-			try
-			{
-				if (Directory.Exists(modsFolderPath))
-				{
-					var projectDirectories = Directory.EnumerateDirectories(modsFolderPath);
-					var filteredFolders = projectDirectories.Where(f => !IgnoreModByFolder(f));
-					Console.WriteLine($"Project Folders: {filteredFolders.Count()} / {projectDirectories.Count()}");
-					foreach (var folder in filteredFolders)
-					{
-						//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
-						var metaFile = Path.Combine(folder, "meta.lsx");
-						if (File.Exists(metaFile))
-						{
-
-							var str = File.ReadAllText(metaFile);
-							if (!String.IsNullOrEmpty(str))
-							{
-								//BOM stripping
-								if (str.StartsWith(_byteOrderMarkUtf8, StringComparison.Ordinal))
-								{
-									str = str.Remove(0, _byteOrderMarkUtf8.Length);
-								}
-								DivinityModData modData = ParseMetaFile(str);
-								if (modData != null)
-								{
-									modData.IsEditorMod = true;
-									modData.FilePath = folder;
-									try
-									{
-										modData.LastModified = File.GetChangeTime(metaFile);
-										modData.LastUpdated = modData.LastModified.Value;
-									}
-									catch (PlatformNotSupportedException ex)
-									{
-										DivinityApp.Log($"Error getting last modified date for '{metaFile}': {ex}");
-									}
-
-									projects.Add(modData);
-
-									var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
-									if (File.Exists(osiConfigFile))
-									{
-										var osiToolsConfig = LoadOsiConfig(osiConfigFile);
-										if (osiToolsConfig != null)
-										{
-											modData.OsiExtenderData = osiToolsConfig;
-											if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
-#if DEBUG
-											//DivinityApp.LogMessage($"Loaded OsiToolsConfig.json for '{folder}':");
-											//DivinityApp.LogMessage($"\tRequiredVersion: {modData.OsiExtenderData.RequiredExtensionVersion}");
-											//if (modData.OsiExtenderData.FeatureFlags != null) DivinityApp.LogMessage($"\tFeatureFlags: {String.Join(",", modData.OsiExtenderData.FeatureFlags)}");
-#endif
-										}
-										else
-										{
-											DivinityApp.Log($"Failed to parse {DivinityApp.EXTENDER_MOD_CONFIG} for '{folder}'.");
-										}
-									}
-								}
-							}
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				DivinityApp.Log($"Error loading mod projects: {ex}");
-			}
-			return projects;
-		}
-
 		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath, CancellationToken? token = null)
 		{
 			List<DivinityModData> projects = new List<DivinityModData>();
@@ -448,7 +373,7 @@ namespace DivinityModManager.Util
 			return true;
 		}
 
-		private static Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
+		private static readonly Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
 		private static bool IsModMetaFile(string pakName, AbstractFileInfo f)
 		{
 			if (Path.GetFileName(f.Name).Equals("meta.lsx", StringComparison.OrdinalIgnoreCase))
@@ -730,6 +655,7 @@ namespace DivinityModManager.Util
 						if (hasBuiltinDirectory)
 						{
 							modData.BuiltinOverrideModsText = String.Join(Environment.NewLine, builtinModOverrides.Values.OrderBy(x => x.Name).Select(x => $"{x.Folder} ({x.Name})"));
+							modData.IsForcedLoaded = true;
 						}
 						modData.FilePath = pakPath;
 						try
@@ -760,6 +686,10 @@ namespace DivinityModManager.Util
 
 						//DivinityApp.Log($"Loaded mod '{modData.Name}'.");
 						return modData;
+					}
+					else
+					{
+						DivinityApp.Log($"Error: Failed to parse meta.lsx for mod pak '{pakPath}'.");
 					}
 				}
 				else
@@ -812,16 +742,22 @@ namespace DivinityModManager.Util
 				{
 					while (partition.MoveNext())
 					{
+						if (cts.IsCancellationRequested) return;
 						await Task.Yield(); // prevents a sync/hot thread hangup
 						var modData = await LoadModDataFromPakAsync(partition.Current, builtinMods, cts);
-						loadedMods.Add(modData);
+						if(modData != null)
+						{
+							loadedMods.Add(modData);
+						}
 					}
 				}
 			}
 
-			var time = DateTime.Now;
+			var currenTime = DateTime.Now;
+			DivinityApp.Log($"Split mod loading into {Environment.ProcessorCount} partitions.");
 			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
-			DivinityApp.Log($"Took {(DateTime.Now - time).Seconds} second(s) to load mod paks.");
+
+			DivinityApp.Log($"Took {(DateTime.Now - currenTime).Seconds} second(s) to load mod paks.");
 			return loadedMods;
 		}
 

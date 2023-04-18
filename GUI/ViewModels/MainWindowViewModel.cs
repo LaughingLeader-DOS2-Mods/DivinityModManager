@@ -235,7 +235,7 @@ namespace DivinityModManager.ViewModels
 		}
 
 		[Reactive] public CancellationTokenSource MainProgressToken { get; set; }
-		[Reactive] public bool CanCancelProgress { get; set; } = true;
+		[Reactive] public bool CanCancelProgress { get; set; }
 
 		#endregion
 		[Reactive] public bool IsRenamingOrder { get; set; }
@@ -1102,31 +1102,6 @@ namespace DivinityModManager.ViewModels
 			return false;
 		}
 
-		public void LoadWorkshopMods()
-		{
-			if (Directory.Exists(Settings.WorkshopPath))
-			{
-				List<DivinityModData> modPakData = DivinityModDataLoader.LoadModPackageData(Settings.WorkshopPath, true);
-				if (modPakData.Count > 0)
-				{
-					foreach (var workshopMod in modPakData)
-					{
-						string workshopID = Directory.GetParent(workshopMod.FilePath)?.Name;
-						if (!String.IsNullOrEmpty(workshopID))
-						{
-							workshopMod.WorkshopData.ID = workshopID;
-						}
-					}
-					//Ignore Classic mods since they share the same workshop folder
-					var sortedWorkshopMods = modPakData.OrderBy(m => m.Name);
-					workshopMods.Clear();
-					workshopMods.AddOrUpdate(sortedWorkshopMods);
-
-					DivinityApp.Log($"Loaded '{workshopMods.Count}' workshop mods from '{Settings.WorkshopPath}'.");
-				}
-			}
-		}
-
 		public async Task<List<DivinityModData>> LoadWorkshopModsAsync(CancellationToken cts)
 		{
 			List<DivinityModData> newWorkshopMods = new List<DivinityModData>();
@@ -1412,6 +1387,7 @@ namespace DivinityModManager.ViewModels
 			List<DivinityModData> baseMods = null;
 
 			var cancelTokenSource = GetCancellationToken(int.MaxValue);
+			CanCancelProgress = false;
 
 			if (Directory.Exists(PathwayData.DocumentsModsPath))
 			{
@@ -1419,7 +1395,6 @@ namespace DivinityModManager.ViewModels
 				await SetMainProgressTextAsync("Loading mods from documents folder...");
 				cancelTokenSource.CancelAfter(TimeSpan.FromMinutes(10));
 				modPakData = await RunTask(DivinityModDataLoader.LoadModPackageDataAsync(PathwayData.DocumentsModsPath, cancelTokenSource.Token), null);
-				modPakData.ForEach(x => x.IsForcedLoaded = x.HasBuiltinOverride);
 				cancelTokenSource = GetCancellationToken(int.MaxValue);
 				await IncreaseMainProgressValueAsync(taskStepAmount);
 			}
@@ -1486,36 +1461,6 @@ namespace DivinityModManager.ViewModels
 			return mods.Items.Any(k => k.UUID == divinityModData.UUID)
 				|| DivinityApp.IgnoredMods.Any(im => im.UUID == divinityModData.UUID)
 				|| DivinityApp.IgnoredDependencyMods.Any(d => d.UUID == divinityModData.UUID);
-		}
-
-		public void LoadProfiles()
-		{
-			if (Directory.Exists(PathwayData.DocumentsProfilesPath))
-			{
-				DivinityApp.Log($"Loading profiles from '{PathwayData.DocumentsProfilesPath}'.");
-
-				var profiles = DivinityModDataLoader.LoadProfileData(PathwayData.DocumentsProfilesPath);
-				Profiles.AddRange(profiles);
-
-				DivinityApp.Log($"Loaded '{Profiles.Count}' profiles.");
-
-				var selectedUUID = DivinityModDataLoader.GetSelectedProfileUUID(PathwayData.DocumentsProfilesPath);
-				if (!String.IsNullOrWhiteSpace(selectedUUID))
-				{
-					var index = Profiles.IndexOf(Profiles.FirstOrDefault(p => p.UUID == selectedUUID));
-					if (index > -1)
-					{
-						SelectedProfileIndex = index;
-						Debug_TraceProfileModOrder(Profiles[index]);
-					}
-				}
-
-				DivinityApp.Log($"Last selected UUID: {selectedUUID}");
-			}
-			else
-			{
-				DivinityApp.Log($"Profile folder not found at '{PathwayData.DocumentsProfilesPath}'.");
-			}
 		}
 
 		public async Task<List<DivinityProfileData>> LoadProfilesAsync()
@@ -3603,6 +3548,13 @@ namespace DivinityModManager.ViewModels
 			}
 			SaveSettings();
 
+			ModUpdatesViewVisible = ModUpdatesAvailable = false;
+			MainProgressTitle = "Loading...";
+			MainProgressValue = 0d;
+			CanCancelProgress = false;
+			MainProgressIsActive = true;
+			View.TaskbarItemInfo.ProgressState = System.Windows.Shell.TaskbarItemProgressState.Normal;
+			View.TaskbarItemInfo.ProgressValue = 0;
 			IsRefreshing = true;
 			RxApp.TaskpoolScheduler.ScheduleAsync(RefreshAsync);
 		}

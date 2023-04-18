@@ -3578,17 +3578,19 @@ namespace DivinityModManager.ViewModels
 
 			if (DebugMode)
 			{
+				double lastPercentage = -1d;
 				string lastMessage = "";
 				this.WhenAnyValue(x => x.MainProgressWorkText, x => x.MainProgressValue).Subscribe((ob) =>
 				{
 					if (lastMessage != ob.Item1)
 					{
-						DivinityApp.Log($"Loading({ob.Item2 * 100}%): {ob.Item1}");
+						DivinityApp.Log($"[{ob.Item2:P0}] {ob.Item1}");
 						lastMessage = ob.Item1;
 					}
-					else
+					else if(lastPercentage != ob.Item2)
 					{
-						DivinityApp.Log($"Loading({ob.Item2 * 100}%)");
+						DivinityApp.Log($"[{ob.Item2:P0}] Loading...");
+						lastPercentage = ob.Item2;
 					}
 				});
 			}

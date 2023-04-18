@@ -1579,17 +1579,6 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private int GetModOrder(DivinityModData mod, DivinityLoadOrder loadOrder)
-		{
-			var entry = loadOrder.Order.FirstOrDefault(o => o.UUID == mod.UUID);
-			int index = -1;
-			if (mod != null)
-			{
-				index = loadOrder.Order.IndexOf(entry);
-			}
-			return index > -1 ? index : 99999999;
-		}
-
 		private async Task<bool> AddModFromFile(string filePath, CancellationToken t)
 		{
 			bool success = false;

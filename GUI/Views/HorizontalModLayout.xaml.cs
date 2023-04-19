@@ -5,6 +5,8 @@ using DivinityModManager.ViewModels;
 
 using DynamicData.Binding;
 
+using GongSolutions.Wpf.DragDrop.Utilities;
+
 using ReactiveUI;
 
 using System;
@@ -296,6 +298,7 @@ namespace DivinityModManager.Views
 					targetMod = ViewModel.ActiveMods.ElementAtOrDefault(nextIndex);
 				}
 
+				var scrollTargetIndex = InactiveModsListView.SelectedIndex;
 				var dropInfo = new ManualDropInfo(selectedMods, InactiveModsListView.SelectedIndex, InactiveModsListView, ViewModel.InactiveMods, ViewModel.ActiveMods);
 				InactiveModsListView.UnselectAll();
 				ViewModel.DropHandler.Drop(dropInfo);
@@ -309,10 +312,23 @@ namespace DivinityModManager.Views
 				{
 					InactiveModsListView.Focus();
 				}
-				else
+
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
 				{
-					ActiveModsListView.Focus();
-				}
+					InactiveModsListView.UpdateLayout();
+					if (scrollTargetIndex <= 0)
+					{
+						ScrollToTop(InactiveModsListView);
+					}
+					else if (scrollTargetIndex >= InactiveModsListView.Items.Count)
+					{
+						ScrollToBottom(InactiveModsListView);
+					}
+					else
+					{
+						ScrollToMod(InactiveModsListView, selectedMods.FirstOrDefault());
+					}
+				});
 
 				if (targetMod != null && targetMod.IsActive)
 				{
@@ -333,6 +349,7 @@ namespace DivinityModManager.Views
 					targetMod = ViewModel.InactiveMods.FirstOrDefault(x => ViewModel.InactiveMods.IndexOf(x) == nextIndex && !x.IsClassicMod);
 				}
 
+				var scrollTargetIndex = ActiveModsListView.SelectedIndex;
 				var dropInfo = new ManualDropInfo(selectedMods, ActiveModsListView.SelectedIndex, ActiveModsListView, ViewModel.ActiveMods, ViewModel.InactiveMods);
 				ActiveModsListView.UnselectAll();
 				ViewModel.DropHandler.Drop(dropInfo);
@@ -347,10 +364,23 @@ namespace DivinityModManager.Views
 				{
 					ActiveModsListView.Focus();
 				}
-				else
+
+				RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
 				{
-					InactiveModsListView.Focus();
-				}
+					ActiveModsListView.UpdateLayout();
+					if (scrollTargetIndex <= 0)
+					{
+						ScrollToTop(ActiveModsListView);
+					}
+					else if (scrollTargetIndex >= ActiveModsListView.Items.Count)
+					{
+						ScrollToBottom(ActiveModsListView);
+					}
+					else
+					{
+						ScrollToMod(ActiveModsListView, selectedMods.FirstOrDefault());
+					}
+				});
 
 				if (targetMod != null && !targetMod.IsActive)
 				{
@@ -378,6 +408,41 @@ namespace DivinityModManager.Views
 			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error focusing selected item:{ex}");
+			}
+		}
+
+		public bool FocusMod(ModListView modListView, DivinityModData mod)
+		{
+			if (modListView.ItemContainerGenerator.ContainerFromItem(mod) is ListViewItem item)
+			{
+				Keyboard.Focus(item);
+				item.Focus();
+				return true;
+			}
+			return false;
+		}
+
+		public void ScrollToMod(ModListView modListView, DivinityModData mod)
+		{
+			if(modListView.GetVisualDescendent<VirtualizingPanel>() is VirtualizingPanel virtualizingPanel)
+			{
+				virtualizingPanel.BringIndexIntoViewPublic(modListView.Items.IndexOf(mod));
+			}
+		}
+
+		public void ScrollToTop(ModListView modListView)
+		{
+			if(modListView.GetVisualDescendent<ScrollViewer>() is ScrollViewer scrollViewer)
+			{
+				scrollViewer.ScrollToTop();
+			}
+		}
+
+		public void ScrollToBottom(ModListView modListView)
+		{
+			if(modListView.GetVisualDescendent<ScrollViewer>() is ScrollViewer scrollViewer)
+			{
+				scrollViewer.ScrollToBottom();
 			}
 		}
 
@@ -444,6 +509,32 @@ namespace DivinityModManager.Views
 
 					d(this.OneWayBind(ViewModel, vm => vm.HasForceLoadedMods, v => v.ForceLoadedModsListView.Visibility, BoolToVisibilityConverter.FromBool));
 					d(this.OneWayBind(ViewModel, vm => vm.HasForceLoadedMods, v => v.ActiveModListViewGridSplitter.Visibility, BoolToVisibilityConverter.FromBool));
+
+					var gridLengthConverter = new GridLengthConverter();
+					var zeroHeight = (GridLength)gridLengthConverter.ConvertFrom(0);
+					var forceModsHeight = (GridLength)gridLengthConverter.ConvertFrom("1*");
+
+					d(ViewModel.WhenAnyValue(x => x.HasForceLoadedMods).ObserveOn(RxApp.MainThreadScheduler).Subscribe((b) =>
+					{
+						foreach(var row in this.ActiveModListGrid.RowDefinitions.Where(x => x.Name != "ActiveModsListRow"))
+						{
+							if (b)
+							{
+								if(row.Name == "ActiveModsListGridRow")
+								{
+									row.Height = GridLength.Auto;
+								}
+								else if(row.Name == "ActiveModsListForcedModsRow")
+								{
+									row.Height = forceModsHeight;
+								}
+							}
+							else
+							{
+								row.Height = zeroHeight;
+							}
+						}
+					}));
 
 					//ViewModel.Keys.Confirm.AddAction(() =>
 					//{

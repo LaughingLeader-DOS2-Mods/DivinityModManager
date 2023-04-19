@@ -1302,6 +1302,7 @@ namespace DivinityModManager.Util
 						if (DivinityJsonUtils.TrySafeDeserializeFromPath<List<DivinitySerializedModData>>(loadOrderFile, out var exportedOrder))
 						{
 							order = new DivinityLoadOrder();
+							order.IsDecipheredOrder = true;
 							order.AddRange(exportedOrder);
 							DivinityApp.Log(String.Join("\n", order.Order.Select(x => x.UUID)));
 							var modGUIDs = allMods.Select(x => x.UUID).ToHashSet();
@@ -1326,8 +1327,7 @@ namespace DivinityModManager.Util
 						var match = textPattern.Match(line);
 						if(match.Success)
 						{
-							var pakName = Path.GetFileName(match.Groups[1].Value);
-							DivinityApp.Log(pakName);
+							var pakName = Path.GetFileName(match.Groups[1].Value.Trim());
 							var mod = allMods.FirstOrDefault(x => x.PakEquals(pakName, StringComparison.OrdinalIgnoreCase));
 							if(mod != null)
 							{
@@ -1359,7 +1359,7 @@ namespace DivinityModManager.Util
 							var lineData = tsvLines[i].Split('\t');
 							if (lineData.Length > fileIndex)
 							{
-								var fileName = Path.GetFileName(lineData[fileIndex]);
+								var fileName = Path.GetFileName(lineData[fileIndex].Trim());
 								var mod = allMods.FirstOrDefault(x => x.PakEquals(fileName, StringComparison.OrdinalIgnoreCase));
 								if (mod != null)
 								{
@@ -1390,6 +1390,7 @@ namespace DivinityModManager.Util
 			}
 			if(order != null)
 			{
+				order.IsDecipheredOrder = true;
 				order.Name = Path.GetFileNameWithoutExtension(loadOrderFile);
 			}
 			return order;

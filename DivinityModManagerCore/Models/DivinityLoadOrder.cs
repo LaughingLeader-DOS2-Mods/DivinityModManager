@@ -41,6 +41,11 @@ namespace DivinityModManager.Models
 
 		[Reactive] public bool IsModSettings { get; set; }
 
+		/// <summary>
+		/// This is an order from a non-standard order file (info .json, .txt, .tsv).
+		/// </summary>
+		[Reactive] public bool IsDecipheredOrder { get; set; }
+
 		private readonly ObservableAsPropertyHelper<string> _lastModified;
 
 		public string LastModified => _lastModified.Value;
@@ -48,31 +53,38 @@ namespace DivinityModManager.Models
 		[DataMember]
 		public List<DivinityLoadOrderEntry> Order { get; set; } = new List<DivinityLoadOrderEntry>();
 
-		public void Add(DivinityModData mod)
+		public void Add(DivinityModData mod, bool force = false)
 		{
 			try
 			{
 				if (Order != null && mod != null)
 				{
-					if (Order.Count > 0)
+					if (force)
 					{
-						bool alreadyInOrder = false;
-						foreach (var x in Order)
-						{
-							if (x != null && x.UUID == mod.UUID)
-							{
-								alreadyInOrder = true;
-								break;
-							}
-						}
-						if (!alreadyInOrder)
-						{
-							Order.Add(mod.ToOrderEntry());
-						}
+						Order.Add(mod.ToOrderEntry());
 					}
 					else
 					{
-						Order.Add(mod.ToOrderEntry());
+						if (Order.Count > 0)
+						{
+							bool alreadyInOrder = false;
+							foreach (var x in Order)
+							{
+								if (x != null && x.UUID == mod.UUID)
+								{
+									alreadyInOrder = true;
+									break;
+								}
+							}
+							if (!alreadyInOrder)
+							{
+								Order.Add(mod.ToOrderEntry());
+							}
+						}
+						else
+						{
+							Order.Add(mod.ToOrderEntry());
+						}
 					}
 				}
 			}
@@ -82,24 +94,43 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public void Add(IDivinityModData mod)
+		public void Add(IDivinityModData mod, bool force = false)
 		{
 			try
 			{
 				if (Order != null && mod != null)
 				{
-					if (Order.Count > 0)
+					if (force)
 					{
-						bool alreadyInOrder = false;
-						foreach (var x in Order)
+						Order.Add(new DivinityLoadOrderEntry
 						{
-							if (x != null && x.UUID == mod.UUID)
+							UUID = mod.UUID,
+							Name = mod.Name,
+						});
+					}
+					else
+					{
+						if (Order.Count > 0)
+						{
+							bool alreadyInOrder = false;
+							foreach (var x in Order)
 							{
-								alreadyInOrder = true;
-								break;
+								if (x != null && x.UUID == mod.UUID)
+								{
+									alreadyInOrder = true;
+									break;
+								}
+							}
+							if (!alreadyInOrder)
+							{
+								Order.Add(new DivinityLoadOrderEntry
+								{
+									UUID = mod.UUID,
+									Name = mod.Name,
+								});
 							}
 						}
-						if (!alreadyInOrder)
+						else
 						{
 							Order.Add(new DivinityLoadOrderEntry
 							{
@@ -108,14 +139,6 @@ namespace DivinityModManager.Models
 							});
 						}
 					}
-					else
-					{
-						Order.Add(new DivinityLoadOrderEntry
-						{
-							UUID = mod.UUID,
-							Name = mod.Name,
-						});
-					}
 				}
 			}
 			catch (Exception ex)
@@ -124,19 +147,19 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		public void AddRange(IEnumerable<DivinityModData> mods)
+		public void AddRange(IEnumerable<DivinityModData> mods, bool replace = false)
 		{
 			foreach (var mod in mods)
 			{
-				Add(mod);
+				Add(mod, replace);
 			}
 		}
 
-		public void AddRange(IEnumerable<IDivinityModData> mods)
+		public void AddRange(IEnumerable<IDivinityModData> mods, bool replace = false)
 		{
 			foreach (var mod in mods)
 			{
-				Add(mod);
+				Add(mod, replace);
 			}
 		}
 

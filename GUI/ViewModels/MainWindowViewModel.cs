@@ -1725,11 +1725,17 @@ namespace DivinityModManager.ViewModels
 			var loadFrom = order.Order;
 
 			var suspend = ActiveMods.SuspendNotifications();
+			var suspend2 = InactiveMods.SuspendNotifications();
+
+			var updatedItems = new HashSet<DivinityModData>();
+
 			foreach (var mod in ActiveMods.ToList())
 			{
 				mod.IsActive = false;
 				mod.Index = -1;
 				mod.IsSelected = false;
+
+				updatedItems.Add(mod);
 			}
 
 			DivinityApp.Log($"Loading mod order '{order.Name}'.");
@@ -1759,6 +1765,7 @@ namespace DivinityModManager.ViewModels
 				else
 				{
 					var mod = mods.Items.First(m => m.UUID == entry.UUID && !m.IsClassicMod);
+					updatedItems.Add(mod);
 					if (mod.Type != "Adventure")
 					{
 						mod.IsActive = true;
@@ -1792,6 +1799,9 @@ namespace DivinityModManager.ViewModels
 			}
 
 			suspend.Dispose();
+			suspend2.Dispose();
+
+			mods.Refresh(updatedItems);
 
 			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 			OnFilterTextChanged(InactiveModFilterText, InactiveMods);
@@ -3368,8 +3378,30 @@ namespace DivinityModManager.ViewModels
 				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName, allMods);
 				if (newOrder != null)
 				{
-					DivinityApp.Log($"Imported mod order: {String.Join(@"\n\t", newOrder.Order.Select(x => x.Name))}");
-					AddNewModOrder(newOrder);
+					DivinityApp.Log($"Imported mod order: {String.Join(Environment.NewLine + "\t", newOrder.Order.Select(x => x.Name))}");
+					if(newOrder.IsDecipheredOrder)
+					{
+						if (SelectedModOrder != null)
+						{
+							SelectedModOrder.SetOrder(newOrder);
+							if (LoadModOrder(SelectedModOrder))
+							{
+								DivinityApp.Log($"Successfully re-loaded order '{SelectedModOrder.Name}' with imported order.");
+							}
+							else
+							{
+								DivinityApp.Log($"Failed to load order '{SelectedModOrder.Name}'");
+							}
+						}
+						else
+						{
+							AddNewModOrder(newOrder);
+						}
+					}
+					else
+					{
+						AddNewModOrder(newOrder);
+					}
 				}
 				else
 				{

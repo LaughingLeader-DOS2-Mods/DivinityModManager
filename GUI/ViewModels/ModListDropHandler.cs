@@ -125,6 +125,11 @@ namespace DivinityModManager.ViewModels
 
 			if (destinationList != null)
 			{
+				if (insertIndex < 0)
+				{
+					insertIndex = 0;
+				}
+
 				var objects2Insert = new List<object>();
 				foreach (var o in data)
 				{
@@ -144,7 +149,7 @@ namespace DivinityModManager.ViewModels
 					}
 					catch (Exception ex)
 					{
-						DivinityApp.Log($"Error adding drop operation item to destinationList:\n{ex}");
+						DivinityApp.Log($"Error adding drop operation item to destinationList at {insertIndex}:\n{ex}");
 						destinationList.Add(obj2Insert);
 					}
 				}
@@ -158,6 +163,14 @@ namespace DivinityModManager.ViewModels
 
 			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
 			var selectedUUIDs = data.Select(x => x.UUID).ToHashSet();
+
+			if(isActive)
+			{
+				foreach(var mod in _viewModel.ActiveMods)
+				{
+					mod.Index = destinationList.IndexOf(mod);
+				}
+			}
 
 			foreach (var mod in _viewModel.Mods)
 			{

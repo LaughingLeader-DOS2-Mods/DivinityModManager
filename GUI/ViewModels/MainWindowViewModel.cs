@@ -4795,9 +4795,9 @@ Directory the zip will be extracted to:
 				SelectedModOrder?.Sort(SortModOrder);
 			});
 
-			var selectedModsConnection = modsConnection.AutoRefresh(x => x.IsSelected, TimeSpan.FromMilliseconds(25));
-			_activeSelected = selectedModsConnection.Filter(x => x.IsSelected && x.IsActive).Count().ToProperty(this, x => x.ActiveSelected, true, RxApp.MainThreadScheduler);
-			_inactiveSelected = selectedModsConnection.Filter(x => x.IsSelected && !x.IsActive).Count().ToProperty(this, x => x.InactiveSelected, true, RxApp.MainThreadScheduler);
+			var selectedModsConnection = modsConnection.AutoRefresh(x => x.IsSelected, TimeSpan.FromMilliseconds(25)).AutoRefresh(x => x.IsActive, TimeSpan.FromMilliseconds(25)).Filter(x => x.IsSelected);
+			_activeSelected = selectedModsConnection.Filter(x => x.IsActive).Count().ToProperty(this, x => x.ActiveSelected, true, RxApp.MainThreadScheduler);
+			_inactiveSelected = selectedModsConnection.Filter(x => !x.IsActive).Count().ToProperty(this, x => x.InactiveSelected, true, RxApp.MainThreadScheduler);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
 

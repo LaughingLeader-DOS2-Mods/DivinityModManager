@@ -330,7 +330,7 @@ namespace DivinityModManager.Util
 
 		public static async Task<List<DivinityModData>> LoadEditorProjectsAsync(string modsFolderPath, CancellationToken token)
 		{
-			List<DivinityModData> projects = new List<DivinityModData>();
+			var projects = new ConcurrentBag<DivinityModData>();
 
 			try
 			{
@@ -357,16 +357,16 @@ namespace DivinityModManager.Util
 						}
 					}
 
-					var currenTime = DateTime.Now;
+					var currentTime = DateTime.Now;
 					await Task.WhenAll(Partitioner.Create(filteredFolders).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
-					DivinityApp.Log($"Took {DateTime.Now - currenTime:s\\.ff} seconds(s) to load editor mods.");
+					DivinityApp.Log($"Took {DateTime.Now - currentTime:s\\.ff} seconds(s) to load editor mods.");
 				}
 			}
 			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error loading mod projects: {ex}");
 			}
-			return projects;
+			return projects.ToList();
 		}
 
 		private static HashSet<string> _AllPaksNames = new HashSet<string>();
@@ -551,7 +551,7 @@ namespace DivinityModManager.Util
 		{
 			var builtinMods = DivinityApp.IgnoredMods.ToDictionary(x => x.Folder, x => x);
 
-			List<string> modPaks = new List<string>();
+			var modPaks = new List<string>();
 			try
 			{
 				var dirOptions = DirectoryEnumerationOptions.Files | DirectoryEnumerationOptions.Recursive;
@@ -571,7 +571,7 @@ namespace DivinityModManager.Util
 
 			DivinityApp.Log($"Mod Packages: {modPaks.Count()}");
 
-			var loadedMods = new List<DivinityModData>();
+			var loadedMods = new ConcurrentBag<DivinityModData>();
 
 			async Task AwaitPartition(IEnumerator<string> partition)
 			{
@@ -590,12 +590,12 @@ namespace DivinityModManager.Util
 				}
 			}
 
-			var currenTime = DateTime.Now;
+			var currentTime = DateTime.Now;
 			DivinityApp.Log($"Split mod loading into {Environment.ProcessorCount} partitions.");
 			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
 
-			DivinityApp.Log($"Took {DateTime.Now - currenTime:s\\.ff} second(s) to load mod paks.");
-			return loadedMods;
+			DivinityApp.Log($"Took {DateTime.Now - currentTime:s\\.ff} second(s) to load mod paks.");
+			return loadedMods.ToList();
 		}
 
 		private static string GetNodeAttribute(Node node, string key, string defaultValue)

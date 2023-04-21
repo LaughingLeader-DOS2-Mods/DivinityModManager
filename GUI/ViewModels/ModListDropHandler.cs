@@ -85,20 +85,16 @@ namespace DivinityModManager.ViewModels
 			var insertIndex = dropInfo.UnfilteredInsertIndex;
 
 			var itemsControl = dropInfo.VisualTarget as ItemsControl;
-			if (itemsControl != null)
+			if (itemsControl != null && itemsControl.Items is IEditableCollectionView editableItems)
 			{
-				var editableItems = itemsControl.Items as IEditableCollectionView;
-				if (editableItems != null)
+				var newItemPlaceholderPosition = editableItems.NewItemPlaceholderPosition;
+				if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtBeginning && insertIndex == 0)
 				{
-					var newItemPlaceholderPosition = editableItems.NewItemPlaceholderPosition;
-					if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtBeginning && insertIndex == 0)
-					{
-						++insertIndex;
-					}
-					else if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtEnd && insertIndex == itemsControl.Items.Count)
-					{
-						--insertIndex;
-					}
+					++insertIndex;
+				}
+				else if (newItemPlaceholderPosition == NewItemPlaceholderPosition.AtEnd && insertIndex == itemsControl.Items.Count)
+				{
+					--insertIndex;
 				}
 			}
 

@@ -1795,25 +1795,6 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private List<DivinityLoadOrder> LoadExternalLoadOrders()
-		{
-			string loadOrderDirectory = Settings.LoadOrderPath;
-			if (String.IsNullOrWhiteSpace(loadOrderDirectory))
-			{
-				//Settings.LoadOrderPath = Path.Combine(Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory), @"Data\ModOrder");
-				//Settings.LoadOrderPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, @"Data\ModOrder");
-				loadOrderDirectory = System.AppDomain.CurrentDomain.BaseDirectory;
-			}
-			else if (Uri.IsWellFormedUriString(loadOrderDirectory, UriKind.Relative))
-			{
-				loadOrderDirectory = Path.GetFullPath(loadOrderDirectory);
-			}
-
-			DivinityApp.Log($"Attempting to load saved load orders from '{loadOrderDirectory}'.");
-			var savedOrderList = DivinityModDataLoader.FindLoadOrderFilesInDirectory(loadOrderDirectory);
-			return savedOrderList;
-		}
-
 		private void CheckExtenderData()
 		{
 			if (Settings != null && Mods.Count > 0)
@@ -2309,11 +2290,13 @@ namespace DivinityModManager.ViewModels
 				Directory.CreateDirectory(startDirectory);
 			}
 
-			var dialog = new SaveFileDialog();
-			dialog.AddExtension = true;
-			dialog.DefaultExt = ".json";
-			dialog.Filter = "JSON file (*.json)|*.json";
-			dialog.InitialDirectory = startDirectory;
+			var dialog = new SaveFileDialog
+			{
+				AddExtension = true,
+				DefaultExt = ".json",
+				Filter = "JSON file (*.json)|*.json",
+				InitialDirectory = startDirectory
+			};
 
 			string outputName = Path.Combine(SelectedModOrder.Name + ".json");
 			if (SelectedModOrder.IsModSettings)
@@ -2668,15 +2651,17 @@ namespace DivinityModManager.ViewModels
 		//TODO: Extract zip mods to the Mods folder, possibly import a load order if a json exists.
 		private void ImportOrderFromArchive()
 		{
-			var dialog = new OpenFileDialog();
-			dialog.CheckFileExists = true;
-			dialog.CheckPathExists = true;
-			dialog.DefaultExt = ".zip";
-			dialog.Filter = "Archive file (*.zip;*.7z)|*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|All files (*.*)|*.*";
-			dialog.Title = "Import Mods from Archive...";
-			dialog.ValidateNames = true;
-			dialog.ReadOnlyChecked = true;
-			dialog.Multiselect = false;
+			var dialog = new OpenFileDialog
+			{
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = ".zip",
+				Filter = "Archive file (*.zip;*.7z)|*.zip;*.7z;*.7zip;*.tar;*.bzip2;*.gzip;*.lzip|All files (*.*)|*.*",
+				Title = "Import Mods from Archive...",
+				ValidateNames = true,
+				ReadOnlyChecked = true,
+				Multiselect = false
+			};
 
 			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
 			{
@@ -3086,11 +3071,13 @@ namespace DivinityModManager.ViewModels
 			{
 				var startDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
 
-				var dialog = new SaveFileDialog();
-				dialog.AddExtension = true;
-				dialog.DefaultExt = ".zip";
-				dialog.Filter = "Archive file (*.zip)|*.zip";
-				dialog.InitialDirectory = startDirectory;
+				var dialog = new SaveFileDialog
+				{
+					AddExtension = true,
+					DefaultExt = ".zip",
+					Filter = "Archive file (*.zip)|*.zip",
+					InitialDirectory = startDirectory
+				};
 
 				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
 				string baseOrderName = SelectedModOrder.Name;
@@ -3137,11 +3124,13 @@ namespace DivinityModManager.ViewModels
 			{
 				var startDirectory = Path.GetFullPath(Directory.GetCurrentDirectory());
 
-				var dialog = new SaveFileDialog();
-				dialog.AddExtension = true;
-				dialog.DefaultExt = ".txt";
-				dialog.Filter = "Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv|JSON file (*.json)|*.json";
-				dialog.InitialDirectory = startDirectory;
+				var dialog = new SaveFileDialog
+				{
+					AddExtension = true,
+					DefaultExt = ".txt",
+					Filter = "Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv|JSON file (*.json)|*.json",
+					InitialDirectory = startDirectory
+				};
 
 				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
 				string baseOrderName = SelectedModOrder.Name;
@@ -3207,12 +3196,14 @@ namespace DivinityModManager.ViewModels
 
 		private DivinityLoadOrder ImportOrderFromSave()
 		{
-			var dialog = new OpenFileDialog();
-			dialog.CheckFileExists = true;
-			dialog.CheckPathExists = true;
-			dialog.DefaultExt = ".lsv";
-			dialog.Filter = "Larian Save file (*.lsv)|*.lsv";
-			dialog.Title = "Load Mod Order From Save...";
+			var dialog = new OpenFileDialog
+			{
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = ".lsv",
+				Filter = "Larian Save file (*.lsv)|*.lsv",
+				Title = "Load Mod Order From Save..."
+			};
 
 			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
 			{
@@ -3293,12 +3284,14 @@ namespace DivinityModManager.ViewModels
 
 		private void ImportOrderFromFile()
 		{
-			var dialog = new OpenFileDialog();
-			dialog.CheckFileExists = true;
-			dialog.CheckPathExists = true;
-			dialog.DefaultExt = ".json";
-			dialog.Filter = "All formats (*.json;*.txt;*.tsv)|*.json;*.txt;*.tsv|JSON file (*.json)|*.json|Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv";
-			dialog.Title = "Load Mod Order From File...";
+			var dialog = new OpenFileDialog
+			{
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = ".json",
+				Filter = "All formats (*.json;*.txt;*.tsv)|*.json;*.txt;*.tsv|JSON file (*.json)|*.json|Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv",
+				Title = "Load Mod Order From File..."
+			};
 
 			if (!String.IsNullOrEmpty(Settings.LastLoadedOrderFilePath) && (Directory.Exists(Settings.LastLoadedOrderFilePath) | File.Exists(Settings.LastLoadedOrderFilePath)))
 			{
@@ -3370,12 +3363,14 @@ namespace DivinityModManager.ViewModels
 			{
 				profileSavesDirectory = Path.GetFullPath(Path.Combine(SelectedProfile.Folder, "Savegames"));
 			}
-			var dialog = new OpenFileDialog();
-			dialog.CheckFileExists = true;
-			dialog.CheckPathExists = true;
-			dialog.DefaultExt = ".lsv";
-			dialog.Filter = "Larian Save file (*.lsv)|*.lsv";
-			dialog.Title = "Pick Save to Rename...";
+			var dialog = new OpenFileDialog
+			{
+				CheckFileExists = true,
+				CheckPathExists = true,
+				DefaultExt = ".lsv",
+				Filter = "Larian Save file (*.lsv)|*.lsv",
+				Title = "Pick Save to Rename..."
+			};
 
 			if (!String.IsNullOrEmpty(PathwayData.LastSaveFilePath) && Directory.Exists(PathwayData.LastSaveFilePath))
 			{
@@ -3399,14 +3394,16 @@ namespace DivinityModManager.ViewModels
 				string rootFileName = Path.GetFileNameWithoutExtension(dialog.FileName);
 				PathwayData.LastSaveFilePath = rootFolder;
 
-				var renameDialog = new SaveFileDialog();
-				renameDialog.CheckFileExists = false;
-				renameDialog.CheckPathExists = false;
-				renameDialog.DefaultExt = ".lsv";
-				renameDialog.Filter = "Larian Save file (*.lsv)|*.lsv";
-				renameDialog.Title = "Rename Save As...";
-				renameDialog.InitialDirectory = rootFolder;
-				renameDialog.FileName = rootFileName + "_1.lsv";
+				var renameDialog = new SaveFileDialog
+				{
+					CheckFileExists = false,
+					CheckPathExists = false,
+					DefaultExt = ".lsv",
+					Filter = "Larian Save file (*.lsv)|*.lsv",
+					Title = "Rename Save As...",
+					InitialDirectory = rootFolder,
+					FileName = rootFileName + "_1.lsv"
+				};
 
 				if (renameDialog.ShowDialog(View) == true)
 				{
@@ -3746,10 +3743,12 @@ namespace DivinityModManager.ViewModels
 
 		private void ExtractSelectedMods_ChooseFolder()
 		{
-			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-			dialog.ShowNewFolderButton = true;
-			dialog.UseDescriptionForTitle = true;
-			dialog.Description = "Select folder to extract mod(s) to...";
+			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+			{
+				ShowNewFolderButton = true,
+				UseDescriptionForTitle = true,
+				Description = "Select folder to extract mod(s) to..."
+			};
 
 			if (Settings.LastExtractOutputPath.IsExistingDirectory())
 			{
@@ -3866,10 +3865,12 @@ namespace DivinityModManager.ViewModels
 				return;
 			}
 
-			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog();
-			dialog.ShowNewFolderButton = true;
-			dialog.UseDescriptionForTitle = true;
-			dialog.Description = "Select folder to extract mod to...";
+			var dialog = new Ookii.Dialogs.Wpf.VistaFolderBrowserDialog
+			{
+				ShowNewFolderButton = true,
+				UseDescriptionForTitle = true,
+				Description = "Select folder to extract mod to..."
+			};
 
 			if (Settings.LastExtractOutputPath.IsExistingDirectory())
 			{
@@ -3941,63 +3942,6 @@ namespace DivinityModManager.ViewModels
 
 					return Disposable.Empty;
 				});
-			}
-		}
-
-		private void ExportOrderToListAs()
-		{
-			if (ActiveMods.Count > 0)
-			{
-				var startDirectory = Path.GetFullPath(!String.IsNullOrEmpty(Settings.LoadOrderPath) ? Settings.LoadOrderPath : Directory.GetCurrentDirectory());
-
-				if (!Directory.Exists(startDirectory))
-				{
-					Directory.CreateDirectory(startDirectory);
-				}
-
-				var dialog = new SaveFileDialog();
-				dialog.AddExtension = true;
-				dialog.DefaultExt = ".txt";
-				dialog.Filter = "Text file (*.txt)|*.txt";
-				dialog.InitialDirectory = startDirectory;
-
-				string outputName = Path.Combine(SelectedModOrder.Name + ".txt");
-				if (SelectedModOrder.IsModSettings)
-				{
-					outputName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}.txt";
-				}
-
-				//dialog.RestoreDirectory = true;
-				dialog.FileName = DivinityModDataLoader.MakeSafeFilename(outputName, '_');
-				dialog.CheckFileExists = false;
-				dialog.CheckPathExists = false;
-				dialog.OverwritePrompt = true;
-				dialog.Title = "Export Load Order List As...";
-
-				if (dialog.ShowDialog(View) == true)
-				{
-					try
-					{
-						string text = "";
-						for (int i = 0; i < ActiveMods.Count; i++)
-						{
-							var mod = ActiveMods[i];
-							text += $"{mod.Index + 1}. {mod.DisplayName}";
-							if (i < ActiveMods.Count - 1) text += Environment.NewLine;
-						}
-						File.WriteAllText(dialog.FileName, text);
-						DivinityApp.Commands.OpenInFileExplorer(dialog.FileName);
-						View.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'", 10);
-					}
-					catch (Exception)
-					{
-						View.AlertBar.SetDangerAlert($"Failed to save mod load order to '{dialog.FileName}'", 20);
-					}
-				}
-			}
-			else
-			{
-				View.AlertBar.SetWarningAlert("Current order is empty.", 10);
 			}
 		}
 

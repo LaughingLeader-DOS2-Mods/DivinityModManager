@@ -77,7 +77,7 @@ namespace DivinityModManager.ViewModels
 	{
 		override public void Drop(IDropInfo dropInfo)
 		{
-			if (dropInfo == null || dropInfo.DragInfo == null)
+			if (dropInfo == null || dropInfo.DragInfo == null || _viewModel.IsLoadingOrder || _viewModel.IsRefreshing)
 			{
 				return;
 			}

@@ -74,6 +74,10 @@ namespace DivinityModManager.ViewModels
 
 		public override bool CanStartDrag(IDragInfo dragInfo)
 		{
+			if(_viewModel.IsLoadingOrder || _viewModel.IsRefreshing)
+			{
+				return false;
+			}
 			if (dragInfo.Data is ISelectable d && !d.CanDrag)
 			{
 				return false;

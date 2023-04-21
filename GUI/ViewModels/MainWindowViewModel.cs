@@ -179,9 +179,9 @@ namespace DivinityModManager.ViewModels
 
 		public List<DivinityLoadOrder> SavedModOrderList { get; set; } = new List<DivinityLoadOrder>();
 
-		[Reactive] public int LayoutMode { get; set; } = 0;
-		[Reactive] public bool CanSaveOrder { get; set; } = true;
-		[Reactive] public bool LoadingOrder { get; set; }
+		[Reactive] public int LayoutMode { get; set; }
+		[Reactive] public bool CanSaveOrder { get; set; }
+		[Reactive] public bool IsLoadingOrder { get; set; }
 		[Reactive] public bool OrderJustLoaded { get; set; }
 		[Reactive] public bool IsDragging { get; set; }
 		[Reactive] public bool AppSettingsLoaded { get; set; }
@@ -1445,7 +1445,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if (SelectedProfile != null)
 			{
-				LoadingOrder = true;
+				IsLoadingOrder = true;
 
 				List<DivinityMissingModData> missingMods = new List<DivinityMissingModData>();
 
@@ -1535,7 +1535,7 @@ namespace DivinityModManager.ViewModels
 							DivinityApp.Log($"Error setting next load order:\n{ex}");
 						}
 					}
-					LoadingOrder = false;
+					IsLoadingOrder = false;
 				});
 			}
 		}
@@ -1683,7 +1683,7 @@ namespace DivinityModManager.ViewModels
 		{
 			if (order == null) return false;
 
-			LoadingOrder = true;
+			IsLoadingOrder = true;
 
 			var loadFrom = order.Order;
 
@@ -1782,7 +1782,7 @@ namespace DivinityModManager.ViewModels
 
 			OrderJustLoaded = true;
 
-			LoadingOrder = false;
+			IsLoadingOrder = false;
 			return true;
 		}
 
@@ -4614,7 +4614,7 @@ Directory the zip will be extracted to:
 			{
 				if (!this.IsRefreshing && SelectedModOrderIndex > -1)
 				{
-					if (SelectedModOrder != null && !LoadingOrder)
+					if (SelectedModOrder != null && !IsLoadingOrder)
 					{
 						if (!SelectedModOrder.OrderEquals(ActiveMods.Select(x => x.UUID)))
 						{
@@ -4815,7 +4815,7 @@ Directory the zip will be extracted to:
 				if (!this.IsRefreshing && IsInitialized && (Settings != null && Settings.AutomaticallyLoadGMCampaignMods) && d.Item1 > -1)
 				{
 					var selectedCampaign = GameMasterCampaigns.ElementAtOrDefault(d.Item1);
-					if (selectedCampaign != null && !LoadingOrder)
+					if (selectedCampaign != null && !IsLoadingOrder)
 					{
 						if (LoadGameMasterCampaignModOrder(selectedCampaign))
 						{
@@ -4854,6 +4854,9 @@ Directory the zip will be extracted to:
 				}), RxApp.MainThreadScheduler);
 				interaction.SetOutput(confirmed);
 			}));
+
+			CanSaveOrder = true;
+			LayoutMode = 0;
 		}
 	}
 }

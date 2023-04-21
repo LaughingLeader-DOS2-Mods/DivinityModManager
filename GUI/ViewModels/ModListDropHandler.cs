@@ -46,8 +46,8 @@ namespace DivinityModManager.ViewModels
 			set => Data = value;
 		}
 
-		ScrollViewer _targetScrollViewer;
-		ScrollingMode _targetScrollingMode;
+		private readonly ScrollViewer _targetScrollViewer;
+		private readonly ScrollingMode _targetScrollingMode;
 
 		ScrollViewer IDropInfo.TargetScrollViewer => _targetScrollViewer;
 		ScrollingMode IDropInfo.TargetScrollingMode => _targetScrollingMode;
@@ -210,7 +210,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private MainWindowViewModel _viewModel;
+		private readonly MainWindowViewModel _viewModel;
 
 		public ModListDropHandler(MainWindowViewModel vm) : base()
 		{

@@ -54,7 +54,7 @@ namespace DivinityModManager.Models
 
 		private DivinityExtenderModStatus extenderModStatus = DivinityExtenderModStatus.NONE;
 
-		public static int _CurrentExtenderVersion { get; set; } = -1;
+		public static int CurrentExtenderVersion { get; set; } = -1;
 
 		public DivinityExtenderModStatus ExtenderModStatus
 		{
@@ -62,7 +62,7 @@ namespace DivinityModManager.Models
 			set
 			{
 				this.RaiseAndSetIfChanged(ref extenderModStatus, value);
-				UpdateOsirisExtenderToolTip(_CurrentExtenderVersion);
+				UpdateOsirisExtenderToolTip(CurrentExtenderVersion);
 			}
 		}
 
@@ -161,18 +161,18 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private ObservableAsPropertyHelper<bool> hasToolTip;
+		private readonly ObservableAsPropertyHelper<bool> hasToolTip;
 
 		public bool HasToolTip => hasToolTip.Value;
 
-		private ObservableAsPropertyHelper<int> dependencyCount;
+		private readonly ObservableAsPropertyHelper<int> dependencyCount;
 		public int TotalDependencies => dependencyCount.Value;
 
-		private ObservableAsPropertyHelper<bool> hasDependencies;
+		private readonly ObservableAsPropertyHelper<bool> hasDependencies;
 
 		public bool HasDependencies => hasDependencies.Value;
 
-		private ObservableAsPropertyHelper<Visibility> dependencyVisibility;
+		private readonly ObservableAsPropertyHelper<Visibility> dependencyVisibility;
 		public Visibility DependencyVisibility => dependencyVisibility.Value;
 
 		[Reactive] public bool HasOsirisExtenderSettings { get; set; }

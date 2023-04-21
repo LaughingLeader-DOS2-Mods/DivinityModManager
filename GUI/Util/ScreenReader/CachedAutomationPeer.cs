@@ -23,21 +23,20 @@ namespace DivinityModManager.Util.ScreenReader
 			{
 				return FrameworkElementAutomationPeer.CreatePeerForElement(element);
 			}
-			catch(Exception ex)
+			catch(Exception)
 			{
 				return null;
 			}
 		}
 
-		internal static List<AutomationPeer> GetChildrenRecursively(UIElement uielement)
+		internal static List<AutomationPeer> GetChildrenRecursively(UIElement uiElement)
 		{
 			List<AutomationPeer> children = new List<AutomationPeer>();
-			int childrenCount = VisualTreeHelper.GetChildrenCount(uielement);
+			int childrenCount = VisualTreeHelper.GetChildrenCount(uiElement);
 
 			for (int child = 0; child < childrenCount; child++)
 			{
-				UIElement element = VisualTreeHelper.GetChild(uielement, child) as UIElement;
-				if (element == null)
+				if (!(VisualTreeHelper.GetChild(uiElement, child) is UIElement element))
 					continue;
 
 				AutomationPeer peer = CreatePeerForElementSafe(element);

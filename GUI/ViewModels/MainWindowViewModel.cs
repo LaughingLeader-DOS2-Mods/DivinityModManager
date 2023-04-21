@@ -88,6 +88,27 @@ namespace DivinityModManager.ViewModels
 			return mods.Lookup(uuid) != null;
 		}
 
+		public bool TryGetMod(string guid, out DivinityModData mod)
+		{
+			mod = null;
+			var modResult = mods.Lookup(guid);
+			if(modResult.HasValue)
+			{
+				mod = modResult.Value;
+				return true;
+			}
+			return false;
+		}
+
+		public string GetModType(string guid)
+		{
+			if(TryGetMod(guid, out var mod))
+			{
+				return mod.ModType;
+			}
+			return "";
+		}
+
 		protected ReadOnlyObservableCollection<DivinityModData> addonMods;
 		public ReadOnlyObservableCollection<DivinityModData> Mods => addonMods;
 
@@ -352,10 +373,11 @@ namespace DivinityModManager.ViewModels
 				int index = 0;
 				foreach (var entry in campaign.Dependencies)
 				{
-					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-					if (mod != null && !mod.IsClassicMod)
+					if (TryGetMod(entry.UUID, out var mod) && !mod.IsClassicMod)
 					{
 						mod.IsActive = true;
+						currentOrder.Add(mod);
+						index++;
 						if (mod.Dependencies.Count > 0)
 						{
 							foreach (var dependency in mod.Dependencies.Items)
@@ -363,35 +385,26 @@ namespace DivinityModManager.ViewModels
 								if (!DivinityModDataLoader.IgnoreMod(dependency.UUID) && !mods.Items.Any(x => x.UUID == dependency.UUID) &&
 									!missingMods.Any(x => x.UUID == dependency.UUID))
 								{
-									var x = new DivinityMissingModData
+									missingMods.Add(new DivinityMissingModData
 									{
 										Index = -1,
 										Name = dependency.Name,
 										UUID = dependency.UUID,
 										Dependency = true
-									};
-									missingMods.Add(x);
+									});
 								}
 							}
 						}
 					}
 					else if (!DivinityModDataLoader.IgnoreMod(entry.UUID) && !missingMods.Any(x => x.UUID == entry.UUID))
 					{
-						var x = new DivinityMissingModData
+						missingMods.Add(new DivinityMissingModData
 						{
 							Index = index,
 							Name = entry.Name,
 							UUID = entry.UUID
-						};
-						missingMods.Add(x);
+						});
 					}
-					currentOrder.Order.Add(new DivinityLoadOrderEntry()
-					{
-						Name = entry.Name,
-						UUID = entry.UUID,
-						Missing = mod == null
-					});
-					index++;
 				}
 			}
 
@@ -1100,9 +1113,7 @@ namespace DivinityModManager.ViewModels
 				{
 					break;
 				}
-				DivinityModData pakMod = mods.Items.FirstOrDefault(x => x.UUID == workshopMod.UUID && !x.IsClassicMod);
-
-				if (pakMod != null)
+				if (TryGetMod(workshopMod.UUID, out var pakMod))
 				{
 					pakMod.WorkshopData.ID = workshopMod.WorkshopData.ID;
 					if (!pakMod.IsEditorMod)
@@ -1272,18 +1283,17 @@ namespace DivinityModManager.ViewModels
 					}
 					DivinityApp.IgnoredMods.Add(m);
 				}
-				var existingMod = mods.Items.FirstOrDefault(x => x.UUID == m.UUID);
-				if (existingMod == null)
-				{
-					mods.AddOrUpdate(m);
-				}
-				else
+				if (TryGetMod(m.UUID, out var existingMod))
 				{
 					if (m.Version.VersionInt > existingMod.Version.VersionInt)
 					{
 						mods.AddOrUpdate(m);
 						DivinityApp.Log($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.ModType}) Version({m.Version.VersionInt})");
 					}
+				}
+				else
+				{
+					mods.AddOrUpdate(m);
 				}
 			}
 		}
@@ -1679,6 +1689,14 @@ namespace DivinityModManager.ViewModels
 			redo();
 		}
 
+		public void DeselectAllMods()
+		{
+			foreach (var mod in mods.Items)
+			{
+				mod.IsSelected = false;
+			}
+		}
+
 		public bool LoadModOrder(DivinityLoadOrder order, List<DivinityMissingModData> missingModsFromProfileOrder = null)
 		{
 			if (order == null) return false;
@@ -1691,8 +1709,9 @@ namespace DivinityModManager.ViewModels
 			{
 				mod.IsActive = false;
 				mod.Index = -1;
-				mod.IsSelected = false;
 			}
+
+			DeselectAllMods();
 
 			DivinityApp.Log($"Loading mod order '{order.Name}'.");
 			Dictionary<string, DivinityMissingModData> missingMods = new Dictionary<string, DivinityMissingModData>();
@@ -1707,47 +1726,49 @@ namespace DivinityModManager.ViewModels
 			for (int i = 0; i < loadFrom.Count; i++)
 			{
 				var entry = loadFrom[i];
-				if(!DivinityModDataLoader.IgnoreMod(entry.UUID) && !ModExists(entry.UUID))
+				if(!DivinityModDataLoader.IgnoreMod(entry.UUID))
 				{
-					var x = new DivinityMissingModData
+					var modResult = mods.Lookup(entry.UUID);
+					if (!modResult.HasValue)
 					{
-						Index = i,
-						Name = entry.Name,
-						UUID = entry.UUID
-					};
-					missingMods[entry.UUID] = x;
-					entry.Missing = true;
-				}
-				else
-				{
-					var mod = mods.Items.First(m => m.UUID == entry.UUID && !m.IsClassicMod);
-					if (mod.ModType != "Adventure")
-					{
-						mod.IsActive = true;
-						mod.Index = loadOrderIndex;
-						loadOrderIndex += 1;
-						DivinityApp.Log($"{mod.Index} {mod.Name} {mod.IsActive}");
-					}
-					else
-					{
-						var nextIndex = AdventureMods.IndexOf(mod);
-						if (nextIndex != -1) SelectedAdventureModIndex = nextIndex;
-					}
-
-					if (mod.Dependencies.Count > 0)
-					{
-						foreach (var dependency in mod.Dependencies.Items)
+						missingMods[entry.UUID] = new DivinityMissingModData
 						{
-							if (!String.IsNullOrWhiteSpace(dependency.UUID) && !DivinityModDataLoader.IgnoreMod(dependency.UUID) && !ModExists(dependency.UUID))
+							Index = i,
+							Name = entry.Name,
+							UUID = entry.UUID
+						};
+						entry.Missing = true;
+					}
+					else if(!modResult.Value.IsClassicMod)
+					{
+						var mod = modResult.Value;
+						if (mod.ModType != "Adventure")
+						{
+							mod.IsActive = true;
+							mod.Index = loadOrderIndex;
+							loadOrderIndex += 1;
+							DivinityApp.Log($"{mod.Index} {mod.Name} {mod.IsActive}");
+						}
+						else
+						{
+							var nextIndex = AdventureMods.IndexOf(mod);
+							if (nextIndex != -1) SelectedAdventureModIndex = nextIndex;
+						}
+
+						if (mod.Dependencies.Count > 0)
+						{
+							foreach (var dependency in mod.Dependencies.Items)
 							{
-								var x = new DivinityMissingModData
+								if (!String.IsNullOrWhiteSpace(dependency.UUID) && !DivinityModDataLoader.IgnoreMod(dependency.UUID) && !ModExists(dependency.UUID))
 								{
-									Index = -1,
-									Name = dependency.Name,
-									UUID = dependency.UUID,
-									Dependency = true
-								};
-								missingMods[dependency.UUID] = x;
+									missingMods[dependency.UUID] = new DivinityMissingModData
+									{
+										Index = -1,
+										Name = dependency.Name,
+										UUID = dependency.UUID,
+										Dependency = true
+									};
+								}
 							}
 						}
 					}
@@ -2126,7 +2147,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if (String.IsNullOrEmpty(lastAdventureMod))
 					{
-						var activeAdventureMod = SelectedModOrder?.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.ModType == "Adventure")).FirstOrDefault();
+						var activeAdventureMod = SelectedModOrder?.Order.FirstOrDefault(x => GetModType(x.UUID) == "Adventure");
 						if (activeAdventureMod != null)
 						{
 							lastAdventureMod = activeAdventureMod.UUID;
@@ -2361,8 +2382,7 @@ namespace DivinityModManager.ViewModels
 				for (int i = 0; i < order.Order.Count; i++)
 				{
 					var entry = order.Order[i];
-					var mod = mods.Items.FirstOrDefault(m => m.UUID == entry.UUID);
-					if (mod != null)
+					if (TryGetMod(entry.UUID, out var mod))
 					{
 						if (mod.Dependencies.Count > 0)
 						{
@@ -2442,17 +2462,19 @@ namespace DivinityModManager.ViewModels
 								{
 									foreach (var dependency in mod.Dependencies.Items)
 									{
-										var dependencyMod = mods.Items.FirstOrDefault(m => m.UUID == dependency.UUID);
-										// Dependencies not in the order that require the extender
-										if (dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
+										if (TryGetMod(dependency.UUID, out var dependencyMod))
 										{
-											extenderRequiredMods.Add(new DivinityMissingModData
+											// Dependencies not in the order that require the extender
+											if (dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED || dependencyMod.ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_MISSING)
 											{
-												Index = mod.Index - 1,
-												Name = dependencyMod.DisplayName,
-												UUID = dependencyMod.UUID,
-												Dependency = true
-											});
+												extenderRequiredMods.Add(new DivinityMissingModData
+												{
+													Index = mod.Index - 1,
+													Name = dependencyMod.DisplayName,
+													UUID = dependencyMod.UUID,
+													Dependency = true
+												});
+											}
 										}
 									}
 								}
@@ -2474,8 +2496,10 @@ namespace DivinityModManager.ViewModels
 
 		private DivinityProfileActiveModData ProfileActiveModDataFromUUID(string uuid)
 		{
-			var modData = mods.Items.FirstOrDefault(x => x.UUID == uuid);
-			modData?.ToProfileModData();
+			if(TryGetMod(uuid, out var mod))
+			{
+				return mod.ToProfileModData();
+			}
 			return new DivinityProfileActiveModData()
 			{
 				UUID = uuid
@@ -2562,56 +2586,58 @@ namespace DivinityModManager.ViewModels
 			{
 				if (SelectedGameMasterCampaign != null)
 				{
-					var gmAdventureMod = mods.Items.FirstOrDefault(x => x.UUID == DivinityApp.GAMEMASTER_UUID);
-					var finalOrder = DivinityModDataLoader.BuildOutputList(SelectedModOrder.Order, mods.Items, Settings.AutoAddDependenciesWhenExporting);
-					if (SelectedGameMasterCampaign.Export(finalOrder))
+					if (TryGetMod(DivinityApp.GAMEMASTER_UUID, out var gmAdventureMod))
 					{
-						// Need to still write to modsettings.lsx
-						finalOrder.Insert(0, gmAdventureMod);
-						await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, finalOrder);
-
-						await Observable.Start(() =>
+						var finalOrder = DivinityModDataLoader.BuildOutputList(SelectedModOrder.Order, mods.Items, Settings.AutoAddDependenciesWhenExporting);
+						if (SelectedGameMasterCampaign.Export(finalOrder))
 						{
-							ShowAlert($"Exported load order to '{SelectedGameMasterCampaign.FilePath}'", AlertType.Success, 15);
+							// Need to still write to modsettings.lsx
+							finalOrder.Insert(0, gmAdventureMod);
+							await DivinityModDataLoader.ExportModSettingsToFileAsync(SelectedProfile.Folder, finalOrder);
 
-							if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+							await Observable.Start(() =>
 							{
-								DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
-							}
-							else
-							{
-								DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
-							}
+								ShowAlert($"Exported load order to '{SelectedGameMasterCampaign.FilePath}'", AlertType.Success, 15);
 
-							//Update the campaign's saved dependencies
-							SelectedGameMasterCampaign.Dependencies.Clear();
-							SelectedGameMasterCampaign.Dependencies.AddRange(finalOrder.Select(x => DivinityModDependencyData.FromModData(x)));
+								if (DivinityModDataLoader.ExportedSelectedProfile(PathwayData.DocumentsProfilesPath, SelectedProfile.UUID))
+								{
+									DivinityApp.Log($"Set active profile to '{SelectedProfile.Name}'.");
+								}
+								else
+								{
+									DivinityApp.Log($"Could not set active profile to '{SelectedProfile.Name}'.");
+								}
 
-							List<string> orderList = new List<string>();
-							if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
-							orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
+								//Update the campaign's saved dependencies
+								SelectedGameMasterCampaign.Dependencies.Clear();
+								SelectedGameMasterCampaign.Dependencies.AddRange(finalOrder.Select(x => DivinityModDependencyData.FromModData(x)));
 
-							SelectedProfile.ModOrder.Clear();
-							SelectedProfile.ModOrder.AddRange(orderList);
-							SelectedProfile.ActiveMods.Clear();
-							SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
-							DisplayMissingMods(SelectedModOrder);
+								List<string> orderList = new List<string>();
+								if (SelectedAdventureMod != null) orderList.Add(SelectedAdventureMod.UUID);
+								orderList.AddRange(SelectedModOrder.Order.Select(x => x.UUID));
 
-							return Unit.Default;
-						}, RxApp.MainThreadScheduler);
-						return true;
-					}
-					else
-					{
-						await Observable.Start((Func<Unit>)(() =>
+								SelectedProfile.ModOrder.Clear();
+								SelectedProfile.ModOrder.AddRange(orderList);
+								SelectedProfile.ActiveMods.Clear();
+								SelectedProfile.ActiveMods.AddRange(orderList.Select(x => ProfileActiveModDataFromUUID(x)));
+								DisplayMissingMods(SelectedModOrder);
+
+								return Unit.Default;
+							}, RxApp.MainThreadScheduler);
+							return true;
+						}
+						else
 						{
-							string msg = $"Problem exporting load order to '{SelectedGameMasterCampaign.FilePath}'";
-							ShowAlert(msg, AlertType.Danger);
-							this.View.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
-							this.View.MainWindowMessageBox_OK.Closed += this.MainWindowMessageBox_Closed_ResetColor;
-							this.View.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
-							return Unit.Default;
-						}), RxApp.MainThreadScheduler);
+							await Observable.Start((Func<Unit>)(() =>
+							{
+								string msg = $"Problem exporting load order to '{SelectedGameMasterCampaign.FilePath}'";
+								ShowAlert(msg, AlertType.Danger);
+								this.View.MainWindowMessageBox_OK.WindowBackground = new SolidColorBrush(Color.FromRgb(219, 40, 40));
+								this.View.MainWindowMessageBox_OK.Closed += this.MainWindowMessageBox_Closed_ResetColor;
+								this.View.MainWindowMessageBox_OK.ShowMessageBox(msg, "Mod Order Export Failed", MessageBoxButton.OK);
+								return Unit.Default;
+							}), RxApp.MainThreadScheduler);
+						}
 					}
 				}
 				else
@@ -4187,22 +4213,6 @@ Directory the zip will be extracted to:
 
 		public void ClearMissingMods()
 		{
-			//if (SelectedProfile.SavedLoadOrder == null)
-			//{
-			//	foreach (var uuid in SelectedProfile.ModOrder.ToList())
-			//	{
-			//		var activeModData = SelectedProfile.ActiveMods.FirstOrDefault(y => y.UUID == uuid);
-			//		if (activeModData != null)
-			//		{
-			//			var mod = mods.Items.FirstOrDefault(m => m.UUID.Equals(uuid, StringComparison.OrdinalIgnoreCase));
-			//			if (mod == null)
-			//			{
-			//				SelectedProfile.ActiveMods.Remove(activeModData);
-			//			}
-			//		}
-			//	}
-			//}
-
 			var totalRemoved = SelectedModOrder != null ? SelectedModOrder.Order.RemoveAll(x => !ModExists(x.UUID)) : 0;
 
 			if (totalRemoved > 0)
@@ -4728,11 +4738,6 @@ Directory the zip will be extracted to:
 			ToggleOrderRenamingCommand = ReactiveCommand.CreateFromTask<object, Unit>(ToggleRenamingLoadOrder, canRenameOrder);
 
 			workshopMods.Connect().Bind(out workshopModsCollection).DisposeMany().Subscribe();
-
-			//modsConnecton.WhenAnyPropertyChanged("Name", "IsClassicMod").Subscribe((mod) =>
-			//{
-			//	mod.UpdateDisplayName();
-			//});
 
 			modsConnection.AutoRefresh(x => x.IsSelected).Filter(x => x.IsSelected && !x.IsEditorMod && File.Exists(x.FilePath)).Bind(out selectedPakMods).Subscribe();
 

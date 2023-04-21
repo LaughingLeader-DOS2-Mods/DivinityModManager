@@ -45,7 +45,8 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		[Reactive][DataMember] public string Type { get; set; }
+		[Reactive][DataMember(Name = "Type")] public string ModType { get; set; }
+
 		[DataMember] public List<string> Modes { get; set; } = new List<string>();
 
 		[DataMember] public string Targets { get; set; }
@@ -196,8 +197,11 @@ namespace DivinityModManager.Models
 			}
 		}
 
-		private ObservableAsPropertyHelper<bool> canDelete;
+		private readonly ObservableAsPropertyHelper<bool> canDelete;
 		public bool CanDelete => canDelete.Value;
+
+		private readonly ObservableAsPropertyHelper<bool> canAddToLoadOrder;
+		public bool CanAddToLoadOrder => canAddToLoadOrder.Value;
 
 
 		[Reactive] public bool CanDrag { get; set; } = true;
@@ -360,8 +364,10 @@ namespace DivinityModManager.Models
 				Select(x => !DivinityApp.IsScreenReaderActive() && (
 				!String.IsNullOrEmpty(x.Item1) || x.Item2 || !String.IsNullOrEmpty(x.Item3))).StartWith(true).ToProperty(this, nameof(HasToolTip));
 
-			canDelete = this.WhenAnyValue(x => x.IsEditorMod, x => x.IsLarianMod, x => x.FilePath, (a, b, c) => !a && !b && File.Exists(c))
-				.StartWith(false).ToProperty(this, nameof(CanDelete));
+			canDelete = this.WhenAnyValue(x => x.IsEditorMod, x => x.IsLarianMod, x => x.FilePath,
+				(a, b, c) => !a && !b && File.Exists(c)).StartWith(false).ToProperty(this, nameof(CanDelete));
+			canAddToLoadOrder = this.WhenAnyValue(x => x.ModType, x => x.IsLarianMod, x => x.IsForcedLoaded,
+				(a, b, c) => a != "Adventure" && !b && !c).StartWith(true).ToProperty(this, nameof(CanAddToLoadOrder));
 		}
 	}
 }

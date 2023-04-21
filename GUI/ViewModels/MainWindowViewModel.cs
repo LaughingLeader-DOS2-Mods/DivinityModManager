@@ -88,8 +88,8 @@ namespace DivinityModManager.ViewModels
 			return mods.Lookup(uuid) != null;
 		}
 
-		protected ReadOnlyObservableCollection<DivinityModData> allMods;
-		public ReadOnlyObservableCollection<DivinityModData> Mods => allMods;
+		protected ReadOnlyObservableCollection<DivinityModData> addonMods;
+		public ReadOnlyObservableCollection<DivinityModData> Mods => addonMods;
 
 		protected ReadOnlyObservableCollection<DivinityModData> adventureMods;
 		public ReadOnlyObservableCollection<DivinityModData> AdventureMods => adventureMods;
@@ -1298,7 +1298,7 @@ namespace DivinityModManager.ViewModels
 			foreach (var m in DivinityApp.IgnoredMods)
 			{
 				mods.AddOrUpdate(m);
-				DivinityApp.Log($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+				DivinityApp.Log($"Added ignored mod: Name({m.Name}) UUID({m.UUID}) Type({m.ModType}) Version({m.Version.VersionInt})");
 			}
 			foreach (var m in loadedMods)
 			{
@@ -1321,7 +1321,7 @@ namespace DivinityModManager.ViewModels
 					if (m.Version.VersionInt > existingMod.Version.VersionInt)
 					{
 						mods.AddOrUpdate(m);
-						DivinityApp.Log($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.Type}) Version({m.Version.VersionInt})");
+						DivinityApp.Log($"Updated mod data from pak: Name({m.Name}) UUID({m.UUID}) Type({m.ModType}) Version({m.Version.VersionInt})");
 					}
 				}
 			}
@@ -1724,18 +1724,11 @@ namespace DivinityModManager.ViewModels
 
 			var loadFrom = order.Order;
 
-			var suspend = ActiveMods.SuspendNotifications();
-			var suspend2 = InactiveMods.SuspendNotifications();
-
-			var updatedItems = new HashSet<DivinityModData>();
-
-			foreach (var mod in ActiveMods.ToList())
+			foreach (var mod in ActiveMods)
 			{
 				mod.IsActive = false;
 				mod.Index = -1;
 				mod.IsSelected = false;
-
-				updatedItems.Add(mod);
 			}
 
 			DivinityApp.Log($"Loading mod order '{order.Name}'.");
@@ -1765,12 +1758,12 @@ namespace DivinityModManager.ViewModels
 				else
 				{
 					var mod = mods.Items.First(m => m.UUID == entry.UUID && !m.IsClassicMod);
-					updatedItems.Add(mod);
-					if (mod.Type != "Adventure")
+					if (mod.ModType != "Adventure")
 					{
 						mod.IsActive = true;
 						mod.Index = loadOrderIndex;
 						loadOrderIndex += 1;
+						DivinityApp.Log($"{mod.Index} {mod.Name} {mod.IsActive}");
 					}
 					else
 					{
@@ -1798,10 +1791,10 @@ namespace DivinityModManager.ViewModels
 				}
 			}
 
-			suspend.Dispose();
-			suspend2.Dispose();
-
-			mods.Refresh(updatedItems);
+			ActiveMods.Clear();
+			ActiveMods.AddRange(addonMods.Where(x => x.CanAddToLoadOrder && x.IsActive).OrderBy(x => x.Index));
+			InactiveMods.Clear();
+			InactiveMods.AddRange(addonMods.Where(x => x.CanAddToLoadOrder && !x.IsActive));
 
 			OnFilterTextChanged(ActiveModFilterText, ActiveMods);
 			OnFilterTextChanged(InactiveModFilterText, InactiveMods);
@@ -2189,7 +2182,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if (String.IsNullOrEmpty(lastAdventureMod))
 					{
-						var activeAdventureMod = SelectedModOrder?.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.Type == "Adventure")).FirstOrDefault();
+						var activeAdventureMod = SelectedModOrder?.Order.Select(x => mods.Items.FirstOrDefault(y => y.UUID == x.UUID && y.ModType == "Adventure")).FirstOrDefault();
 						if (activeAdventureMod != null)
 						{
 							lastAdventureMod = activeAdventureMod.UUID;
@@ -3375,10 +3368,10 @@ namespace DivinityModManager.ViewModels
 				Settings.LastLoadedOrderFilePath = Path.GetDirectoryName(dialog.FileName);
 				SaveSettings();
 				DivinityApp.Log($"Loading order from '{dialog.FileName}'.");
-				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName, allMods);
+				var newOrder = DivinityModDataLoader.LoadOrderFromFile(dialog.FileName, addonMods);
 				if (newOrder != null)
 				{
-					DivinityApp.Log($"Imported mod order: {String.Join(Environment.NewLine + "\t", newOrder.Order.Select(x => x.Name))}");
+					DivinityApp.Log($"Imported mod order:\n{String.Join(Environment.NewLine + "\t", newOrder.Order.Select(x => x.Name))}");
 					if(newOrder.IsDecipheredOrder)
 					{
 						if (SelectedModOrder != null)
@@ -4373,7 +4366,7 @@ Directory the zip will be extracted to:
 							}
 							if (dict.TryGetValue("Type", out var modType))
 							{
-								mod.Type = (string)modType;
+								mod.ModType = (string)modType;
 							}
 							if (dict.TryGetValue("Author", out var author))
 							{
@@ -4760,27 +4753,8 @@ Directory the zip will be extracted to:
 			modsConnection.Publish();
 
 			modsConnection.Filter(x => x.IsUserMod).Bind(out _userMods).Subscribe();
-
-			Func<DivinityModData, bool> isLoadOrderMod = x => !x.IsLarianMod && x.Type != "Adventure" & !x.IsForcedLoaded;
-
-			modsConnection.Filter(isLoadOrderMod).Bind(out allMods).Subscribe();
-
-			Func<DivinityModData, bool> isValidActiveMod = x => isLoadOrderMod(x) && x.IsActive;
-			Func<DivinityModData, bool> isValidInactiveMod = x => isLoadOrderMod(x) && !x.IsActive;
-			var activeModSort = SortExpressionComparer<DivinityModData>.Ascending(x => x.Index);
-
-			//Lists bound to the UI
-			var orderWasLoaded = this.WhenAnyValue(x => x.OrderJustLoaded, b => b == true).ObserveOn(RxApp.MainThreadScheduler);
-			orderWasLoaded.Throttle(TimeSpan.FromMilliseconds(50)).Subscribe((b) =>
-			{
-				OrderJustLoaded = false;
-			});
-			var uiModsConnection = modsConnection.ObserveOn(RxApp.MainThreadScheduler).AutoRefreshOnObservable(m => orderWasLoaded, TimeSpan.FromMilliseconds(5), RxApp.MainThreadScheduler);
-			uiModsConnection.Filter(isValidActiveMod).Sort(activeModSort).Bind(_activeMods).Subscribe();
-			uiModsConnection.Filter(isValidInactiveMod).Bind(_inactiveMods).Subscribe();
-			uiModsConnection.Filter(x => x.IsForcedLoaded).Bind(out _forceLoadedMods).Subscribe();
-
-			//ActiveMods.ActOnEveryObject(mod => mod.Index = ActiveMods.IndexOf(mod), mod => mod.Index = -1);
+			modsConnection.Filter(x => x.CanAddToLoadOrder).Bind(out addonMods).Subscribe();
+			modsConnection.Filter(x => x.IsForcedLoaded).ObserveOn(RxApp.MainThreadScheduler).Bind(out _forceLoadedMods).Subscribe();
 
 			//Throttle filters so they only happen when typing stops for 500ms
 
@@ -4801,7 +4775,7 @@ Directory the zip will be extracted to:
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
 
-			modsConnection.Filter(x => x.Type == "Adventure" && (!x.IsHidden || x.UUID == DivinityApp.ORIGINS_UUID)).Bind(out adventureMods).DisposeMany().Subscribe();
+			modsConnection.Filter(x => x.ModType == "Adventure" && (!x.IsHidden || x.UUID == DivinityApp.ORIGINS_UUID)).Bind(out adventureMods).DisposeMany().Subscribe();
 			_selectedAdventureMod = this.WhenAnyValue(x => x.SelectedAdventureModIndex, x => x.AdventureMods.Count, (index, count) => index >= 0 && count > 0 && index < count).
 				Where(b => b == true).Select(x => AdventureMods[SelectedAdventureModIndex]).
 				ToProperty(this, x => x.SelectedAdventureMod).DisposeWith(this.Disposables);

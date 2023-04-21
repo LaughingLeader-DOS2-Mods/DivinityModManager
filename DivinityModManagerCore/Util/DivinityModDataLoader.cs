@@ -189,7 +189,7 @@ namespace DivinityModManager.Util
 						Folder = GetAttributeWithId(moduleInfoNode, "Folder", ""),
 						Description = description,
 						MD5 = GetAttributeWithId(moduleInfoNode, "MD5", ""),
-						Type = GetAttributeWithId(moduleInfoNode, "Type", ""),
+						ModType = GetAttributeWithId(moduleInfoNode, "Type", ""),
 						HeaderVersion = new DivinityModVersion(headerMajor, headerMinor, headerRevision, headerBuild)
 					};
 					var tagsText = GetAttributeWithId(moduleInfoNode, "Tags", "");

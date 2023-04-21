@@ -45,7 +45,7 @@ namespace DivinityModManager.Models
 				Folder = mod.Folder,
 				Name = mod.Name,
 				Version = mod.Version,
-				Type = mod.Type,
+				Type = mod.ModType,
 				Modes = mod.Modes,
 				Targets = mod.Targets,
 				Index = mod.Index,

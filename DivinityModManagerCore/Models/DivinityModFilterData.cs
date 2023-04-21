@@ -89,7 +89,7 @@ namespace DivinityModManager.Models
 
 			if (PropertyContains("Type"))
 			{
-				if (ValueContains(mod.Type)) return true;
+				if (ValueContains(mod.ModType)) return true;
 			}
 
 			if (PropertyContains("UUID"))

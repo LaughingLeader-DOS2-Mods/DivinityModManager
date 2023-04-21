@@ -164,7 +164,7 @@ namespace DivinityModManager.ViewModels
 			bool isActive = dropInfo.TargetCollection == _viewModel.ActiveMods;
 			var selectedUUIDs = data.Select(x => x.UUID).ToHashSet();
 
-			if(isActive)
+			if (isActive)
 			{
 				foreach(var mod in _viewModel.ActiveMods)
 				{

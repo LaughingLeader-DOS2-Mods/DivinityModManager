@@ -3583,8 +3583,12 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private string SelectedToLabel(int total)
+		private string SelectedToLabel(int total, int totalHidden)
 		{
+			if(totalHidden > 0)
+			{
+				return $", {total} Selected";
+			}
 			return $"{total} Selected";
 		}
 
@@ -4701,8 +4705,8 @@ Directory the zip will be extracted to:
 			_activeSelected = selectedModsConnection.Filter(x => x.IsActive).Count().ToProperty(this, nameof(ActiveSelected), true, RxApp.MainThreadScheduler);
 			_inactiveSelected = selectedModsConnection.Filter(x => !x.IsActive).Count().ToProperty(this, nameof(InactiveSelected), true, RxApp.MainThreadScheduler);
 
-			_activeSelectedText = this.WhenAnyValue(x => x.ActiveSelected).Select(SelectedToLabel).ToProperty(this, nameof(ActiveSelectedText), true, RxApp.MainThreadScheduler);
-			_inactiveSelectedText = this.WhenAnyValue(x => x.InactiveSelected).Select(SelectedToLabel).ToProperty(this, nameof(InactiveSelectedText), true, RxApp.MainThreadScheduler);
+			_activeSelectedText = this.WhenAnyValue(x => x.ActiveSelected, x => x.TotalActiveModsHidden).Select(x => SelectedToLabel(x.Item1, x.Item2)).ToProperty(this, nameof(ActiveSelectedText), true, RxApp.MainThreadScheduler);
+			_inactiveSelectedText = this.WhenAnyValue(x => x.InactiveSelected, x => x.TotalInactiveModsHidden).Select(x => SelectedToLabel(x.Item1, x.Item2)).ToProperty(this, nameof(InactiveSelectedText), true, RxApp.MainThreadScheduler);
 
 			_activeModsFilterResultText = this.WhenAnyValue(x => x.TotalActiveModsHidden).Select(x => HiddenToLabel(x, ActiveMods.Count)).ToProperty(this, nameof(ActiveModsFilterResultText), true, RxApp.MainThreadScheduler);
 

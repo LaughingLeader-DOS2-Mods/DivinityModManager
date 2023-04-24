@@ -72,7 +72,6 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding ActiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Active Mods"
 					UpdateBindingOnFocusLost="True" />
@@ -180,7 +179,6 @@
 					AcceptsReturn="False"
 					AcceptsTab="False"
 					CanUndoTextOnEscape="True"
-					Text="{Binding InactiveModFilterText, UpdateSourceTrigger=PropertyChanged}"
 					TextAlignment="Left"
 					ToolTip="Filter Inactive Mods"
 					UpdateBindingOnFocusLost="True" />
@@ -232,7 +230,6 @@
 				dd:DragDrop.DropHandler="{Binding DropHandler}"
 				GridViewColumnHeader.Click="ListView_Click"
 				ItemContainerStyle="{StaticResource ListViewItemMouseEvents}"
-				ItemsSource="{Binding InactiveMods}"
 				Style="{StaticResource ModOrderListViewWithDrag}"
 				View="{DynamicResource InactiveModGridView}"
 				VirtualizingPanel.IsVirtualizing="True"

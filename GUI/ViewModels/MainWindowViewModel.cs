@@ -180,6 +180,18 @@ namespace DivinityModManager.ViewModels
 		private readonly ObservableAsPropertyHelper<int> _inactiveSelected;
 		public int InactiveSelected => _inactiveSelected.Value;
 
+		private readonly ObservableAsPropertyHelper<string> _activeSelectedText;
+		public string ActiveSelectedText => _activeSelectedText.Value;
+
+		private readonly ObservableAsPropertyHelper<string> _inactiveSelectedText;
+		public string InactiveSelectedText => _inactiveSelectedText.Value;
+
+		private readonly ObservableAsPropertyHelper<string> _activeModsFilterResultText;
+		public string ActiveModsFilterResultText => _activeModsFilterResultText.Value;
+
+		private readonly ObservableAsPropertyHelper<string> _inactiveModsFilterResultText;
+		public string InactiveModsFilterResultText => _inactiveModsFilterResultText.Value;
+
 		[Reactive] public string ActiveModFilterText { get; set; }
 		[Reactive] public string InactiveModFilterText { get; set; }
 
@@ -3556,20 +3568,24 @@ namespace DivinityModManager.ViewModels
 		private readonly Regex filterPropertyPattern = new Regex("@([^\\s]+?)([\\s]+)([^@\\s]*)");
 		private readonly Regex filterPropertyPatternWithQuotes = new Regex("@([^\\s]+?)([\\s\"]+)([^@\"]*)");
 
-		private int totalActiveModsHidden = 0;
+		[Reactive] public int TotalActiveModsHidden { get; set; }
+		[Reactive] public int TotalInactiveModsHidden { get; set; }
 
-		public int TotalActiveModsHidden
+		private string HiddenToLabel(int totalHidden, int totalCount)
 		{
-			get => totalActiveModsHidden;
-			set { this.RaiseAndSetIfChanged(ref totalActiveModsHidden, value); }
+			if (totalHidden > 0)
+			{
+				return $"{totalCount - totalHidden} Matched, {totalHidden} Hidden";
+			}
+			else
+			{
+				return $"0 Matched";
+			}
 		}
 
-		private int totalInactiveModsHidden = 0;
-
-		public int TotalInactiveModsHidden
+		private string SelectedToLabel(int total)
 		{
-			get => totalInactiveModsHidden;
-			set { this.RaiseAndSetIfChanged(ref totalInactiveModsHidden, value); }
+			return $"{total} Selected";
 		}
 
 		public void OnFilterTextChanged(string searchText, IEnumerable<DivinityModData> modDataList)
@@ -4681,8 +4697,16 @@ Directory the zip will be extracted to:
 			});
 
 			var selectedModsConnection = modsConnection.AutoRefresh(x => x.IsSelected, TimeSpan.FromMilliseconds(25)).AutoRefresh(x => x.IsActive, TimeSpan.FromMilliseconds(25)).Filter(x => x.IsSelected);
-			_activeSelected = selectedModsConnection.Filter(x => x.IsActive).Count().ToProperty(this, x => x.ActiveSelected, true, RxApp.MainThreadScheduler);
-			_inactiveSelected = selectedModsConnection.Filter(x => !x.IsActive).Count().ToProperty(this, x => x.InactiveSelected, true, RxApp.MainThreadScheduler);
+
+			_activeSelected = selectedModsConnection.Filter(x => x.IsActive).Count().ToProperty(this, nameof(ActiveSelected), true, RxApp.MainThreadScheduler);
+			_inactiveSelected = selectedModsConnection.Filter(x => !x.IsActive).Count().ToProperty(this, nameof(InactiveSelected), true, RxApp.MainThreadScheduler);
+
+			_activeSelectedText = this.WhenAnyValue(x => x.ActiveSelected).Select(SelectedToLabel).ToProperty(this, nameof(ActiveSelectedText), true, RxApp.MainThreadScheduler);
+			_inactiveSelectedText = this.WhenAnyValue(x => x.InactiveSelected).Select(SelectedToLabel).ToProperty(this, nameof(InactiveSelectedText), true, RxApp.MainThreadScheduler);
+
+			_activeModsFilterResultText = this.WhenAnyValue(x => x.TotalActiveModsHidden).Select(x => HiddenToLabel(x, ActiveMods.Count)).ToProperty(this, nameof(ActiveModsFilterResultText), true, RxApp.MainThreadScheduler);
+
+			_inactiveModsFilterResultText = this.WhenAnyValue(x => x.TotalInactiveModsHidden).Select(x => HiddenToLabel(x, InactiveMods.Count)).ToProperty(this, nameof(InactiveModsFilterResultText), true, RxApp.MainThreadScheduler);
 
 			DivinityApp.Events.OrderNameChanged += OnOrderNameChanged;
 

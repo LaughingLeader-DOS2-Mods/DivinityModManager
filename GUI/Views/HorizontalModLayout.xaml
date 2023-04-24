@@ -95,13 +95,13 @@
 					</TextBlock.Style>
 				</TextBlock>
 				<TextBlock
+					x:Name="ActiveModsFilterResultText"
 					Grid.Column="2"
 					Margin="4,0,0,0"
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
-					Visibility="{Binding TotalActiveModsHidden, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding TotalActiveModsHidden, Mode=OneWay}" />
-					<Run Text="Hidden" /></TextBlock>
+					behavior:ScreenReaderHelperBehavior.Name="Total Hidden Active Mods"
+					AutomationProperties.HelpText="{Binding Text, RelativeSource={RelativeSource Self}}" />
 				<TextBlock
 					x:Name="ActiveSelectedText"
 					Grid.Column="3"
@@ -109,10 +109,7 @@
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
 					AutomationProperties.HelpText="{Binding Text, RelativeSource={RelativeSource Self}}"
-					AutomationProperties.Name="Active Mods"
-					Visibility="{Binding ActiveSelected, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding ActiveSelected, Mode=OneWay}" />
-					<Run Text="Selected" /></TextBlock>
+					AutomationProperties.Name="Active Mods" />
 			</Grid>
 			<Grid x:Name="ActiveModListGrid" Grid.Row="1">
 				<Grid.RowDefinitions>
@@ -205,14 +202,14 @@
 					</TextBlock.Style>
 				</TextBlock>
 				<TextBlock
+					x:Name="InactiveModsFilterResultText"
 					Grid.Column="2"
 					Margin="4,0,0,0"
 					HorizontalAlignment="Left"
 					VerticalAlignment="Center"
 					behavior:ScreenReaderHelperBehavior.Name="Total Hidden Inactive Mods"
-					Visibility="{Binding TotalInactiveModsHidden, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding TotalInactiveModsHidden, Mode=OneWay}" />
-					<Run Text="Hidden" /></TextBlock>
+					AutomationProperties.HelpText="{Binding Text, RelativeSource={RelativeSource Self}}"
+					Visibility="Collapsed" />
 				<TextBlock
 					x:Name="InactiveSelectedText"
 					Grid.Column="3"
@@ -221,10 +218,7 @@
 					VerticalAlignment="Center"
 					behavior:ScreenReaderHelperBehavior.Name="Total Inactive Mods Selected"
 					AutomationProperties.HelpText="{Binding Text, RelativeSource={RelativeSource Self}}"
-					AutomationProperties.Name="Inactive Mods"
-					Visibility="{Binding InactiveSelected, Converter={StaticResource IntToVisibilityConverter}}">
-					<Run Text="{Binding InactiveSelected, Mode=OneWay}" />
-					<Run Text="Selected" /></TextBlock>
+					AutomationProperties.Name="Inactive Mods" />
 			</Grid>
 			<c:ModListView
 				x:Name="InactiveModsListView"

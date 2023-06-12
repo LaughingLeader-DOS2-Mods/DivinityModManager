@@ -1174,7 +1174,7 @@ namespace DivinityModManager.ViewModels
 		{
 			try
 			{
-				string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+				string documentsFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify);
 				if (String.IsNullOrWhiteSpace(AppSettings.DefaultPathways.DocumentsGameFolder))
 				{
 					AppSettings.DefaultPathways.DocumentsGameFolder = "Larian Studios\\Divinity Original Sin 2 Definitive Edition";

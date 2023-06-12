@@ -424,13 +424,17 @@ namespace DivinityModManager.Views
 					var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
 					if (tb != null && !tb.IsFocused)
 					{
-						ViewModel.StopRenaming(false);
-						ViewModel.SelectedModOrder.Name = tb.Text;
-						var directory = Path.GetDirectoryName(ViewModel.SelectedModOrder.FilePath);
-						var ext = Path.GetExtension(ViewModel.SelectedModOrder.FilePath);
-						string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(ViewModel.SelectedModOrder.Name + ext), '_');
-						ViewModel.SelectedModOrder.FilePath = Path.Combine(directory, outputName);
-						AlertBar.SetSuccessAlert($"Renamed load order name/path to '{ViewModel.SelectedModOrder.FilePath}'", 20);
+						var cancel = string.IsNullOrEmpty(tb.Text);
+						ViewModel.StopRenaming(cancel);
+						if(!cancel)
+						{
+							ViewModel.SelectedModOrder.Name = tb.Text;
+							var directory = Path.GetDirectoryName(ViewModel.SelectedModOrder.FilePath);
+							var ext = Path.GetExtension(ViewModel.SelectedModOrder.FilePath);
+							string outputName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(ViewModel.SelectedModOrder.Name + ext), '_');
+							ViewModel.SelectedModOrder.FilePath = Path.Combine(directory, outputName);
+							AlertBar.SetSuccessAlert($"Renamed load order name/path to '{ViewModel.SelectedModOrder.FilePath}'", 20);
+						}
 					}
 				});
 			}

@@ -1203,7 +1203,7 @@ namespace DivinityModManager.ViewModels
 					DivinityApp.Log($"No GM campaigns folder found at '{gmCampaignsFolder}'.");
 				}
 
-				string profileFolder = (Path.Combine(larianDocumentsFolder, "PlayerProfiles"));
+				string profileFolder = Path.Combine(larianDocumentsFolder, "PlayerProfiles");
 				PathwayData.DocumentsProfilesPath = profileFolder;
 				if (!Directory.Exists(profileFolder))
 				{
@@ -3165,8 +3165,8 @@ namespace DivinityModManager.ViewModels
 				var dialog = new SaveFileDialog
 				{
 					AddExtension = true,
-					DefaultExt = ".txt",
-					Filter = "Text file (*.txt)|*.txt|TSV file (*.tsv)|*.tsv|JSON file (*.json)|*.json",
+					DefaultExt = ".tsv",
+					Filter = "Spreadsheet file (*.tsv)|*.tsv|Plain text file (*.txt)|*.txt|JSON file (*.json)|*.json",
 					InitialDirectory = startDirectory
 				};
 

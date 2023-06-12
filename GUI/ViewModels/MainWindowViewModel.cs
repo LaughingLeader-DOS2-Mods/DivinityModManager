@@ -1690,7 +1690,7 @@ namespace DivinityModManager.ViewModels
 				{
 					newOrder = new DivinityLoadOrder()
 					{
-						Name = "New" + nextOrders.Count,
+						Name = $"New{nextOrders.Count}",
 						Order = ActiveMods.Select(m => m.ToOrderEntry()).ToList()
 					};
 					newOrder.FilePath = Path.Combine(Settings.LoadOrderPath, DivinityModDataLoader.MakeSafeFilename(Path.Combine(newOrder.Name + ".json"), '_'));
@@ -1762,7 +1762,6 @@ namespace DivinityModManager.ViewModels
 							mod.IsActive = true;
 							mod.Index = loadOrderIndex;
 							loadOrderIndex += 1;
-							DivinityApp.Log($"{mod.Index} {mod.Name} {mod.IsActive}");
 						}
 						else
 						{

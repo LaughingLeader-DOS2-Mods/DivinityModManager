@@ -263,7 +263,7 @@
 							LostFocus="OrdersComboBox_LostFocus"
 							SelectedIndex="{Binding SelectedModOrderIndex}"
 							Tag="{Binding}"
-							Text="{Binding SelectedModOrder.Name, Mode=TwoWay}">
+							Text="{Binding SelectedModOrderName, Mode=OneWay}">
 							<ComboBox.ItemContainerStyle>
 								<Style TargetType="ComboBoxItem">
 									<EventSetter Event="ComboBoxItem.PreviewMouseDown" Handler="OrderComboBox_OnUserClick" />

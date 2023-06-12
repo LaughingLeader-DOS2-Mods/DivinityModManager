@@ -207,6 +207,9 @@ namespace DivinityModManager.ViewModels
 		private readonly ObservableAsPropertyHelper<DivinityLoadOrder> _selectedModOrder;
 		public DivinityLoadOrder SelectedModOrder => _selectedModOrder.Value;
 
+		private readonly ObservableAsPropertyHelper<string> _selectedModOrderName;
+		public string SelectedModOrderName => _selectedModOrderName.Value;
+
 		private readonly ObservableAsPropertyHelper<bool> _isBaseLoadOrder;
 		public bool IsBaseLoadOrder => _isBaseLoadOrder.Value;
 
@@ -4637,6 +4640,7 @@ Directory the zip will be extracted to:
 
 			_selectedModOrder = this.WhenAnyValue(x => x.SelectedModOrderIndex, x => x.ModOrderList.Count).
 				Select(x => ModOrderList.ElementAtOrDefault(x.Item1)).ToProperty(this, nameof(SelectedModOrder));
+			_selectedModOrderName = this.WhenAnyValue(x => x.SelectedModOrder).WhereNotNull().Select(x => x.Name).ToProperty(this, nameof(SelectedModOrderName), true, RxApp.MainThreadScheduler);
 			_isBaseLoadOrder = this.WhenAnyValue(x => x.SelectedModOrder).Select(x => x != null && x.IsModSettings).ToProperty(this, nameof(IsBaseLoadOrder), true, RxApp.MainThreadScheduler);
 
 			//Throttle in case the index changes quickly in a short timespan

@@ -186,6 +186,11 @@ namespace DivinityModManager.Models
 
 		[Reactive] public int SelectedTabIndex { get; set; }
 
+		[DataMember] public WindowSettings Window { get; set; }
+
+		[SettingsEntry("Save Window Location", "Save and restore the window location when the application starts.")]
+		[DataMember][Reactive] public bool SaveWindowLocation { get; set; }
+
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
 		public ICommand ExportExtenderSettingsCommand { get; set; }
@@ -216,9 +221,10 @@ namespace DivinityModManager.Models
 		public DivinityModManagerSettings()
 		{
 			Disposables = new CompositeDisposable();
-			ExtenderSettings = new OsirisExtenderSettings();
 
 			//Defaults
+			ExtenderSettings = new OsirisExtenderSettings();
+			Window = new WindowSettings();
 			GameDataPath = "";
 			GameExecutablePath = "";
 			DocumentsFolderPathOverride = "";
@@ -228,6 +234,7 @@ namespace DivinityModManager.Models
 			CheckForUpdates = true;
 			LastUpdateCheck = -1;
 			SelectedTabIndex = 0;
+			SaveWindowLocation = true;
 
 			var properties = typeof(DivinityModManagerSettings)
 			.GetRuntimeProperties()
@@ -240,13 +247,13 @@ namespace DivinityModManager.Models
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 			}).DisposeWith(Disposables);
 
-			var extender_properties = typeof(OsirisExtenderSettings)
+			var extenderProperties = typeof(OsirisExtenderSettings)
 			.GetRuntimeProperties()
 			.Where(prop => Attribute.IsDefined(prop, typeof(DataMemberAttribute)))
 			.Select(prop => prop.Name)
 			.ToArray();
 
-			ExtenderSettings.WhenAnyPropertyChanged(extender_properties).Subscribe((c) =>
+			ExtenderSettings.WhenAnyPropertyChanged(extenderProperties).Subscribe((c) =>
 			{
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 				this.RaisePropertyChanged("ExtenderLogDirectory");

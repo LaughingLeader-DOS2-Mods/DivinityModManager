@@ -1052,8 +1052,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
-			//DivinityApp.DependencyFilter = this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Select(MakeDependencyFilter);
-			//DisposeWith(Settings.Disposables);
+			this.WhenAnyValue(x => x.Settings.SaveWindowLocation).Subscribe(View.ToggleWindowPositionSaving).DisposeWith(Settings.Disposables);
 
 			if (Settings.LogEnabled)
 			{
@@ -1065,7 +1064,6 @@ namespace DivinityModManager.ViewModels
 			if (loaded)
 			{
 				Settings.CanSaveSettings = false;
-				//view.AlertBar.SetSuccessAlert($"Loaded settings from '{settingsFile}'.", 5);
 			}
 
 			return loaded;
@@ -1098,6 +1096,20 @@ namespace DivinityModManager.ViewModels
 				View.AlertBar.SetDangerAlert($"Error saving settings at '{settingsFile}': {ex}");
 			}
 			return false;
+		}
+
+		object deferSave = null;
+
+		public void QueueSave()
+		{
+			if (deferSave == null)
+			{
+				deferSave = RxApp.MainThreadScheduler.Schedule(TimeSpan.FromMilliseconds(250), () =>
+				{
+					SaveSettings();
+					deferSave = null;
+				});
+			}
 		}
 
 		public async Task<List<DivinityModData>> LoadWorkshopModsAsync(CancellationToken cts)
@@ -3559,13 +3571,37 @@ namespace DivinityModManager.ViewModels
 				});
 			}
 
-			LoadSettings();
+			var loaded = LoadSettings();
 			Keys.LoadKeybindings(this);
 			if (Settings.CheckForUpdates)
 			{
 				CheckForUpdates();
 			}
 			SaveSettings();
+
+			if (loaded && Settings.SaveWindowLocation)
+			{
+				var window = Settings.Window;
+				View.WindowStartupLocation = WindowStartupLocation.Manual;
+
+				var screens = System.Windows.Forms.Screen.AllScreens;
+				var screen = screens.FirstOrDefault();
+				if (screen != null)
+				{
+					if (window.Screen > -1 && window.Screen < screens.Length - 1)
+					{
+						screen = screens[window.Screen];
+					}
+
+					View.Left = Math.Max(screen.WorkingArea.Left, Math.Min(screen.WorkingArea.Right, screen.WorkingArea.Left + window.X));
+					View.Top = Math.Max(screen.WorkingArea.Top, Math.Min(screen.WorkingArea.Bottom, screen.WorkingArea.Top + window.Y));
+				}
+
+				if (window.Maximized)
+				{
+					View.WindowState = WindowState.Maximized;
+				}
+			}
 
 			ModUpdatesViewVisible = ModUpdatesAvailable = false;
 			MainProgressTitle = "Loading...";

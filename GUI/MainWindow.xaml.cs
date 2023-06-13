@@ -11,11 +11,14 @@ using DivinityModManager.Util;
 using DivinityModManager.Util.ScreenReader;
 using DivinityModManager.ViewModels;
 
+using DynamicData;
+
 using ReactiveUI;
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Globalization;
 using System.Linq;
 using System.Reactive.Concurrency;
@@ -70,6 +73,8 @@ namespace DivinityModManager.Views
 		{
 			return MainContentPresenter.FindVisualChildren<HorizontalModLayout>().FirstOrDefault();
 		}
+
+		private System.Windows.Interop.WindowInteropHelper _hwnd;
 
 		public MainWindow()
 		{
@@ -151,6 +156,41 @@ namespace DivinityModManager.Views
 			});
 
 			AddHandler(UIElement.GotFocusEvent, new RoutedEventHandler(OnGotFocus));
+
+			_hwnd = new System.Windows.Interop.WindowInteropHelper(this);
+		}
+
+		void OnStateChanged(object sender, EventArgs e)
+		{
+			var windowSettings = ViewModel.Settings.Window;
+			windowSettings.Maximized = WindowState == WindowState.Maximized;
+			var screen = System.Windows.Forms.Screen.FromHandle(_hwnd.Handle);
+			windowSettings.Screen = System.Windows.Forms.Screen.AllScreens.IndexOf(screen);
+			ViewModel.QueueSave();
+		}
+
+		void OnLocationChanged(object sender, EventArgs e)
+		{
+			var windowSettings = ViewModel.Settings.Window;
+			var screen = System.Windows.Forms.Screen.FromHandle(_hwnd.Handle);
+			windowSettings.X = Left - screen.WorkingArea.Left;
+			windowSettings.Y = Top - screen.WorkingArea.Top;
+			windowSettings.Screen = System.Windows.Forms.Screen.AllScreens.IndexOf(screen);
+			ViewModel.QueueSave();
+		}
+
+		public void ToggleWindowPositionSaving(bool b)
+		{
+			if (b)
+			{
+				StateChanged += OnStateChanged;
+				LocationChanged += OnLocationChanged;
+			}
+			else
+			{
+				StateChanged -= OnStateChanged;
+				LocationChanged -= OnLocationChanged;
+			}
 		}
 
 		void OnGotFocus(object sender, RoutedEventArgs e)

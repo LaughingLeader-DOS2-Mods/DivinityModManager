@@ -1,29 +1,30 @@
-﻿<local:SettingsWindowBase x:Class="DivinityModManager.Views.SettingsWindow"
-                          xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                          xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                          xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
-                          xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
-                          xmlns:autogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
-                          xmlns:behavior="clr-namespace:DivinityModManager.Controls.Behavior"
-                          xmlns:c="clr-namespace:DivinityModManager.Controls"
-                          xmlns:controls="clr-namespace:DivinityModManager.Controls"
-                          xmlns:conv="clr-namespace:DivinityModManager.Converters"
-                          xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-                          xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
-                          xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
-                          xmlns:dd="urn:gong-wpf-dragdrop"
-                          xmlns:ext="clr-namespace:DivinityModManager.Controls.Extensions"
-                          xmlns:local="clr-namespace:DivinityModManager.Views"
-                          xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                          xmlns:reactiveui="http://reactiveui.net"
-                          xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
-                          xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
-                          Title="Preferences"
-                          Width="800"
-                          Height="900"
-                          TitleBarBackground="#4e38c9"
-                          TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
-                          mc:Ignorable="d">
+﻿<local:SettingsWindowBase
+	x:Class="DivinityModManager.Views.SettingsWindow"
+	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+	xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+	xmlns:adonisUI="clr-namespace:AdonisUI;assembly=AdonisUI"
+	xmlns:autogrid="clr-namespace:WpfAutoGrid;assembly=WpfAutoGrid"
+	xmlns:behavior="clr-namespace:DivinityModManager.Controls.Behavior"
+	xmlns:c="clr-namespace:DivinityModManager.Controls"
+	xmlns:controls="clr-namespace:DivinityModManager.Controls"
+	xmlns:conv="clr-namespace:DivinityModManager.Converters"
+	xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+	xmlns:dapp="clr-namespace:DivinityModManager;assembly=DivinityModManagerCore"
+	xmlns:data="clr-namespace:DivinityModManager.Models;assembly=DivinityModManagerCore"
+	xmlns:dd="urn:gong-wpf-dragdrop"
+	xmlns:ext="clr-namespace:DivinityModManager.Controls.Extensions"
+	xmlns:local="clr-namespace:DivinityModManager.Views"
+	xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+	xmlns:reactiveui="http://reactiveui.net"
+	xmlns:vm="clr-namespace:DivinityModManager.ViewModels"
+	xmlns:xc="http://schemas.xceed.com/wpf/xaml/toolkit"
+	Title="Preferences"
+	Width="800"
+	Height="900"
+	TitleBarBackground="#4e38c9"
+	TitleBarForeground="{DynamicResource {x:Static adonisUI:Brushes.AccentForegroundBrush}}"
+	mc:Ignorable="d">
 	<Window.Style>
 		<Style BasedOn="{StaticResource {x:Type Window}}" TargetType="Window" />
 	</Window.Style>
@@ -56,51 +57,81 @@
 			<RowDefinition Height="*" />
 			<RowDefinition Height="Auto" />
 		</Grid.RowDefinitions>
-		<StackPanel Margin="4" HorizontalAlignment="Left" Orientation="Horizontal">
-			<Button Command="{Binding SaveSettingsCommand}" Style="{StaticResource IconButtonStyle}" ToolTip="Save Settings (CTRL + S)">
+		<StackPanel
+			Margin="4"
+			HorizontalAlignment="Left"
+			Orientation="Horizontal">
+			<Button
+				Command="{Binding SaveSettingsCommand}"
+				Style="{StaticResource IconButtonStyle}"
+				ToolTip="Save Settings (CTRL + S)">
 				<controls:AutoGrayableImage Source="{StaticResource SaveImage}" />
 			</Button>
-			<Rectangle Grid.Column="1" Margin="2,0" Style="{StaticResource VerticalSeparator}" />
-			<Button Command="{Binding OpenSettingsFolderCommand}" Style="{StaticResource IconButtonStyle}" ToolTip="Open Settings Folder">
+			<Rectangle
+				Grid.Column="1"
+				Margin="2,0"
+				Style="{StaticResource VerticalSeparator}" />
+			<Button
+				Command="{Binding OpenSettingsFolderCommand}"
+				Style="{StaticResource IconButtonStyle}"
+				ToolTip="Open Settings Folder">
 				<controls:AutoGrayableImage Source="{StaticResource OpenFolderImage}" />
 			</Button>
-			<Rectangle Grid.Column="1" Margin="2,0" Style="{StaticResource VerticalSeparator}" />
-			<Button Command="{Binding ResetExtenderSettingsToDefaultCommand}"
-			        Style="{StaticResource IconButtonStyle}"
-			        ToolTip="Reset extender settings to their default values"
-			        Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
+			<Rectangle
+				Grid.Column="1"
+				Margin="2,0"
+				Style="{StaticResource VerticalSeparator}" />
+			<Button
+				Command="{Binding ResetExtenderSettingsToDefaultCommand}"
+				Style="{StaticResource IconButtonStyle}"
+				ToolTip="Reset extender settings to their default values"
+				Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}}">
 				<controls:AutoGrayableImage Source="{StaticResource DefaultIcon}" />
 			</Button>
 		</StackPanel>
-		<TabControl x:Name="PreferencesTabControl" Grid.Row="1" SelectedIndex="{Binding SelectedTabIndex}">
+		<TabControl
+			x:Name="PreferencesTabControl"
+			Grid.Row="1"
+			SelectedIndex="{Binding SelectedTabIndex}">
 			<TabItem FocusManager.FocusedElement="{Binding ElementName=SettingsAutoGrid}" Header="General">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-					<autogrid:AutoGrid x:Name="SettingsAutoGrid"
-					                   Margin="10,0"
-					                   ChildMargin="4"
-					                   ColumnCount="2"
-					                   Columns="auto,*"
-					                   RowCount="12"
-					                   RowHeight="*"
-					                   Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
+					<autogrid:AutoGrid
+						x:Name="SettingsAutoGrid"
+						Margin="10,0"
+						ChildMargin="4"
+						ColumnCount="2"
+						Columns="auto,*"
+						RowCount="16"
+						RowHeight="*"
+						Rows="auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto,auto">
 						<autogrid:AutoGrid.Resources>
 							<Style BasedOn="{StaticResource {x:Type TextBlock}}" TargetType="TextBlock">
 								<Setter Property="DataContext" Value="{Binding}" />
 							</Style>
 						</autogrid:AutoGrid.Resources>
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameDataPath" />
-						<controls:UnfocusableTextBox VerticalAlignment="Center" Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" TextAlignment="Left" />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding GameDataPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameExecutablePath" />
-						<controls:UnfocusableTextBox VerticalAlignment="Center" Text="{Binding GameExecutablePath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}" TextAlignment="Left" />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding GameExecutablePath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="WorkshopPath" />
-						<controls:UnfocusableTextBox x:Name="WorkshopPathTextbox"
-						                             VerticalAlignment="Center"
-						                             GotFocus="WorkshopPathTextbox_GotFocus"
-						                             LostFocus="WorkshopPathTextbox_LostFocus"
-						                             Text="{Binding WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
-						                             TextAlignment="Left" />
+						<controls:UnfocusableTextBox
+							x:Name="WorkshopPathTextbox"
+							VerticalAlignment="Center"
+							GotFocus="WorkshopPathTextbox_GotFocus"
+							LostFocus="WorkshopPathTextbox_LostFocus"
+							Text="{Binding WorkshopPath, UpdateSourceTrigger=PropertyChanged, FallbackValue=''}"
+							TextAlignment="Left" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="LoadOrderPath" />
-						<controls:UnfocusableTextBox VerticalAlignment="Center" Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}" TextAlignment="Left" />
+						<controls:UnfocusableTextBox
+							VerticalAlignment="Center"
+							Text="{Binding LoadOrderPath, UpdateSourceTrigger=PropertyChanged, FallbackValue='Load Order'}"
+							TextAlignment="Left" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="GameStoryLogEnabled" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding GameStoryLogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutoAddDependenciesWhenExporting" />
@@ -116,37 +147,46 @@
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutomaticallyLoadGMCampaignMods" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutomaticallyLoadGMCampaignMods, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="On Game Launch" />
-						<ComboBox DisplayMemberPath="Description"
-						          ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
-						          SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
-						          SelectedValuePath="Value"
-						          ToolTip="When the game launches through the mod manager, this action will be performed" />
+						<ComboBox
+							DisplayMemberPath="Description"
+							ItemsSource="{Binding Source={ext:EnumExtension {x:Type dapp:DivinityGameLaunchWindowAction}}}"
+							SelectedValue="{Binding ActionOnGameLaunch, UpdateSourceTrigger=PropertyChanged, Mode=TwoWay}"
+							SelectedValuePath="Value"
+							ToolTip="When the game launches through the mod manager, this action will be performed" />
 					</autogrid:AutoGrid>
 				</ScrollViewer>
 			</TabItem>
-			<TabItem x:Name="ScriptExtenderTab" FocusManager.FocusedElement="{Binding ElementName=ExtenderSettingsAutoGrid}" Header="Script Extender">
+			<TabItem
+				x:Name="ScriptExtenderTab"
+				FocusManager.FocusedElement="{Binding ElementName=ExtenderSettingsAutoGrid}"
+				Header="Script Extender">
 				<Grid>
 					<Grid.RowDefinitions>
 						<RowDefinition Height="*" />
 						<RowDefinition Height="auto" />
 					</Grid.RowDefinitions>
 					<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-						<autogrid:AutoGrid x:Name="ExtenderSettingsAutoGrid"
-						                   Margin="10,0"
-						                   ChildMargin="4"
-						                   ColumnCount="2"
-						                   Columns="*,*"
-						                   RowCount="1"
-						                   RowHeight="*"
-						                   Rows="auto" />
+						<autogrid:AutoGrid
+							x:Name="ExtenderSettingsAutoGrid"
+							Margin="10,0"
+							ChildMargin="4"
+							ColumnCount="2"
+							Columns="*,*"
+							RowCount="1"
+							RowHeight="*"
+							Rows="auto" />
 					</ScrollViewer>
 				</Grid>
 			</TabItem>
-			<TabItem x:Name="KeybindingsTabItem" FocusManager.FocusedElement="{Binding ElementName=KeybindingsListView}" Header="Keyboard Shortcuts">
-				<ListView x:Name="KeybindingsListView"
-				          KeyboardNavigation.TabNavigation="Continue"
-				          MouseDoubleClick="HotkeyListViewItem_MouseDoubleClick"
-				          ScrollViewer.VerticalScrollBarVisibility="Auto">
+			<TabItem
+				x:Name="KeybindingsTabItem"
+				FocusManager.FocusedElement="{Binding ElementName=KeybindingsListView}"
+				Header="Keyboard Shortcuts">
+				<ListView
+					x:Name="KeybindingsListView"
+					KeyboardNavigation.TabNavigation="Continue"
+					MouseDoubleClick="HotkeyListViewItem_MouseDoubleClick"
+					ScrollViewer.VerticalScrollBarVisibility="Auto">
 					<ListView.ItemContainerStyle>
 						<Style BasedOn="{StaticResource {x:Type ListViewItem}}" TargetType="ListViewItem">
 							<Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
@@ -157,8 +197,14 @@
 							<Setter Property="ContextMenu">
 								<Setter.Value>
 									<ContextMenu>
-										<MenuItem x:Name="ResetHotkeyMenuItem" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ResetCommand}" Header="Reset Keybinding" />
-										<MenuItem x:Name="ClearHotkeyMenuItem" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ClearCommand}" Header="Remove Keybinding" />
+										<MenuItem
+											x:Name="ResetHotkeyMenuItem"
+											Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ResetCommand}"
+											Header="Reset Keybinding" />
+										<MenuItem
+											x:Name="ClearHotkeyMenuItem"
+											Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ContextMenu}}, Path=PlacementTarget.DataContext.ClearCommand}"
+											Header="Remove Keybinding" />
 									</ContextMenu>
 								</Setter.Value>
 							</Setter>
@@ -167,28 +213,36 @@
 					<ListView.View>
 						<GridView AllowsColumnReorder="False" ColumnHeaderContainerStyle="{StaticResource GridViewLeftContainerStyle}">
 							<GridView.Columns>
-								<GridViewColumn Width="450" Header="Command" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+								<GridViewColumn
+									Width="450"
+									Header="Command"
+									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 									<GridViewColumn.CellTemplate>
 										<DataTemplate>
-											<TextBlock Margin="0,4"
-											           Padding="0"
-											           HorizontalAlignment="Stretch"
-											           VerticalAlignment="Bottom"
-											           IsHitTestVisible="False"
-											           TextAlignment="Left">
+											<TextBlock
+												Margin="0,4"
+												Padding="0"
+												HorizontalAlignment="Stretch"
+												VerticalAlignment="Bottom"
+												IsHitTestVisible="False"
+												TextAlignment="Left">
 												<Run Foreground="Lime" Text="{Binding ModifiedText}" />
 												<Run Text="{Binding DisplayName}" /></TextBlock>
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>
-								<GridViewColumn Width="400" Header="Keybinding" HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
+								<GridViewColumn
+									Width="400"
+									Header="Keybinding"
+									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 									<GridViewColumn.CellTemplate>
 										<DataTemplate>
-											<controls:HotkeyEditorControl HorizontalAlignment="Left"
-											                              FocusReturnTarget="{Binding ElementName=KeybindingsListView}"
-											                              GotFocus="HotkeyEditorControl_GotFocus"
-											                              Hotkey="{Binding}"
-											                              LostFocus="HotkeyEditorControl_LostFocus" />
+											<controls:HotkeyEditorControl
+												HorizontalAlignment="Left"
+												FocusReturnTarget="{Binding ElementName=KeybindingsListView}"
+												GotFocus="HotkeyEditorControl_GotFocus"
+												Hotkey="{Binding}"
+												LostFocus="HotkeyEditorControl_LostFocus" />
 										</DataTemplate>
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>
@@ -199,16 +253,23 @@
 			</TabItem>
 			<TabItem FocusManager.FocusedElement="{Binding ElementName=AdvancedSettingsAutoGrid}" Header="Advanced">
 				<ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-					<autogrid:AutoGrid x:Name="AdvancedSettingsAutoGrid"
-					                   Margin="10,0"
-					                   ChildMargin="2"
-					                   ColumnCount="2"
-					                   Columns="auto,*"
-					                   RowCount="4"
-					                   RowHeight="*"
-					                   Rows="auto,auto,auto,auto">
-						<TextBlock x:Name="DebugModeTextBlock" behavior:TextBlockSettingsEntryAttributeBehavior.Target="DebugModeEnabled" DataContext="{Binding}" />
-						<CheckBox VerticalAlignment="Center" IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}" ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
+					<autogrid:AutoGrid
+						x:Name="AdvancedSettingsAutoGrid"
+						Margin="10,0"
+						ChildMargin="2"
+						ColumnCount="2"
+						Columns="auto,*"
+						RowCount="4"
+						RowHeight="*"
+						Rows="auto,auto,auto,auto">
+						<TextBlock
+							x:Name="DebugModeTextBlock"
+							behavior:TextBlockSettingsEntryAttributeBehavior.Target="DebugModeEnabled"
+							DataContext="{Binding}" />
+						<CheckBox
+							VerticalAlignment="Center"
+							IsChecked="{Binding DebugModeEnabled, UpdateSourceTrigger=PropertyChanged}"
+							ToolTip="{Binding ElementName=DebugModeTextBlock, Path=ToolTip}" />
 						<TextBlock Text="Enable Mod Manager Logs" ToolTip="Automatically save logs to _Logs" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding LogEnabled, UpdateSourceTrigger=PropertyChanged}" />
 						<Menu>
@@ -218,28 +279,35 @@
 									<Setter Property="CommandParameter" Value="{Binding Path=Header, RelativeSource={RelativeSource Self}}" />
 								</Style>
 							</Menu.Resources>
-							<MenuItem Command="{x:Null}"
-							          CommandParameter="{x:Null}"
-							          Header="Game Launch Params"
-							          ToolTip="Parameters to pass to the game executable when launching the game through the mod manager">
+							<MenuItem
+								Command="{x:Null}"
+								CommandParameter="{x:Null}"
+								Header="Game Launch Params"
+								ToolTip="Parameters to pass to the game executable when launching the game through the mod manager">
 								<MenuItem Header="-storylog 1" ToolTip="Enables the story log" />
 								<MenuItem Header="--logPath &quot;&quot;" ToolTip="A directory to write story logs to" />
-								<MenuItem Command="{Binding ClearLaunchParamsCommand}"
-								          CommandParameter="{x:Null}"
-								          Header="Clear"
-								          ToolTip="Clear current params" />
+								<MenuItem
+									Command="{Binding ClearLaunchParamsCommand}"
+									CommandParameter="{x:Null}"
+									Header="Clear"
+									ToolTip="Clear current params" />
 							</MenuItem>
 						</Menu>
-						<TextBox VerticalAlignment="Center"
-						         Text="{Binding GameLaunchParams, UpdateSourceTrigger=PropertyChanged}"
-						         TextWrapping="Wrap"
-						         ToolTip="Parameters to pass to the game executable when launching the game through the mod manager" />
-						<TextBlock x:Name="ClearCacheTextBlock" Text="Clear Workshop Cache" ToolTip="Delete the local workshop cache used for tag display, located at Data\workshopdata.json" />
-						<Button HorizontalAlignment="Left"
-						        VerticalAlignment="Center"
-						        Command="{Binding ClearWorkshopCacheCommand}"
-						        Content="Delete Cache"
-						        ToolTip="{Binding ElementName=ClearCacheTextBlock, Path=ToolTip}" />
+						<TextBox
+							VerticalAlignment="Center"
+							Text="{Binding GameLaunchParams, UpdateSourceTrigger=PropertyChanged}"
+							TextWrapping="Wrap"
+							ToolTip="Parameters to pass to the game executable when launching the game through the mod manager" />
+						<TextBlock
+							x:Name="ClearCacheTextBlock"
+							Text="Clear Workshop Cache"
+							ToolTip="Delete the local workshop cache used for tag display, located at Data\workshopdata.json" />
+						<Button
+							HorizontalAlignment="Left"
+							VerticalAlignment="Center"
+							Command="{Binding ClearWorkshopCacheCommand}"
+							Content="Delete Cache"
+							ToolTip="{Binding ElementName=ClearCacheTextBlock, Path=ToolTip}" />
 					</autogrid:AutoGrid>
 				</ScrollViewer>
 			</TabItem>
@@ -250,24 +318,27 @@
 				<ColumnDefinition Width="*" />
 			</Grid.ColumnDefinitions>
 			<Grid Margin="4,0,4,0" Background="{DynamicResource {x:Static adonisUI:Brushes.Layer0BackgroundBrush}}">
-				<Button x:Name="ExportExtenderSettingsButton"
-				        HorizontalAlignment="Center"
-				        Command="{Binding ExportExtenderSettingsCommand}"
-				        Content="Save OsirisExtenderSettings.json"
-				        ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json (CTRL + S)"
-				        Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
-				<Button x:Name="ResetKeybindingsButton"
-				        HorizontalAlignment="Center"
-				        Command="{Binding ResetKeybindingsCommand}"
-				        Content="Reset to Default"
-				        ToolTip="Reset all keybindings to their default value"
-				        Visibility="{Binding KeybindingsTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+				<Button
+					x:Name="ExportExtenderSettingsButton"
+					HorizontalAlignment="Center"
+					Command="{Binding ExportExtenderSettingsCommand}"
+					Content="Save OsirisExtenderSettings.json"
+					ToolTip="Export Settings to DefEd\bin\OsirisExtenderSettings.json (CTRL + S)"
+					Visibility="{Binding ExtenderTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
+				<Button
+					x:Name="ResetKeybindingsButton"
+					HorizontalAlignment="Center"
+					Command="{Binding ResetKeybindingsCommand}"
+					Content="Reset to Default"
+					ToolTip="Reset all keybindings to their default value"
+					Visibility="{Binding KeybindingsTabIsVisible, Converter={StaticResource BoolToVisibilityConverter}, FallbackValue=Collapsed}" />
 			</Grid>
 			<Grid Grid.Column="1">
-				<Button x:Name="SaveSettingsButton"
-				        Padding="30,0"
-				        HorizontalAlignment="Center"
-				        Content="Save" />
+				<Button
+					x:Name="SaveSettingsButton"
+					Padding="30,0"
+					HorizontalAlignment="Center"
+					Content="Save" />
 			</Grid>
 		</Grid>
 	</Grid>

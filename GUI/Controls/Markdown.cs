@@ -527,7 +527,7 @@ namespace DivinityModManager.Controls
             var result = Create<Hyperlink, Inline>(RunSpanGamut(linkText));
             result.Command = HyperlinkCommand;
             result.CommandParameter = url;
-            if (!string.IsNullOrWhiteSpace(title))
+            if (!String.IsNullOrWhiteSpace(title))
             {
                 result.ToolTip = title;
             }

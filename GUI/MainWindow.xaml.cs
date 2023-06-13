@@ -424,7 +424,7 @@ namespace DivinityModManager.Views
 					var tb = comboBox.FindVisualChildren<TextBox>().FirstOrDefault();
 					if (tb != null && !tb.IsFocused)
 					{
-						var cancel = string.IsNullOrEmpty(tb.Text);
+						var cancel = String.IsNullOrEmpty(tb.Text);
 						ViewModel.StopRenaming(cancel);
 						if(!cancel)
 						{

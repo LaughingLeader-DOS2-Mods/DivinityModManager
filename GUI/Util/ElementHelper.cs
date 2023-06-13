@@ -41,7 +41,7 @@ namespace DivinityModManager.Util
 					// If the child is found, break so we do not overwrite the found child. 
 					if (foundChild != null) break;
 				}
-				else if (!string.IsNullOrEmpty(childName))
+				else if (!String.IsNullOrEmpty(childName))
 				{
 					var frameworkElement = child as FrameworkElement;
 					// If the child's name is set for search

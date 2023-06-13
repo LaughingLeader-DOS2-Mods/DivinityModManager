@@ -90,7 +90,7 @@ namespace DivinityModManager.Util
 		public static string EscapeXml(string s)
 		{
 			string toxml = s;
-			if (!string.IsNullOrEmpty(toxml))
+			if (!String.IsNullOrEmpty(toxml))
 			{
 				// replace literal values with entities
 				toxml = toxml.Replace("&", "&amp;");
@@ -104,7 +104,7 @@ namespace DivinityModManager.Util
 
 		public static string EscapeXmlAttributes(string xmlstring)
 		{
-			if (!string.IsNullOrEmpty(xmlstring))
+			if (!String.IsNullOrEmpty(xmlstring))
 			{
 				xmlstring = Regex.Replace(xmlstring, "value=\"(.*?)\"", new MatchEvaluator((m) =>
 				{
@@ -116,7 +116,7 @@ namespace DivinityModManager.Util
 
 		public static string UnescapeXml(string str)
 		{
-			if (!string.IsNullOrEmpty(str))
+			if (!String.IsNullOrEmpty(str))
 			{
 				str = str.Replace("&amp;", "&");
 				str = str.Replace("&apos;", "'");
@@ -884,7 +884,7 @@ namespace DivinityModManager.Util
 											if (c.Attributes.TryGetValue("UUID", out var attribute))
 											{
 												var uuid = (string)attribute.Value;
-												if (!string.IsNullOrEmpty(uuid))
+												if (!String.IsNullOrEmpty(uuid))
 												{
 													profileData.ModOrder.Add(uuid);
 												}
@@ -989,7 +989,7 @@ namespace DivinityModManager.Util
 											if (c.Attributes.TryGetValue("UUID", out var attribute))
 											{
 												var uuid = (string)attribute.Value;
-												if (!string.IsNullOrEmpty(uuid))
+												if (!String.IsNullOrEmpty(uuid))
 												{
 													profileData.ModOrder.Add(uuid);
 												}

@@ -827,7 +827,7 @@ namespace DivinityModManager.ViewModels
 			{
 				if (!File.Exists(Settings.GameExecutablePath))
 				{
-					if (string.IsNullOrWhiteSpace(Settings.GameExecutablePath))
+					if (String.IsNullOrWhiteSpace(Settings.GameExecutablePath))
 					{
 						ShowAlert("No game executable path set.", AlertType.Danger, 30);
 					}
@@ -838,11 +838,11 @@ namespace DivinityModManager.ViewModels
 					return;
 				}
 				string launchParams = Settings.GameLaunchParams;
-				if (string.IsNullOrEmpty(launchParams)) launchParams = "";
+				if (String.IsNullOrEmpty(launchParams)) launchParams = "";
 
 				if (Settings.GameStoryLogEnabled && launchParams.IndexOf("storylog") < 0)
 				{
-					if (string.IsNullOrWhiteSpace(launchParams))
+					if (String.IsNullOrWhiteSpace(launchParams))
 					{
 						launchParams = "-storylog 1";
 					}
@@ -1982,7 +1982,7 @@ namespace DivinityModManager.ViewModels
 					if (cachedData != null)
 					{
 						CachedWorkshopData = cachedData;
-						if (string.IsNullOrEmpty(CachedWorkshopData.LastVersion) || CachedWorkshopData.LastVersion != this.Version)
+						if (String.IsNullOrEmpty(CachedWorkshopData.LastVersion) || CachedWorkshopData.LastVersion != this.Version)
 						{
 							CachedWorkshopData.LastUpdated = -1;
 						}
@@ -4061,7 +4061,7 @@ namespace DivinityModManager.ViewModels
 						Settings.ExtenderSettings.ExtenderVersion = 56;
 						if (Settings.ExtenderSettings.ExtenderVersion <= -1)
 						{
-							if (!string.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
+							if (!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
 							{
 								var re = new Regex("v([0-9]+)");
 								var m = re.Match(PathwayData.OsirisExtenderLatestReleaseVersion);

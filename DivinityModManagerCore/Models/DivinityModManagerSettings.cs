@@ -32,6 +32,10 @@ namespace DivinityModManager.Models
 
 		[DataMember][Reactive] public string GameExecutablePath { get; set; } = "";
 
+		[SettingsEntry("Documents Path Override", "[EXPERIMENTAL]\nOverride the default location to Documents\\Larian Studios\\Divinity Original Sin 2 Definitive Edition\nThis folder is used when exporting load orders, loading profiles, and loading mods.")]
+
+		[DataMember][Reactive] public string DocumentsFolderPathOverride { get; set; } = "";
+
 		//Old. Will be read, but not written.
 		[DataMember]
 		public string DOS2DEGameExecutable { set => GameExecutablePath = value; }

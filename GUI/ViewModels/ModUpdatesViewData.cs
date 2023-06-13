@@ -143,7 +143,7 @@ namespace DivinityModManager.ViewModels
 		private void CopySelectedMods_Run()
 		{
 			string documentsFolder = System.Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-			string modPakFolder = Path.Combine(documentsFolder, _mainWindowViewModel.AppSettings.DefaultPathways.DocumentsGameFolder, "Mods");
+			string modPakFolder = Path.Combine(_mainWindowViewModel.PathwayData.LarianDocumentsFolder, "Mods");
 
 			if (Directory.Exists(modPakFolder))
 			{
@@ -276,7 +276,7 @@ namespace DivinityModManager.ViewModels
 
 				if (args.UpdatesToMove.Count > 0)
 				{
-					string backupFolder = Path.Combine(args.DocumentsFolder, _mainWindowViewModel.AppSettings.DefaultPathways.DocumentsGameFolder, "Mods_Old_ModManager");
+					string backupFolder = Path.Combine(_mainWindowViewModel.PathwayData.LarianDocumentsFolder, "Mods_Old_ModManager");
 					Directory.CreateDirectory(backupFolder);
 					DivinityApp.Log($"Copying '{args.UpdatesToMove.Count}' workshop mod update(s) to the local mods folder.");
 					foreach (string file in args.UpdatesToMove)

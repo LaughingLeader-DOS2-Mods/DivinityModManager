@@ -1043,6 +1043,15 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
+			this.WhenAnyValue(x => x.Settings.DocumentsFolderPathOverride).Subscribe((x) =>
+			{
+				if(!IsLocked)
+				{
+					SetGamePathways(Settings.GameDataPath, x);
+					View.AlertBar.SetWarningAlert($"Larian documents folder changed to '{PathwayData.LarianDocumentsFolder}'. Make sure to refresh.", 60);
+				}
+			}).DisposeWith(Settings.Disposables);
+
 			//DivinityApp.DependencyFilter = this.WhenAnyValue(x => x.Settings.DebugModeEnabled).Select(MakeDependencyFilter);
 			//DisposeWith(Settings.Disposables);
 
@@ -1051,7 +1060,7 @@ namespace DivinityModManager.ViewModels
 				ToggleLogging(true);
 			}
 
-			SetGamePathways(Settings.GameDataPath);
+			SetGamePathways(Settings.GameDataPath, Settings.DocumentsFolderPathOverride);
 
 			if (loaded)
 			{
@@ -1173,7 +1182,7 @@ namespace DivinityModManager.ViewModels
 			IsRefreshingWorkshop = false;
 		}
 
-		private void SetGamePathways(string currentGameDataPath)
+		private void SetGamePathways(string currentGameDataPath, string larianDocumentsFolderOverride = "")
 		{
 			try
 			{
@@ -1183,6 +1192,11 @@ namespace DivinityModManager.ViewModels
 					AppSettings.DefaultPathways.DocumentsGameFolder = "Larian Studios\\Divinity Original Sin 2 Definitive Edition";
 				}
 				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
+
+				if (!String.IsNullOrEmpty(larianDocumentsFolderOverride) && Directory.Exists(larianDocumentsFolderOverride))
+				{
+					larianDocumentsFolder = larianDocumentsFolderOverride;
+				}
 
 				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
 				DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");

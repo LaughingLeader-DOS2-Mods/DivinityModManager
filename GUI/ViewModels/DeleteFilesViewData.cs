@@ -55,7 +55,7 @@ namespace DivinityModManager.ViewModels
 		public ReactiveCommand<Unit, Unit> CancelCommand { get; private set; }
 
 		[Reactive] public bool PermanentlyDelete { get; set; }
-		[Reactive] public bool RemoveFromLoadOrder { get; set; } = true;
+		[Reactive] public bool RemoveFromLoadOrder { get; set; }
 
 		[Reactive] public bool IsActive{ get; set; }
 		[Reactive] public bool IsProgressActive { get; set; }
@@ -158,6 +158,7 @@ namespace DivinityModManager.ViewModels
 
 		public DeleteFilesViewData()
 		{
+			RemoveFromLoadOrder = true;
 			IsActive = false;
 			PermanentlyDelete = false;
 			var filesChanged = this.Files.ToObservableChangeSet().AutoRefresh(x => x.IsSelected).ToCollection().Throttle(TimeSpan.FromMilliseconds(50)).ObserveOn(RxApp.MainThreadScheduler);

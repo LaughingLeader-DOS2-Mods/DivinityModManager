@@ -249,7 +249,7 @@ namespace DivinityModManager.ViewModels
 		[Reactive] public string MainProgressTitle { get; set; }
 		[Reactive] public string MainProgressWorkText { get; set; }
 		[Reactive] public bool MainProgressIsActive { get; set; }
-		[Reactive] public double MainProgressValue { get; set; } = 0d;
+		[Reactive] public double MainProgressValue { get; set; }
 
 		public void IncreaseMainProgressValue(double val, string message = "")
 		{
@@ -275,7 +275,7 @@ namespace DivinityModManager.ViewModels
 
 		#endregion
 		[Reactive] public bool IsRenamingOrder { get; set; }
-		[Reactive] public Visibility StatusBarBusyIndicatorVisibility { get; set; } = Visibility.Collapsed;
+		[Reactive] public Visibility StatusBarBusyIndicatorVisibility { get; set; }
 		[Reactive] public bool WorkshopSupportEnabled { get; set; }
 		[Reactive] public bool CanMoveSelectedMods { get; set; }
 
@@ -4398,7 +4398,10 @@ Directory the zip will be extracted to:
 
 		public MainWindowViewModel() : base()
 		{
+			MainProgressValue = 0d;
 			MainProgressIsActive = true;
+			StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
+
 			exceptionHandler = new MainWindowExceptionHandler(this);
 			RxApp.DefaultExceptionHandler = exceptionHandler;
 

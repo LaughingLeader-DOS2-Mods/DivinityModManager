@@ -26,15 +26,15 @@ namespace DivinityModManager.Models
 	{
 		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods\nExample: Divinity Original Sin 2/DefEd/Data")]
 
-		[DataMember][Reactive] public string GameDataPath { get; set; } = "";
+		[DataMember][Reactive] public string GameDataPath { get; set; }
 
 		[SettingsEntry("Game Executable Path", "The path to the game exe, EoCApp.exe\nExample: Divinity Original Sin 2/DefEd/bin/EoCApp.exe")]
 
-		[DataMember][Reactive] public string GameExecutablePath { get; set; } = "";
+		[DataMember][Reactive] public string GameExecutablePath { get; set; }
 
 		[SettingsEntry("Documents Path Override", "[EXPERIMENTAL]\nOverride the default location to Documents\\Larian Studios\\Divinity Original Sin 2 Definitive Edition\nThis folder is used when exporting load orders, loading profiles, and loading mods.")]
 
-		[DataMember][Reactive] public string DocumentsFolderPathOverride { get; set; } = "";
+		[DataMember][Reactive] public string DocumentsFolderPathOverride { get; set; }
 
 		//Old. Will be read, but not written.
 		[DataMember]
@@ -45,26 +45,26 @@ namespace DivinityModManager.Models
 
 
 		[SettingsEntry("Workshop Path", "The Steam Workshop folder for Divinity: Original Sin 2\nUsed for detecting mod updates and new mods to be copied into the local mods folder\nExample: Steam/steamapps/workshop/content/435150")]
-		[DataMember][Reactive] public string WorkshopPath { get; set; } = "";
+		[DataMember][Reactive] public string WorkshopPath { get; set; }
 
 
 		[SettingsEntry("Saved Load Orders Path", "The folder containing mod load orders")]
-		[DataMember][Reactive] public string LoadOrderPath { get; set; } = "Orders";
+		[DataMember][Reactive] public string LoadOrderPath { get; set; }
 
 
 		[SettingsEntry("Enable Internal Log", "Enable the log for the mod manager")]
 		[DataMember][Reactive] public bool LogEnabled { get; set; }
 
 		[SettingsEntry("Auto Add Missing Dependencies When Exporting", "Automatically add dependency mods above their dependents in the exported load order, if omitted from the active order")]
-		[DataMember][Reactive] public bool AutoAddDependenciesWhenExporting { get; set; } = true;
+		[DataMember][Reactive] public bool AutoAddDependenciesWhenExporting { get; set; }
 
 		[SettingsEntry("Enable Automatic Updates", "Automatically check for updates when the program starts")]
-		[DataMember][Reactive] public bool CheckForUpdates { get; set; } = true;
+		[DataMember][Reactive] public bool CheckForUpdates { get; set; }
 
 		[SettingsEntry("Automatically Load GM Campaign Mods", "When a GM campaign is selected, its dependency mods will automatically be loaded without needing to manually import them")]
 		[DataMember][Reactive] public bool AutomaticallyLoadGMCampaignMods { get; set; }
 
-		[DataMember][Reactive] public long LastUpdateCheck { get; set; } = -1;
+		[DataMember][Reactive] public long LastUpdateCheck { get; set; }
 		private string lastOrder = "";
 
 		[DataMember]
@@ -184,7 +184,7 @@ namespace DivinityModManager.Models
 			set { this.RaiseAndSetIfChanged(ref selectedHotkey, value); }
 		}
 
-		[Reactive] public int SelectedTabIndex { get; set; } = 0;
+		[Reactive] public int SelectedTabIndex { get; set; }
 
 		public ICommand SaveSettingsCommand { get; set; }
 		public ICommand OpenSettingsFolderCommand { get; set; }
@@ -217,6 +217,17 @@ namespace DivinityModManager.Models
 		{
 			Disposables = new CompositeDisposable();
 			ExtenderSettings = new OsirisExtenderSettings();
+
+			//Defaults
+			GameDataPath = "";
+			GameExecutablePath = "";
+			DocumentsFolderPathOverride = "";
+			WorkshopPath = "";
+			LoadOrderPath = "Orders";
+			AutoAddDependenciesWhenExporting = true;
+			CheckForUpdates = true;
+			LastUpdateCheck = -1;
+			SelectedTabIndex = 0;
 
 			var properties = typeof(DivinityModManagerSettings)
 			.GetRuntimeProperties()

@@ -20,6 +20,7 @@ using System.Runtime.Serialization;
 using System.Windows;
 using System.Windows.Automation.Peers;
 using System.Windows.Input;
+using System.Reflection;
 
 namespace DivinityModManager.Models
 {
@@ -27,7 +28,7 @@ namespace DivinityModManager.Models
 	[ScreenReaderHelper(Name = "DisplayName", HelpText = "HelpText")]
 	public class DivinityModData : DivinityBaseModData, ISelectable
 	{
-		[Reactive][DataMember] public int Index { get; set; } = -1;
+		[Reactive][DataMember] public int Index { get; set; }
 
 		[DataMember(Name = "FileName")]
 		public string OutputPakName
@@ -204,7 +205,7 @@ namespace DivinityModManager.Models
 		public bool CanAddToLoadOrder => canAddToLoadOrder.Value;
 
 
-		[Reactive] public bool CanDrag { get; set; } = true;
+		[Reactive] public bool CanDrag { get; set; }
 
 		[Reactive] public bool DeveloperMode { get; set; }
 
@@ -288,6 +289,9 @@ namespace DivinityModManager.Models
 
 		public DivinityModData(bool isBaseGameMod = false) : base()
 		{
+			Index = -1;
+			CanDrag = true;
+
 			var connection = this.Dependencies.Connect().ObserveOn(RxApp.MainThreadScheduler);
 			connection.Bind(out displayedDependencies).DisposeMany().Subscribe();
 			dependencyCount = connection.Count().StartWith(0).ToProperty(this, nameof(TotalDependencies));

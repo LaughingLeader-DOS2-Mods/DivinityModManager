@@ -71,11 +71,11 @@ namespace DivinityModManager.Models
 		[Reactive] public bool HasBuiltinOverride { get; set; }
 		[Reactive] public string BuiltinOverrideModsText { get; set; }
 
-		[Reactive] public string HelpText { get; set; } = "";
+		[Reactive] public string HelpText { get; set; }
 
 		public List<string> Tags { get; set; } = new List<string>();
 
-		[Reactive] public Visibility Visibility { get; set; } = Visibility.Visible;
+		[Reactive] public Visibility Visibility { get; set; }
 
 		readonly ObservableAsPropertyHelper<Visibility> descriptionVisibility;
 		public Visibility DescriptionVisibility => descriptionVisibility.Value;
@@ -155,6 +155,8 @@ namespace DivinityModManager.Models
 
 		public DivinityBaseModData()
 		{
+			HelpText = "";
+			Visibility = Visibility.Visible;
 			fileName = this.WhenAnyValue(x => x.FilePath).Select(f => Path.GetFileName(f)).ToProperty(this, nameof(FileName));
 			displayName = this.WhenAnyValue(x => x.Name, x => x.FilePath, x => x.DisplayFileForName).Select(x => this.GetDisplayName()).ToProperty(this, nameof(DisplayName));
 			descriptionVisibility = this.WhenAnyValue(x => x.Description).Select(x => !String.IsNullOrWhiteSpace(x) ? Visibility.Visible : Visibility.Collapsed).StartWith(Visibility.Visible).ToProperty(this, nameof(DescriptionVisibility));

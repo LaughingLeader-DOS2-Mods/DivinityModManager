@@ -16,32 +16,43 @@ namespace DivinityModManager.Models
 		/// <summary>
 		/// The path to the root game folder, i.e. SteamLibrary\steamapps\common\Divinity Original Sin 2
 		/// </summary>
-		[Reactive] public string InstallPath { get; set; } = "";
+		[Reactive] public string InstallPath { get; set; }
 
 		/// <summary>
 		/// The path to Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition
 		/// </summary>
-		[Reactive] public string LarianDocumentsFolder { get; set; } = "";
+		[Reactive] public string LarianDocumentsFolder { get; set; }
 
 		/// <summary>
 		/// The path to Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\Mods
 		/// </summary>
-		[Reactive] public string DocumentsModsPath { get; set; } = "";
+		[Reactive] public string DocumentsModsPath { get; set; }
 
 		/// <summary>
 		/// The path to Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\PlayerProfiles
 		/// </summary>
-		[Reactive] public string DocumentsProfilesPath { get; set; } = "";
+		[Reactive] public string DocumentsProfilesPath { get; set; }
 
 		/// <summary>
 		/// The path to Documents\Larian Studios\Divinity Original Sin 2 Definitive Edition\GMCampaigns
 		/// </summary>
-		[Reactive] public string DocumentsGMCampaignsPath { get; set; } = "";
+		[Reactive] public string DocumentsGMCampaignsPath { get; set; }
 
-		[Reactive] public string LastSaveFilePath { get; set; } = "";
+		[Reactive] public string LastSaveFilePath { get; set; }
 
-		[Reactive] public string OsirisExtenderLatestReleaseUrl { get; set; } = "";
-		[Reactive] public string OsirisExtenderLatestReleaseVersion { get; set; } = "";
+		[Reactive] public string OsirisExtenderLatestReleaseUrl { get; set; }
+		[Reactive] public string OsirisExtenderLatestReleaseVersion { get; set; }
+
+		public DivinityPathwayData()
+		{
+			InstallPath = "";
+			LarianDocumentsFolder = "";
+			DocumentsModsPath = "";
+			DocumentsGMCampaignsPath = "";
+			LastSaveFilePath = "";
+			OsirisExtenderLatestReleaseUrl = "";
+			OsirisExtenderLatestReleaseVersion = "";
+		}
 
 		public string OsirisExtenderSettingsFile(DivinityModManagerSettings settings)
 		{

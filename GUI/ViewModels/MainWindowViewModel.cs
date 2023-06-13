@@ -1043,7 +1043,7 @@ namespace DivinityModManager.ViewModels
 				}
 			}).DisposeWith(Settings.Disposables);
 
-			this.WhenAnyValue(x => x.Settings.DocumentsFolderPathOverride).Subscribe((x) =>
+			this.WhenAnyValue(x => x.Settings.DocumentsFolderPathOverride).Skip(1).Subscribe((x) =>
 			{
 				if(!IsLocked)
 				{

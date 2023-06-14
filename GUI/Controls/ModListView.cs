@@ -73,7 +73,6 @@ namespace DivinityModManager.Controls
 
 		private void OnTargetGridLoaded(object sender, EventArgs e)
 		{
-			DivinityApp.Log($"[OnTargetGridLoaded] sender({sender}) targetView.View({((ModListView)sender)?.View})");
 			if (sender is ModListView targetView && targetView.View is GridView grid)
 			{
 				PropertyDescriptor pd = DependencyPropertyDescriptor.FromProperty(GridViewColumn.WidthProperty, typeof(GridViewColumn));

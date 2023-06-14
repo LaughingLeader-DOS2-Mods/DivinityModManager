@@ -200,6 +200,9 @@ namespace DivinityModManager.ViewModels
 		private readonly ObservableAsPropertyHelper<DivinityProfileData> _selectedProfile;
 		public DivinityProfileData SelectedProfile => _selectedProfile.Value;
 
+		private readonly ObservableAsPropertyHelper<bool> _hasProfile;
+		public bool HasProfile => _hasProfile.Value;
+
 		public ObservableCollectionExtended<DivinityLoadOrder> ModOrderList { get; set; } = new ObservableCollectionExtended<DivinityLoadOrder>();
 
 		[Reactive] public int SelectedModOrderIndex { get; set; }
@@ -1203,41 +1206,59 @@ namespace DivinityModManager.ViewModels
 				{
 					AppSettings.DefaultPathways.DocumentsGameFolder = "Larian Studios\\Divinity Original Sin 2 Definitive Edition";
 				}
+
 				string larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
 
 				if (!String.IsNullOrEmpty(larianDocumentsFolderOverride) && Directory.Exists(larianDocumentsFolderOverride))
 				{
 					larianDocumentsFolder = larianDocumentsFolderOverride;
 				}
-
-				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
-				DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");
-				if (!Directory.Exists(larianDocumentsFolder))
+				else if(!Directory.Exists(larianDocumentsFolder))
 				{
-					Directory.CreateDirectory(larianDocumentsFolder);
+					var userFolder = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile, Environment.SpecialFolderOption.DoNotVerify);
+					if(Directory.Exists(userFolder))
+					{
+						documentsFolder = Path.Combine(userFolder, "Documents");
+						larianDocumentsFolder = Path.Combine(documentsFolder, AppSettings.DefaultPathways.DocumentsGameFolder);
+					}
 				}
 
 				string modPakFolder = Path.Combine(larianDocumentsFolder, "Mods");
-				PathwayData.DocumentsModsPath = modPakFolder;
-				if (!Directory.Exists(modPakFolder))
-				{
-					DivinityApp.Log($"No mods folder found at '{modPakFolder}'. Creating folder.");
-					Directory.CreateDirectory(modPakFolder);
-				}
-
 				string gmCampaignsFolder = Path.Combine(larianDocumentsFolder, "GMCampaigns");
-				PathwayData.DocumentsGMCampaignsPath = gmCampaignsFolder;
-				if (!Directory.Exists(gmCampaignsFolder))
-				{
-					DivinityApp.Log($"No GM campaigns folder found at '{gmCampaignsFolder}'.");
-				}
-
 				string profileFolder = Path.Combine(larianDocumentsFolder, "PlayerProfiles");
+
+				PathwayData.LarianDocumentsFolder = larianDocumentsFolder;
+				PathwayData.DocumentsModsPath = modPakFolder;
+				PathwayData.DocumentsGMCampaignsPath = gmCampaignsFolder;
 				PathwayData.DocumentsProfilesPath = profileFolder;
-				if (!Directory.Exists(profileFolder))
+
+				if (Directory.Exists(documentsFolder))
 				{
-					DivinityApp.Log($"Creating profile folder at '{profileFolder}'.");
-					Directory.CreateDirectory(profileFolder);
+					Directory.CreateDirectory(larianDocumentsFolder);
+					DivinityApp.Log($"Larian documents folder set to '{larianDocumentsFolder}'.");
+
+					if (!Directory.Exists(modPakFolder))
+					{
+						DivinityApp.Log($"No mods folder found at '{modPakFolder}'. Creating folder.");
+						Directory.CreateDirectory(modPakFolder);
+					}
+
+					if (!Directory.Exists(gmCampaignsFolder))
+					{
+						DivinityApp.Log($"No GM campaigns folder found at '{gmCampaignsFolder}'. Creating folder.");
+						Directory.CreateDirectory(gmCampaignsFolder);
+					}
+
+					if (!Directory.Exists(profileFolder))
+					{
+						DivinityApp.Log($"No PlayerProfiles folder found at '{profileFolder}'. Creating folder.");
+						Directory.CreateDirectory(profileFolder);
+					}
+				}
+				else
+				{
+					ShowAlert("Failed to find %USERPROFILE%\\Documents folder. This is weird.", AlertType.Danger);
+					DivinityApp.Log($"Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify) return a non-existent path?\nResult({Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments, Environment.SpecialFolderOption.DoNotVerify)})");
 				}
 
 				if (String.IsNullOrEmpty(currentGameDataPath) || !Directory.Exists(currentGameDataPath))
@@ -1268,7 +1289,6 @@ namespace DivinityModManager.ViewModels
 						string gameDataPath = Path.Combine(installPath, AppSettings.DefaultPathways.GameDataFolder).Replace("\\", "/");
 						DivinityApp.Log($"Set game data path to '{gameDataPath}'.");
 						Settings.GameDataPath = gameDataPath;
-						SaveSettings();
 					}
 				}
 				else
@@ -3764,23 +3784,26 @@ namespace DivinityModManager.ViewModels
 
 		public void ShowAlert(string message, AlertType alertType = AlertType.Info, int timeout = 0)
 		{
-			if (timeout < 0) timeout = 0;
-			switch (alertType)
+			RxApp.MainThreadScheduler.Schedule(() =>
 			{
-				case AlertType.Danger:
-					View.AlertBar.SetDangerAlert(message, timeout);
-					break;
-				case AlertType.Warning:
-					View.AlertBar.SetWarningAlert(message, timeout);
-					break;
-				case AlertType.Success:
-					View.AlertBar.SetSuccessAlert(message, timeout);
-					break;
-				case AlertType.Info:
-				default:
-					View.AlertBar.SetInformationAlert(message, timeout);
-					break;
-			}
+				if (timeout < 0) timeout = 0;
+				switch (alertType)
+				{
+					case AlertType.Danger:
+						View.AlertBar.SetDangerAlert(message, timeout);
+						break;
+					case AlertType.Warning:
+						View.AlertBar.SetWarningAlert(message, timeout);
+						break;
+					case AlertType.Success:
+						View.AlertBar.SetSuccessAlert(message, timeout);
+						break;
+					case AlertType.Info:
+					default:
+						View.AlertBar.SetInformationAlert(message, timeout);
+						break;
+				}
+			});
 		}
 
 		private Unit DeleteOrder(DivinityLoadOrder order)
@@ -4475,7 +4498,6 @@ Directory the zip will be extracted to:
 			Keys.SaveAs.AddAction(SaveLoadOrderAs, canExecuteSaveAsCommand);
 			Keys.ImportMod.AddAction(OpenModImportDialog);
 			Keys.NewOrder.AddAction(() => AddNewModOrder());
-			Keys.ExportOrderToGame.AddAction(ExportLoadOrder);
 
 			var canRefreshObservable = this.WhenAnyValue(x => x.IsRefreshing, b => !b).StartWith(true);
 			RefreshCommand = ReactiveCommand.Create(() =>
@@ -4672,6 +4694,10 @@ Directory the zip will be extracted to:
 
 			var profileChanged = this.WhenAnyValue(x => x.SelectedProfileIndex, x => x.Profiles.Count).Select(x => Profiles.ElementAtOrDefault(x.Item1));
 			_selectedProfile = profileChanged.ToProperty(this, nameof(SelectedProfile)).DisposeWith(this.Disposables);
+			var hasNonNullProfile = this.WhenAnyValue(x => x.SelectedProfile).Select(x => x != null);
+			_hasProfile = hasNonNullProfile.ToProperty(this, nameof(HasProfile)).DisposeWith(this.Disposables);
+
+			Keys.ExportOrderToGame.AddAction(ExportLoadOrder, hasNonNullProfile);
 
 			profileChanged.Subscribe((profile) =>
 			{

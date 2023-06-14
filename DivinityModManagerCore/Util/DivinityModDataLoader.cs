@@ -358,7 +358,8 @@ namespace DivinityModManager.Util
 					}
 
 					var currentTime = DateTime.Now;
-					await Task.WhenAll(Partitioner.Create(filteredFolders).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
+					var partitionAmount = Environment.ProcessorCount;
+					await Task.WhenAll(Partitioner.Create(filteredFolders).GetPartitions(partitionAmount).AsParallel().Select(p => AwaitPartition(p)));
 					DivinityApp.Log($"Took {DateTime.Now - currentTime:s\\.ff} seconds(s) to load editor mods.");
 				}
 			}
@@ -540,9 +541,16 @@ namespace DivinityModManager.Util
 
 		private static async Task<DivinityModData> LoadModDataFromPakAsync(string pakPath, Dictionary<string, DivinityModData> builtinMods, CancellationToken cts)
 		{
-			while (!cts.IsCancellationRequested)
+			try
 			{
-				return await LoadModDataFromPakAsync(pakPath, builtinMods);
+				while (!cts.IsCancellationRequested)
+				{
+					return await LoadModDataFromPakAsync(pakPath, builtinMods);
+				}
+			}
+			catch(Exception ex)
+			{
+				DivinityApp.Log($"Error loading mod pak '{pakPath}':\n{ex}");
 			}
 			return null;
 		}
@@ -590,9 +598,10 @@ namespace DivinityModManager.Util
 				}
 			}
 
+			var partitionAmount = Environment.ProcessorCount;
 			var currentTime = DateTime.Now;
-			DivinityApp.Log($"Split mod loading into {Environment.ProcessorCount} partitions.");
-			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(Environment.ProcessorCount).AsParallel().Select(p => AwaitPartition(p)));
+			DivinityApp.Log($"Split mod loading into {partitionAmount} partitions.");
+			await Task.WhenAll(Partitioner.Create(modPaks).GetPartitions(partitionAmount).AsParallel().Select(p => AwaitPartition(p)));
 
 			DivinityApp.Log($"Took {DateTime.Now - currentTime:s\\.ff} second(s) to load mod paks.");
 			return loadedMods.ToList();

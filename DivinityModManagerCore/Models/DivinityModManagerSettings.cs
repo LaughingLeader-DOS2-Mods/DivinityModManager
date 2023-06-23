@@ -25,15 +25,12 @@ namespace DivinityModManager.Models
 	public class DivinityModManagerSettings : ReactiveObject, IDisposable
 	{
 		[SettingsEntry("Game Data Path", "The path to the Data folder, for loading editor mods\nExample: Divinity Original Sin 2/DefEd/Data")]
-
 		[DataMember][Reactive] public string GameDataPath { get; set; }
 
 		[SettingsEntry("Game Executable Path", "The path to the game exe, EoCApp.exe\nExample: Divinity Original Sin 2/DefEd/bin/EoCApp.exe")]
-
 		[DataMember][Reactive] public string GameExecutablePath { get; set; }
 
 		[SettingsEntry("Documents Path Override", "[EXPERIMENTAL]\nOverride the default location to Documents\\Larian Studios\\Divinity Original Sin 2 Definitive Edition\nThis folder is used when exporting load orders, loading profiles, and loading mods.")]
-
 		[DataMember][Reactive] public string DocumentsFolderPathOverride { get; set; }
 
 		//Old. Will be read, but not written.

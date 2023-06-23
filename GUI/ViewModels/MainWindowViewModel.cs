@@ -569,8 +569,8 @@ namespace DivinityModManager.ViewModels
 								{
 									if (intVersion >= 3)
 									{
-										//Assume we're at least at v56 is the updater is 3.0.0.0
-										Settings.ExtenderSettings.ExtenderVersion = 56;
+										//Assume we're using the latest release version if the updater is 3.0.0.0
+										Settings.ExtenderSettings.ExtenderVersion = 59;
 									}
 								}
 								else
@@ -621,17 +621,10 @@ namespace DivinityModManager.ViewModels
 								FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(f);
 								if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
 								{
-									var version = extenderInfo.FileVersion.Split('.')[0];
-									if (int.TryParse(version, out int intVersion))
+									var version = extenderInfo.FileVersion.Split('.').FirstOrDefault();
+									if (!String.IsNullOrEmpty(version) && int.TryParse(version, out int intVersion) && intVersion > latestVersion)
 									{
-										if (intVersion > latestVersion)
-										{
-											latestVersion = intVersion;
-										}
-									}
-									else
-									{
-										Settings.ExtenderSettings.ExtenderVersion = -1;
+										latestVersion = intVersion;
 									}
 								}
 							}
@@ -660,15 +653,11 @@ namespace DivinityModManager.ViewModels
 							FileVersionInfo extenderInfo = FileVersionInfo.GetVersionInfo(extenderAppFile);
 							if (!String.IsNullOrEmpty(extenderInfo.FileVersion))
 							{
-								var version = extenderInfo.FileVersion.Split('.')[0];
-								if (int.TryParse(version, out int intVersion))
+								var version = extenderInfo.FileVersion.Split('.').FirstOrDefault();
+								if (!String.IsNullOrEmpty(version) && int.TryParse(version, out int intVersion))
 								{
 									Settings.ExtenderSettings.ExtenderVersion = intVersion;
 									DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
-								}
-								else
-								{
-									Settings.ExtenderSettings.ExtenderVersion = -1;
 								}
 							}
 						}

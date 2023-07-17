@@ -100,7 +100,7 @@ namespace DivinityModManager.Models
 					}
 					if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_DISABLED)
 					{
-						ScriptExtenderSupportToolTipText += " (Enable Extensions in the OsiExtender config)";
+						ScriptExtenderSupportToolTipText += " (Enable Extensions in the Script Extender config)";
 					}
 					if (ExtenderModStatus == DivinityExtenderModStatus.REQUIRED_OLD)
 					{

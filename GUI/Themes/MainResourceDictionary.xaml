@@ -612,7 +612,7 @@
 					Text="{Binding FileName}"
 					Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
 				<TextBlock Margin="2" Visibility="{Binding HasScriptExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
-					<Run Foreground="Goldenrod" Text="Script Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" />
+					<Run Foreground="Goldenrod" Text="Script Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding ScriptExtenderData.RequiredExtensionVersion}" />
 				</TextBlock>
 				<TextBlock Margin="2">
 					<Run Text="Last Updated on " /><Run Text="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />

@@ -154,7 +154,7 @@ namespace DivinityModManager.Models
 
 		private bool debugModeEnabled = false;
 
-		[SettingsEntry("Enable Developer Mode", "This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional OsiExtender options")]
+		[SettingsEntry("Enable Developer Mode", "This enables features for mod developers, such as being able to copy a mod's UUID in context menus, and additional Script Extender options")]
 		[DataMember]
 		public bool DebugModeEnabled
 		{

@@ -4055,7 +4055,7 @@ namespace DivinityModManager.ViewModels
 			}
 		}
 
-		private void InstallOsiExtender_DownloadStart(string exeDir)
+		private void InstallScriptExtender_DownloadStart(string exeDir)
 		{
 			double taskStepAmount = 1.0 / 3;
 			MainProgressTitle = $"Setting up the Script Extender...";
@@ -4187,7 +4187,7 @@ Directory the zip will be extracted to:
 
 					if (result == AdonisUI.Controls.MessageBoxResult.Yes)
 					{
-						InstallOsiExtender_DownloadStart(exeDir);
+						InstallScriptExtender_DownloadStart(exeDir);
 					}
 				}
 				else

@@ -422,6 +422,12 @@
     <None Include="Resources\DefaultPathways.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Include="Resources\IgnoredMods.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+	<Resource Include="DivinityModManager.ico" />
     <Resource Include="Resources\Icons\AddItem_16x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
@@ -521,6 +527,15 @@
     <Resource Include="Resources\Icons\Log_Normal_32x.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
+	<Resource Include="Resources\Icons\LoadCampaignOrder_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Resources\Icons\BrowserLink_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
+	<Resource Include="Resources\Icons\DeleteAzureResource_16x.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include=".NETFramework,Version=v4.7.2">
@@ -538,34 +553,13 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="DivinityModManager.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="Themes\DefaultStyles\ComboBox.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\IgnoredMods.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\LoadCampaignOrder_16x.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="FodyWeavers.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\BrowserLink_16x.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Resources\Icons\DeleteAzureResource_16x.png" />
   </ItemGroup>
   <PropertyGroup>
     <PreBuildEvent>rd /s /q $(TargetDir)_Lib</PreBuildEvent>

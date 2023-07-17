@@ -83,8 +83,8 @@ namespace DivinityModManager.Models.App
 		[Reactive] public bool IsSelected { get; set; }
 		[Reactive] public string ModifiedText { get; set; }
 
-		private Key _defaultKey;
-		private ModifierKeys _defaultModifiers;
+		private Key _defaultKey = Key.None;
+		private ModifierKeys _defaultModifiers = ModifierKeys.None;
 
 		public Key DefaultKey => _defaultKey;
 		public ModifierKeys DefaultModifiers => _defaultModifiers;
@@ -151,19 +151,19 @@ namespace DivinityModManager.Models.App
 			_canExecuteCommand = this.WhenAnyObservable(x => x._canExecuteConditions).ToProperty(this, nameof(CanExecuteCommand), false, RxApp.MainThreadScheduler);
 			Command = ReactiveCommand.Create(Invoke, this.WhenAnyValue(x => x.CanExecuteCommand));
 
-			var canReset = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != _defaultKey || m != _defaultModifiers).StartWith(false);
-			ResetCommand = ReactiveCommand.Create(ResetToDefault, canReset);
-			var canClear = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != Key.None).StartWith(false);
-			ClearCommand = ReactiveCommand.Create(Clear, canClear);
-
-			this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k == _defaultKey && m == _defaultModifiers).BindTo(this, x => x.IsDefault);
-			var isDefaultChanged = this.WhenAnyValue(x => x.IsDefault);
-			isDefaultChanged.Subscribe((b) =>
+			this.WhenAnyValue(x => x.Key, x => x.Modifiers).Select(x => x.Item1 == _defaultKey && x.Item2 == _defaultModifiers).Skip(1).StartWith(true).BindTo(this, x => x.IsDefault);
+			var isDefaultObservable = this.WhenAnyValue(x => x.IsDefault);
+			isDefaultObservable.Subscribe(_ =>
 			{
 				this.RaisePropertyChanged("ToolTip");
 			});
+			isDefaultObservable.Select(b => b ? "*" : "").Skip(1).BindTo(this, x => x.ModifiedText);
 
-			isDefaultChanged.Select(b => !b ? "*" : "").BindTo(this, x => x.ModifiedText);
+			var canReset = isDefaultObservable.Select(b => !b).StartWith(false);
+			var canClear = this.WhenAnyValue(x => x.Key, x => x.Modifiers, (k, m) => k != Key.None).StartWith(false);
+
+			ResetCommand = ReactiveCommand.Create(ResetToDefault, canReset);
+			ClearCommand = ReactiveCommand.Create(Clear, canClear);
 		}
 
 		private void Init(Key key, ModifierKeys modifiers)
@@ -183,7 +183,7 @@ namespace DivinityModManager.Models.App
 		{
 			Init(key, modifiers);
 		}
-	
+
 
 		public override string ToString()
 		{

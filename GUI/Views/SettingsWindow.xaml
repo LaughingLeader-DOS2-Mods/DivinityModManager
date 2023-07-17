@@ -232,7 +232,7 @@
 									</GridViewColumn.CellTemplate>
 								</GridViewColumn>
 								<GridViewColumn
-									Width="400"
+									Width="200"
 									Header="Keybinding"
 									HeaderTemplate="{StaticResource GridViewTextblockHeaderTemplate}">
 									<GridViewColumn.CellTemplate>

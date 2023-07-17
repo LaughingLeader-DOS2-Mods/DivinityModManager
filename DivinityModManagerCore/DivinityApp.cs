@@ -103,8 +103,7 @@ namespace DivinityModManager
 			int iAction = 70; // SPI_GETSCREENREADER constant;
 			int iParam = 0;
 			int iUpdate = 0;
-			bool bActive = false;
-			bool bReturn = SystemParametersInfo(iAction, iParam, out bActive, iUpdate);
+			bool bReturn = SystemParametersInfo(iAction, iParam, out bool bActive, iUpdate);
 			return bReturn && bActive;
 			//if (AutomationPeer.ListenerExists(AutomationEvents.AutomationFocusChanged) || AutomationPeer.ListenerExists(AutomationEvents.LiveRegionChanged))
 			//{

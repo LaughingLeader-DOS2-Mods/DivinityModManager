@@ -29,7 +29,7 @@ namespace DivinityModManager.Models
 
 		[DataMember] public string Targets { get; set; }
 
-		[DataMember] public DivinityModOsiExtenderConfig OsiExtenderData { get; set; }
+		[DataMember] public DivinityModScriptExtenderConfig ScriptExtenderData { get; set; }
 		[DataMember] public List<DivinityModDependencyData> Dependencies { get; set; }
 
 		[DataMember] public string MD5 { get; set; }
@@ -49,7 +49,7 @@ namespace DivinityModManager.Models
 				Modes = mod.Modes,
 				Targets = mod.Targets,
 				Index = mod.Index,
-				OsiExtenderData = mod.OsiExtenderData,
+				ScriptExtenderData = mod.ScriptExtenderData,
 				UUID = mod.UUID,
 				MD5 = mod.MD5
 			};

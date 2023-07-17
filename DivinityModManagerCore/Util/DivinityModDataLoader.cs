@@ -1,30 +1,35 @@
-﻿using DivinityModManager.Models;
-using System;
-using System.Collections.Generic;
-using Alphaleonis.Win32.Filesystem;
-using System.Text;
-using System.Xml;
-using System.Xml.Linq;
-using System.Linq;
+﻿using Alphaleonis.Win32.Filesystem;
+
+using DivinityModManager.Extensions;
+using DivinityModManager.Models;
+
+using DynamicData;
+
 using LSLib.LS;
-using System.Diagnostics;
-using System.Reflection;
-using System.Resources;
-using System.Threading.Tasks;
+
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using Newtonsoft.Json.Linq;
-using DynamicData;
-using DivinityModManager.Extensions;
-using ReactiveUI;
-using LSLib.Granny;
-using System.Collections.Concurrent;
+using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 
 namespace DivinityModManager.Util
 {
 	public static class DivinityModDataLoader
 	{
+		public static int HEADER_MAJOR = 3;
+		public static int HEADER_MINOR = 6;
+		public static int HEADER_REVISION = 1;
+		public static int HEADER_BUILD = 5;
+
 		public static bool IgnoreMod(string modUUID)
 		{
 			return DivinityApp.IgnoredMods.Any(m => m.UUID == modUUID);
@@ -62,6 +67,19 @@ namespace DivinityModManager.Util
 			if (att != null)
 			{
 				return att;
+			}
+			return fallbackValue;
+		}
+
+		private static string GetAttributeWithId(XElement node, string[] ids, string fallbackValue = "")
+		{
+			foreach (var id in ids)
+			{
+				var att = node.Descendants("attribute").FirstOrDefault(a => a.Attribute("id")?.Value == id)?.Attribute("value")?.Value;
+				if (att != null)
+				{
+					return att;
+				}
 			}
 			return fallbackValue;
 		}
@@ -135,10 +153,10 @@ namespace DivinityModManager.Util
 				XElement xDoc = XElement.Parse(EscapeXmlAttributes(metaContents));
 				var versionNode = xDoc.Descendants("version").FirstOrDefault();
 
-				int headerMajor = 3;
-				int headerMinor = 6;
-				int headerRevision = 1;
-				int headerBuild = 5;
+				var headerMajor = HEADER_MAJOR;
+				var headerMinor = HEADER_MINOR;
+				var headerRevision = HEADER_REVISION;
+				var headerBuild = HEADER_BUILD;
 
 				if (versionNode != null)
 				{
@@ -308,11 +326,11 @@ namespace DivinityModManager.Util
 							var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
 							if (File.Exists(osiConfigFile))
 							{
-								var osiToolsConfig = await LoadOsiConfigAsync(osiConfigFile);
+								var osiToolsConfig = await LoadScriptExtenderConfigAsync(osiConfigFile);
 								if (osiToolsConfig != null)
 								{
-									modData.OsiExtenderData = osiToolsConfig;
-									if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+									modData.ScriptExtenderData = osiToolsConfig;
+									if (modData.ScriptExtenderData.RequiredExtensionVersion > -1) modData.HasScriptExtenderSettings = true;
 								}
 								else
 								{
@@ -510,11 +528,11 @@ namespace DivinityModManager.Util
 
 						if (osiConfigInfo != null)
 						{
-							var osiToolsConfig = await LoadOsiConfigAsync(osiConfigInfo);
+							var osiToolsConfig = await LoadScriptExtenderConfigAsync(osiConfigInfo);
 							if (osiToolsConfig != null)
 							{
-								modData.OsiExtenderData = osiToolsConfig;
-								if (modData.OsiExtenderData.RequiredExtensionVersion > -1) modData.HasOsirisExtenderSettings = true;
+								modData.ScriptExtenderData = osiToolsConfig;
+								if (modData.ScriptExtenderData.RequiredExtensionVersion > -1) modData.HasScriptExtenderSettings = true;
 							}
 							else
 							{
@@ -1692,7 +1710,7 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		private static async Task<DivinityModOsiExtenderConfig> LoadOsiConfigAsync(string osiToolsConfig)
+		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(string osiToolsConfig)
 		{
 			try
 			{
@@ -1701,7 +1719,7 @@ namespace DivinityModManager.Util
 					var text = await reader.ReadToEndAsync();
 					if (!String.IsNullOrWhiteSpace(text))
 					{
-						var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+						var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
 						if (osiConfig != null)
 						{
 							return osiConfig;
@@ -1711,7 +1729,7 @@ namespace DivinityModManager.Util
 							var jsonObj = JObject.Parse(text);
 							if (jsonObj != null)
 							{
-								osiConfig = new DivinityModOsiExtenderConfig();
+								osiConfig = new DivinityModScriptExtenderConfig();
 								osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
 								osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
 								return osiConfig;
@@ -1727,7 +1745,7 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		private static async Task<DivinityModOsiExtenderConfig> LoadOsiConfigAsync(AbstractFileInfo osiToolsConfig)
+		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(AbstractFileInfo osiToolsConfig)
 		{
 			try
 			{
@@ -1738,7 +1756,7 @@ namespace DivinityModManager.Util
 						string text = await sr.ReadToEndAsync();
 						if (!String.IsNullOrWhiteSpace(text))
 						{
-							var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModOsiExtenderConfig>(text);
+							var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
 							if (osiConfig != null)
 							{
 								return osiConfig;
@@ -1748,7 +1766,7 @@ namespace DivinityModManager.Util
 								var jsonObj = JObject.Parse(text);
 								if (jsonObj != null)
 								{
-									osiConfig = new DivinityModOsiExtenderConfig();
+									osiConfig = new DivinityModScriptExtenderConfig();
 									osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
 									osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
 									return osiConfig;

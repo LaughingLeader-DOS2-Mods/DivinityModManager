@@ -101,10 +101,10 @@ namespace DivinityModManager.Models
 		[SettingsEntry("Shift Focus on Swap", "When moving selected mods to the opposite list with Enter, move focus to that list as well")]
 		[DataMember][Reactive] public bool ShiftListFocusOnSwap { get; set; }
 
-		private OsirisExtenderSettings extenderSettings;
+		private ScriptExtenderSettings extenderSettings;
 
 		[DataMember]
-		public OsirisExtenderSettings ExtenderSettings
+		public ScriptExtenderSettings ExtenderSettings
 		{
 			get => extenderSettings;
 			set { this.RaiseAndSetIfChanged(ref extenderSettings, value); }
@@ -220,7 +220,7 @@ namespace DivinityModManager.Models
 			Disposables = new CompositeDisposable();
 
 			//Defaults
-			ExtenderSettings = new OsirisExtenderSettings();
+			ExtenderSettings = new ScriptExtenderSettings();
 			Window = new WindowSettings();
 			GameDataPath = "";
 			GameExecutablePath = "";
@@ -244,7 +244,7 @@ namespace DivinityModManager.Models
 				if (SettingsWindowIsOpen) CanSaveSettings = true;
 			}).DisposeWith(Disposables);
 
-			var extenderProperties = typeof(OsirisExtenderSettings)
+			var extenderProperties = typeof(ScriptExtenderSettings)
 			.GetRuntimeProperties()
 			.Where(prop => Attribute.IsDefined(prop, typeof(DataMemberAttribute)))
 			.Select(prop => prop.Name)

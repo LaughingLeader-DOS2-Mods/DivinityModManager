@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace DivinityModManager.Models
 {
 	[JsonObject(MemberSerialization.OptIn)]
-	public class DivinityModOsiExtenderConfig
+	public class DivinityModScriptExtenderConfig
 	{
 		[JsonProperty("RequiredExtensionVersion")]
 		public int RequiredExtensionVersion { get; set; } = -1;

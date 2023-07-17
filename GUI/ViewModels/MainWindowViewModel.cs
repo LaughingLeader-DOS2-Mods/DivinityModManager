@@ -498,7 +498,7 @@ namespace DivinityModManager.ViewModels
 						}
 						if (jsonData.TryGetValue("tag_name", out var tagName))
 						{
-							PathwayData.OsirisExtenderLatestReleaseVersion = (string)tagName;
+							PathwayData.ScriptExtenderLatestReleaseVersion = (string)tagName;
 						}
 #if DEBUG
 						//var lines = jsonData.Select(kvp => kvp.Key + ": " + kvp.Value.ToString());
@@ -508,12 +508,12 @@ namespace DivinityModManager.ViewModels
 					if (!String.IsNullOrEmpty(latestReleaseZipUrl))
 					{
 						OpenRepoLinkToDownload = false;
-						PathwayData.OsirisExtenderLatestReleaseUrl = latestReleaseZipUrl;
-						DivinityApp.Log($"OsiTools latest release url found: {latestReleaseZipUrl}");
+						PathwayData.ScriptExtenderLatestReleaseUrl = latestReleaseZipUrl;
+						DivinityApp.Log($"Script Extender latest release url found: {latestReleaseZipUrl}");
 					}
 					else
 					{
-						DivinityApp.Log($"OsiTools latest release not found.");
+						DivinityApp.Log($"Script Extender latest release not found.");
 					}
 				}
 				else
@@ -523,7 +523,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error checking for latest OsiExtender release: {ex}");
+				DivinityApp.Log($"Error checking for latest Script Extender release: {ex}");
 
 				OpenRepoLinkToDownload = true;
 			}
@@ -533,10 +533,10 @@ namespace DivinityModManager.ViewModels
 
 				try
 				{
-					string extenderSettingsJson = PathwayData.OsirisExtenderSettingsFile(Settings);
+					string extenderSettingsJson = PathwayData.ScriptExtenderSettingsFile(Settings);
 					if (extenderSettingsJson.IsExistingFile())
 					{
-						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<OsirisExtenderSettings>(extenderSettingsJson);
+						var osirisExtenderSettings = DivinityJsonUtils.SafeDeserializeFromPath<ScriptExtenderSettings>(extenderSettingsJson);
 						if (osirisExtenderSettings != null)
 						{
 							DivinityApp.Log($"Loaded extender settings from '{extenderSettingsJson}'.");
@@ -550,10 +550,10 @@ namespace DivinityModManager.ViewModels
 				}
 
 				string extenderUpdaterPath = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), DivinityApp.EXTENDER_UPDATER_FILE);
-				DivinityApp.Log($"Looking for OsiExtender at '{extenderUpdaterPath}'.");
+				DivinityApp.Log($"Looking for Script Extender at '{extenderUpdaterPath}'.");
 				if (File.Exists(extenderUpdaterPath))
 				{
-					DivinityApp.Log($"Checking {DivinityApp.EXTENDER_UPDATER_FILE} for Osiris ASCII bytes.");
+					DivinityApp.Log($"Checking {DivinityApp.EXTENDER_UPDATER_FILE} for Script Extender ASCII bytes.");
 					try
 					{
 						FileVersionInfo fvi = FileVersionInfo.GetVersionInfo(extenderUpdaterPath);
@@ -636,7 +636,7 @@ namespace DivinityModManager.ViewModels
 						if (latestVersion > -1)
 						{
 							Settings.ExtenderSettings.ExtenderVersion = latestVersion;
-							DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+							DivinityApp.Log($"Current Script Extender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
 						}
 					}
 				}
@@ -657,7 +657,7 @@ namespace DivinityModManager.ViewModels
 								if (!String.IsNullOrEmpty(version) && int.TryParse(version, out int intVersion))
 								{
 									Settings.ExtenderSettings.ExtenderVersion = intVersion;
-									DivinityApp.Log($"Current OsiExtender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
+									DivinityApp.Log($"Current Script Extender version found: '{Settings.ExtenderSettings.ExtenderVersion}'.");
 								}
 							}
 						}
@@ -747,7 +747,7 @@ namespace DivinityModManager.ViewModels
 					var baseName = Path.GetFileNameWithoutExtension(Settings.WorkshopPath);
 					if (baseName == "steamapps")
 					{
-						var newFolder = Path.Combine(Settings.WorkshopPath, "workshop/content/435150");
+						var newFolder = Path.Combine(Settings.WorkshopPath, $"workshop/content/{AppSettings.DefaultPathways.Steam.AppID}");
 						if (Directory.Exists(newFolder))
 						{
 							Settings.WorkshopPath = newFolder;
@@ -783,7 +783,7 @@ namespace DivinityModManager.ViewModels
 			canOpenGameExe = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p)).StartWith(false);
 			canOpenLogDirectory = this.WhenAnyValue(x => x.Settings.ExtenderLogDirectory, (f) => Directory.Exists(f)).StartWith(false);
 
-			Keys.DownloadScriptExtender.AddAction(() => InstallOsiExtender_Start());
+			Keys.DownloadScriptExtender.AddAction(() => InstallScriptExtender_Start());
 
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
 			Keys.OpenModsFolder.AddAction(() =>
@@ -911,7 +911,7 @@ namespace DivinityModManager.ViewModels
 
 			Settings.ExportExtenderSettingsCommand = ReactiveCommand.Create(() =>
 			{
-				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "OsirisExtenderSettings.json");
+				string outputFile = Path.Combine(Path.GetDirectoryName(Settings.GameExecutablePath), "ScriptExtenderSettings.json");
 				try
 				{
 					var jsonSettings = new JsonSerializerSettings { DefaultValueHandling = DefaultValueHandling.Ignore, Formatting = Formatting.Indented };
@@ -921,11 +921,11 @@ namespace DivinityModManager.ViewModels
 					}
 					string contents = JsonConvert.SerializeObject(Settings.ExtenderSettings, jsonSettings);
 					File.WriteAllText(outputFile, contents);
-					View.AlertBar.SetSuccessAlert($"Saved Osiris Extender settings to '{outputFile}'.", 20);
+					View.AlertBar.SetSuccessAlert($"Saved Script Extender settings to '{outputFile}'.", 20);
 				}
 				catch (Exception ex)
 				{
-					View.AlertBar.SetDangerAlert($"Error saving Osiris Extender settings to '{outputFile}':\n{ex}");
+					View.AlertBar.SetDangerAlert($"Error saving Script Extender settings to '{outputFile}':\n{ex}");
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -1873,12 +1873,12 @@ namespace DivinityModManager.ViewModels
 
 				foreach (var mod in Mods)
 				{
-					if (mod.OsiExtenderData != null && mod.OsiExtenderData.HasAnySettings)
+					if (mod.ScriptExtenderData != null && mod.ScriptExtenderData.HasAnySettings)
 					{
 						// Assume an Lua-only mod actually requires the extender, otherwise functionality is limited.
-						bool onlyUsesLua = mod.OsiExtenderData.FeatureFlags.Contains("Lua") && !mod.OsiExtenderData.FeatureFlags.Contains("OsirisExtensions");
+						bool onlyUsesLua = mod.ScriptExtenderData.FeatureFlags.Contains("Lua") && !mod.ScriptExtenderData.FeatureFlags.Contains("OsirisExtensions");
 
-						if (!mod.OsiExtenderData.FeatureFlags.Contains("Preprocessor") || onlyUsesLua)
+						if (!mod.ScriptExtenderData.FeatureFlags.Contains("Preprocessor") || onlyUsesLua)
 						{
 							if (!Settings.ExtenderSettings.EnableExtensions)
 							{
@@ -1888,7 +1888,7 @@ namespace DivinityModManager.ViewModels
 							{
 								if (Settings.ExtenderSettings != null && Settings.ExtenderSettings.ExtenderVersion > -1 && Settings.ExtenderSettings.ExtenderUpdaterIsAvailable)
 								{
-									if (mod.OsiExtenderData.RequiredExtensionVersion > -1 && Settings.ExtenderSettings.ExtenderVersion < mod.OsiExtenderData.RequiredExtensionVersion)
+									if (mod.ScriptExtenderData.RequiredExtensionVersion > -1 && Settings.ExtenderSettings.ExtenderVersion < mod.ScriptExtenderData.RequiredExtensionVersion)
 									{
 										mod.ExtenderModStatus = DivinityExtenderModStatus.REQUIRED_OLD;
 									}
@@ -4058,7 +4058,7 @@ namespace DivinityModManager.ViewModels
 		private void InstallOsiExtender_DownloadStart(string exeDir)
 		{
 			double taskStepAmount = 1.0 / 3;
-			MainProgressTitle = $"Setting up the Osiris Extender...";
+			MainProgressTitle = $"Setting up the Script Extender...";
 			MainProgressValue = 0d;
 			MainProgressToken = new CancellationTokenSource();
 			CanCancelProgress = true;
@@ -4073,8 +4073,8 @@ namespace DivinityModManager.ViewModels
 				System.IO.Stream unzippedEntryStream = null;
 				try
 				{
-					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Downloading {PathwayData.OsirisExtenderLatestReleaseUrl}...");
-					webStream = await WebHelper.DownloadFileAsStreamAsync(PathwayData.OsirisExtenderLatestReleaseUrl, MainProgressToken.Token);
+					RxApp.MainThreadScheduler.Schedule(_ => MainProgressWorkText = $"Downloading {PathwayData.ScriptExtenderLatestReleaseUrl}...");
+					webStream = await WebHelper.DownloadFileAsStreamAsync(PathwayData.ScriptExtenderLatestReleaseUrl, MainProgressToken.Token);
 					if (webStream != null)
 					{
 						successes += 1;
@@ -4123,10 +4123,10 @@ namespace DivinityModManager.ViewModels
 						Settings.ExtenderSettings.ExtenderVersion = 56;
 						if (Settings.ExtenderSettings.ExtenderVersion <= -1)
 						{
-							if (!String.IsNullOrWhiteSpace(PathwayData.OsirisExtenderLatestReleaseVersion))
+							if (!String.IsNullOrWhiteSpace(PathwayData.ScriptExtenderLatestReleaseVersion))
 							{
 								var re = new Regex("v([0-9]+)");
-								var m = re.Match(PathwayData.OsirisExtenderLatestReleaseVersion);
+								var m = re.Match(PathwayData.ScriptExtenderLatestReleaseVersion);
 								if (m.Success)
 								{
 									if (int.TryParse(m.Groups[1].Value, out int version))
@@ -4136,10 +4136,10 @@ namespace DivinityModManager.ViewModels
 									}
 								}
 							}
-							else if (PathwayData.OsirisExtenderLatestReleaseUrl.Contains("v"))
+							else if (PathwayData.ScriptExtenderLatestReleaseUrl.Contains("v"))
 							{
 								var re = new Regex("v([0-9]+).*.zip");
-								var m = re.Match(PathwayData.OsirisExtenderLatestReleaseUrl);
+								var m = re.Match(PathwayData.ScriptExtenderLatestReleaseUrl);
 								if (m.Success)
 								{
 									if (int.TryParse(m.Groups[1].Value, out int version))
@@ -4162,7 +4162,7 @@ namespace DivinityModManager.ViewModels
 			}));
 		}
 
-		private void InstallOsiExtender_Start()
+		private void InstallScriptExtender_Start()
 		{
 			if (!OpenRepoLinkToDownload)
 			{
@@ -4175,7 +4175,7 @@ The extenders needs to only be installed once, as it can auto-update itself auto
 Download url: 
 {0}
 Directory the zip will be extracted to:
-{1}", PathwayData.OsirisExtenderLatestReleaseUrl, exeDir);
+{1}", PathwayData.ScriptExtenderLatestReleaseUrl, exeDir);
 
 					var result = AdonisUI.Controls.MessageBox.Show(new AdonisUI.Controls.MessageBoxModel
 					{

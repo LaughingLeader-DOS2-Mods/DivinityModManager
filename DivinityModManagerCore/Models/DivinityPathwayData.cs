@@ -40,8 +40,8 @@ namespace DivinityModManager.Models
 
 		[Reactive] public string LastSaveFilePath { get; set; }
 
-		[Reactive] public string OsirisExtenderLatestReleaseUrl { get; set; }
-		[Reactive] public string OsirisExtenderLatestReleaseVersion { get; set; }
+		[Reactive] public string ScriptExtenderLatestReleaseUrl { get; set; }
+		[Reactive] public string ScriptExtenderLatestReleaseVersion { get; set; }
 
 		public DivinityPathwayData()
 		{
@@ -50,15 +50,15 @@ namespace DivinityModManager.Models
 			DocumentsModsPath = "";
 			DocumentsGMCampaignsPath = "";
 			LastSaveFilePath = "";
-			OsirisExtenderLatestReleaseUrl = "";
-			OsirisExtenderLatestReleaseVersion = "";
+			ScriptExtenderLatestReleaseUrl = "";
+			ScriptExtenderLatestReleaseVersion = "";
 		}
 
-		public string OsirisExtenderSettingsFile(DivinityModManagerSettings settings)
+		public string ScriptExtenderSettingsFile(DivinityModManagerSettings settings)
 		{
 			if(settings.GameExecutablePath.IsExistingFile())
 			{
-				return Path.Combine(Path.GetDirectoryName(settings.GameExecutablePath), "OsirisExtenderSettings.json");
+				return Path.Combine(Path.GetDirectoryName(settings.GameExecutablePath), "ScriptExtenderSettings.json");
 			}
 			return "";
 		}

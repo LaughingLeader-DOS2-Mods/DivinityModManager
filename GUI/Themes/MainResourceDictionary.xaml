@@ -611,8 +611,8 @@
 					Margin="2"
 					Text="{Binding FileName}"
 					Visibility="{Binding IsEditorMod, Converter={StaticResource BoolToVisibilityConverterReversed}, FallbackValue=Collapsed}" />
-				<TextBlock Margin="2" Visibility="{Binding HasOsirisExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
-					<Run Foreground="Goldenrod" Text="Osiris Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" />
+				<TextBlock Margin="2" Visibility="{Binding HasScriptExtenderSettings, Converter={StaticResource BoolToVisibilityConverter}}">
+					<Run Foreground="Goldenrod" Text="Script Extender " /><Run Foreground="Lime" Text="v" /><Run Foreground="Lime" Text="{Binding OsiExtenderData.RequiredExtensionVersion}" />
 				</TextBlock>
 				<TextBlock Margin="2">
 					<Run Text="Last Updated on " /><Run Text="{Binding LastUpdated, StringFormat={x:Static dapp:DivinityApp.DateTimeTooltipFormat}}" />
@@ -933,7 +933,7 @@
 					DataContext="{Binding}"
 					RenderOptions.BitmapScalingMode="HighQuality"
 					Stretch="UniformToFill"
-					ToolTip="{Binding OsirisExtenderSupportToolTipText}">
+					ToolTip="{Binding ScriptExtenderSupportToolTipText}">
 					<Image.Style>
 						<Style TargetType="{x:Type Image}">
 							<Style.Triggers>

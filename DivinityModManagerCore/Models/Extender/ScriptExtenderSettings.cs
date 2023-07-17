@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace DivinityModManager.Models.Extender
 {
     [DataContract]
-    public class OsirisExtenderSettings : ReactiveObject
+    public class ScriptExtenderSettings : ReactiveObject
     {
         private bool extenderIsAvailable = false;
 
@@ -152,7 +152,7 @@ namespace DivinityModManager.Models.Extender
 		[DefaultValue(false)]
 		public bool ShowPerfWarnings { get; set; }
 
-		public static OsirisExtenderSettings DefaultSettings = new OsirisExtenderSettings();
+		public static ScriptExtenderSettings DefaultSettings = new ScriptExtenderSettings();
 
         public void SetToDefault()
         {
@@ -166,7 +166,7 @@ namespace DivinityModManager.Models.Extender
             }
         }
 
-        public void Set(OsirisExtenderSettings osirisExtenderSettings)
+        public void Set(ScriptExtenderSettings osirisExtenderSettings)
         {
             EnableExtensions = osirisExtenderSettings.EnableExtensions;
             CreateConsole = osirisExtenderSettings.CreateConsole;

@@ -86,7 +86,7 @@ namespace DivinityModManager.Views
 
 		private void CreateExtenderSettings()
 		{
-			var props = from p in typeof(OsirisExtenderSettings).GetProperties()
+			var props = from p in typeof(ScriptExtenderSettings).GetProperties()
 						let attr = p.GetCustomAttributes(typeof(SettingsEntryAttribute), true)
 						where attr.Length == 1
 						select new { Property = p, Attribute = attr.First() as SettingsEntryAttribute };

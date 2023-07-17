@@ -25,6 +25,9 @@ namespace DivinityModManager.Util
 {
 	public static class DivinityModDataLoader
 	{
+		private static readonly StringComparison SCOMP = StringComparison.OrdinalIgnoreCase;
+		private static readonly string[] LarianFileTypes = new string[4] { ".lsb", ".lsf", ".lsx", ".lsj" };
+
 		public static int HEADER_MAJOR = 3;
 		public static int HEADER_MINOR = 6;
 		public static int HEADER_REVISION = 1;
@@ -42,7 +45,7 @@ namespace DivinityModManager.Util
 
 		public static bool IgnoreModByFolder(string folder)
 		{
-			return DivinityApp.IgnoredMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), StringComparison.OrdinalIgnoreCase));
+			return DivinityApp.IgnoredMods.Any(m => m.Folder.Equals(Path.GetFileName(folder.TrimEnd(Path.DirectorySeparatorChar)), SCOMP));
 		}
 
 		public static string MakeSafeFilename(string filename, char replaceChar)
@@ -412,7 +415,7 @@ namespace DivinityModManager.Util
 		private static readonly Regex modMetaPattern = new Regex("^Mods/([^/]+)/meta.lsx", RegexOptions.IgnoreCase);
 		private static bool IsModMetaFile(AbstractFileInfo f)
 		{
-			if (Path.GetFileName(f.Name).Equals("meta.lsx", StringComparison.OrdinalIgnoreCase))
+			if (Path.GetFileName(f.Name).Equals("meta.lsx", SCOMP))
 			{
 				return modMetaPattern.IsMatch(f.Name);
 			}
@@ -584,7 +587,7 @@ namespace DivinityModManager.Util
 				var allPaks = Directory.EnumerateFiles(modsFolderPath, dirOptions,
 				new DirectoryEnumerationFilters()
 				{
-					InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", StringComparison.OrdinalIgnoreCase),
+					InclusionFilter = (f) => Path.GetExtension(f.Extension).Equals(".pak", SCOMP),
 					RecursionFilter = (f) => !_IgnoredRecursiveFolders.Any(x => f.FullPath.Contains(x))
 				});
 				_AllPaksNames.UnionWith(allPaks.Select(p => Path.GetFileNameWithoutExtension(p)));
@@ -639,14 +642,23 @@ namespace DivinityModManager.Util
 			return defaultValue;
 		}
 
+		private static T GetNodeAttribute<T>(Node node, string key, T defaultValue)
+		{
+			if (node.Attributes.TryGetValue(key, out var att))
+			{
+				return (T)Convert.ChangeType(att.Value, typeof(T));
+			}
+			return defaultValue;
+		}
+
 		private static DivinityGameMasterCampaign ParseGameMasterCampaignMetaFile(Resource meta)
 		{
 			try
 			{
-				int headerMajor = 3;
-				int headerMinor = 6;
-				int headerRevision = 0;
-				int headerBuild = 0;
+				var headerMajor = HEADER_MAJOR;
+				var headerMinor = HEADER_MINOR;
+				var headerRevision = HEADER_REVISION;
+				var headerBuild = HEADER_BUILD;
 
 				int.TryParse(meta.Metadata.MajorVersion.ToString(), out headerMajor);
 				int.TryParse(meta.Metadata.MinorVersion.ToString(), out headerMinor);
@@ -742,7 +754,7 @@ namespace DivinityModManager.Util
 
 		private static bool CanProcessGMMetaFile(FileSystemEntryInfo f)
 		{
-			return f.FileName.Equals("meta.lsf", StringComparison.OrdinalIgnoreCase);
+			return f.FileName.Equals("meta.lsf", SCOMP);
 		}
 
 		private static DirectoryEnumerationFilters GMMetaFilters = new DirectoryEnumerationFilters()
@@ -818,7 +830,7 @@ namespace DivinityModManager.Util
 			if (node.Attributes.TryGetValue(attribute, out var att))
 			{
 				var attVal = (string)att.Value;
-				if (attVal.Equals(matchVal, StringComparison.OrdinalIgnoreCase))
+				if (attVal.Equals(matchVal, SCOMP))
 				{
 					return node;
 				}
@@ -846,13 +858,13 @@ namespace DivinityModManager.Util
 					string storedDisplayedName = displayName;
 					string profileUUID = "";
 
-					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
-					var profileFile = Path.Combine(folder, "profile.lsb");
-					if (File.Exists(profileFile))
+					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, SCOMP))}");
+					var profileFile = GetProfileFile(folder);
+					if (profileFile != null)
 					{
 						try
 						{
-							var profileRes = ResourceUtils.LoadResource(profileFile, LSLib.LS.Enums.ResourceFormat.LSB);
+							var profileRes = ResourceUtils.LoadResource(profileFile.FullName, LSLib.LS.Enums.ResourceFormat.LSB);
 							if (profileRes != null && profileRes.Regions.TryGetValue("PlayerProfile", out var region))
 							{
 								if (region.Attributes.TryGetValue("PlayerProfileDisplayName", out var profileDisplayNameAtt))
@@ -962,7 +974,7 @@ namespace DivinityModManager.Util
 					string storedDisplayedName = displayName;
 					string profileUUID = "";
 
-					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, StringComparison.OrdinalIgnoreCase))}");
+					//Console.WriteLine($"Folder: {Path.GetFileName(folder)} Blacklisted: {IgnoredMods.Any(m => Path.GetFileName(folder).Equals(m.Folder, SCOMP))}");
 					var profileFile = Path.Combine(folder, "profile.lsb");
 					if (File.Exists(profileFile))
 					{
@@ -1089,20 +1101,51 @@ namespace DivinityModManager.Util
 			});
 		}
 
+		private static FileInfo GetProfileFile(string path)
+		{
+			var files = Directory.EnumerateFiles(path, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
+			{
+				InclusionFilter = (f) =>
+				{
+					if (f.FileName.IndexOf("profile", SCOMP) > -1 && LarianFileTypes.Any(e => e.Equals(f.Extension, SCOMP)))
+					{
+						return true;
+					}
+					return false;
+				}
+			}).Select(x => new FileInfo(x)).OrderBy(x => x.LastWriteTime).ToList();
+			return files.FirstOrDefault();
+		}
+
+		private static FileInfo GetPlayerProfilesFile(string path)
+		{
+			var files = Directory.EnumerateFiles(path, DirectoryEnumerationOptions.Files, new DirectoryEnumerationFilters()
+			{
+				InclusionFilter = (f) =>
+				{
+					if (f.FileName.IndexOf("playerprofiles", SCOMP) > -1 && LarianFileTypes.Any(e => e.Equals(f.Extension, SCOMP)))
+					{
+						return true;
+					}
+					return false;
+				}
+			}).Select(x => new FileInfo(x)).OrderBy(x => x.LastWriteTime).ToList();
+			return files.FirstOrDefault();
+		}
+
 		public static string GetSelectedProfileUUID(string profilePath)
 		{
-			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
+
+			FileInfo playerprofilesFile = GetPlayerProfilesFile(profilePath);
 			string activeProfileUUID = "";
-			if (File.Exists(playerprofilesFile))
+			if (playerprofilesFile != null)
 			{
 				try
 				{
-					DivinityApp.Log($"Loading playerprofiles.lsb at '{playerprofilesFile}'");
-					var res = ResourceUtils.LoadResource(playerprofilesFile, LSLib.LS.Enums.ResourceFormat.LSB);
+					DivinityApp.Log($"Loading playerprofiles at '{playerprofilesFile.FullName}'");
+					var res = ResourceUtils.LoadResource(playerprofilesFile.FullName);
 					if (res != null && res.Regions.TryGetValue("UserProfiles", out var region))
 					{
-						DivinityApp.Log($"ActiveProfile | Getting root node '{String.Join(";", region.Attributes.Keys)}'");
-
 						if (region.Attributes.TryGetValue("ActiveProfile", out var att))
 						{
 							DivinityApp.Log($"ActiveProfile | '{att.Type} {att.Value}'");
@@ -1120,7 +1163,7 @@ namespace DivinityModManager.Util
 
 		public static bool ExportedSelectedProfile(string profilePath, string profileUUID)
 		{
-			var conversionParams = ResourceConversionParameters.FromGameVersion(LSLib.LS.Enums.Game.DivinityOriginalSin2DE);
+			var conversionParams = ResourceConversionParameters.FromGameVersion(DivinityApp.GAME);
 			var playerprofilesFile = Path.Combine(profilePath, "playerprofiles.lsb");
 			if (File.Exists(playerprofilesFile))
 			{
@@ -1219,7 +1262,7 @@ namespace DivinityModManager.Util
 				{
 					InclusionFilter = (f) =>
 					{
-						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase);
+						return f.Extension.Equals(".json", SCOMP);
 					}
 				});
 
@@ -1256,7 +1299,7 @@ namespace DivinityModManager.Util
 				{
 					InclusionFilter = (f) =>
 					{
-						return f.Extension.Equals(".json", StringComparison.OrdinalIgnoreCase) && !f.FileName.Equals("settings.json", StringComparison.OrdinalIgnoreCase);
+						return f.Extension.Equals(".json", SCOMP) && !f.FileName.Equals("settings.json", SCOMP);
 					}
 				});
 
@@ -1355,7 +1398,7 @@ namespace DivinityModManager.Util
 						if(match.Success)
 						{
 							var pakName = Path.GetFileName(match.Groups[1].Value.Trim());
-							var mod = allMods.FirstOrDefault(x => x.PakEquals(pakName, StringComparison.OrdinalIgnoreCase));
+							var mod = allMods.FirstOrDefault(x => x.PakEquals(pakName, SCOMP));
 							if(mod != null)
 							{
 								order.Add(mod);
@@ -1387,7 +1430,7 @@ namespace DivinityModManager.Util
 							if (lineData.Length > fileIndex)
 							{
 								var fileName = Path.GetFileName(lineData[fileIndex].Trim());
-								var mod = allMods.FirstOrDefault(x => x.PakEquals(fileName, StringComparison.OrdinalIgnoreCase));
+								var mod = allMods.FirstOrDefault(x => x.PakEquals(fileName, SCOMP));
 								if (mod != null)
 								{
 									order.Add(mod);
@@ -1546,7 +1589,7 @@ namespace DivinityModManager.Util
 
 		private static Node FindNode(Node node, string name)
 		{
-			if (node.Name.Equals(name, StringComparison.OrdinalIgnoreCase))
+			if (node.Name.Equals(name, SCOMP))
 			{
 				return node;
 			}
@@ -1560,7 +1603,7 @@ namespace DivinityModManager.Util
 		{
 			foreach (var kvp in children)
 			{
-				if (kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
+				if (kvp.Key.Equals(name, SCOMP))
 				{
 					return kvp.Value.FirstOrDefault();
 				}
@@ -1581,7 +1624,7 @@ namespace DivinityModManager.Util
 		{
 			foreach (var kvp in region.Children)
 			{
-				if (kvp.Key.Equals(name, StringComparison.OrdinalIgnoreCase))
+				if (kvp.Key.Equals(name, SCOMP))
 				{
 					return kvp.Value.First();
 				}
@@ -1740,7 +1783,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error reading 'OsiToolsConfig.json': {ex}");
+				DivinityApp.Log($"Error reading '{configFile}': {ex}");
 			}
 			return null;
 		}
@@ -1778,7 +1821,7 @@ namespace DivinityModManager.Util
 			}
 			catch (Exception ex)
 			{
-				DivinityApp.Log($"Error reading 'OsiToolsConfig.json': {ex}");
+				DivinityApp.Log($"Error reading '{configFile?.Name}': {ex}");
 			}
 			return null;
 		}
@@ -1790,11 +1833,14 @@ namespace DivinityModManager.Util
 			try
 			{
 				var modResources = new ModResources();
-				var modHelper = new ModPathVisitor(modResources);
-				modHelper.CollectGlobals = false;
-				modHelper.CollectLevels = false;
-				modHelper.CollectStoryGoals = false;
-				modHelper.CollectStats = false;
+				var modHelper = new ModPathVisitor(modResources)
+				{
+					Game = DivinityApp.GAME_COMPILER,
+					CollectGlobals = false,
+					CollectLevels = false,
+					CollectStoryGoals = false,
+					CollectStats = false
+				};
 
 				modHelper.DiscoverBuiltinPackages(gameDataPath);
 
@@ -1880,7 +1926,7 @@ namespace DivinityModManager.Util
 				var modResources = new ModResources();
 				var modHelper = new ModPathVisitor(modResources)
 				{
-					Game = LSLib.LS.Story.Compiler.TargetGame.DOS2DE,
+					Game = DivinityApp.GAME_COMPILER,
 					CollectGlobals = false,
 					CollectLevels = false,
 					CollectStoryGoals = false,

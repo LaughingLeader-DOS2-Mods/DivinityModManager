@@ -36,7 +36,7 @@ namespace DivinityModManager.Models
 		{
 			try
 			{
-				var conversionParams = ResourceConversionParameters.FromGameVersion(LSLib.LS.Enums.Game.DivinityOriginalSin2DE);
+				var conversionParams = ResourceConversionParameters.FromGameVersion(DivinityApp.GAME);
 				if (File.Exists(FilePath) && File.GetSize(FilePath) > 0)
 				{
 					var backupName = Path.Combine(Path.GetDirectoryName(FilePath), FileName + ".backup");

@@ -43,6 +43,9 @@ namespace DivinityModManager
 		public const string EXTENDER_MOD_CONFIG = "OsiToolsConfig.json";
 		public const string EXTENDER_UPDATER_FILE = "DXGI.dll";
 
+		public const LSLib.LS.Enums.Game GAME = LSLib.LS.Enums.Game.DivinityOriginalSin2DE;
+		public const LSLib.LS.Story.Compiler.TargetGame GAME_COMPILER = LSLib.LS.Story.Compiler.TargetGame.DOS2DE;
+
 		public static readonly Uri LightTheme = new Uri("pack://application:,,,/DivinityModManager;component/Themes/Light.xaml", UriKind.Absolute);
 		public static readonly Uri DarkTheme = new Uri("pack://application:,,,/DivinityModManager;component/Themes/Dark.xaml", UriKind.Absolute);
 

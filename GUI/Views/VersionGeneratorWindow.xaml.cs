@@ -90,10 +90,10 @@ namespace DivinityModManager.Views
 			this.WhenActivated(d =>
 			{
 				d(this.Bind(ViewModel, vm => vm.Text, v => v.VersionNumberTextBox.Text));
-				d(this.Bind(ViewModel, vm => vm.Version.Major, v => v.MajorIntegerUpDown.Value));
-				d(this.Bind(ViewModel, vm => vm.Version.Minor, v => v.MinorIntegerUpDown.Value));
-				d(this.Bind(ViewModel, vm => vm.Version.Revision, v => v.RevisionIntegerUpDown.Value));
-				d(this.Bind(ViewModel, vm => vm.Version.Build, v => v.BuildIntegerUpDown.Value));
+				d(this.Bind(ViewModel, vm => vm.Version.Major, v => v.MajorUpDown.Value));
+				d(this.Bind(ViewModel, vm => vm.Version.Minor, v => v.MinorUpDown.Value));
+				d(this.Bind(ViewModel, vm => vm.Version.Revision, v => v.RevisionUpDown.Value));
+				d(this.Bind(ViewModel, vm => vm.Version.Build, v => v.BuildUpDown.Value));
 				d(this.BindCommand(ViewModel, vm => vm.CopyCommand, v => v.CopyButton));
 				d(this.BindCommand(ViewModel, vm => vm.ResetCommand, v => v.ResetButton));
 

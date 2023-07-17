@@ -323,13 +323,13 @@ namespace DivinityModManager.Util
 								DivinityApp.Log($"Error getting last modified date for '{metaFile}': {ex}");
 							}
 
-							var osiConfigFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
-							if (File.Exists(osiConfigFile))
+							var configFile = Path.Combine(folder, DivinityApp.EXTENDER_MOD_CONFIG);
+							if (File.Exists(configFile))
 							{
-								var osiToolsConfig = await LoadScriptExtenderConfigAsync(osiConfigFile);
-								if (osiToolsConfig != null)
+								var config = await LoadScriptExtenderConfigAsync(configFile);
+								if (config != null)
 								{
-									modData.ScriptExtenderData = osiToolsConfig;
+									modData.ScriptExtenderData = config;
 									if (modData.ScriptExtenderData.RequiredExtensionVersion > -1) modData.HasScriptExtenderSettings = true;
 								}
 								else
@@ -441,7 +441,7 @@ namespace DivinityModManager.Util
 				var hasBuiltinDirectory = false;
 				var builtinModOverrides = new Dictionary<string, DivinityModData>();
 
-				AbstractFileInfo osiConfigInfo = null;
+				AbstractFileInfo configInfo = null;
 
 				if (pak != null && pak.Files != null)
 				{
@@ -450,7 +450,7 @@ namespace DivinityModManager.Util
 						var f = pak.Files[i];
 						if(f.Name.Contains(DivinityApp.EXTENDER_MOD_CONFIG))
 						{
-							osiConfigInfo = f;
+							configInfo = f;
 						}
 						if (IsModMetaFile(f))
 						{
@@ -526,17 +526,17 @@ namespace DivinityModManager.Util
 
 						modData.IsUserMod = true;
 
-						if (osiConfigInfo != null)
+						if (configInfo != null)
 						{
-							var osiToolsConfig = await LoadScriptExtenderConfigAsync(osiConfigInfo);
-							if (osiToolsConfig != null)
+							var config = await LoadScriptExtenderConfigAsync(configInfo);
+							if (config != null)
 							{
-								modData.ScriptExtenderData = osiToolsConfig;
+								modData.ScriptExtenderData = config;
 								if (modData.ScriptExtenderData.RequiredExtensionVersion > -1) modData.HasScriptExtenderSettings = true;
 							}
 							else
 							{
-								DivinityApp.Log($"Failed to parse OsiToolsConfig.json for '{pakPath}'.");
+								DivinityApp.Log($"Failed to parse {configInfo.Name} for '{pakPath}'.");
 							}
 						}
 
@@ -1710,29 +1710,29 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(string osiToolsConfig)
+		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(string configFile)
 		{
 			try
 			{
-				using (var reader = File.OpenText(osiToolsConfig))
+				using (var reader = File.OpenText(configFile))
 				{
 					var text = await reader.ReadToEndAsync();
 					if (!String.IsNullOrWhiteSpace(text))
 					{
-						var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
-						if (osiConfig != null)
+						var config = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
+						if (config != null)
 						{
-							return osiConfig;
+							return config;
 						}
 						else
 						{
 							var jsonObj = JObject.Parse(text);
 							if (jsonObj != null)
 							{
-								osiConfig = new DivinityModScriptExtenderConfig();
-								osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
-								osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
-								return osiConfig;
+								config = new DivinityModScriptExtenderConfig();
+								config.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+								config.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+								return config;
 							}
 						}
 					}
@@ -1745,31 +1745,31 @@ namespace DivinityModManager.Util
 			return null;
 		}
 
-		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(AbstractFileInfo osiToolsConfig)
+		private static async Task<DivinityModScriptExtenderConfig> LoadScriptExtenderConfigAsync(AbstractFileInfo configFile)
 		{
 			try
 			{
-				using (var stream = osiToolsConfig.MakeStream())
+				using (var stream = configFile.MakeStream())
 				{
 					using (var sr = new System.IO.StreamReader(stream))
 					{
 						string text = await sr.ReadToEndAsync();
 						if (!String.IsNullOrWhiteSpace(text))
 						{
-							var osiConfig = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
-							if (osiConfig != null)
+							var config = DivinityJsonUtils.SafeDeserialize<DivinityModScriptExtenderConfig>(text);
+							if (config != null)
 							{
-								return osiConfig;
+								return config;
 							}
 							else
 							{
 								var jsonObj = JObject.Parse(text);
 								if (jsonObj != null)
 								{
-									osiConfig = new DivinityModScriptExtenderConfig();
-									osiConfig.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
-									osiConfig.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
-									return osiConfig;
+									config = new DivinityModScriptExtenderConfig();
+									config.RequiredExtensionVersion = jsonObj.GetValue<int>("RequiredExtensionVersion", -1);
+									config.FeatureFlags = jsonObj.GetValue<List<string>>("FeatureFlags", null);
+									return config;
 								}
 							}
 						}

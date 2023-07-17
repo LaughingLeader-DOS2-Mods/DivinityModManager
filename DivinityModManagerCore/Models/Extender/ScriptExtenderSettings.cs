@@ -166,20 +166,20 @@ namespace DivinityModManager.Models.Extender
             }
         }
 
-        public void Set(ScriptExtenderSettings osirisExtenderSettings)
+        public void Set(ScriptExtenderSettings settings)
         {
-            EnableExtensions = osirisExtenderSettings.EnableExtensions;
-            CreateConsole = osirisExtenderSettings.CreateConsole;
-            EnableLogging = osirisExtenderSettings.EnableLogging;
-            LogCompile = osirisExtenderSettings.LogCompile;
-            if (osirisExtenderSettings.LogDirectory.IsExistingDirectory()) LogDirectory = osirisExtenderSettings.LogDirectory;
-            DisableModValidation = osirisExtenderSettings.DisableModValidation;
-            EnableAchievements = osirisExtenderSettings.EnableAchievements;
-            SendCrashReports = osirisExtenderSettings.SendCrashReports;
-            EnableDebugger = osirisExtenderSettings.EnableDebugger;
-            DebuggerPort = osirisExtenderSettings.DebuggerPort;
-            DebuggerFlags = osirisExtenderSettings.DebuggerFlags;
-            DeveloperMode = osirisExtenderSettings.DeveloperMode;
+            EnableExtensions = settings.EnableExtensions;
+            CreateConsole = settings.CreateConsole;
+            EnableLogging = settings.EnableLogging;
+            LogCompile = settings.LogCompile;
+            if (settings.LogDirectory.IsExistingDirectory()) LogDirectory = settings.LogDirectory;
+            DisableModValidation = settings.DisableModValidation;
+            EnableAchievements = settings.EnableAchievements;
+            SendCrashReports = settings.SendCrashReports;
+            EnableDebugger = settings.EnableDebugger;
+            DebuggerPort = settings.DebuggerPort;
+            DebuggerFlags = settings.DebuggerFlags;
+            DeveloperMode = settings.DeveloperMode;
         }
     }
 }

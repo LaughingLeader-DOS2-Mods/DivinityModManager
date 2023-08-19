@@ -146,6 +146,8 @@
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding ShiftListFocusOnSwap, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="AutomaticallyLoadGMCampaignMods" />
 						<CheckBox VerticalAlignment="Center" IsChecked="{Binding AutomaticallyLoadGMCampaignMods, UpdateSourceTrigger=PropertyChanged}" />
+						<TextBlock behavior:TextBlockSettingsEntryAttributeBehavior.Target="SaveWindowLocation" />
+						<CheckBox VerticalAlignment="Center" IsChecked="{Binding SaveWindowLocation, UpdateSourceTrigger=PropertyChanged}" />
 						<TextBlock Text="On Game Launch" />
 						<ComboBox
 							DisplayMemberPath="Description"

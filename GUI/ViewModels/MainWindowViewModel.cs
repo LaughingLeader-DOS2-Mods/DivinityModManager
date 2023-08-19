@@ -342,6 +342,23 @@ namespace DivinityModManager.ViewModels
 		public ICommand OpenGameMasterCampaignInFileExplorerCommand { get; private set; }
 		public ICommand CopyGameMasterCampaignPathToClipboardCommand { get; private set; }
 
+		private void TryOpenPath(string path)
+		{
+			try
+			{
+				if(!String.IsNullOrEmpty(path))
+				{
+					Process.Start(path);
+				}
+			}
+			catch (Exception ex)
+			{
+				var msg = $"Error opening path:\n{ex}";
+				DivinityApp.Log(msg);
+				ShowAlert(msg, AlertType.Danger);
+			}
+		}
+
 		private void SetLoadedGMCampaigns(IEnumerable<DivinityGameMasterCampaign> data)
 		{
 			string lastSelectedCampaignUUID = "";
@@ -448,14 +465,12 @@ namespace DivinityModManager.ViewModels
 			{
 				if (debugLogListener == null)
 				{
-					string exePath = Path.GetFullPath(System.AppDomain.CurrentDomain.BaseDirectory);
-
 					string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
-					string logsDirectory = exePath + "/_Logs/";
-					if (!Alphaleonis.Win32.Filesystem.Directory.Exists(logsDirectory))
+					string logsDirectory = DivinityApp.GetAppDirectory("_Logs");
+					if (!Directory.Exists(logsDirectory))
 					{
-						Alphaleonis.Win32.Filesystem.Directory.CreateDirectory(logsDirectory);
-						DivinityApp.Log($"Creating logs directory: {logsDirectory} | exe dir: {exePath}");
+						Directory.CreateDirectory(logsDirectory);
+						DivinityApp.Log($"Creating logs directory: {logsDirectory}");
 					}
 
 					string logFileName = Path.Combine(logsDirectory, "debug_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss") + ".log");
@@ -709,8 +724,8 @@ namespace DivinityModManager.ViewModels
 		{
 			Settings?.Dispose();
 
-			bool loaded = false;
-			string settingsFile = @"Data\settings.json";
+			var loaded = false;
+			var settingsFile = DivinityApp.GetAppDirectory("Data", "settings.json");
 			try
 			{
 				if (File.Exists(settingsFile))
@@ -725,7 +740,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				View.AlertBar.SetDangerAlert($"Error loading settings at '{settingsFile}': {ex}");
+				ShowAlert($"Error loading settings at '{settingsFile}': {ex}", AlertType.Danger);
 				Settings = null;
 			}
 
@@ -788,31 +803,23 @@ namespace DivinityModManager.ViewModels
 			var canOpenModsFolder = this.WhenAnyValue(x => x.PathwayData.DocumentsModsPath, (p) => !String.IsNullOrEmpty(p) && Directory.Exists(p));
 			Keys.OpenModsFolder.AddAction(() =>
 			{
-				Process.Start(PathwayData.DocumentsModsPath);
+				TryOpenPath(PathwayData.DocumentsModsPath);
 			}, canOpenModsFolder);
 
 			var canOpenGameFolder = this.WhenAnyValue(x => x.Settings.GameExecutablePath, (p) => !String.IsNullOrEmpty(p) && File.Exists(p));
 			Keys.OpenGameFolder.AddAction(() =>
 			{
-				var folder = Path.GetDirectoryName(Settings.GameExecutablePath);
-				if (Directory.Exists(folder))
-				{
-					Process.Start(folder);
-				}
+				TryOpenPath(Path.GetDirectoryName(Settings.GameExecutablePath));
 			}, canOpenGameFolder);
 
 			Keys.OpenLogsFolder.AddAction(() =>
 			{
-				Process.Start(Settings.ExtenderLogDirectory);
+				TryOpenPath(Settings.ExtenderLogDirectory);
 			}, canOpenLogDirectory);
 
 			Keys.OpenWorkshopFolder.AddAction(() =>
 			{
-				//DivinityApp.Log($"WorkshopSupportEnabled:{WorkshopSupportEnabled} canOpenWorkshopFolder CanExecute:{OpenWorkshopFolderCommand.CanExecute(null)}");
-				if (!String.IsNullOrEmpty(Settings.WorkshopPath) && Directory.Exists(Settings.WorkshopPath))
-				{
-					Process.Start(Settings.WorkshopPath);
-				}
+				TryOpenPath(Settings.WorkshopPath);
 			}, canOpenWorkshopFolder);
 
 			Keys.LaunchGame.AddAction(() =>
@@ -900,13 +907,13 @@ namespace DivinityModManager.ViewModels
 				catch (Exception) { }
 				if (SaveSettings())
 				{
-					View.AlertBar.SetSuccessAlert($"Saved settings to '{settingsFile}'.", 10);
+					ShowAlert($"Saved settings to '{settingsFile}'.", AlertType.Success, 10);
 				}
 			}).DisposeWith(Settings.Disposables);
 
 			Settings.OpenSettingsFolderCommand = ReactiveCommand.Create(() =>
 			{
-				Process.Start(DivinityApp.DIR_DATA);
+				TryOpenPath(DivinityApp.GetAppDirectory(DivinityApp.DIR_DATA));
 			}).DisposeWith(Settings.Disposables);
 
 			Settings.ExportExtenderSettingsCommand = ReactiveCommand.Create(() =>
@@ -921,11 +928,11 @@ namespace DivinityModManager.ViewModels
 					}
 					string contents = JsonConvert.SerializeObject(Settings.ExtenderSettings, jsonSettings);
 					File.WriteAllText(outputFile, contents);
-					View.AlertBar.SetSuccessAlert($"Saved Script Extender settings to '{outputFile}'.", 20);
+					ShowAlert($"Saved Script Extender settings to '{outputFile}'.", AlertType.Success, 20);
 				}
 				catch (Exception ex)
 				{
-					View.AlertBar.SetDangerAlert($"Error saving Script Extender settings to '{outputFile}':\n{ex}");
+					ShowAlert($"Error saving Script Extender settings to '{outputFile}':\n{ex}", AlertType.Danger);
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -963,11 +970,11 @@ namespace DivinityModManager.ViewModels
 						{
 							var fullFilePath = Path.GetFullPath("Data\\workshopdata.json");
 							RecycleBinHelper.DeleteFile(fullFilePath, false, true);
-							View.AlertBar.SetSuccessAlert($"Deleted local workshop cache at '{fullFilePath}'.", 20);
+							ShowAlert($"Deleted local workshop cache at '{fullFilePath}'.", AlertType.Success, 20);
 						}
 						catch (Exception ex)
 						{
-							View.AlertBar.SetDangerAlert($"Error deleting workshop cache:\n{ex}");
+							ShowAlert($"Error deleting workshop cache:\n{ex}", AlertType.Danger);
 						}
 					}
 				}
@@ -1040,7 +1047,7 @@ namespace DivinityModManager.ViewModels
 				if(!IsLocked)
 				{
 					SetGamePathways(Settings.GameDataPath, x);
-					View.AlertBar.SetWarningAlert($"Larian documents folder changed to '{PathwayData.LarianDocumentsFolder}'. Make sure to refresh.", 60);
+					ShowAlert($"Larian documents folder changed to '{PathwayData.LarianDocumentsFolder}'. Make sure to refresh.", AlertType.Warning, 60);
 				}
 			}).DisposeWith(Settings.Disposables);
 
@@ -1072,11 +1079,11 @@ namespace DivinityModManager.ViewModels
 
 		public bool SaveSettings()
 		{
-			string settingsFile = @"Data\settings.json";
+			string settingsFile = DivinityApp.GetAppDirectory("Data", "settings.json");
 
 			try
 			{
-				Directory.CreateDirectory("Data");
+				Directory.CreateDirectory(Path.GetDirectoryName(settingsFile));
 				string contents = JsonConvert.SerializeObject(Settings, Newtonsoft.Json.Formatting.Indented);
 				File.WriteAllText(settingsFile, contents);
 				Settings.CanSaveSettings = false;
@@ -1085,7 +1092,7 @@ namespace DivinityModManager.ViewModels
 			}
 			catch (Exception ex)
 			{
-				View.AlertBar.SetDangerAlert($"Error saving settings at '{settingsFile}': {ex}");
+				ShowAlert($"Error saving settings at '{settingsFile}': {ex}", AlertType.Danger);
 			}
 			return false;
 		}
@@ -1680,20 +1687,16 @@ namespace DivinityModManager.ViewModels
 						{
 							if (total > 1)
 							{
-								View.AlertBar.SetSuccessAlert($"Successfully imported {total} mods.", 20);
+								ShowAlert($"Successfully imported {total} mods.", AlertType.Success, 20);
 							}
 							else if (total == 1)
 							{
-								View.AlertBar.SetSuccessAlert($"Successfully imported '{dialog.FileName}'.", 20);
+								ShowAlert($"Successfully imported '{dialog.FileName}'.", AlertType.Success, 20);
 							}
 							else
 							{
-								View.AlertBar.SetSuccessAlert("Skipped importing mod.", 20);
+								ShowAlert("Skipped importing mod.", AlertType.Success, 20);
 							}
-						}
-						else
-						{
-							//view.AlertBar.SetDangerAlert($"Only imported {successes}/{total} mods. Check the log.", 20);
 						}
 					});
 					return Disposable.Empty;
@@ -2068,7 +2071,7 @@ namespace DivinityModManager.ViewModels
 						StatusBarRightText = "";
 						StatusBarBusyIndicatorVisibility = Visibility.Collapsed;
 						string updateMessage = !CachedWorkshopData.CacheUpdated ? "cached " : "";
-						this.View.AlertBar.SetSuccessAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", 60);
+						ShowAlert($"Loaded {updateMessage}workshop data ({CachedWorkshopData.Mods.Count} mods).", AlertType.Success, 60);
 					});
 
 					if (CachedWorkshopData.CacheUpdated)
@@ -2338,13 +2341,13 @@ namespace DivinityModManager.ViewModels
 				}
 				catch (Exception ex)
 				{
-					View.AlertBar.SetDangerAlert($"Failed to save mod load order to '{outputPath}': {ex.Message}");
+					ShowAlert($"Failed to save mod load order to '{outputPath}': {ex.Message}", AlertType.Danger);
 					result = false;
 				}
 
 				if (result && !skipSaveConfirmation)
 				{
-					View.AlertBar.SetSuccessAlert($"Saved mod load order to '{outputPath}'", 10);
+					ShowAlert($"Saved mod load order to '{outputPath}'", AlertType.Success, 10);
 				}
 			}
 
@@ -2402,7 +2405,7 @@ namespace DivinityModManager.ViewModels
 
 				if (result)
 				{
-					View.AlertBar.SetSuccessAlert($"Saved mod load order to '{dialog.FileName}'", 10);
+					ShowAlert($"Saved mod load order to '{dialog.FileName}'", AlertType.Success, 10);
 					foreach (var order in this.ModOrderList)
 					{
 						if (order.FilePath == dialog.FileName)
@@ -2414,7 +2417,7 @@ namespace DivinityModManager.ViewModels
 				}
 				else
 				{
-					View.AlertBar.SetDangerAlert($"Failed to save mod load order to '{dialog.FileName}'");
+					ShowAlert($"Failed to save mod load order to '{dialog.FileName}'", AlertType.Danger);
 				}
 			}
 		}
@@ -2764,7 +2767,7 @@ namespace DivinityModManager.ViewModels
 						OnMainProgressComplete();
 						if (success)
 						{
-							View.AlertBar.SetSuccessAlert($"Successfully extracted archive.", 20);
+							ShowAlert($"Successfully extracted archive.", AlertType.Success, 20);
 						}
 					});
 					return Disposable.Empty;
@@ -2934,7 +2937,7 @@ namespace DivinityModManager.ViewModels
 				DivinityApp.Log($"Error extracting package: {ex}");
 				RxApp.MainThreadScheduler.Schedule((Action<Action>)(_ =>
 				{
-					this.View.AlertBar.SetDangerAlert($"Error extracting archive (check the log): {ex.Message}", 0);
+					this.ShowAlert($"Error extracting archive (check the log): {ex.Message}", AlertType.Danger, 0);
 				}));
 			}
 			finally
@@ -2994,7 +2997,7 @@ namespace DivinityModManager.ViewModels
 			{
 				string sysFormat = CultureInfo.CurrentCulture.DateTimeFormat.ShortDatePattern.Replace("/", "-");
 				string gameDataFolder = Path.GetFullPath(Settings.GameDataPath);
-				string appDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+				string appDir = DivinityApp.GetAppDirectory();
 				string tempDir = Path.Combine(appDir, "_Temp_" + DateTime.Now.ToString(sysFormat + "_HH-mm-ss"));
 				Directory.CreateDirectory(tempDir);
 
@@ -3005,9 +3008,9 @@ namespace DivinityModManager.ViewModels
 					{
 						baseOrderName = $"{SelectedProfile.Name}_{SelectedModOrder.Name}";
 					}
-					outputPath = $"Export/{baseOrderName}-{DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip";
-
 					var exportDirectory = Path.Combine(appDir, "Export");
+					outputPath = Path.Combine(exportDirectory, $"{baseOrderName}-{DateTime.Now.ToString(sysFormat + "_HH-mm-ss")}.zip");
+
 					if (!Directory.Exists(exportDirectory))
 					{
 						Directory.CreateDirectory(exportDirectory);
@@ -3023,8 +3026,8 @@ namespace DivinityModManager.ViewModels
 					using (var zip = File.OpenWrite(outputPath))
 					using (var zipWriter = WriterFactory.Open(zip, ArchiveType.Zip, CompressionType.Deflate))
 					{
-						string orderFileName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder.Name + ".json"), '_');
-						string contents = JsonConvert.SerializeObject(SelectedModOrder.Name, Newtonsoft.Json.Formatting.Indented);
+						string orderFileName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder + ".json"), '_');
+						string contents = JsonConvert.SerializeObject(SelectedModOrder, Newtonsoft.Json.Formatting.Indented);
 						using (var ms = new System.IO.MemoryStream())
 						{
 							using (var swriter = new System.IO.StreamWriter(ms))
@@ -3077,9 +3080,8 @@ namespace DivinityModManager.ViewModels
 
 					RxApp.MainThreadScheduler.Schedule(() =>
 					{
-						var dir = Path.GetDirectoryName(outputPath);
-						Process.Start(dir);
-						this.View.AlertBar.SetSuccessAlert($"Exported load order to '{outputPath}'.", 15);
+						ShowAlert($"Exported load order to '{outputPath}'.", AlertType.Success, 15);
+						TryOpenPath(Path.GetDirectoryName(outputPath));
 					});
 
 					success = true;
@@ -3090,7 +3092,7 @@ namespace DivinityModManager.ViewModels
 					{
 						string msg = $"Error writing load order archive '{outputPath}': {ex}";
 						DivinityApp.Log(msg);
-						this.View.AlertBar.SetDangerAlert(msg);
+						ShowAlert(msg, AlertType.Danger);
 					});
 				}
 
@@ -3100,7 +3102,7 @@ namespace DivinityModManager.ViewModels
 			{
 				RxApp.MainThreadScheduler.Schedule(() =>
 				{
-					this.View.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+					this.ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
 				});
 			}
 
@@ -3188,7 +3190,7 @@ namespace DivinityModManager.ViewModels
 			}
 			else
 			{
-				View.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
 			}
 
 		}
@@ -3254,18 +3256,18 @@ namespace DivinityModManager.ViewModels
 					try
 					{
 						File.WriteAllText(dialog.FileName, outputText);
-						View.AlertBar.SetSuccessAlert($"Exported order to '{dialog.FileName}'", 20);
+						ShowAlert($"Exported order to '{dialog.FileName}'", AlertType.Success, 20);
 					}
 					catch (Exception ex)
 					{
-						View.AlertBar.SetDangerAlert($"Error exporting mod order to '{dialog.FileName}':\n{ex}");
+						ShowAlert($"Error exporting mod order to '{dialog.FileName}':\n{ex}", AlertType.Danger);
 					}
 				}
 			}
 			else
 			{
 				DivinityApp.Log($"SelectedProfile({SelectedProfile}) SelectedModOrder({SelectedModOrder})");
-				View.AlertBar.SetDangerAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.");
+				ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
 			}
 		}
 
@@ -3518,7 +3520,7 @@ namespace DivinityModManager.ViewModels
 								}
 							}
 
-							View.AlertBar.SetSuccessAlert($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.", 15);
+							ShowAlert($"Successfully renamed '{dialog.FileName}' to '{renameDialog.FileName}'.", AlertType.Success, 15);
 						}
 						catch (Exception ex)
 						{
@@ -3806,7 +3808,7 @@ namespace DivinityModManager.ViewModels
 				if (!String.IsNullOrEmpty(order.FilePath) && File.Exists(order.FilePath))
 				{
 					RecycleBinHelper.DeleteFile(order.FilePath, false, false);
-					View.AlertBar.SetWarningAlert($"Sent load order '{order.FilePath}' to the recycle bin.", 25);
+					ShowAlert($"Sent load order '{order.FilePath}' to the recycle bin.", AlertType.Warning, 25);
 				}
 			}
 			return Unit.Default;
@@ -3933,12 +3935,12 @@ namespace DivinityModManager.ViewModels
 					{
 						if (successes >= totalWork)
 						{
-							View.AlertBar.SetSuccessAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", 20);
-							Process.Start(openOutputPath);
+							ShowAlert($"Successfully extracted all selected mods to '{dialog.SelectedPath}'.", AlertType.Success, 20);
+							TryOpenPath(openOutputPath);
 						}
 						else
 						{
-							View.AlertBar.SetDangerAlert($"Error occurred when extracting selected mods to '{dialog.SelectedPath}'.", 30);
+							ShowAlert($"Error occurred when extracting selected mods to '{dialog.SelectedPath}'.", AlertType.Danger, 30);
 						}
 					});
 
@@ -3971,7 +3973,7 @@ namespace DivinityModManager.ViewModels
 			if (SelectedAdventureMod == null || SelectedAdventureMod.IsEditorMod || SelectedAdventureMod.IsLarianMod || !File.Exists(SelectedAdventureMod.FilePath))
 			{
 				var displayName = SelectedAdventureMod != null ? SelectedAdventureMod.DisplayName : "";
-				View.AlertBar.SetWarningAlert($"Current adventure mod '{displayName}' is not extractable.", 30);
+				ShowAlert($"Current adventure mod '{displayName}' is not extractable.", AlertType.Warning, 30);
 				return;
 			}
 
@@ -4041,12 +4043,12 @@ namespace DivinityModManager.ViewModels
 					{
 						if (success)
 						{
-							View.AlertBar.SetSuccessAlert($"Successfully extracted adventure mod to '{dialog.SelectedPath}'.", 20);
-							Process.Start(openOutputPath);
+							ShowAlert($"Successfully extracted adventure mod to '{dialog.SelectedPath}'.", AlertType.Success, 20);
+							TryOpenPath(openOutputPath);
 						}
 						else
 						{
-							View.AlertBar.SetDangerAlert($"Error occurred when extracting adventure mod to '{dialog.SelectedPath}'.", 30);
+							ShowAlert($"Error occurred when extracting adventure mod to '{dialog.SelectedPath}'.", AlertType.Danger, 30);
 						}
 					});
 
@@ -4066,7 +4068,7 @@ namespace DivinityModManager.ViewModels
 
 			string dllDestination = Path.Combine(exeDir, DivinityApp.EXTENDER_UPDATER_FILE);
 
-			RxApp.TaskpoolScheduler.ScheduleAsync((Func<IScheduler, CancellationToken, Task<IDisposable>>)(async (ctrl, t) =>
+			RxApp.TaskpoolScheduler.ScheduleAsync(async (ctrl, t) =>
 			{
 				int successes = 0;
 				System.IO.Stream webStream = null;
@@ -4117,7 +4119,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if (successes >= 3)
 					{
-						this.View.AlertBar.SetSuccessAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", 20);
+						this.ShowAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", AlertType.Success, 20);
 						HighlightExtenderDownload = false;
 						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
 						Settings.ExtenderSettings.ExtenderVersion = 56;
@@ -4154,12 +4156,12 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						this.View.AlertBar.SetDangerAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", 30);
+						this.ShowAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", AlertType.Danger, 30);
 					}
 				});
 
 				return Disposable.Empty;
-			}));
+			});
 		}
 
 		private void InstallScriptExtender_Start()
@@ -4198,7 +4200,7 @@ Directory the zip will be extracted to:
 			else
 			{
 				DivinityApp.Log($"Getting a release download link failed for some reason. Opening repo url: https://github.com/Norbyte/ositools/releases/latest");
-				Process.Start("https://github.com/Norbyte/ositools/releases/latest");
+				TryOpenPath("https://github.com/Norbyte/ositools/releases/latest");
 			}
 		}
 
@@ -4309,9 +4311,16 @@ Directory the zip will be extracted to:
 		{
 			AppSettingsLoaded = false;
 
-			if (File.Exists(DivinityApp.PATH_APP_FEATURES))
+			var resourcesFolder = DivinityApp.GetAppDirectory(DivinityApp.PATH_RESOURCES);
+			var appFeaturesPath = Path.Combine(resourcesFolder, DivinityApp.PATH_APP_FEATURES);
+			var defaultPathwaysPath = Path.Combine(resourcesFolder, DivinityApp.PATH_DEFAULT_PATHWAYS);
+			var ignoredModsPath = Path.Combine(resourcesFolder, DivinityApp.PATH_IGNORED_MODS);
+
+			DivinityApp.Log($"Loading resources from '{resourcesFolder}'");
+
+			if (File.Exists(appFeaturesPath))
 			{
-				var appFeaturesDict = DivinityJsonUtils.SafeDeserializeFromPath<Dictionary<string, bool>>(DivinityApp.PATH_APP_FEATURES);
+				var appFeaturesDict = DivinityJsonUtils.SafeDeserializeFromPath<Dictionary<string, bool>>(appFeaturesPath);
 				if (appFeaturesDict != null)
 				{
 					foreach (var kvp in appFeaturesDict)
@@ -4332,14 +4341,14 @@ Directory the zip will be extracted to:
 				}
 			}
 
-			if (File.Exists(DivinityApp.PATH_DEFAULT_PATHWAYS))
+			if (File.Exists(defaultPathwaysPath))
 			{
-				AppSettings.DefaultPathways = DivinityJsonUtils.SafeDeserializeFromPath<DefaultPathwayData>(DivinityApp.PATH_DEFAULT_PATHWAYS);
+				AppSettings.DefaultPathways = DivinityJsonUtils.SafeDeserializeFromPath<DefaultPathwayData>(defaultPathwaysPath);
 			}
 
-			if (File.Exists(DivinityApp.PATH_IGNORED_MODS))
+			if (File.Exists(ignoredModsPath))
 			{
-				ignoredModsData = DivinityJsonUtils.SafeDeserializeFromPath<IgnoredModsData>(DivinityApp.PATH_IGNORED_MODS);
+				ignoredModsData = DivinityJsonUtils.SafeDeserializeFromPath<IgnoredModsData>(ignoredModsPath);
 				if (ignoredModsData != null)
 				{
 					DivinityApp.IgnoredMods.Clear();
@@ -4404,7 +4413,7 @@ Directory the zip will be extracted to:
 								}
 							}
 							DivinityApp.IgnoredMods.Add(mod);
-							//DivinityApp.LogMessage($"Ignored mod added: Name({mod.Name}) UUID({mod.UUID}) Type({mod.Type})");
+							DivinityApp.Log($"Ignored mod added: Name({mod.Name}) UUID({mod.UUID})");
 						}
 					}
 
@@ -4423,6 +4432,7 @@ Directory the zip will be extracted to:
 
 			AppSettingsLoaded = true;
 		}
+
 		public void OnKeyDown(Key key)
 		{
 			switch (key)
@@ -4537,12 +4547,12 @@ Directory the zip will be extracted to:
 
 			Keys.OpenDonationLink.AddAction(() =>
 			{
-				Process.Start(DivinityApp.URL_DONATION);
+				TryOpenPath(DivinityApp.URL_DONATION);
 			});
 
 			Keys.OpenRepositoryPage.AddAction(() =>
 			{
-				Process.Start(DivinityApp.URL_REPO);
+				TryOpenPath(DivinityApp.URL_REPO);
 			});
 
 			Keys.ToggleViewTheme.AddAction(() =>
@@ -4672,12 +4682,12 @@ Directory the zip will be extracted to:
 					}
 					else
 					{
-						this.View.AlertBar.SetWarningAlert("Current order is empty.", 10);
+						this.ShowAlert("Current order is empty.", AlertType.Warning, 10);
 					}
 				}
 				catch (Exception ex)
 				{
-					this.View.AlertBar.SetDangerAlert($"Error copying order to clipboard: {ex}", 15);
+					this.ShowAlert($"Error copying order to clipboard: {ex}", AlertType.Danger, 15);
 				}
 			});
 

@@ -29,10 +29,11 @@ namespace DivinityModManager
 		public const string XML_MOD_ORDER_MODULE = @"<node id=""Module""><attribute id=""UUID"" value=""{0}"" type=""22""/></node>";
 		public const string XML_MODULE_SHORT_DESC = @"<node id=""ModuleShortDesc""><attribute id=""Folder"" value=""{0}"" type=""30""/><attribute id=""MD5"" value=""{1}"" type=""23""/><attribute id=""Name"" value=""{2}"" type=""22""/><attribute id=""UUID"" value=""{3}"" type=""22"" /><attribute id=""Version"" value=""{4}"" type=""4""/></node>";
 		public const string XML_MOD_SETTINGS_TEMPLATE = @"<?xml version=""1.0"" encoding=""UTF-8""?><save><header version=""2""/><version major=""3"" minor=""6"" revision=""9"" build=""0""/><region id=""ModuleSettings""><node id=""root""><children><node id=""ModOrder""><children>{0}</children></node><node id=""Mods""><children>{1}</children></node></children></node></region></save>";
-		
-		public const string PATH_APP_FEATURES = @"Resources/AppFeatures.json";
-		public const string PATH_DEFAULT_PATHWAYS = @"Resources/DefaultPathways.json";
-		public const string PATH_IGNORED_MODS = @"Resources/IgnoredMods.json";
+
+		public const string PATH_RESOURCES = "Resources";
+		public const string PATH_APP_FEATURES = "AppFeatures.json";
+		public const string PATH_DEFAULT_PATHWAYS = "DefaultPathways.json";
+		public const string PATH_IGNORED_MODS = "IgnoredMods.json";
 
 		public const string ORIGINS_UUID = "1301db3d-1f54-4e98-9be5-5094030916e4";
 		public const string GAMEMASTER_UUID = "00550ab2-ac92-410c-8d94-742f7629de0e";
@@ -110,6 +111,18 @@ namespace DivinityModManager
 			//	return true;
 			//}
 			//return false;
+		}
+
+		public static string GetAppDirectory()
+		{
+			return Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
+		}
+
+		public static string GetAppDirectory(params string[] joinPath)
+		{
+			var exeDir = GetAppDirectory();
+			var paths = joinPath.Prepend(exeDir).ToArray();
+			return Path.Combine(paths);
 		}
 	}
 }

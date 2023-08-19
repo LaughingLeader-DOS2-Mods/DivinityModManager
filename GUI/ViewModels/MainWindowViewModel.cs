@@ -2726,6 +2726,10 @@ namespace DivinityModManager.ViewModels
 			});
 		}
 
+		private static readonly ArchiveEncoding _archiveEncoding = new ArchiveEncoding(Encoding.UTF8, Encoding.UTF8);
+		private static readonly ReaderOptions _importReaderOptions = new ReaderOptions { ArchiveEncoding = _archiveEncoding };
+		private static readonly WriterOptions _exportWriterOptions = new WriterOptions(CompressionType.Deflate) { ArchiveEncoding = _archiveEncoding };
+
 		//TODO: Extract zip mods to the Mods folder, possibly import a load order if a json exists.
 		private void ImportOrderFromArchive()
 		{
@@ -2780,7 +2784,7 @@ namespace DivinityModManager.ViewModels
 			int successes = 0;
 			int total = 0;
 			stream.Position = 0;
-			using (var archiveStream = SevenZipArchive.Open(stream))
+			using (var archiveStream = SevenZipArchive.Open(stream, _importReaderOptions))
 			{
 				foreach (var entry in archiveStream.Entries)
 				{
@@ -2817,7 +2821,7 @@ namespace DivinityModManager.ViewModels
 									int length = (int)entry.CompressedSize;
 									var result = new byte[length];
 									await entryStream.ReadAsync(result, 0, length);
-									string text = System.Text.Encoding.UTF8.GetString(result);
+									string text = Encoding.UTF8.GetString(result);
 									if (!String.IsNullOrWhiteSpace(text))
 									{
 										jsonFiles.Add(Path.GetFileNameWithoutExtension(entry.Key), text);
@@ -2841,7 +2845,7 @@ namespace DivinityModManager.ViewModels
 			int successes = 0;
 			int total = 0;
 			stream.Position = 0;
-			using (var reader = SharpCompress.Readers.ReaderFactory.Open(stream))
+			using (var reader = ReaderFactory.Open(stream, _importReaderOptions))
 			{
 				while (reader.MoveToNextEntry())
 				{
@@ -2878,7 +2882,7 @@ namespace DivinityModManager.ViewModels
 									int length = (int)reader.Entry.CompressedSize;
 									var result = new byte[length];
 									await entryStream.ReadAsync(result, 0, length);
-									string text = System.Text.Encoding.UTF8.GetString(result);
+									string text = Encoding.UTF8.GetString(result);
 									if (!String.IsNullOrWhiteSpace(text))
 									{
 										jsonFiles.Add(Path.GetFileNameWithoutExtension(reader.Entry.Key), text);
@@ -2935,10 +2939,10 @@ namespace DivinityModManager.ViewModels
 			catch (Exception ex)
 			{
 				DivinityApp.Log($"Error extracting package: {ex}");
-				RxApp.MainThreadScheduler.Schedule((Action<Action>)(_ =>
+				RxApp.MainThreadScheduler.Schedule(() =>
 				{
-					this.ShowAlert($"Error extracting archive (check the log): {ex.Message}", AlertType.Danger, 0);
-				}));
+					ShowAlert($"Error extracting archive (check the log): {ex.Message}", AlertType.Danger, 0);
+				});
 			}
 			finally
 			{
@@ -3023,8 +3027,8 @@ namespace DivinityModManager.ViewModels
 
 				try
 				{
-					using (var zip = File.OpenWrite(outputPath))
-					using (var zipWriter = WriterFactory.Open(zip, ArchiveType.Zip, CompressionType.Deflate))
+					using (var stream = File.OpenWrite(outputPath))
+					using (var zipWriter = WriterFactory.Open(stream, ArchiveType.Zip, _exportWriterOptions))
 					{
 						string orderFileName = DivinityModDataLoader.MakeSafeFilename(Path.Combine(SelectedModOrder + ".json"), '_');
 						string contents = JsonConvert.SerializeObject(SelectedModOrder, Newtonsoft.Json.Formatting.Indented);
@@ -3102,7 +3106,7 @@ namespace DivinityModManager.ViewModels
 			{
 				RxApp.MainThreadScheduler.Schedule(() =>
 				{
-					this.ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
+					ShowAlert("SelectedProfile or SelectedModOrder is null! Failed to export mod order.", AlertType.Danger);
 				});
 			}
 
@@ -4119,7 +4123,7 @@ namespace DivinityModManager.ViewModels
 				{
 					if (successes >= 3)
 					{
-						this.ShowAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", AlertType.Success, 20);
+						ShowAlert($"Successfully installed the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE} to '{exeDir}'.", AlertType.Success, 20);
 						HighlightExtenderDownload = false;
 						Settings.ExtenderSettings.ExtenderUpdaterIsAvailable = true;
 						Settings.ExtenderSettings.ExtenderVersion = 56;
@@ -4156,7 +4160,7 @@ namespace DivinityModManager.ViewModels
 					}
 					else
 					{
-						this.ShowAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", AlertType.Danger, 30);
+						ShowAlert($"Error occurred when installing the Extender updater {DivinityApp.EXTENDER_UPDATER_FILE}. Check the log.", AlertType.Danger, 30);
 					}
 				});
 
@@ -4682,12 +4686,12 @@ Directory the zip will be extracted to:
 					}
 					else
 					{
-						this.ShowAlert("Current order is empty.", AlertType.Warning, 10);
+						ShowAlert("Current order is empty.", AlertType.Warning, 10);
 					}
 				}
 				catch (Exception ex)
 				{
-					this.ShowAlert($"Error copying order to clipboard: {ex}", AlertType.Danger, 15);
+					ShowAlert($"Error copying order to clipboard: {ex}", AlertType.Danger, 15);
 				}
 			});
 
